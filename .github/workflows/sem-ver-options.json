@@ -1,6 +1,6 @@
 {
   "scheme": "semantic",
-  "versionFile": "./Angular-app/package.json",
+  "versionFile": "./package.json",
   "files": ["./package-lock.json"],
   "rules": [
     {
