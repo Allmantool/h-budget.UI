@@ -2,7 +2,7 @@ name: Manage versions
 on: [push]
 
 env:
-  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   bump:
@@ -12,9 +12,9 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
-          node-version: "17"
+          node-version: "12"
       - name: Version Bumper
         uses: michmich112/version-bumper@1.2.4
         with:
           options-file: "./.github/workflows/sem-ver-options.json"
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ env.GITHUB_TOKEN }}
