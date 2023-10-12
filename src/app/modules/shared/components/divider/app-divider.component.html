@@ -1,0 +1,6 @@
+<div *ngIf="isVertical; else horizontal">
+    <mat-divider [vertical]="true"></mat-divider>
+</div>
+<ng-template #horizontal>
+    <mat-divider></mat-divider>
+</ng-template>

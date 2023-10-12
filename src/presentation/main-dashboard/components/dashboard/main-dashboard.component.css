@@ -1,0 +1,6 @@
+.content {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	margin: 10em auto 5em;
+}

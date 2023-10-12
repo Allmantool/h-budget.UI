@@ -1,0 +1,14 @@
+:host {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+}
+
+.input-value {
+	text-align: right;
+	-moz-appearance: textfield;
+}
+
+.input-value::-webkit-inner-spin-button {
+	display: none;
+}

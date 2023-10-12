@@ -1,0 +1,80 @@
+<div>Hello from account</div>
+
+<mat-accordion class="example-headers-align">
+	<mat-expansion-panel [expanded]="step === 0" (opened)="setStep(0)" hideToggle>
+		<mat-expansion-panel-header>
+			<mat-panel-title>Wallet money</mat-panel-title>
+			<mat-panel-description>
+				Money on hands
+				<mat-icon>account_balance_wallet</mat-icon>
+			</mat-panel-description>
+		</mat-expansion-panel-header>
+
+		<mat-selection-list #cash [multiple]="false" (selectionChange)="chooseAcccount()">
+			<mat-list-option *ngFor="let cashAccount of cashAccounts" [value]="cashAccount.id">
+				{{cashAccount.description}} -- Balance: {{cashAccount.balance}}
+				{{cashAccount.currency}}
+			</mat-list-option>
+		</mat-selection-list>
+
+		<mat-action-row>
+			<button
+				mat-button
+				color="primary"
+				[disabled]="isNavigateToOperationsDisabled"
+				(click)="navigateToOperations()"
+			>
+				Navigate
+			</button>
+		</mat-action-row>
+	</mat-expansion-panel>
+
+	<mat-expansion-panel [expanded]="step === 1" (opened)="setStep(1)" hideToggle>
+		<mat-expansion-panel-header>
+			<mat-panel-title>Virtual accounts</mat-panel-title>
+			<mat-panel-description>
+				A virtual account is a fintech (financial technology) product that allows users to
+				make payments quickly and efficiently
+				<mat-icon>payments</mat-icon>
+			</mat-panel-description>
+		</mat-expansion-panel-header>
+
+		<mat-selection-list #virtualCards [multiple]="false">
+			<mat-list-option
+				*ngFor="let debitVirtualAccount of debitVirtualAccounts"
+				[value]="debitVirtualAccount"
+			>
+				{{debitVirtualAccount}} -- Balance: 150$
+			</mat-list-option>
+		</mat-selection-list>
+
+		<mat-action-row>
+			<button mat-button color="warn" (click)="prevStep()">Previous</button>
+			<button mat-button color="primary" (click)="nextStep()">Next</button>
+		</mat-action-row>
+	</mat-expansion-panel>
+
+	<mat-expansion-panel [expanded]="step === 2" (opened)="setStep(2)" hideToggle>
+		<mat-expansion-panel-header>
+			<mat-panel-title>Loans</mat-panel-title>
+			<mat-panel-description>
+				Lend (a sum of money or item of property).
+				<mat-icon>credit_score</mat-icon>
+			</mat-panel-description>
+		</mat-expansion-panel-header>
+
+		<mat-selection-list #loans [multiple]="false">
+			<mat-list-option
+				*ngFor="let creditVirtualAccount of creditVirtualAccounts"
+				[value]="creditVirtualAccount"
+			>
+				{{creditVirtualAccount}} -- Balance: 150$
+			</mat-list-option>
+		</mat-selection-list>
+
+		<mat-action-row>
+			<button mat-button color="warn" (click)="prevStep()">Previous</button>
+			<button mat-button color="primary" (click)="nextStep()">End</button>
+		</mat-action-row>
+	</mat-expansion-panel>
+</mat-accordion>

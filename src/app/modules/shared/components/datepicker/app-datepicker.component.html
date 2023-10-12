@@ -1,0 +1,9 @@
+<div class="datepicker-content">
+    <mat-form-field appearance="outline">
+        <mat-label>{{ placeholder }}</mat-label>
+        <input matInput [matDatepicker]="picker" (dateChange)="updateValue($event)" readonly [value]="data$ | async">
+        <mat-hint>{{ dateFormat }}</mat-hint>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+</div>

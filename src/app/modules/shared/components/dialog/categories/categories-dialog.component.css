@@ -1,0 +1,14 @@
+.dialog-body {
+	display: flex;
+	flex-direction: row;
+	width: 60em;
+	height: 13em;
+}
+
+.categories-chip-list {
+	width: 100%;
+}
+
+form {
+	width: 100%;
+}

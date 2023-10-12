@@ -1,0 +1,56 @@
+.account-note {
+	display: flex;
+	flex-direction: column;
+	align-items: end;
+	text-wrap: nowrap;
+    flex-shrink: 0;
+}
+
+.accounting-table {
+	margin-top: 1em;
+}
+
+.row-is-clicked {
+	font-weight: bold;
+	background-color: gold;
+}
+
+.mat-mdc-table {
+	overflow-y: scroll;
+	max-height: 70em;
+	min-height: 70em;
+}
+
+.mat-mdc-cell {
+	vertical-align: middle;
+}
+
+.mat-column-operationDate {
+	width: 12em;
+}
+
+.mat-column-contractor {
+	width: 20em;
+}
+
+.mat-column-category {
+	width: 30em;
+}
+
+.mat-column-income {
+	width: 10em;
+	color: limegreen;
+}
+
+.mat-column-expense {
+	width: 10em;
+	color: lightcoral;
+}
+
+.mat-column-balance {
+	width: 10em;
+}
+
+.mat-column-comment {
+	width: 35em;
+}

@@ -1,0 +1,45 @@
+.crud-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding-top: 7em;
+	width: 100%;
+	height: 100%;
+	justify-content: space-between;
+}
+
+.record-crud-section-title {
+	padding-bottom: 2em;
+}
+
+.command-buttons {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+}
+
+.expense-section {
+	color: red;
+}
+
+.income-section {
+	color: green;
+}
+
+.category-section {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	width: 30em;
+}
+
+.contractor-section {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	width: 30em;
+}
+
+::ng-deep .mat-mdc-form-field {
+	width: 23em;
+}

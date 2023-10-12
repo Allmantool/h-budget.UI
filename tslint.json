@@ -1,0 +1,10 @@
+{
+  "extends": [
+    "tslint-config-prettier",
+    "tslint-plugin-prettier",
+    "codelyzer"
+  ],
+  "rules": {
+    "prettier": true
+  }
+ }

@@ -1,0 +1,14 @@
+.dialog-body {
+	display: flex;
+	flex-direction: row;
+	width: 60em;
+	height: 8em;
+}
+
+.contractors-chip-list {
+	width: 100%;
+}
+
+form {
+	width: 100%;
+}

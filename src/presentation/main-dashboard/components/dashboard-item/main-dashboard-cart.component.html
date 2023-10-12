@@ -1,0 +1,23 @@
+<mat-card class="dahsboard-card-item">
+	<mat-card-header>
+		<div mat-card-avatar class="dahsboard-card-item_image"></div>
+		<mat-card-title>{{ title }}</mat-card-title>
+		<mat-card-subtitle>{{ subtitle }}</mat-card-subtitle>
+	</mat-card-header>
+	<img mat-card-image src="{{ imagePath }}" alt="{{ title }}" />
+	<div class="dahsboard-card-item_content">
+		<mat-card-content>
+			<p>{{ description }}</p>
+		</mat-card-content>
+		<mat-card-actions class="dahsboard-card-item_navigate-buttom">
+			<button
+				mat-button
+				routerLink="{{ navigateLink }}"
+				routerLinkActive="active"
+				(click)="navigate()"
+			>
+				Navigate
+			</button>
+		</mat-card-actions>
+	</div>
+</mat-card>

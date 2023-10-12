@@ -1,0 +1,14 @@
+<div *ngIf="isChartInitialized$ | async" class="currency-rates-chart">
+	<apx-chart
+		[series]="chartOptions.series!"
+		[chart]="chartOptions.chart!"
+		[xaxis]="chartOptions.xaxis!"
+		[title]="chartOptions.title!"
+	></apx-chart>
+</div>
+
+<div class="currency-rates-chart-spinner">
+	<progress-spinner
+		[isLoaded]="isChartInitialized$ | async"
+	></progress-spinner>
+</div>

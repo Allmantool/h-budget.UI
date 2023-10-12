@@ -1,0 +1,10 @@
+.currency-rates-grid--width {
+	display: grid;
+	grid-template-columns: 85em;
+}
+
+.currency-rates-grid__show-button--align-center {
+	display: flex;
+	justify-content: space-around;
+	margin-bottom: 1em;
+}

@@ -1,0 +1,59 @@
+<!-- eslint-disable prettier/prettier -->
+<div class="dialog-content">
+	<h1 mat-dialog-title>{{ title }}</h1>
+
+	<mat-dialog-content class="dialog-body" [formGroup]="dialogFg">
+		<form>
+			<app-form-field
+				formControlName="categoryType"
+				[fieldType]="'SELECT'"
+				[title]="'Category type:'"
+				[defaultValue]="getCategoryTypes()[0]"
+				[selectOptions]="getCategoryTypes()"
+			>
+			</app-form-field>
+			<!-- -->
+			<mat-form-field class="categories-chip-list">
+				<mat-label>Budget categories</mat-label>
+
+				<mat-chip-grid #chipGrid aria-label="Category selection">
+					<mat-chip-row
+						*ngFor="let categoryNode of categoryNodes"
+						(removed)="remove(categoryNode)"
+					>
+						{{categoryNode}}
+						<button matChipRemove [attr.aria-label]="'remove ' + categoryNode">
+							<mat-icon>cancel</mat-icon>
+						</button>
+					</mat-chip-row>
+				</mat-chip-grid>
+				<input
+					placeholder="New category..."
+					#fruitInput
+					[formControl]="categoryCtrl"
+					[matChipInputFor]="chipGrid"
+					[matAutocomplete]="auto"
+					[matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+					(matChipInputTokenEnd)="add($event)"
+				/>
+				<mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+					<mat-option
+						*ngFor="let filteredCategoryNode of filteredCategoryNodes$ | async"
+						[value]="filteredCategoryNode"
+					>
+						{{filteredCategoryNode}}
+					</mat-option>
+				</mat-autocomplete>
+			</mat-form-field>
+		</form>
+	</mat-dialog-content>
+
+	<div mat-dialog-actions>
+		<button mat-raised-button mat-dialog-close (click)="close()">Close</button>
+		<button mat-raised-button color="primary" [disabled]="isSaveDisabled" (click)="save()">
+			Save
+		</button>
+	</div>
+</div>
+
+<progress-bar [isLoading]="isLoading$ | async"></progress-bar>

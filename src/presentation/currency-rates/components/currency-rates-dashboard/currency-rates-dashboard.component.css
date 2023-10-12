@@ -1,0 +1,13 @@
+.rates-dashboard-content {
+	display: grid;
+	grid-template-rows: 1fr 1fr;
+	padding: 5em;
+	justify-items: center;
+	align-items: stretch;
+	margin: 0;
+}
+
+.rates-dashboard-content_chart {
+	display: flex;
+	justify-content: center;
+}

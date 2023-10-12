@@ -1,0 +1,68 @@
+<div class="crud-content">
+	<form [formGroup]="crudRecordFg" (ngSubmit)="saveRecord()">
+		<div class="record-crud-section-title">New record:</div>
+		<div class="date-section">
+			<app-datepicker placeholder="Choose a opeation date" formControlName="operationDate">
+			</app-datepicker>
+		</div>
+		<div class="contractor-section">
+			<app-form-field
+				formControlName="contractor"
+				[fieldType]="'SELECT'"
+				[title]="'Contractor:'"
+				[selectOptions]="getContractorLabels()"
+			>
+			</app-form-field>
+
+			<button (click)="addContractor()" mat-fab color="primary" aria-label="add a contractor">
+				<mat-icon>add</mat-icon>
+			</button>
+		</div>
+
+		<div class="category-section">
+			<app-form-field
+				formControlName="category"
+				[fieldType]="'SELECT'"
+				[title]="'Category:'"
+				[selectOptions]="getCategoryLabels()"
+			>
+			</app-form-field>
+
+			<button (click)="addCategory()" mat-fab color="primary" aria-label="add a category">
+				<mat-icon>add</mat-icon>
+			</button>
+		</div>
+
+		<ng-container #expense *ngIf="isExpenseOperation(); else income">
+			<div class="expense-section">
+				<app-form-field
+					formControlName="expense"
+					[fieldType]="'INPUT'"
+					[title]="'Expense:'"
+				>
+				</app-form-field>
+			</div>
+		</ng-container>
+
+		<ng-template #income>
+			<div class="income-section">
+				<app-form-field formControlName="income" [fieldType]="'INPUT'" [title]="'Income:'">
+				</app-form-field>
+			</div>
+		</ng-template>
+
+		<div class="comment-section">
+			<app-form-field
+				formControlName="comment"
+				[fieldType]="'TEXT_AREA'"
+				[title]="'Comments:'"
+			>
+			</app-form-field>
+		</div>
+		<div class="command-buttons">
+			<app-button (click)="saveRecord()" title="Save"></app-button>
+			<app-button (click)="addRecord()" title="New"></app-button>
+			<app-button (click)="deleteRecord()" title="Delete"></app-button>
+		</div>
+	</form>
+</div>
