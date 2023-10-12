@@ -1,5 +1,9 @@
 name: Manage versions
 on: [push]
+
+env:
+  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
 jobs:
   bump:
     runs-on: ubuntu-latest
