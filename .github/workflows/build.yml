@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./Angular-app
+        working-directory: .
     steps:
       - name: Check out code
         uses: actions/checkout@v3
@@ -34,7 +34,7 @@ jobs:
         with:
           node-version: "18"
           cache: "npm"
-          cache-dependency-path: ./Angular-app/package-lock.json
+          cache-dependency-path: .package-lock.json
 
       - name: Upload & Install UI dependencies
         run: |
