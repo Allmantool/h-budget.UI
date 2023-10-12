@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 
 import { Select, Store } from '@ngxs/store';
@@ -31,7 +31,7 @@ import '../../../../domain/extensions/handbookExtensions';
 	styleUrls: ['./accounting-operations-crud.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AccountingOperationsCrudComponent implements OnInit {
+export class AccountingOperationsCrudComponent implements OnInit, OnDestroy {
 	private destroy$ = new Subject<void>();
 
 	public contractors: string[] = [];
