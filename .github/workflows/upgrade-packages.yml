@@ -26,7 +26,7 @@ jobs:
           node-version: "18.x"
 
       - name: Upgrade packages 🔀
-        run:  npm i -g npm-check-updates to update
+        run: npm i -g npm-check-updates to update
 
       - name: Commit and create PR 🔀
         uses: peter-evans/create-pull-request@v5
