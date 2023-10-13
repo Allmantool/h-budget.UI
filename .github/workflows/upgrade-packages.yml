@@ -2,7 +2,7 @@ name: Upgrade NPM packages
 
 on:
   push:
-    branches: [master]
+    branches: ['**']
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [master]
@@ -12,7 +12,7 @@ on:
 
 jobs:
   upgrade-packages:
-    name: Upgrade packages
+    name: Upgrade packages job
 
     runs-on: ubuntu-latest
 
@@ -25,7 +25,7 @@ jobs:
         with:
           node-version: "18.x"
 
-      - name: Upgrade packages 🔀
+      - name: Check and update packages 🔀
         run: npm i -g npm-check-updates to update
 
       - name: Commit and create PR 🔀
