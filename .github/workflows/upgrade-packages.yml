@@ -23,10 +23,10 @@ jobs:
       - name: Set up Node.js ⚙️
         uses: actions/setup-node@v3
         with:
-          node-version: "17.x"
+          node-version: "18.x"
 
       - name: Upgrade packages 🔀
-        run: npm update
+        run: npm i -g npm-check-updates to update
 
       - name: Commit and create PR 🔀
         uses: peter-evans/create-pull-request@v5
