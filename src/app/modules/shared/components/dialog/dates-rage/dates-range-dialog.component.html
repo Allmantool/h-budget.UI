@@ -3,29 +3,19 @@
 
 	<mat-dialog-content class="dialog-body" [formGroup]="dialogFg">
 		<div class="date-section">
-			<app-datepicker
-				placeholder="Choose a start date"
-				formControlName="startDate"
-			>
+			<app-datepicker placeholder="Choose a start date" formControlName="startDate">
 			</app-datepicker>
 		</div>
 		<div class="date-section">
-			<app-datepicker
-				placeholder="Choose an end date"
-				formControlName="endDate"
-			>
+			<app-datepicker placeholder="Choose an end date" formControlName="endDate">
 			</app-datepicker>
 		</div>
 	</mat-dialog-content>
 
 	<div mat-dialog-actions>
-		<button mat-raised-button mat-dialog-close (click)="close()">
-			Close
-		</button>
-		<button mat-raised-button color="primary" (click)="getRates()">
-			Get rates
-		</button>
+		<button mat-raised-button mat-dialog-close (click)="close()">Close</button>
+		<button mat-raised-button color="primary" (click)="getRates()">Get rates</button>
 	</div>
 </div>
 
-<progress-bar [isLoading]="isLoading$ | async"></progress-bar>
+<progress-bar [isLoading]="isLoadingSignal()"></progress-bar>

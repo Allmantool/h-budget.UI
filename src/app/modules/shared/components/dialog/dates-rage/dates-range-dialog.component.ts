@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+
+import { ChangeDetectionStrategy, Component, Inject, signal } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
-import { BehaviorSubject, take } from 'rxjs';
-
 import { DialogContainer } from '../../../../shared/models/dialog-container';
+import { take } from 'rxjs';
 
 @Component({
 	selector: 'dates-range-dialog',
@@ -15,7 +15,7 @@ import { DialogContainer } from '../../../../shared/models/dialog-container';
 export class DateRangeDialogComponent {
 	private dialogConfiguration: DialogContainer;
 
-	public isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+	public isLoadingSignal = signal<boolean>(false);
 	public dialogFg: UntypedFormGroup;
 	public title: string;
 
@@ -38,13 +38,13 @@ export class DateRangeDialogComponent {
 	}
 
 	public getRates(): void {
-		this.isLoading$.next(true);
+		this.isLoadingSignal.set(true);
 
 		this.dialogConfiguration
 			.onSubmit(this.dialogFg.value)
 			.pipe(take(1))
 			.subscribe((_) => {
-				this.isLoading$.next(false);
+				this.isLoadingSignal.set(false);
 				this.dialogRef.close();
 			});
 	}

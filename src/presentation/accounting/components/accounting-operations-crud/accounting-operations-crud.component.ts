@@ -1,9 +1,16 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, Signal } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	OnDestroy,
+	OnInit,
+	Signal,
+	signal,
+} from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { Select, Store } from '@ngxs/store';
-import { combineLatest, Observable, BehaviorSubject, Subject } from 'rxjs';
+import { combineLatest, Observable, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import * as _ from 'lodash';
 import { Guid } from 'typescript-guid';
@@ -39,7 +46,7 @@ export class AccountingOperationsCrudComponent implements OnInit, OnDestroy {
 
 	public categories: OperationCategory[] = [];
 
-	public selectedRecord$ = new BehaviorSubject<AccountingGridRecord | undefined>(undefined);
+	public selectedRecordSignal = signal<AccountingGridRecord | undefined>(undefined);
 
 	public crudRecordFg: UntypedFormGroup;
 
@@ -93,12 +100,12 @@ export class AccountingOperationsCrudComponent implements OnInit, OnDestroy {
 				filter(([tableOptions, records]) => !_.isNil(tableOptions) && !_.isNil(records))
 			)
 			.subscribe(([tableOptions, records]) => {
-				this.selectedRecord$.next(
+				this.selectedRecordSignal.set(
 					records.find((r) => tableOptions.selectedRecordGuid === r.id)
 				);
 
-				if (!_.isNil(this.crudRecordFg) && !_.isNil(this.selectedRecord$.value)) {
-					const recordData = this.selectedRecord$.value;
+				if (!_.isNil(this.crudRecordFg) && !_.isNil(this.selectedRecordSignal)) {
+					const recordData = this.selectedRecordSignal()!;
 
 					this.crudRecordFg.patchValue({
 						id: recordData.id,
@@ -113,7 +120,7 @@ export class AccountingOperationsCrudComponent implements OnInit, OnDestroy {
 			});
 
 		this.crudRecordFg.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((formData) => {
-			this.selectedRecord$.next(formData as AccountingGridRecord);
+			this.selectedRecordSignal.set(formData as AccountingGridRecord);
 		});
 
 		this.categories$.pipe(takeUntil(this.destroy$)).subscribe(
@@ -144,8 +151,8 @@ export class AccountingOperationsCrudComponent implements OnInit, OnDestroy {
 	}
 
 	public saveRecord(): void {
-		if (!_.isNil(this.selectedRecord$.value)) {
-			this.store.dispatch(new Edit(this.selectedRecord$.value));
+		if (!_.isNil(this.selectedRecordSignal())) {
+			this.store.dispatch(new Edit(this.selectedRecordSignal()!));
 		}
 	}
 
@@ -163,15 +170,13 @@ export class AccountingOperationsCrudComponent implements OnInit, OnDestroy {
 
 		this.store.dispatch(new Add(newRecord));
 
-		this.selectedRecord$.next(newRecord);
+		this.selectedRecordSignal.set(newRecord);
 
 		this.store.dispatch(new SetActiveAccountingOperation(newRecord.id));
 	}
 
 	public deleteRecord(): void {
-		console.log(this.selectedRecord$.value);
-
-		const recordGuid = this.selectedRecord$.value?.id;
+		const recordGuid = this.selectedRecordSignal()?.id;
 
 		if (_.isNil(recordGuid)) {
 			return;

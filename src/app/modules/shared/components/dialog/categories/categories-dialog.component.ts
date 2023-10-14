@@ -5,6 +5,7 @@ import {
 	Inject,
 	OnDestroy,
 	ViewChild,
+	signal,
 } from '@angular/core';
 import { ENTER } from '@angular/cdk/keycodes';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
@@ -17,7 +18,7 @@ import {
 } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import { BehaviorSubject, Observable, startWith, take, map, Subject } from 'rxjs';
+import { Observable, startWith, take, map, Subject } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import * as _ from 'lodash';
 
@@ -40,7 +41,7 @@ export class CategoriesDialogComponent implements OnDestroy {
 	@ViewChild('chipGrid ')
 	chipGrid!: ElementRef<HTMLInputElement>;
 
-	public isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+	public isLoadingSignal = signal<boolean>(false);
 
 	public isSaveDisabled: boolean = true;
 
@@ -89,7 +90,7 @@ export class CategoriesDialogComponent implements OnDestroy {
 	}
 
 	public save(): void {
-		this.isLoading$.next(true);
+		this.isLoadingSignal.set(true);
 
 		if (_.isEmpty(this.categoryNodes)) {
 			this.dialogRef.close();
@@ -112,7 +113,7 @@ export class CategoriesDialogComponent implements OnDestroy {
 			)
 			.pipe(take(1))
 			.subscribe((_) => {
-				this.isLoading$.next(false);
+				this.isLoadingSignal.set(false);
 				this.dialogRef.close();
 			});
 	}
