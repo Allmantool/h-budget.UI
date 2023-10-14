@@ -1,16 +1,17 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, Signal } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { Select, Store } from '@ngxs/store';
 import { combineLatest, Observable, BehaviorSubject, Subject } from 'rxjs';
 import { filter, takeUntil } from 'rxjs/operators';
 import * as _ from 'lodash';
 import { Guid } from 'typescript-guid';
+import { nameof } from 'ts-simple-nameof';
 
 import { AccountingGridRecord } from '../../models/accounting-grid-record';
 import { OperationCategory } from '../../../../domain/models/accounting/operation-category';
 import { AccountingOperationsTableOptions } from 'app/modules/shared/store/models/accounting/accounting-table-options';
-import { OperationTypes } from '../../../../domain/models/accounting/operation-types';
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
@@ -42,6 +43,8 @@ export class AccountingOperationsCrudComponent implements OnInit, OnDestroy {
 
 	public crudRecordFg: UntypedFormGroup;
 
+	public expenseSignal: Signal<string>;
+
 	@Select(getAccountingTableOptions)
 	accountingTableOptions$!: Observable<AccountingOperationsTableOptions>;
 
@@ -69,6 +72,13 @@ export class AccountingOperationsCrudComponent implements OnInit, OnDestroy {
 			expense: new UntypedFormControl(),
 			comment: new UntypedFormControl(),
 		});
+
+		this.expenseSignal = toSignal(
+			this.crudRecordFg.get(nameof<AccountingGridRecord>((r) => r.expense))!.valueChanges,
+			{
+				initialValue: '',
+			}
+		);
 	}
 
 	ngOnDestroy(): void {
@@ -123,16 +133,6 @@ export class AccountingOperationsCrudComponent implements OnInit, OnDestroy {
 			.subscribe(
 				(payload) => (this.contractors = _.map(payload, (i) => i.parseToTreeAsString()))
 			);
-	}
-
-	public isExpenseOperation(): boolean {
-		const selectedCategoryValue: string =
-			(this.crudRecordFg.controls['category']?.value as string) ||
-			(this.selectedRecord$?.value?.category as string);
-
-		const selectedCategory = _.find(this.categories, (c) => c.value === selectedCategoryValue);
-
-		return selectedCategory?.type === OperationTypes.Expense;
 	}
 
 	public getCategoryLabels(): string[] {

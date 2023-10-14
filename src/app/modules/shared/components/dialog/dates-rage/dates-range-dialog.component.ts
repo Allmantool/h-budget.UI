@@ -1,9 +1,5 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import {
-	UntypedFormBuilder,
-	UntypedFormControl,
-	UntypedFormGroup,
-} from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 import { BehaviorSubject, take } from 'rxjs';
@@ -19,9 +15,7 @@ import { DialogContainer } from '../../../../shared/models/dialog-container';
 export class DateRangeDialogComponent {
 	private dialogConfiguration: DialogContainer;
 
-	public isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
-		false
-	);
+	public isLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 	public dialogFg: UntypedFormGroup;
 	public title: string;
 

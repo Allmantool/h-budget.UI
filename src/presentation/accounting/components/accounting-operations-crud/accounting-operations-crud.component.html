@@ -33,7 +33,7 @@
 			</button>
 		</div>
 
-		<ng-container #expense *ngIf="isExpenseOperation(); else income">
+		<ng-container #expense *ngIf="expenseSignal(); else income">
 			<div class="expense-section">
 				<app-form-field
 					formControlName="expense"
