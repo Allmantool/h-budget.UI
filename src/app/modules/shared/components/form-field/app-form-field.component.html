@@ -36,12 +36,8 @@
 				[value]="defaultValue ?? (data$ | async)"
 				(selectionChange)="updateValue($event)"
 			>
-				<ng-container
-					*ngFor="let selectOption of selectOptions; trackBy: trackByFn"
-				>
-					<mat-option [value]="selectOption"
-						>{{ selectOption }}</mat-option
-					>
+				<ng-container *ngFor="let selectOption of selectOptions; trackBy: trackByFn">
+					<mat-option [value]="selectOption">{{ selectOption }}</mat-option>
 				</ng-container>
 			</mat-select>
 		</mat-form-field>

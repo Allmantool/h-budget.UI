@@ -1,0 +1,70 @@
+<div class="dialog-content">
+	<h1 mat-dialog-title>{{ title }}</h1>
+
+	<mat-dialog-content class="dialog-body" [formGroup]="dialogFg">
+		<mat-stepper orientation="vertical" [linear]="true" #stepper>
+			<mat-step [stepControl]="accountTypeStepFormGroup">
+				<form [formGroup]="accountTypeStepFormGroup" class="stepperForm">
+					<ng-template matStepLabel>Pick out an account type:</ng-template>
+					<app-form-field
+						formControlName="accountTypeCtrl"
+						[fieldType]="'SELECT'"
+						[title]="'Payment account type:'"
+						[defaultValue]="getAccountsTypes()[0]"
+						[selectOptions]="getAccountsTypes()"
+					>
+					</app-form-field>
+					<div>
+						<button mat-button matStepperNext>Next</button>
+					</div>
+				</form>
+			</mat-step>
+			<mat-step [stepControl]="currencyStepFormGroup">
+				<form [formGroup]="currencyStepFormGroup" class="stepperForm">
+					<ng-template matStepLabel>Pick out a currency type:</ng-template>
+					<app-form-field
+						formControlName="currencyCtrl"
+						[fieldType]="'SELECT'"
+						[title]="'Currency type:'"
+						[defaultValue]="getCurrencyTypes()[0]"
+						[selectOptions]="getCurrencyTypes()"
+					>
+					</app-form-field>
+					<div>
+						<button mat-button matStepperPrevious>Back</button>
+						<button mat-button matStepperNext>Next</button>
+					</div>
+				</form>
+			</mat-step>
+			<mat-step [stepControl]="balanceStepFormGroup">
+				<form [formGroup]="balanceStepFormGroup" class="stepperForm">
+					<ng-template matStepLabel>Provide account initial balance:</ng-template>
+					<app-form-field
+						formControlName="balanceCtrl"
+						[fieldType]="'INPUT'"
+						[title]="'Balance:'"
+					>
+					</app-form-field>
+					<div>
+						<button mat-button matStepperPrevious>Back</button>
+						<button mat-button matStepperNext>Next</button>
+					</div>
+				</form>
+			</mat-step>
+			<mat-step>
+				<ng-template matStepLabel>Done</ng-template>
+				<p>You are now done.</p>
+				<div>
+					<button mat-button matStepperPrevious>Back</button>
+					<button mat-button (click)="saveAccount()">Apply</button>
+				</div>
+			</mat-step>
+		</mat-stepper>
+	</mat-dialog-content>
+
+	<div mat-dialog-actions>
+		<button mat-raised-button mat-dialog-close (click)="close()">Close</button>
+	</div>
+</div>
+
+<progress-bar [isLoading]="isLoadingSignal()"></progress-bar>

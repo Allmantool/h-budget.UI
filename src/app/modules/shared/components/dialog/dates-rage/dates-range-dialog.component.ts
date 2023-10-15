@@ -1,10 +1,10 @@
-
 import { ChangeDetectionStrategy, Component, Inject, signal } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
-import { DialogContainer } from '../../../../shared/models/dialog-container';
 import { take } from 'rxjs';
+
+import { DialogContainer } from '../../../../shared/models/dialog-container';
 
 @Component({
 	selector: 'dates-range-dialog',
@@ -14,7 +14,6 @@ import { take } from 'rxjs';
 })
 export class DateRangeDialogComponent {
 	private dialogConfiguration: DialogContainer;
-
 	public isLoadingSignal = signal<boolean>(false);
 	public dialogFg: UntypedFormGroup;
 	public title: string;

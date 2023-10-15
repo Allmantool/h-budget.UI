@@ -6,8 +6,8 @@ import { CurrencyAbbrevitions } from '../../../app/modules/shared/constants/rate
 export interface PaymentAccount {
 	id: Guid;
 	type: AccountTypes;
-	balance: number;
 	currency: CurrencyAbbrevitions;
-	agent: string;
+	balance: number;
+	emitter: string;
 	description: string;
 }

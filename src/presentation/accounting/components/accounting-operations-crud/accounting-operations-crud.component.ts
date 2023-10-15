@@ -22,7 +22,7 @@ import { AccountingOperationsTableOptions } from 'app/modules/shared/store/model
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
-import { CategoriesDialogService } from '../../../currency-rates/services/categories-dialog.service';
+import { CategoriesDialogService } from '../../services/categories-dialog.service';
 import {
 	Edit,
 	Add,
@@ -30,7 +30,7 @@ import {
 } from '../../../../app/modules/shared/store/states/accounting/actions/accounting.actions';
 import { getCategories } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
 import { getContractors } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
-import { CounterpartiesDialogService } from '../../../currency-rates/services/counterparties-dialog.service';
+import { CounterpartiesDialogService } from '../../services/counterparties-dialog.service';
 import '../../../../domain/extensions/handbookExtensions';
 
 @Component({
