@@ -1,17 +1,21 @@
 import { ChangeDetectionStrategy, Component, Inject, signal } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { take } from 'rxjs';
+import { Guid } from 'typescript-guid';
 
 import { DialogContainer } from '../../../models/dialog-container';
 import { AccountTypes } from '../../../../../../domain/models/accounting/account-types';
 import { CurrencyAbbrevitions } from '../../../constants/rates-abbreviations';
+import { PaymentAccount } from 'domain/models/accounting/payment-account';
+import { Result } from 'core/result';
 
 @Component({
-	selector: 'payment-account',
-	templateUrl: './payment-account.component.html',
-	styleUrls: ['./payment-account.component.css'],
+	selector: 'payment-account-dialog',
+	templateUrl: './payment-account-dialog.component.html',
+	styleUrls: ['./payment-account-dialog.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaymentAccountDialogComponent {
@@ -20,15 +24,15 @@ export class PaymentAccountDialogComponent {
 	public dialogFg: UntypedFormGroup;
 	public title: string;
 
-	public accountTypeStepFormGroup = this.fb.group({
+	public accountTypeStepFg = this.fb.group({
 		accountTypeCtrl: [''],
 	});
 
-	public currencyStepFormGroup = this.fb.group({
+	public currencyStepFg = this.fb.group({
 		currencyCtrl: [''],
 	});
 
-	public balanceStepFormGroup = this.fb.group({
+	public balanceStepFg = this.fb.group({
 		balanceCtrl: [0],
 	});
 
@@ -36,6 +40,14 @@ export class PaymentAccountDialogComponent {
 		emitterCtrl: [''],
 		descriptionCtrls: [''],
 	});
+
+	public accountTypeSignal = toSignal<string>(
+		this.accountTypeStepFg.get('accountTypeCtrl')!.valueChanges
+	);
+
+	public currencySignal = toSignal<string>(this.currencyStepFg.get('currencyCtrl')!.valueChanges);
+
+	public balanceSignal = toSignal<number>(this.balanceStepFg.get('balanceCtrl')!.valueChanges);
 
 	constructor(
 		private readonly dialogRef: MatDialogRef<PaymentAccountDialogComponent>,
@@ -65,8 +77,20 @@ export class PaymentAccountDialogComponent {
 	public saveAccount(): void {
 		this.isLoadingSignal.set(true);
 
+		const paymentAccountForSave: PaymentAccount = {
+			id: Guid.create(),
+			type: AccountTypes[this.accountTypeSignal()! as keyof typeof AccountTypes],
+			currency:
+				CurrencyAbbrevitions[this.currencySignal()! as keyof typeof CurrencyAbbrevitions],
+			balance: this.balanceSignal()!,
+			emitter: 'some emitter',
+			description: 'some description',
+		};
+
 		this.dialogConfiguration
-			.onSubmit(this.dialogFg.value)
+			.onSubmit(
+				new Result<PaymentAccount>({ payload: paymentAccountForSave, isSucceeded: true })
+			)
 			.pipe(take(1))
 			.subscribe((_) => {
 				this.isLoadingSignal.set(false);

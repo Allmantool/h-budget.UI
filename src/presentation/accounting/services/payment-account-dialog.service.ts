@@ -6,7 +6,7 @@ import { of } from 'rxjs';
 import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
 import { Result } from '../../../core/result';
 import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
-import { PaymentAccountDialogComponent } from '../../../app/modules/shared/components/dialog/payment-account/payment-account.component';
+import { PaymentAccountDialogComponent } from '../../../app/modules/shared/components/dialog/payment-account/payment-account.-dialog.component';
 import { PaymentAccount } from '../../../domain/models/accounting/payment-account';
 
 @Injectable()
