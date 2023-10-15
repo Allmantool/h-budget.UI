@@ -1,7 +1,12 @@
 <div class="payment-crud">
 	<mat-list role="list">
 		<mat-list-item role="listitem">
-			<button mat-fab color="primary" aria-label="Add a payment account">
+			<button
+				mat-fab
+				color="primary"
+				(click)="openCreatePaymentAccountDialog()"
+				aria-label="Add a payment account"
+			>
 				<mat-icon>add</mat-icon>
 			</button>
 			Add a payment account</mat-list-item

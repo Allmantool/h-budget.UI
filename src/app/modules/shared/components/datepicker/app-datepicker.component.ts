@@ -36,8 +36,7 @@ export class DatepickerComponent implements ControlValueAccessor {
 
 	@Output() public onDateChanged = new EventEmitter<Date | null>();
 
-	public data$: BehaviorSubject<Date | null> =
-		new BehaviorSubject<Date | null>(null);
+	public data$: BehaviorSubject<Date | null> = new BehaviorSubject<Date | null>(null);
 
 	writeValue(value: Date | null): void {
 		this.data$.next(value);

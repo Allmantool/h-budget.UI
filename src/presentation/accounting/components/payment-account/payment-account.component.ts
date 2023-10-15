@@ -45,7 +45,7 @@ export class PaymentAccountComponent implements OnDestroy {
 			type: AccountTypes.WalletCache,
 			balance: 62.08,
 			currency: CurrencyAbbrevitions.BYN,
-			agent: 'Cache',
+			emitter: 'Cache',
 			description: `Cache ${CurrencyAbbrevitions.BYN}`,
 		},
 		{
@@ -53,7 +53,7 @@ export class PaymentAccountComponent implements OnDestroy {
 			type: AccountTypes.WalletCache,
 			balance: 978.24,
 			currency: CurrencyAbbrevitions.USD,
-			agent: '',
+			emitter: '',
 			description: `Cache ${CurrencyAbbrevitions.USD}`,
 		},
 		{
@@ -61,7 +61,7 @@ export class PaymentAccountComponent implements OnDestroy {
 			type: AccountTypes.WalletCache,
 			balance: 1500.24,
 			currency: CurrencyAbbrevitions.EUR,
-			agent: 'Cache',
+			emitter: 'Cache',
 			description: `Cache ${CurrencyAbbrevitions.EUR}`,
 		},
 		{
@@ -69,7 +69,7 @@ export class PaymentAccountComponent implements OnDestroy {
 			type: AccountTypes.WalletCache,
 			balance: 32,
 			currency: CurrencyAbbrevitions.PLN,
-			agent: '',
+			emitter: '',
 			description: `Cache ${CurrencyAbbrevitions.PLN}`,
 		},
 	];

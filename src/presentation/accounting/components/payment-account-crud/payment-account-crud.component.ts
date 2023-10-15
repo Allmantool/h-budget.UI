@@ -1,9 +1,8 @@
-import { StepperOrientation } from '@angular/cdk/stepper';
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
-import { FormBuilder } from '@angular/forms';
-import { BreakpointObserver } from '@angular/cdk/layout';
 
-import { Observable, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
+
+import { PaymentAccountDialogService } from '../../services/payment-account-dialog.service';
 
 @Component({
 	selector: 'payment-account-crud',
@@ -17,5 +16,11 @@ export class PaymentAccountCrudComponent implements OnDestroy {
 	public ngOnDestroy(): void {
 		this.destroy$.next();
 		this.destroy$.complete();
+	}
+
+	constructor(private readonly paymentAccountService: PaymentAccountDialogService) {}
+
+	public openCreatePaymentAccountDialog(): void {
+		this.paymentAccountService.openPaymentAccount();
 	}
 }
