@@ -26,13 +26,10 @@ export class HttpRequestLoaderInterceptor implements HttpInterceptor {
 			tap((event) => {
 				if (event instanceof HttpResponse) {
 					const correlationId = event.headers.get(ApiHeaders.CORRELATION_ID);
-					console.log(`[${correlationId}] hide loader for "${req.url}"`);
 
 					this.store.dispatch(new RemoveProcessingRequest(correlationId!));
 				} else {
 					const correlationId = req.headers.get(ApiHeaders.CORRELATION_ID);
-					console.log(`[${correlationId}] show loader for "${req.url}"`);
-
 					this.store.dispatch(new AddProcessingRequest(correlationId!));
 				}
 			})

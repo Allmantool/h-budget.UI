@@ -33,10 +33,10 @@ export class CoreAppState {
 		{ getState, patchState }: StateContext<ICoreAppStateModel>,
 		{ requestCorrelationId }: RemoveProcessingRequest
 	): void {
+		const requestUnderProcessing = [...getState().requestsUnderProcessing];
+
 		patchState({
-			requestsUnderProcessing: [
-				..._.filter(getState().requestsUnderProcessing, requestCorrelationId),
-			],
+			requestsUnderProcessing: [..._.filter(requestUnderProcessing, requestCorrelationId)],
 		});
 	}
 }

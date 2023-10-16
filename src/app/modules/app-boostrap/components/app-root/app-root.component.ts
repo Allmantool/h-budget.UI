@@ -25,6 +25,7 @@ export class AppRootComponent implements OnInit {
 		this.requestsUnderProcessing$.pipe(takeUntil(this.destroy$)).subscribe((requestIds) => {
 			if (_.isEmpty(requestIds)) {
 				this.isDataLoaded$.next(true);
+				return;
 			}
 
 			this.isDataLoaded$.next(false);
