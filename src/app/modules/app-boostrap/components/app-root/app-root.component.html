@@ -18,4 +18,6 @@
 	</div>
 </div>
 
-<progress-spinner [isLoaded]="rootAppOutlet.isActivated"></progress-spinner>
+<progress-spinner
+	[isLoaded]="rootAppOutlet.isActivated && (isDataLoaded$ | async)"
+></progress-spinner>

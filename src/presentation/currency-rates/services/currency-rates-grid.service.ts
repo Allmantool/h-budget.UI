@@ -50,9 +50,7 @@ export class CurrencyRatesGridService {
 		return new SelectionModel<CurrencyGridRateModel>(false, source);
 	}
 
-	public syncWithRatesStore(
-		todayRatesGroups: CurrencyRateGroupModel[]
-	): void {
+	public syncWithRatesStore(todayRatesGroups: CurrencyRateGroupModel[]): void {
 		this.store.dispatch(new AddCurrencyGroups(todayRatesGroups));
 	}
 
@@ -67,17 +65,9 @@ export class CurrencyRatesGridService {
 			return false;
 		}
 
-		console.log('Current currencyId: ' + selectedRate?.currencyId);
-
-		if (
-			!_.isNil(selectedRate.currencyId) &&
-			!_.isNil(selectedRate.abbreviation)
-		) {
+		if (!_.isNil(selectedRate.currencyId) && !_.isNil(selectedRate.abbreviation)) {
 			this.store.dispatch(
-				new SetActiveCurrency(
-					selectedRate.currencyId,
-					selectedRate.abbreviation
-				)
+				new SetActiveCurrency(selectedRate.currencyId, selectedRate.abbreviation)
 			);
 		}
 
@@ -119,13 +109,9 @@ export class CurrencyRatesGridService {
 		}
 
 		const diffAsPercentage =
-			_.divide(_.subtract(todayRate, previousDayRate), previousDayRate) *
-			100;
+			_.divide(_.subtract(todayRate, previousDayRate), previousDayRate) * 100;
 
-		return _.round(
-			diffAsPercentage,
-			RatesGridDefaultOptions.RATE_DIFF_PRECISION
-		).toString();
+		return _.round(diffAsPercentage, RatesGridDefaultOptions.RATE_DIFF_PRECISION).toString();
 	}
 
 	private getTrend(todayDayRate?: number, previousDayRate?: number): string {

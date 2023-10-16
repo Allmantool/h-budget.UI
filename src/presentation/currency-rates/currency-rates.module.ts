@@ -31,15 +31,8 @@ import { CurrencyChartState } from 'app/modules/shared/store/states/rates/curren
 		CurrencyRatesRoutingModule,
 		AppSharedModule,
 		AppCoreModule,
-		NgxsModule.forFeature([
-			CurrencyRatesState,
-			CurrencyTableState,
-			CurrencyChartState,
-		]),
-		MapperModule.withProfiles([
-			DataRatesMappingProfile,
-			PresentationRatesMappingProfile,
-		]),
+		NgxsModule.forFeature([CurrencyRatesState, CurrencyTableState, CurrencyChartState]),
+		MapperModule.withProfiles([DataRatesMappingProfile, PresentationRatesMappingProfile]),
 	],
 	providers: [
 		LineChartService,
