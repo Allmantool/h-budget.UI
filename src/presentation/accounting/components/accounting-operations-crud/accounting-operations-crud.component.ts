@@ -107,15 +107,17 @@ export class AccountingOperationsCrudComponent implements OnInit, OnDestroy {
 				if (!_.isNil(this.crudRecordFg) && !_.isNil(this.selectedRecordSignal)) {
 					const recordData = this.selectedRecordSignal()!;
 
-					this.crudRecordFg.patchValue({
-						id: recordData.id,
-						operationDate: recordData.operationDate,
-						contractor: recordData.contractor,
-						category: recordData.category,
-						income: recordData.income,
-						expense: recordData.expense,
-						comment: recordData.comment,
-					});
+					if (!_.isNil(recordData)) {
+						this.crudRecordFg.patchValue({
+							id: recordData.id,
+							operationDate: recordData.operationDate,
+							contractor: recordData.contractor,
+							category: recordData.category,
+							income: recordData.income,
+							expense: recordData.expense,
+							comment: recordData.comment,
+						});
+					}
 				}
 			});
 

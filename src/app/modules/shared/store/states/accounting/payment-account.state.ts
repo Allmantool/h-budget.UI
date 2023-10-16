@@ -1,3 +1,4 @@
+import { Injectable } from '@angular/core';
 import { State, Action, StateContext } from '@ngxs/store';
 
 import { IPaymenentAccountStateModel } from './models/payment-account-state.model';
@@ -10,6 +11,7 @@ import { SetActivePaymentAccount } from './actions/payment-acount.actions';
 	},
 	children: [],
 })
+@Injectable()
 export class PaymentAccountState {
 	@Action(SetActivePaymentAccount)
 	add(

@@ -13,11 +13,13 @@ import { AppBootsrapRoutingModule, AppRootComponent } from '../app-boostrap';
 import { AppSharedModule } from './../shared/shared.module';
 import { ngxsConfig } from './../shared/store/ngxs.config';
 import { CorrelationIdInteceptor } from '../core/interceptors/correlation-id.interceptor';
+import { HttpRequestLoaderInterceptor } from '../core/interceptors/http-request-loader.interceptor';
+import { CoreAppState } from '../shared/store/states/core-app-root/core-app.state';
 
 @NgModule({
 	declarations: [AppRootComponent],
 	imports: [
-		NgxsModule.forRoot([], ngxsConfig),
+		NgxsModule.forRoot([CoreAppState], ngxsConfig),
 		NgxsLoggerPluginModule.forRoot(),
 		NgxsReduxDevtoolsPluginModule.forRoot(),
 		AppSharedModule,
@@ -33,6 +35,11 @@ import { CorrelationIdInteceptor } from '../core/interceptors/correlation-id.int
 			{
 				provide: HTTP_INTERCEPTORS,
 				useClass: CorrelationIdInteceptor,
+				multi: true,
+			},
+			{
+				provide: HTTP_INTERCEPTORS,
+				useClass: HttpRequestLoaderInterceptor,
 				multi: true,
 			},
 		],

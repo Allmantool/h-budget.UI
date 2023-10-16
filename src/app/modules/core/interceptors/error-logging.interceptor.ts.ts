@@ -2,20 +2,13 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Injectable } from '@angular/core';
+import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
+
 import { Observable, throwError } from 'rxjs';
-import {
-	HttpEvent,
-	HttpHandler,
-	HttpInterceptor,
-	HttpRequest,
-} from '@angular/common/http';
 
 @Injectable()
 export class ErrorLoggingInterceptor implements HttpInterceptor {
-	intercept(
-		request: HttpRequest<any>,
-		next: HttpHandler
-	): Observable<HttpEvent<any>> {
+	intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 		return next.handle(request).pipe(this.handleError);
 	}
 
