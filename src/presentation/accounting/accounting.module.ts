@@ -1,5 +1,7 @@
 import { NgModule } from '@angular/core';
+
 import { NgxsModule } from '@ngxs/store';
+import { MapperModule } from '@dynamic-mapper/angular';
 
 import {
 	AccountingRoutingModule,
@@ -18,6 +20,8 @@ import { PaymentAccountComponent } from './components/payment-account/payment-ac
 import { PaymentAccountState } from '../../app/modules/shared/store/states/accounting/payment-account.state';
 import { PaymentAccountCrudComponent } from './components/payment-account-crud/payment-account-crud.component';
 import { PaymentAccountDialogService } from './services/payment-account-dialog.service';
+import { DefaultPaymentAccountsProvider } from '../../data/providers/accounting/payment-accounts.provider';
+import { DataAccountingMappingProfile } from '../../data/providers/accounting/mappers/data-accounting.mapping.profile';
 
 @NgModule({
 	declarations: [
@@ -37,8 +41,14 @@ import { PaymentAccountDialogService } from './services/payment-account-dialog.s
 			CategoriesState,
 			PaymentAccountState,
 		]),
+		MapperModule.withProfiles([DataAccountingMappingProfile]),
 	],
-	providers: [CategoriesDialogService, CounterpartiesDialogService, PaymentAccountDialogService],
+	providers: [
+		DefaultPaymentAccountsProvider,
+		CategoriesDialogService,
+		CounterpartiesDialogService,
+		PaymentAccountDialogService,
+	],
 	bootstrap: [],
 })
 export class AccountingModule {}

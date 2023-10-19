@@ -12,6 +12,7 @@ export class DataRatesMappingProfile extends Profile {
 		RatesGroupEntity,
 		CurrencyRateGroupModel
 	>();
+
 	static readonly RateValueEntityToDomain = new MappingPair<
 		RateValueEntity,
 		CurrencyRateValueModel

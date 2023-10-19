@@ -11,9 +11,12 @@
 		</mat-expansion-panel-header>
 
 		<mat-selection-list #cash [multiple]="false" (selectionChange)="chooseAcccount()">
-			<mat-list-option *ngFor="let cashAccount of cashAccounts" [value]="cashAccount.id">
-				{{cashAccount.description}} -- Balance: {{cashAccount.balance}}
-				{{cashAccount.currency}}
+			<mat-list-option
+				*ngFor="let paymentAccount of cashAccounts"
+				[value]="paymentAccount.id"
+			>
+				{{paymentAccount.description}} -- Balance: {{paymentAccount.balance}}
+				{{paymentAccount.currency}}
 			</mat-list-option>
 		</mat-selection-list>
 
@@ -39,12 +42,13 @@
 			</mat-panel-description>
 		</mat-expansion-panel-header>
 
-		<mat-selection-list #virtualCards [multiple]="false">
+		<mat-selection-list #virtual [multiple]="false" (selectionChange)="chooseAcccount()">
 			<mat-list-option
-				*ngFor="let debitVirtualAccount of debitVirtualAccounts"
-				[value]="debitVirtualAccount"
+				*ngFor="let paymentAccount of debitVirtualAccounts"
+				[value]="paymentAccount.id"
 			>
-				{{debitVirtualAccount}} -- Balance: 150$
+				{{paymentAccount.description}} -- Balance: {{paymentAccount.balance}}
+				{{paymentAccount.currency}}
 			</mat-list-option>
 		</mat-selection-list>
 
@@ -63,12 +67,13 @@
 			</mat-panel-description>
 		</mat-expansion-panel-header>
 
-		<mat-selection-list #loans [multiple]="false">
+		<mat-selection-list #loan [multiple]="false" (selectionChange)="chooseAcccount()">
 			<mat-list-option
-				*ngFor="let creditVirtualAccount of creditVirtualAccounts"
-				[value]="creditVirtualAccount"
+				*ngFor="let paymentAccount of creditVirtualAccounts"
+				[value]="paymentAccount.id"
 			>
-				{{creditVirtualAccount}} -- Balance: 150$
+				{{paymentAccount.description}} -- Balance: {{paymentAccount.balance}}
+				{{paymentAccount.currency}}
 			</mat-list-option>
 		</mat-selection-list>
 

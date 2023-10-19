@@ -9,7 +9,7 @@ import { Guid } from 'typescript-guid';
 import { DialogContainer } from '../../../models/dialog-container';
 import { AccountTypes } from '../../../../../../domain/models/accounting/account-types';
 import { CurrencyAbbrevitions } from '../../../constants/rates-abbreviations';
-import { PaymentAccount } from 'domain/models/accounting/payment-account';
+import { PaymentAccountModel } from 'domain/models/accounting/payment-account';
 import { Result } from 'core/result';
 
 @Component({
@@ -77,7 +77,7 @@ export class PaymentAccountDialogComponent {
 	public saveAccount(): void {
 		this.isLoadingSignal.set(true);
 
-		const paymentAccountForSave: PaymentAccount = {
+		const paymentAccountForSave: PaymentAccountModel = {
 			id: Guid.create(),
 			type: AccountTypes[this.accountTypeSignal()! as keyof typeof AccountTypes],
 			currency:
@@ -89,7 +89,7 @@ export class PaymentAccountDialogComponent {
 
 		this.dialogConfiguration
 			.onSubmit(
-				new Result<PaymentAccount>({ payload: paymentAccountForSave, isSucceeded: true })
+				new Result<PaymentAccountModel>({ payload: paymentAccountForSave, isSucceeded: true })
 			)
 			.pipe(take(1))
 			.subscribe((_) => {

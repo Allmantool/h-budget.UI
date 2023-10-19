@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { Select } from '@ngxs/store';
@@ -13,7 +13,7 @@ import { requestsUnderProcessing } from '../../../shared/store/states/core-app-r
 	styleUrls: ['./app-root.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppRootComponent implements OnInit {
+export class AppRootComponent implements OnInit, OnDestroy {
 	private destroy$ = new Subject<void>();
 
 	@Select(requestsUnderProcessing)

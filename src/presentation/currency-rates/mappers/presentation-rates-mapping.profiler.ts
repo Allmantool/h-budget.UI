@@ -15,44 +15,41 @@ export class PresentationRatesMappingProfile extends Profile {
 	constructor() {
 		super();
 
-		this.createMap(
-			PresentationRatesMappingProfile.CurrencyRateGroupModelToGridRates,
-			{
-				currencyId: (opt) => {
-					opt.preCondition((src) => !_.isNil(src.currencyId));
-					opt.mapFrom((src) => src.currencyId);
-				},
-				abbreviation: (opt) => {
-					opt.preCondition((src) => !_.isNil(src.abbreviation));
-					opt.mapFrom((src) => src.abbreviation);
-				},
-				scale: (opt) => {
-					opt.preCondition((src) => !_.isNil(src.scale));
-					opt.mapFrom((src) => src.scale);
-				},
-				name: (opt) => {
-					opt.preCondition((src) => !_.isNil(src.name));
-					opt.mapFrom((src) => src.name);
-				},
-				officialRate: (opt) => {
-					opt.preCondition((src) => !_.isNil(src.rateValues));
-					opt.mapFrom((src) => _.first(src.rateValues)?.officialRate);
-				},
-				updateDate: (opt) => {
-					opt.preCondition((src) => !_.isNil(src.rateValues));
-					opt.mapFrom((src) => _.first(src.rateValues)?.updateDate);
-				},
-				ratePerUnit: (opt) => {
-					opt.preCondition((src) => !_.isNil(src.rateValues));
-					opt.mapFrom((src) => _.first(src.rateValues)?.ratePerUnit);
-				},
-				currencyTrend: (opt) => {
-					opt.mapFrom(() => CurrencyTrend.notChanged);
-				},
-				rateDiff: (opt) => {
-					opt.mapFrom(() => '0');
-				},
-			}
-		);
+		this.createMap(PresentationRatesMappingProfile.CurrencyRateGroupModelToGridRates, {
+			currencyId: (opt) => {
+				opt.preCondition((src) => !_.isNil(src.currencyId));
+				opt.mapFrom((src) => src.currencyId);
+			},
+			abbreviation: (opt) => {
+				opt.preCondition((src) => !_.isNil(src.abbreviation));
+				opt.mapFrom((src) => src.abbreviation);
+			},
+			scale: (opt) => {
+				opt.preCondition((src) => !_.isNil(src.scale));
+				opt.mapFrom((src) => src.scale);
+			},
+			name: (opt) => {
+				opt.preCondition((src) => !_.isNil(src.name));
+				opt.mapFrom((src) => src.name);
+			},
+			officialRate: (opt) => {
+				opt.preCondition((src) => !_.isNil(src.rateValues));
+				opt.mapFrom((src) => _.first(src.rateValues)?.officialRate);
+			},
+			updateDate: (opt) => {
+				opt.preCondition((src) => !_.isNil(src.rateValues));
+				opt.mapFrom((src) => _.first(src.rateValues)?.updateDate);
+			},
+			ratePerUnit: (opt) => {
+				opt.preCondition((src) => !_.isNil(src.rateValues));
+				opt.mapFrom((src) => _.first(src.rateValues)?.ratePerUnit);
+			},
+			currencyTrend: (opt) => {
+				opt.mapFrom(() => CurrencyTrend.notChanged);
+			},
+			rateDiff: (opt) => {
+				opt.mapFrom(() => '0');
+			},
+		});
 	}
 }
