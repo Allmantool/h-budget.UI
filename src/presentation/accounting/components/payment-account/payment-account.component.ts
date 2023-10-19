@@ -7,6 +7,7 @@ import { Store } from '@ngxs/store';
 import { Subject, retry, take } from 'rxjs';
 import { Guid } from 'typescript-guid';
 import * as _ from 'lodash';
+import { nameof } from 'ts-simple-nameof';
 
 import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account';
 import { SetActivePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
@@ -39,9 +40,18 @@ export class PaymentAccountComponent implements OnInit, OnDestroy {
 			.getPaymentAccounts()
 			.pipe(retry(1), take(1))
 			.subscribe((accounts) => {
-				this.cashAccounts = _.filter(accounts, ['type', AccountTypes.WalletCache]);
-				this.debitVirtualAccounts = _.filter(accounts, ['type', AccountTypes.Virtual]);
-				this.creditVirtualAccounts = _.filter(accounts, ['type', AccountTypes.Loan]);
+				this.cashAccounts = _.filter(accounts, [
+					nameof<PaymentAccountModel>((p) => p.type),
+					AccountTypes.WalletCache,
+				]);
+				this.debitVirtualAccounts = _.filter(accounts, [
+					nameof<PaymentAccountModel>((p) => p.type),
+					AccountTypes.Virtual,
+				]);
+				this.creditVirtualAccounts = _.filter(accounts, [
+					nameof<PaymentAccountModel>((p) => p.type),
+					AccountTypes.Loan,
+				]);
 			});
 	}
 
