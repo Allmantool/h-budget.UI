@@ -12,7 +12,12 @@
 			Add a payment account</mat-list-item
 		>
 		<mat-list-item role="listitem">
-			<button mat-fab color="warn" aria-label="Delete the payment account">
+			<button
+				mat-fab
+				color="warn"
+				(click)="RemovePaymentAccount()"
+				aria-label="Delete the payment account"
+			>
 				<mat-icon>delete</mat-icon>
 			</button>
 			Delete the payment account</mat-list-item

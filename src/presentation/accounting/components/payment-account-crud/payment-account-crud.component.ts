@@ -23,4 +23,6 @@ export class PaymentAccountCrudComponent implements OnDestroy {
 	public openCreatePaymentAccountDialog(): void {
 		this.paymentAccountService.openPaymentAccount();
 	}
+
+	public RemovePaymentAccount(): void {}
 }
