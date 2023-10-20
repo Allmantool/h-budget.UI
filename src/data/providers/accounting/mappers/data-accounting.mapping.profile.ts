@@ -20,7 +20,7 @@ export class DataAccountingMappingProfile extends Profile {
 	constructor() {
 		super();
 
-		this.createAutoMap(DataAccountingMappingProfile.PaymentAccountEntityToDomain, {
+		this.createMap(DataAccountingMappingProfile.PaymentAccountEntityToDomain, {
 			id: (opt) => {
 				opt.preCondition((src) => !_.isNil(src.id));
 				opt.mapFrom((src) => Guid.parse(src.id));
@@ -47,7 +47,7 @@ export class DataAccountingMappingProfile extends Profile {
 			},
 		});
 
-		this.createAutoMap(DataAccountingMappingProfile.DomainToPaymentAccountCreateRequest, {
+		this.createMap(DataAccountingMappingProfile.DomainToPaymentAccountCreateRequest, {
 			accountType: (opt) => {
 				opt.preCondition((src) => !_.isNil(src.type));
 				opt.mapFrom((src) => src.type); // should work (should be checked)

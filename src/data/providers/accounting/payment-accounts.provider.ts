@@ -19,7 +19,6 @@ export class DefaultPaymentAccountsProvider implements PaymentAccountsProvider {
 	) {}
 
 	public savePaymentAccount(newPaymentAccount: PaymentAccountModel): Observable<Result<string>> {
-
 		const request = this.mapper?.map(
 			DataAccountingMappingProfile.DomainToPaymentAccountCreateRequest,
 			newPaymentAccount
@@ -28,9 +27,7 @@ export class DefaultPaymentAccountsProvider implements PaymentAccountsProvider {
 		return this.http
 			.post<Result<string>>(
 				`${RoutesSegments.HOME_BUDGET_ACCOUNTING_HOST}/paymentAccounts/makePaymentAccount`,
-				{
-					request,
-				}
+				request
 			)
 			.pipe(
 				tap((result: Result<string>) =>

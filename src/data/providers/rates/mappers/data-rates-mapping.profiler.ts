@@ -21,7 +21,7 @@ export class DataRatesMappingProfile extends Profile {
 	constructor() {
 		super();
 
-		this.createAutoMap(DataRatesMappingProfile.RateValueEntityToDomain, {
+		this.createMap(DataRatesMappingProfile.RateValueEntityToDomain, {
 			officialRate: (opt) => {
 				opt.preCondition((src) => !_.isNil(src.officialRate));
 				opt.mapFrom((src) => src.officialRate);
@@ -36,7 +36,7 @@ export class DataRatesMappingProfile extends Profile {
 			},
 		});
 
-		this.createAutoMap(DataRatesMappingProfile.RatesGroupEntityToDomain, {
+		this.createMap(DataRatesMappingProfile.RatesGroupEntityToDomain, {
 			currencyId: (opt) => {
 				opt.preCondition((src) => !_.isNil(src.currencyId));
 				opt.mapFrom((src) => src.currencyId);
