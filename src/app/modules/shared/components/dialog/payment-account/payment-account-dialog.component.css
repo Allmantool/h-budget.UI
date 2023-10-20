@@ -2,6 +2,7 @@
 	width: 45em;
 	min-height: 43em;
 	max-height: 53em;
+	z-index: 150s;
 }
 
 .stepperForm {

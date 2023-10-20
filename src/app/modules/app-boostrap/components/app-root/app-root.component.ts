@@ -19,20 +19,20 @@ export class AppRootComponent implements OnInit, OnDestroy {
 	@Select(requestsUnderProcessing)
 	requestsUnderProcessing$!: Observable<string[]>;
 
-	public isDataLoaded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
+	public isDataLoadeding$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
-	ngOnInit(): void {
+	public ngOnInit(): void {
 		this.requestsUnderProcessing$.pipe(takeUntil(this.destroy$)).subscribe((requestIds) => {
 			if (_.isEmpty(requestIds)) {
-				this.isDataLoaded$.next(true);
+				this.isDataLoadeding$.next(false);
 				return;
 			}
 
-			this.isDataLoaded$.next(false);
+			this.isDataLoadeding$.next(true);
 		});
 	}
 
-	ngOnDestroy(): void {
+	public ngOnDestroy(): void {
 		this.destroy$.next();
 		this.destroy$.complete();
 	}

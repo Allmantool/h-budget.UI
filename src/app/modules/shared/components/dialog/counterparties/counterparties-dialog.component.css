@@ -9,6 +9,10 @@
 	width: 100%;
 }
 
+.dialog-content {
+	z-index: 150;
+}
+
 form {
 	width: 100%;
 }
