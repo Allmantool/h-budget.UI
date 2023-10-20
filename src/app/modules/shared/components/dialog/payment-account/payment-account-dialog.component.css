@@ -1,8 +1,15 @@
 .dialog-content {
 	width: 45em;
-	height: 43em;
+	min-height: 43em;
+	max-height: 53em;
 }
 
 .stepperForm {
 	margin-top: 1em;
+}
+
+.step--addtional-info {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-evenly;
 }

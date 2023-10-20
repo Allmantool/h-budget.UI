@@ -16,6 +16,7 @@
 		<mat-form-field appearance="outline" floatLabel="always">
 			<mat-label>{{ title }}</mat-label>
 			<input
+				(click)="clearInput($event)"
 				class="input-value"
 				matInput
 				type="number"
@@ -23,9 +24,9 @@
 				step="1"
 				placeholder="0.00"
 				(input)="updateValue($event.target)"
-				[value]="data$ | async"
+				[value]="(data$ | async) | accountingCurrencyFormat"
 			/>
-			<span matPrefix>$&nbsp;</span>
+			<span matPrefix>{{ numberInputPrefix }}</span>
 		</mat-form-field>
 	</ng-template>
 

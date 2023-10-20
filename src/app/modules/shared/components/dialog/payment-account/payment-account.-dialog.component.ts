@@ -4,7 +4,6 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { take } from 'rxjs';
-import { Guid } from 'typescript-guid';
 
 import { DialogContainer } from '../../../models/dialog-container';
 import { AccountTypes } from '../../../../../../domain/models/accounting/account-types';
@@ -28,6 +27,11 @@ export class PaymentAccountDialogComponent {
 		accountTypeCtrl: [''],
 	});
 
+	public additionalInfoStepFg = this.fb.group({
+		descriptionCtrl: [''],
+		emitterCtrl: [''],
+	});
+
 	public currencyStepFg = this.fb.group({
 		currencyCtrl: [''],
 	});
@@ -36,18 +40,31 @@ export class PaymentAccountDialogComponent {
 		balanceCtrl: [0],
 	});
 
-	public additionalInfoStepFormGroup = this.fb.group({
-		emitterCtrl: [''],
-		descriptionCtrls: [''],
-	});
-
-	public accountTypeSignal = toSignal<string>(
-		this.accountTypeStepFg.get('accountTypeCtrl')!.valueChanges
+	public accountTypeSignal = toSignal(
+		this.accountTypeStepFg.get('accountTypeCtrl')!.valueChanges,
+		{
+			initialValue: this.getAccountsTypes()[0],
+		}
 	);
 
-	public currencySignal = toSignal<string>(this.currencyStepFg.get('currencyCtrl')!.valueChanges);
+	public currencySignal = toSignal(this.currencyStepFg.get('currencyCtrl')!.valueChanges, {
+		initialValue: this.getCurrencyTypes()[0]!,
+	});
 
-	public balanceSignal = toSignal<number>(this.balanceStepFg.get('balanceCtrl')!.valueChanges);
+	public balanceSignal = toSignal(this.balanceStepFg.get('balanceCtrl')!.valueChanges, {
+		initialValue: 0,
+	});
+
+	public emmiterSignal = toSignal(this.additionalInfoStepFg.get('emitterCtrl')!.valueChanges, {
+		initialValue: '',
+	});
+
+	public descriptionSignal = toSignal(
+		this.additionalInfoStepFg.get('descriptionCtrl')!.valueChanges,
+		{
+			initialValue: '',
+		}
+	);
 
 	constructor(
 		private readonly dialogRef: MatDialogRef<PaymentAccountDialogComponent>,
@@ -78,10 +95,9 @@ export class PaymentAccountDialogComponent {
 		this.isLoadingSignal.set(true);
 
 		const paymentAccountForSave: PaymentAccountModel = {
-			id: Guid.create(),
 			type: AccountTypes[this.accountTypeSignal()! as keyof typeof AccountTypes],
-			currency: this.currencySignal()!,
-			balance: this.balanceSignal()!,
+			currency: this.currencySignal()! as string,
+			balance: this.balanceSignal()! as number,
 			emitter: 'some emitter',
 			description: 'some description',
 		};
