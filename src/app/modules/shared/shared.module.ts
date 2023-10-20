@@ -29,12 +29,13 @@ import { AppDividerComponent, ProgressSpinnerComponent, PageNotFoundComponent } 
 import { DatepickerComponent } from './components/datepicker/app-datepicker.component';
 import { AppFormFieldComponent } from './components/form-field/app-form-field.component';
 import { AppButtonComponent } from './components/button/app-button.component';
-import { AccountingCurrencyFormatPipe } from './pipes/accouting-currency-pipe';
+import { AccountingCurrencyFormatPipe } from './pipes/accouting-currency.pipe';
 import { DateRangeDialogComponent } from './components/dialog/dates-rage/dates-range-dialog.component';
 import { ProgressBarComponent } from './components/progress-bar/progress-bar.component';
 import { CategoriesDialogComponent } from './components/dialog/categories/categories-dialog.component';
 import { CounterpartiesDialogComponent } from './components/dialog/counterparties/counterparties-dialog.component';
 import { PaymentAccountDialogComponent } from './components/dialog/payment-account/payment-account.-dialog.component';
+import { CurrencyAbreviationToFlagFormatPipe } from './pipes/currency-abbreviation-to-flag.pipe';
 
 @NgModule({
 	declarations: [
@@ -51,6 +52,7 @@ import { PaymentAccountDialogComponent } from './components/dialog/payment-accou
 		AppButtonComponent,
 
 		AccountingCurrencyFormatPipe,
+		CurrencyAbreviationToFlagFormatPipe,
 	],
 	exports: [
 		CommonModule,
@@ -88,6 +90,7 @@ import { PaymentAccountDialogComponent } from './components/dialog/payment-accou
 		ReactiveFormsModule,
 
 		AccountingCurrencyFormatPipe,
+		CurrencyAbreviationToFlagFormatPipe,
 	],
 	imports: [
 		CommonModule,

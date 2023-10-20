@@ -12,16 +12,14 @@ export class RatesGridColumnOptions {
 	public static DESCRIPTIONS: Map<string, string> = new Map<string, string>([
 		[RatesGridColumnOptions.SELECT, ''],
 		[RatesGridColumnOptions.ID, 'Id'],
-		[RatesGridColumnOptions.ABBREVIATION, 'Abbreviation'],
+		[RatesGridColumnOptions.ABBREVIATION, 'Country'],
 		[RatesGridColumnOptions.NAME, 'Name'],
 		[RatesGridColumnOptions.RATE_PER_UNIT, 'An unit rate'],
 		[RatesGridColumnOptions.PERCENTAGE_DIFF, 'Trend'],
 		[RatesGridColumnOptions.UPDATE_DATE, 'Last update date'],
 	]);
 
-	public static NAMES: string[] = [
-		...RatesGridColumnOptions.DESCRIPTIONS.keys(),
-	];
+	public static NAMES: string[] = [...RatesGridColumnOptions.DESCRIPTIONS.keys()];
 
 	public static TRENDS: { [trendDirection: string]: string } = {
 		[CurrencyTrend.up]: 'LimeGreen',

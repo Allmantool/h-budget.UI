@@ -108,3 +108,5 @@ reports/*
 .eslintcaches
 
 .eslintcache
+
+.nx
