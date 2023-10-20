@@ -15,8 +15,14 @@
 				*ngFor="let paymentAccount of cashAccounts"
 				[value]="paymentAccount.id"
 			>
-				{{paymentAccount.description}} -- Balance: {{paymentAccount.balance}}
-				{{paymentAccount.currency}}
+				<span
+					class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
+				></span>
+				{{paymentAccount.emitter }} | {{paymentAccount.description}} | Balance:
+				<span [class]="paymentAccount.balance > 0 ? 'positiveBalance' : 'negativebalance'"
+					>{{ paymentAccount.balance }}</span
+				>
+				[{{paymentAccount.currency}}]
 			</mat-list-option>
 		</mat-selection-list>
 
@@ -47,8 +53,14 @@
 				*ngFor="let paymentAccount of debitVirtualAccounts"
 				[value]="paymentAccount.id"
 			>
-				{{paymentAccount.description}} -- Balance: {{paymentAccount.balance}}
-				{{paymentAccount.currency}}
+				<span
+					class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
+				></span>
+				{{paymentAccount.emitter }} | {{paymentAccount.description}} | Balance:
+				<span [class]="paymentAccount.balance > 0 ? 'positiveBalance' : 'negativebalance'"
+					>{{ paymentAccount.balance }}</span
+				>
+				[{{paymentAccount.currency}}]
 			</mat-list-option>
 		</mat-selection-list>
 
@@ -72,8 +84,14 @@
 				*ngFor="let paymentAccount of creditVirtualAccounts"
 				[value]="paymentAccount.id"
 			>
-				{{paymentAccount.description}} -- Balance: {{paymentAccount.balance}}
-				{{paymentAccount.currency}}
+				<span
+					class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
+				></span>
+				{{paymentAccount.emitter }} | {{paymentAccount.description}} | Balance:
+				<span [class]="paymentAccount.balance > 0 ? 'positiveBalance' : 'negativebalance'"
+					>{{ paymentAccount.balance }}</span
+				>
+				[{{paymentAccount.currency}}]
 			</mat-list-option>
 		</mat-selection-list>
 

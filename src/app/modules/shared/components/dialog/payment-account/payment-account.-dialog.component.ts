@@ -80,8 +80,7 @@ export class PaymentAccountDialogComponent {
 		const paymentAccountForSave: PaymentAccountModel = {
 			id: Guid.create(),
 			type: AccountTypes[this.accountTypeSignal()! as keyof typeof AccountTypes],
-			currency:
-				CurrencyAbbrevitions[this.currencySignal()! as keyof typeof CurrencyAbbrevitions],
+			currency: this.currencySignal()!,
 			balance: this.balanceSignal()!,
 			emitter: 'some emitter',
 			description: 'some description',
@@ -89,7 +88,10 @@ export class PaymentAccountDialogComponent {
 
 		this.dialogConfiguration
 			.onSubmit(
-				new Result<PaymentAccountModel>({ payload: paymentAccountForSave, isSucceeded: true })
+				new Result<PaymentAccountModel>({
+					payload: paymentAccountForSave,
+					isSucceeded: true,
+				})
 			)
 			.pipe(take(1))
 			.subscribe((_) => {
