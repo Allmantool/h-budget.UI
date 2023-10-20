@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { Mapper } from '@dynamic-mapper/angular';
-import { Observable, map, retry, take, tap } from 'rxjs';
+import { Observable, filter, map, retry, take, tap } from 'rxjs';
 
 import { PaymentAccountsProvider } from '../../../domain/providers/accounting/payment-accounts.provider';
 import { PaymentAccountModel } from '../../../domain/models/accounting/payment-account';
@@ -17,6 +17,19 @@ export class DefaultPaymentAccountsProvider implements PaymentAccountsProvider {
 		private readonly http: HttpClient,
 		private readonly mapper: Mapper
 	) {}
+
+	public removePaymentAccount(accountGuid: string): Observable<Result<boolean>> {
+		return this.http
+			.delete<Result<boolean>>(
+				`${RoutesSegments.HOME_BUDGET_ACCOUNTING_HOST}/paymentAccounts/removePaymentAccount/${accountGuid}`
+			)
+			.pipe(
+				filter((responseResult) => responseResult.isSucceeded),
+				tap(() => console.log(`The account with guid ${accountGuid} has been deleted`)),
+				retry(3),
+				take(1)
+			);
+	}
 
 	public savePaymentAccount(newPaymentAccount: PaymentAccountModel): Observable<Result<string>> {
 		const request = this.mapper?.map(
@@ -41,7 +54,7 @@ export class DefaultPaymentAccountsProvider implements PaymentAccountsProvider {
 	public getPaymentAccounts(): Observable<PaymentAccountModel[]> {
 		return this.http
 			.get<Result<PaymentAccountEntity[]>>(
-				`${RoutesSegments.HOME_BUDGET_ACCOUNTING_HOST}/paymentAccounts/GetPaymentAccounts`
+				`${RoutesSegments.HOME_BUDGET_ACCOUNTING_HOST}/paymentAccounts/getPaymentAccounts`
 			)
 			.pipe(
 				map(
