@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
 
-import { of, take, tap } from 'rxjs';
+import { switchMap, take, tap, filter, map, concatMap, of, mergeMap } from 'rxjs';
 
 import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
 import { Result } from '../../../core/result';
@@ -25,17 +25,26 @@ export class PaymentAccountDialogService {
 				return;
 			}
 
-			this.defaultPaymentAccountsProvider
+			return this.defaultPaymentAccountsProvider
 				.savePaymentAccount(operationResult.payload)
 				.pipe(
-					tap((responseResult) => console.log(responseResult.payload)),
-					take(1)
-				)
-				.subscribe((newPaymentAccountGuid) => {
-					return newPaymentAccountGuid;
-				});
-
-			return of(operationResult.payload);
+					filter((responseResult) => responseResult.isSucceeded),
+					map((responseResult) => responseResult.payload),
+					tap((newPaymentAccountGuid) => console.log(newPaymentAccountGuid)),
+					concatMap((newPaymentAccountGuid) => {
+						return this.defaultPaymentAccountsProvider
+							.getPaymentAccountById(newPaymentAccountGuid)
+							.pipe(
+								map(
+									(response) =>
+										new Result({
+											payload: response,
+											isSucceeded: true,
+										})
+								)
+							);
+					})
+				);
 		};
 
 		config.data = {

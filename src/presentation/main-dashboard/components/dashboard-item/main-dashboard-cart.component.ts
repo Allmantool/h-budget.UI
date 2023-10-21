@@ -19,7 +19,7 @@ export class MainDashboardCartComponent {
 		private router: Router
 	) {}
 
-	public navigate(): void {
-		this.router.navigate([this.navigateLink], { relativeTo: this.route });
+	public async navigate(): Promise<void> {
+		await this.router.navigate([this.navigateLink], { relativeTo: this.route });
 	}
 }

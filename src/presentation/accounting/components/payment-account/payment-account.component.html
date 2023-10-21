@@ -10,9 +10,9 @@
 			</mat-panel-description>
 		</mat-expansion-panel-header>
 
-		<mat-selection-list #cash [multiple]="false" (selectionChange)="chooseAcccount()">
+		<mat-selection-list #cash [multiple]="false" (selectionChange)="chooseAcccount($event)">
 			<mat-list-option
-				*ngFor="let paymentAccount of cashAccounts"
+				*ngFor="let paymentAccount of cashAccountsSignal()"
 				[value]="paymentAccount.id"
 			>
 				<span
@@ -48,9 +48,9 @@
 			</mat-panel-description>
 		</mat-expansion-panel-header>
 
-		<mat-selection-list #virtual [multiple]="false" (selectionChange)="chooseAcccount()">
+		<mat-selection-list #virtual [multiple]="false" (selectionChange)="chooseAcccount($event)">
 			<mat-list-option
-				*ngFor="let paymentAccount of debitVirtualAccounts"
+				*ngFor="let paymentAccount of debitVirtualAccountsSignal()"
 				[value]="paymentAccount.id"
 			>
 				<span
@@ -79,9 +79,9 @@
 			</mat-panel-description>
 		</mat-expansion-panel-header>
 
-		<mat-selection-list #loan [multiple]="false" (selectionChange)="chooseAcccount()">
+		<mat-selection-list #loan [multiple]="false" (selectionChange)="chooseAcccount($event)">
 			<mat-list-option
-				*ngFor="let paymentAccount of creditVirtualAccounts"
+				*ngFor="let paymentAccount of creditVirtualAccountsSignal()"
 				[value]="paymentAccount.id"
 			>
 				<span

@@ -51,6 +51,24 @@ export class DefaultPaymentAccountsProvider implements PaymentAccountsProvider {
 			);
 	}
 
+	public getPaymentAccountById(paymentAccountId: string): Observable<PaymentAccountModel> {
+		return this.http
+			.get<Result<PaymentAccountEntity>>(
+				`${RoutesSegments.HOME_BUDGET_ACCOUNTING_HOST}/paymentAccounts/getPaymentAccountById/${paymentAccountId}`
+			)
+			.pipe(
+				map(
+					(responseResult) =>
+						this.mapper?.map(
+							DataAccountingMappingProfile.PaymentAccountEntityToDomain,
+							responseResult.payload
+						)
+				),
+				retry(3),
+				take(1)
+			);
+	}
+
 	public getPaymentAccounts(): Observable<PaymentAccountModel[]> {
 		return this.http
 			.get<Result<PaymentAccountEntity[]>>(

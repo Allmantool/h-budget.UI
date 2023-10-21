@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, Inject, signal } from '@angular/cor
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { toSignal } from '@angular/core/rxjs-interop';
-
+import { Store } from '@ngxs/store';
 import { take } from 'rxjs';
 
 import { DialogContainer } from '../../../models/dialog-container';
@@ -10,6 +10,7 @@ import { AccountTypes } from '../../../../../../domain/models/accounting/account
 import { CurrencyAbbrevitions } from '../../../constants/rates-abbreviations';
 import { PaymentAccountModel } from 'domain/models/accounting/payment-account';
 import { Result } from 'core/result';
+import { AddPaymentAccount } from '../../../store/states/accounting/actions/payment-acount.actions';
 
 @Component({
 	selector: 'payment-account-dialog',
@@ -67,6 +68,7 @@ export class PaymentAccountDialogComponent {
 	);
 
 	constructor(
+		private readonly store: Store,
 		private readonly dialogRef: MatDialogRef<PaymentAccountDialogComponent>,
 		private readonly fb: UntypedFormBuilder,
 		@Inject(MAT_DIALOG_DATA) dialogConfiguration: DialogContainer
@@ -110,7 +112,8 @@ export class PaymentAccountDialogComponent {
 				})
 			)
 			.pipe(take(1))
-			.subscribe((_) => {
+			.subscribe((response) => {
+				this.store.dispatch(new AddPaymentAccount(response.payload));
 				this.isLoadingSignal.set(false);
 				this.dialogRef.close();
 			});
