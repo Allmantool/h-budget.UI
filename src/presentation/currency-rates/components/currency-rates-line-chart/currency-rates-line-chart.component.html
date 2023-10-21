@@ -8,5 +8,5 @@
 </div>
 
 <div class="currency-rates-chart-spinner">
-	<progress-spinner [isLoaded]="isChartInitialized$ | async"></progress-spinner>
+	<progress-spinner [isLoading]="(isChartInitialized$ | async) === false"></progress-spinner>
 </div>

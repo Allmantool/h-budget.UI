@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { Select } from '@ngxs/store';
@@ -13,26 +13,26 @@ import { requestsUnderProcessing } from '../../../shared/store/states/core-app-r
 	styleUrls: ['./app-root.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppRootComponent implements OnInit {
+export class AppRootComponent implements OnInit, OnDestroy {
 	private destroy$ = new Subject<void>();
 
 	@Select(requestsUnderProcessing)
 	requestsUnderProcessing$!: Observable<string[]>;
 
-	public isDataLoaded$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(true);
+	public isDataLoadeding$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
-	ngOnInit(): void {
+	public ngOnInit(): void {
 		this.requestsUnderProcessing$.pipe(takeUntil(this.destroy$)).subscribe((requestIds) => {
 			if (_.isEmpty(requestIds)) {
-				this.isDataLoaded$.next(true);
+				this.isDataLoadeding$.next(false);
 				return;
 			}
 
-			this.isDataLoaded$.next(false);
+			this.isDataLoadeding$.next(true);
 		});
 	}
 
-	ngOnDestroy(): void {
+	public ngOnDestroy(): void {
 		this.destroy$.next();
 		this.destroy$.complete();
 	}

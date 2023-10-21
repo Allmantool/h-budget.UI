@@ -42,6 +42,8 @@ export class AppFormFieldComponent implements ControlValueAccessor {
 
 	@Input() public title: string = '';
 
+	@Input() public numberInputPrefix: string = '';
+
 	@Input() public defaultValue: FormInput = '';
 
 	// eslint-disable-next-line @angular-eslint/no-output-on-prefix
@@ -72,6 +74,10 @@ export class AppFormFieldComponent implements ControlValueAccessor {
 		this.onTouched();
 
 		this.onDataChanged.emit(this.data$.value);
+	}
+
+	public clearInput(event: any) {
+		event.target.value = '';
 	}
 
 	public trackByFn(index: number, item: string): string {

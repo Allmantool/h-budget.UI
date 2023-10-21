@@ -7,3 +7,8 @@ export const getPaymentAccountId = createSelector(
 	[PaymentAccountState],
 	(state: IPaymenentAccountStateModel) => state?.activeAccountGuid
 );
+
+export const getPaymentAccounts = createSelector(
+	[PaymentAccountState],
+	(state: IPaymenentAccountStateModel) => state?.paymentAccounts
+);

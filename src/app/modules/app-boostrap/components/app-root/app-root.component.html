@@ -4,20 +4,26 @@
 	<span>Welcome to h-budget app</span>
 </div>
 
-<div class="layout-content">
-	<div class="app-root-left-sidebar-outlet">
-		<router-outlet name="leftSidebar"></router-outlet>
+<div class="wrapper">
+	<div class="layout-content">
+		<div class="app-root-left-sidebar-outlet">
+			<router-outlet name="leftSidebar"></router-outlet>
+		</div>
+
+		<div class="app-root-central-outlet">
+			<router-outlet #rootAppOutlet="outlet"></router-outlet>
+		</div>
+
+		<div class="app-root-right-sidebar-outlet">
+			<router-outlet name="rightSidebar"></router-outlet>
+		</div>
 	</div>
 
-	<div class="app-root-central-outlet">
-		<router-outlet #rootAppOutlet="outlet"></router-outlet>
-	</div>
-
-	<div class="app-root-right-sidebar-outlet">
-		<router-outlet name="rightSidebar"></router-outlet>
+	<div *ngIf="isDataLoadeding$ | async" class="overlay">
+		<div class="spinner-wrapper">
+			<progress-spinner
+				[isLoading]="!rootAppOutlet.isActivated && (isDataLoadeding$ | async)"
+			></progress-spinner>
+		</div>
 	</div>
 </div>
-
-<progress-spinner
-	[isLoaded]="rootAppOutlet.isActivated && (isDataLoaded$ | async)"
-></progress-spinner>

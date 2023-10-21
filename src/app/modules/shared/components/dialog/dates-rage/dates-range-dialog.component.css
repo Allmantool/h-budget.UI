@@ -5,3 +5,7 @@
 .date-section {
 	margin: 0 1em 0 1em;
 }
+
+.dialog-content {
+	z-index: 150;
+}

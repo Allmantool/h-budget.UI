@@ -1,5 +1,5 @@
 export enum AccountTypes {
-	WalletCache = 1,
-	Virtual = 2,
-	Loan = 3,
+	WalletCache = 0,
+	Virtual = 1,
+	Loan = 2,
 }

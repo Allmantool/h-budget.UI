@@ -1,18 +1,29 @@
-
-import { ChangeDetectionStrategy, Component, OnDestroy, ViewChild } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	EnvironmentInjector,
+	OnDestroy,
+	OnInit,
+	Signal,
+	runInInjectionContext,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatListOption, MatSelectionList } from '@angular/material/list';
-import { SelectionModel } from '@angular/cdk/collections';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatSelectionListChange } from '@angular/material/list';
+import { signal } from '@angular/core';
 
-import { Subject } from 'rxjs';
-import { Store } from '@ngxs/store';
+import { Select, Store } from '@ngxs/store';
+import { Observable, Subject, retry, take } from 'rxjs';
 import { Guid } from 'typescript-guid';
 import * as _ from 'lodash';
+import { nameof } from 'ts-simple-nameof';
 
-import { PaymentAccount } from '../../../../domain/models/accounting/payment-account';
-import { AccountTypes } from '../../../../domain/models/accounting/account-types';
-import { CurrencyAbbrevitions } from '../../../../app/modules/shared/constants/rates-abbreviations';
+import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account';
 import { SetActivePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
+import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
+import { AccountTypes } from '../../../../domain/models/accounting/account-types';
+import { SetInitialPaymentAccounts } from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
+import { getPaymentAccounts } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 
 @Component({
 	selector: 'payment-accounts',
@@ -20,67 +31,63 @@ import { SetActivePaymentAccount } from '../../../../app/modules/shared/store/st
 	styleUrls: ['./payment-account.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PaymentAccountComponent implements OnDestroy {
+export class PaymentAccountComponent implements OnInit, OnDestroy {
 	private destroy$ = new Subject<void>();
 
-	@ViewChild('cash')
-	chipGrid!: MatSelectionList;
-
 	public isNavigateToOperationsDisabled: boolean = true;
+	public cashAccountsSignal = signal<PaymentAccountModel[]>([]);
+	public debitVirtualAccountsSignal = signal<PaymentAccountModel[]>([]);
+	public creditVirtualAccountsSignal = signal<PaymentAccountModel[]>([]);
+
+	@Select(getPaymentAccounts)
+	paymentAccounts$!: Observable<PaymentAccountModel[]>;
 
 	constructor(
+		private injector: EnvironmentInjector,
+		private readonly paymentAccountsProvider: DefaultPaymentAccountsProvider,
 		private readonly route: ActivatedRoute,
 		private readonly router: Router,
 		private readonly store: Store
 	) {}
 
+	public ngOnInit(): void {
+		this.paymentAccountsProvider
+			.getPaymentAccounts()
+			.pipe(retry(1), take(1))
+			.subscribe((accounts) => {
+				this.store.dispatch(new SetInitialPaymentAccounts(accounts));
+			});
+
+		runInInjectionContext(this.injector, () => {
+			this.paymentAccounts$.pipe(takeUntilDestroyed()).subscribe((accounts) => {
+				this.cashAccountsSignal.set(
+					_.filter(accounts, [
+						nameof<PaymentAccountModel>((p) => p.type),
+						AccountTypes.WalletCache,
+					])
+				);
+
+				this.debitVirtualAccountsSignal.set(
+					_.filter(accounts, [
+						nameof<PaymentAccountModel>((p) => p.type),
+						AccountTypes.Virtual,
+					])
+				);
+
+				this.creditVirtualAccountsSignal.set(
+					_.filter(accounts, [
+						nameof<PaymentAccountModel>((p) => p.type),
+						AccountTypes.Loan,
+					])
+				);
+			});
+		});
+	}
+
 	public ngOnDestroy(): void {
 		this.destroy$.next();
 		this.destroy$.complete();
 	}
-
-	public cashAccounts: PaymentAccount[] = [
-		{
-			id: Guid.create(),
-			type: AccountTypes.WalletCache,
-			balance: 62.08,
-			currency: CurrencyAbbrevitions.BYN,
-			emitter: 'Cache',
-			description: `Cache ${CurrencyAbbrevitions.BYN}`,
-		},
-		{
-			id: Guid.create(),
-			type: AccountTypes.WalletCache,
-			balance: 978.24,
-			currency: CurrencyAbbrevitions.USD,
-			emitter: '',
-			description: `Cache ${CurrencyAbbrevitions.USD}`,
-		},
-		{
-			id: Guid.create(),
-			type: AccountTypes.WalletCache,
-			balance: 1500.24,
-			currency: CurrencyAbbrevitions.EUR,
-			emitter: 'Cache',
-			description: `Cache ${CurrencyAbbrevitions.EUR}`,
-		},
-		{
-			id: Guid.create(),
-			type: AccountTypes.WalletCache,
-			balance: 32,
-			currency: CurrencyAbbrevitions.PLN,
-			emitter: '',
-			description: `Cache ${CurrencyAbbrevitions.PLN}`,
-		},
-	];
-
-	public debitVirtualAccounts: string[] = [
-		'[USD -- TechBank] Plastic Card -- MasterCard',
-		'[BYN -- PriorBank] Plastic Card -- Visa',
-		'[USD -- PriorBank] Plastic Card -- Visa',
-	];
-
-	public creditVirtualAccounts: string[] = ['[USD -- Vtb] Plastic Card -- МИР'];
 
 	public step: number = 0;
 
@@ -96,10 +103,10 @@ export class PaymentAccountComponent implements OnDestroy {
 		this.step--;
 	}
 
-	public chooseAcccount(): void {
-		const selectedOptions: SelectionModel<MatListOption> = this.chipGrid.selectedOptions;
+	public chooseAcccount(event: MatSelectionListChange): void {
+		const options = event.options;
 
-		const guid = _.first(selectedOptions.selected)?.value as Guid;
+		const guid = _.first(options)?.value as Guid;
 
 		this.store.dispatch(new SetActivePaymentAccount(guid.toString()));
 

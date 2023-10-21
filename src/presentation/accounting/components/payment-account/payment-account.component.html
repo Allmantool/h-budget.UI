@@ -10,10 +10,19 @@
 			</mat-panel-description>
 		</mat-expansion-panel-header>
 
-		<mat-selection-list #cash [multiple]="false" (selectionChange)="chooseAcccount()">
-			<mat-list-option *ngFor="let cashAccount of cashAccounts" [value]="cashAccount.id">
-				{{cashAccount.description}} -- Balance: {{cashAccount.balance}}
-				{{cashAccount.currency}}
+		<mat-selection-list #cash [multiple]="false" (selectionChange)="chooseAcccount($event)">
+			<mat-list-option
+				*ngFor="let paymentAccount of cashAccountsSignal()"
+				[value]="paymentAccount.id"
+			>
+				<span
+					class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
+				></span>
+				{{paymentAccount.emitter }} | {{paymentAccount.description}} | Balance:
+				<span [class]="paymentAccount.balance > 0 ? 'positiveBalance' : 'negativebalance'"
+					>{{ paymentAccount.balance }}</span
+				>
+				[{{paymentAccount.currency}}]
 			</mat-list-option>
 		</mat-selection-list>
 
@@ -39,12 +48,19 @@
 			</mat-panel-description>
 		</mat-expansion-panel-header>
 
-		<mat-selection-list #virtualCards [multiple]="false">
+		<mat-selection-list #virtual [multiple]="false" (selectionChange)="chooseAcccount($event)">
 			<mat-list-option
-				*ngFor="let debitVirtualAccount of debitVirtualAccounts"
-				[value]="debitVirtualAccount"
+				*ngFor="let paymentAccount of debitVirtualAccountsSignal()"
+				[value]="paymentAccount.id"
 			>
-				{{debitVirtualAccount}} -- Balance: 150$
+				<span
+					class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
+				></span>
+				{{paymentAccount.emitter }} | {{paymentAccount.description}} | Balance:
+				<span [class]="paymentAccount.balance > 0 ? 'positiveBalance' : 'negativebalance'"
+					>{{ paymentAccount.balance }}</span
+				>
+				[{{paymentAccount.currency}}]
 			</mat-list-option>
 		</mat-selection-list>
 
@@ -63,12 +79,19 @@
 			</mat-panel-description>
 		</mat-expansion-panel-header>
 
-		<mat-selection-list #loans [multiple]="false">
+		<mat-selection-list #loan [multiple]="false" (selectionChange)="chooseAcccount($event)">
 			<mat-list-option
-				*ngFor="let creditVirtualAccount of creditVirtualAccounts"
-				[value]="creditVirtualAccount"
+				*ngFor="let paymentAccount of creditVirtualAccountsSignal()"
+				[value]="paymentAccount.id"
 			>
-				{{creditVirtualAccount}} -- Balance: 150$
+				<span
+					class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
+				></span>
+				{{paymentAccount.emitter }} | {{paymentAccount.description}} | Balance:
+				<span [class]="paymentAccount.balance > 0 ? 'positiveBalance' : 'negativebalance'"
+					>{{ paymentAccount.balance }}</span
+				>
+				[{{paymentAccount.currency}}]
 			</mat-list-option>
 		</mat-selection-list>
 

@@ -7,10 +7,7 @@ export class LineChartTitleService {
 		abbreviation: string,
 		rateValuesForPeriod: number[]
 	): CurrencyChartTitle {
-		const trend =
-			LineChartTitleService.getPeriodTrendInPercentage(
-				rateValuesForPeriod
-			);
+		const trend = LineChartTitleService.getPeriodTrendInPercentage(rateValuesForPeriod);
 
 		if (trend > 0) {
 			return {

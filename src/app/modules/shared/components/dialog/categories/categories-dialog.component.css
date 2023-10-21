@@ -5,6 +5,10 @@
 	height: 13em;
 }
 
+.dialog-content {
+	z-index: 150;
+}
+
 .categories-chip-list {
 	width: 100%;
 }

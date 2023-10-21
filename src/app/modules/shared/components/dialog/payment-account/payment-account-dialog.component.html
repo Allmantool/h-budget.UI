@@ -1,11 +1,17 @@
 <div class="dialog-content">
 	<h1 mat-dialog-title>{{ title }}</h1>
 
+	<mat-divider></mat-divider>
+
 	<mat-dialog-content class="dialog-body" [formGroup]="dialogFg">
 		<mat-stepper orientation="vertical" [linear]="true" #stepper>
 			<mat-step [stepControl]="accountTypeStepFg">
 				<form [formGroup]="accountTypeStepFg" class="stepperForm">
-					<ng-template matStepLabel>Pick out an account type:</ng-template>
+					<ng-template matStepLabel
+						>Pick out an account type:<span>
+							{{ accountTypeSignal()}}</span
+						></ng-template
+					>
 					<app-form-field
 						formControlName="accountTypeCtrl"
 						[fieldType]="'SELECT'"
@@ -21,7 +27,12 @@
 			</mat-step>
 			<mat-step [stepControl]="currencyStepFg">
 				<form [formGroup]="currencyStepFg" class="stepperForm">
-					<ng-template matStepLabel>Pick out a currency type:</ng-template>
+					<ng-template matStepLabel
+						>Pick out a currency type:
+						<span
+							class="abbreviation-flag fi fi-{{currencySignal() | currencyAbbreviationToFlagFormat}}"
+						></span
+					></ng-template>
 					<app-form-field
 						formControlName="currencyCtrl"
 						[fieldType]="'SELECT'"
@@ -38,13 +49,42 @@
 			</mat-step>
 			<mat-step [stepControl]="balanceStepFg">
 				<form [formGroup]="balanceStepFg" class="stepperForm">
-					<ng-template matStepLabel>Provide account initial balance:</ng-template>
-					<app-form-field
-						formControlName="balanceCtrl"
-						[fieldType]="'INPUT'"
-						[title]="'Balance:'"
+					<ng-template matStepLabel
+						>Provide account initial balance:
+						<span> {{ balanceSignal()}}</span></ng-template
 					>
-					</app-form-field>
+					<div>
+						<app-form-field
+							formControlName="balanceCtrl"
+							[fieldType]="'INPUT'"
+							[title]="'Balance:'"
+							[numberInputPrefix]="currencySignal()"
+						>
+						</app-form-field>
+					</div>
+					<div>
+						<button mat-button matStepperPrevious>Back</button>
+						<button mat-button matStepperNext>Next</button>
+					</div>
+				</form>
+			</mat-step>
+			<mat-step [stepControl]="additionalInfoStepFg">
+				<form [formGroup]="additionalInfoStepFg" class="stepperForm">
+					<ng-template matStepLabel>Provide addtional information:</ng-template>
+					<div class="step--addtional-info">
+						<app-form-field
+							formControlName="emitterCtrl"
+							[fieldType]="'TEXT_AREA'"
+							[title]="'Emitter information:'"
+						>
+						</app-form-field>
+						<app-form-field
+							formControlName="descriptionCtrl"
+							[fieldType]="'TEXT_AREA'"
+							[title]="'Description:'"
+						>
+						</app-form-field>
+					</div>
 					<div>
 						<button mat-button matStepperPrevious>Back</button>
 						<button mat-button matStepperNext>Next</button>
@@ -52,16 +92,32 @@
 				</form>
 			</mat-step>
 			<mat-step>
-				<ng-template matStepLabel>Done</ng-template>
-				<p>You are now done.</p>
+				<ng-template matStepLabel>[Summary] Save the payment account:</ng-template>
+				<mat-list>
+					<mat-list-item
+						><mat-icon matListItemIcon>done</mat-icon>
+						Account type: {{accountTypeSignal()}}
+					</mat-list-item>
+					<mat-divider></mat-divider>
+					<mat-list-item
+						><mat-icon matListItemIcon>done</mat-icon>Initial balance: {{balanceSignal()
+						}} {{ currencySignal()}}
+					</mat-list-item>
+					<mat-divider></mat-divider>
+					<mat-list-item
+						><mat-icon matListItemIcon>done</mat-icon>
+						Addtional: {{emmiterSignal()}} | {{descriptionSignal()}}
+					</mat-list-item>
+				</mat-list>
 				<div>
-					<button mat-button matStepperPrevious>Back</button>
-					<button mat-button (click)="saveAccount()">Apply</button>
+					<button mat-raised-button matStepperPrevious>Back</button>
+					<button mat-raised-button color="primary" (click)="saveAccount()">Apply</button>
 				</div>
 			</mat-step>
 		</mat-stepper>
 	</mat-dialog-content>
 
+	<mat-divider></mat-divider>
 	<div mat-dialog-actions>
 		<button mat-raised-button mat-dialog-close (click)="close()">Close</button>
 	</div>

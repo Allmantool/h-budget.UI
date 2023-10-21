@@ -25,7 +25,7 @@ export class NationalBankCurrencyProvider implements BankCurrencyProvider {
 	public getCurrenciesForSpecifiedPeriod(
 		payload: DaysRangePayload
 	): Observable<CurrencyRateGroupModel[]> {
-		const ratesUrl: string = `${RoutesSegments.HOME_BUDGET_APP_HOST}/currencyRates/period`;
+		const ratesUrl: string = `${RoutesSegments.HOME_BUDGET_RATES_HOST}/currencyRates/period`;
 
 		// prettier-ignore
 		const parametersSegmentUri = `${format(payload.startDate,'yyyy-MM-dd')}/${format(payload.endDate, 'yyyy-MM-dd')}`;
@@ -47,7 +47,7 @@ export class NationalBankCurrencyProvider implements BankCurrencyProvider {
 
 	public saveCurrencies(rates: CurrencyGridRateModel[]): Observable<Result<number>> {
 		return this.http
-			.post<Result<number>>(`${RoutesSegments.HOME_BUDGET_APP_HOST}/currencyRates`, {
+			.post<Result<number>>(`${RoutesSegments.HOME_BUDGET_RATES_HOST}/currencyRates`, {
 				currencyRates: rates,
 			})
 			.pipe(
@@ -60,7 +60,9 @@ export class NationalBankCurrencyProvider implements BankCurrencyProvider {
 
 	public getCurrencies(): Observable<CurrencyRateGroupModel[]> {
 		return this.http
-			.get<Result<RatesGroupEntity[]>>(`${RoutesSegments.HOME_BUDGET_APP_HOST}/currencyRates`)
+			.get<Result<RatesGroupEntity[]>>(
+				`${RoutesSegments.HOME_BUDGET_RATES_HOST}/currencyRates`
+			)
 			.pipe(
 				map(
 					(responseResult) =>
@@ -77,7 +79,7 @@ export class NationalBankCurrencyProvider implements BankCurrencyProvider {
 	public getTodayCurrencies(): Observable<CurrencyRateGroupModel[]> {
 		return this.http
 			.get<Result<RatesGroupEntity[]>>(
-				`${RoutesSegments.HOME_BUDGET_APP_HOST}/currencyRates/today`
+				`${RoutesSegments.HOME_BUDGET_RATES_HOST}/currencyRates/today`
 			)
 			.pipe(
 				map(
