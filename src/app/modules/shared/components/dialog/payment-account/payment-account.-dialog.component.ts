@@ -98,8 +98,8 @@ export class PaymentAccountDialogComponent {
 			type: AccountTypes[this.accountTypeSignal()! as keyof typeof AccountTypes],
 			currency: this.currencySignal()! as string,
 			balance: this.balanceSignal()! as number,
-			emitter: 'some emitter',
-			description: 'some description',
+			emitter: this.emmiterSignal()! as string,
+			description: this.descriptionSignal()! as string,
 		};
 
 		this.dialogConfiguration

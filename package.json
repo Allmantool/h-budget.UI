@@ -16,7 +16,10 @@
     "eslint": "eslint --cache --fix --ext .js,.jsx,.ts,.tsx src",
     "eslint:dump": "eslint --print-config ./.eslintrc.json",
     "sonar-scanner": "sonar-scanner",
-    "prepare": "cd .. && husky install Angular-app/.husky"
+    "prepare": "cd .. && husky install Angular-app/.husky",
+    "clean": "rmdir /s /q node_modules",
+    "reinstall": "npm run clean && npm install",
+    "rebuild": "npm run clean && npm install && rmdir /s /q dist && npm run build --prod"
   },
   "private": true,
   "dependencies": {
