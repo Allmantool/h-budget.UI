@@ -42,13 +42,24 @@ export class DefaultPaymentAccountsProvider implements PaymentAccountsProvider {
 				`${RoutesSegments.HOME_BUDGET_ACCOUNTING_HOST}/paymentAccounts/makePaymentAccount`,
 				request
 			)
-			.pipe(
-				tap((result: Result<string>) =>
-					console.log(`New payment account guid: ${result.payload}`)
-				),
-				retry(3),
-				take(1)
-			);
+			.pipe(retry(3), take(1));
+	}
+
+	public updatePaymentAccount(
+		updatedPaymentAccount: PaymentAccountModel,
+		accountGuid: string
+	): Observable<Result<string>> {
+		const request = this.mapper?.map(
+			DataAccountingMappingProfile.DomainToPaymentAccountCreateRequest,
+			updatedPaymentAccount
+		);
+
+		return this.http
+			.patch<Result<string>>(
+				`${RoutesSegments.HOME_BUDGET_ACCOUNTING_HOST}/paymentAccounts/updatePaymentAccount/${accountGuid}`,
+				request
+			)
+			.pipe(retry(3), take(1));
 	}
 
 	public getPaymentAccountById(paymentAccountId: string): Observable<PaymentAccountModel> {

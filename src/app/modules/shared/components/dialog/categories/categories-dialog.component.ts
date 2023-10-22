@@ -24,7 +24,7 @@ import * as _ from 'lodash';
 
 import { DialogContainer } from '../../../models/dialog-container';
 import { Result } from 'core/result';
-import { OperationTypes } from 'domain/models/accounting/operation-types';
+import { AccountingOperationTypes } from 'domain/models/accounting/accounting-operation-types';
 import { OperationCategory } from '../../../../../../domain/models/accounting/operation-category';
 
 @Component({
@@ -60,7 +60,7 @@ export class CategoriesDialogComponent implements OnDestroy {
 		@Inject(MAT_DIALOG_DATA) dialogConfiguration: DialogContainer
 	) {
 		this.dialogFg = fb.group({
-			categoryType: new UntypedFormControl(OperationTypes[OperationTypes.Income]),
+			categoryType: new UntypedFormControl(AccountingOperationTypes[AccountingOperationTypes.Income]),
 		});
 
 		this.title = dialogConfiguration.title;
@@ -86,7 +86,7 @@ export class CategoriesDialogComponent implements OnDestroy {
 	}
 
 	public getCategoryTypes(): string[] {
-		return Object.keys(OperationTypes).filter((v) => isNaN(Number(v)));
+		return Object.keys(AccountingOperationTypes).filter((v) => isNaN(Number(v)));
 	}
 
 	public save(): void {
@@ -100,7 +100,7 @@ export class CategoriesDialogComponent implements OnDestroy {
 		const categoryType = this.dialogFg.controls['categoryType'].value as string;
 
 		const payloadForSave = {
-			type: OperationTypes[categoryType as keyof typeof OperationTypes],
+			type: AccountingOperationTypes[categoryType as keyof typeof AccountingOperationTypes],
 			value: JSON.stringify(this.categoryNodes),
 		} as OperationCategory;
 

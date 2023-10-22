@@ -20,6 +20,11 @@ export class AddPaymentAccount {
 	constructor(public paymentAccount: PaymentAccountModel) {}
 }
 
+export class UpdatePaymentAccount {
+	static readonly type = '[Payment account] Update payment account';
+	constructor(public paymentAccount: PaymentAccountModel) {}
+}
+
 export class RemovePaymentAccount {
 	static readonly type = '[Payment account] Remove payment account';
 	constructor(public paymentAccountId: string) {}

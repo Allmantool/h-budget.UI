@@ -10,13 +10,14 @@ import {
 	RemovePaymentAccount,
 	SetActivePaymentAccount,
 	SetInitialPaymentAccounts,
+	UpdatePaymentAccount,
 } from './actions/payment-acount.actions';
 
 @State<IPaymenentAccountStateModel>({
 	name: 'paymentAccount',
 	defaults: {
 		activeAccountGuid: '',
-		paymentAccounts: [],
+		accounts: [],
 	},
 	children: [],
 })
@@ -40,8 +41,8 @@ export class PaymentAccountState {
 		const state = getState();
 
 		patchState({
-			paymentAccounts: [
-				..._.filter(state?.paymentAccounts, function (p) {
+			accounts: [
+				..._.filter(state?.accounts, function (p) {
 					return p.id?.toString() !== paymentAccountId;
 				}),
 			],
@@ -56,7 +57,7 @@ export class PaymentAccountState {
 		const state = getState();
 
 		patchState({
-			paymentAccounts: [..._.concat(state.paymentAccounts, paymentAccounts)],
+			accounts: [..._.concat(state.accounts, paymentAccounts)],
 		});
 	}
 
@@ -67,11 +68,31 @@ export class PaymentAccountState {
 	): void {
 		const state = getState();
 
-		const accounts = [...state.paymentAccounts];
+		const accounts = [...state.accounts];
 		accounts.push(paymentAccount);
 
 		patchState({
-			paymentAccounts: [...accounts],
+			accounts: [...accounts],
+		});
+	}
+
+	@Action(UpdatePaymentAccount)
+	update(
+		{ getState, patchState }: StateContext<IPaymenentAccountStateModel>,
+		{ paymentAccount }: UpdatePaymentAccount
+	): void {
+		const state = getState();
+
+		const accounts = [...state.accounts];
+
+		const indexForUpdate = _.findIndex(accounts, function (i) {
+			return _.isEqual(i.id?.toString(), paymentAccount.id?.toString());
+		});
+
+		accounts[indexForUpdate] = paymentAccount;
+
+		patchState({
+			accounts: [...accounts],
 		});
 	}
 
@@ -81,7 +102,7 @@ export class PaymentAccountState {
 		{ paymentAccounts }: AddPaymentAccounts
 	): void {
 		patchState({
-			paymentAccounts: [...paymentAccounts],
+			accounts: [...paymentAccounts],
 		});
 	}
 }

@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 
 import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account';
 import { PaymentAccountEntity } from '../entities/payment-account-entity';
-import { PaymentAccountCreateRequest } from '../../../../domain/models/accounting/requests/payment-account.-create.request';
+import { PaymentAccountCreateOrUpdateRequest } from '../../../../domain/models/accounting/requests/payment-account-create-or-update.request';
 
 export class DataAccountingMappingProfile extends Profile {
 	static readonly PaymentAccountEntityToDomain = new MappingPair<
@@ -14,7 +14,7 @@ export class DataAccountingMappingProfile extends Profile {
 
 	static readonly DomainToPaymentAccountCreateRequest = new MappingPair<
 		PaymentAccountModel,
-		PaymentAccountCreateRequest
+		PaymentAccountCreateOrUpdateRequest
 	>();
 
 	constructor() {
@@ -52,7 +52,7 @@ export class DataAccountingMappingProfile extends Profile {
 				opt.preCondition((src) => !_.isNil(src.type));
 				opt.mapFrom((src) => src.type); // should work (should be checked)
 			},
-			currencyAbbreviation: (opt) => {
+			currency: (opt) => {
 				opt.preCondition((src) => !_.isNil(src.currency));
 				opt.mapFrom((src) => src.currency);
 			},

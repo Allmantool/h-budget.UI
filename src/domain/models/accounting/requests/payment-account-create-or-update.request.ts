@@ -1,7 +1,7 @@
-export interface PaymentAccountCreateRequest {
+export interface PaymentAccountCreateOrUpdateRequest {
 	agent: string;
 	balance: number;
-	currencyAbbreviation: string;
+	currency: string;
 	description: string;
 	accountType: number;
 }

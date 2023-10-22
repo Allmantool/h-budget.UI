@@ -10,5 +10,5 @@ export const getPaymentAccountId = createSelector(
 
 export const getPaymentAccounts = createSelector(
 	[PaymentAccountState],
-	(state: IPaymenentAccountStateModel) => state?.paymentAccounts
+	(state: IPaymenentAccountStateModel) => state?.accounts
 );

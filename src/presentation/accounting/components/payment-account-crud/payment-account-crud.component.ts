@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 import { Observable, Subject, filter, take } from 'rxjs';
 import { Select, Store } from '@ngxs/store';
+import * as _ from 'lodash';
 
 import { PaymentAccountDialogService } from '../../services/payment-account-dialog.service';
 import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
@@ -17,7 +18,7 @@ import { RemovePaymentAccount } from '../../../../app/modules/shared/store/state
 })
 export class PaymentAccountCrudComponent implements OnDestroy {
 	private destroy$ = new Subject<void>();
-	activePaymentAccountGuidSignal: Signal<string>;
+	public activePaymentAccountGuidSignal: Signal<string>;
 
 	public ngOnDestroy(): void {
 		this.destroy$.next();
@@ -37,11 +38,19 @@ export class PaymentAccountCrudComponent implements OnDestroy {
 		});
 	}
 
-	public openCreatePaymentAccountDialog(): void {
-		this.paymentAccountService.openPaymentAccount();
+	public get isAnyPaymentAccountSelected(): boolean {
+		return _.isEmpty(this.activePaymentAccountGuidSignal());
 	}
 
-	public RemovePaymentAccount(): void {
+	public createNewPaymentAccount(): void {
+		this.paymentAccountService.openPaymentAccountForSave();
+	}
+
+	public updatePaymentAccount(): void {
+		this.paymentAccountService.openPaymentAccountForUpdate(this.activePaymentAccountGuidSignal());
+	}
+
+	public removePaymentAccount(): void {
 		const paymentAccountGuidForDelete = this.activePaymentAccountGuidSignal()!;
 
 		this.paymentAccountsProvider
@@ -54,4 +63,6 @@ export class PaymentAccountCrudComponent implements OnDestroy {
 				this.store.dispatch(new RemovePaymentAccount(paymentAccountGuidForDelete));
 			});
 	}
+
+	public EditPaymentAccount(): void {}
 }

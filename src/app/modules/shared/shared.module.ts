@@ -34,7 +34,7 @@ import { DateRangeDialogComponent } from './components/dialog/dates-rage/dates-r
 import { ProgressBarComponent } from './components/progress-bar/progress-bar.component';
 import { CategoriesDialogComponent } from './components/dialog/categories/categories-dialog.component';
 import { CounterpartiesDialogComponent } from './components/dialog/counterparties/counterparties-dialog.component';
-import { PaymentAccountDialogComponent } from './components/dialog/payment-account/payment-account.-dialog.component';
+import { PaymentAccountDialogComponent } from './components/dialog/payment-account/payment-account-dialog.component';
 import { CurrencyAbreviationToFlagFormatPipe } from './pipes/currency-abbreviation-to-flag.pipe';
 
 @NgModule({
