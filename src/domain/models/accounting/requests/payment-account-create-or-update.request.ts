@@ -1,4 +1,4 @@
-export interface PaymentAccountCreateRequest {
+export interface PaymentAccountCreateOrUpdateRequest {
 	agent: string;
 	balance: number;
 	currency: string;

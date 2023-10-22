@@ -4,10 +4,13 @@ import * as _ from 'lodash';
 
 import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account';
 import { PaymentAccountEntity } from '../entities/payment-account-entity';
-import { PaymentAccountCreateRequest as PaymentAccountCreateOrUpdateRequest } from '../../../../domain/models/accounting/requests/payment-account.-create.request';
+import { PaymentAccountCreateOrUpdateRequest } from '../../../../domain/models/accounting/requests/payment-account-create-or-update.request';
 
 export class DataAccountingMappingProfile extends Profile {
-	static readonly PaymentAccountEntityToDomain = new MappingPair<PaymentAccountEntity, PaymentAccountModel>();
+	static readonly PaymentAccountEntityToDomain = new MappingPair<
+		PaymentAccountEntity,
+		PaymentAccountModel
+	>();
 
 	static readonly DomainToPaymentAccountCreateRequest = new MappingPair<
 		PaymentAccountModel,
