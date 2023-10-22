@@ -1,11 +1,4 @@
-import {
-	ChangeDetectionStrategy,
-	Component,
-	computed,
-	Inject,
-	signal,
-	Signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, Inject, signal, Signal } from '@angular/core';
 import { UntypedFormBuilder } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
@@ -18,7 +11,10 @@ import { Result } from 'core/result';
 import { DialogContainer } from '../../../models/dialog-container';
 import { AccountTypes } from '../../../../../../domain/models/accounting/account-types';
 import { CurrencyAbbrevitions } from '../../../constants/rates-abbreviations';
-import { AddPaymentAccount } from '../../../store/states/accounting/actions/payment-acount.actions';
+import {
+	AddPaymentAccount,
+	UpdatePaymentAccount,
+} from '../../../store/states/accounting/actions/payment-acount.actions';
 import { PaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account';
 import { DialogOperationTypes } from '../../../models/dialog-operation-types';
 import {
@@ -66,12 +62,9 @@ export class PaymentAccountDialogComponent {
 		balanceCtrl: [0],
 	});
 
-	public accountTypeSignal = toSignal(
-		this.accountTypeStepFg.get('accountTypeCtrl')!.valueChanges,
-		{
-			initialValue: this.getAccountsTypes()[0],
-		}
-	);
+	public accountTypeSignal = toSignal(this.accountTypeStepFg.get('accountTypeCtrl')!.valueChanges, {
+		initialValue: this.getAccountsTypes()[0],
+	});
 
 	public currencySignal = toSignal(this.currencyStepFg.get('currencyCtrl')!.valueChanges, {
 		initialValue: this.getCurrencyTypes()[0]!,
@@ -85,12 +78,9 @@ export class PaymentAccountDialogComponent {
 		initialValue: '',
 	});
 
-	public descriptionSignal = toSignal(
-		this.additionalInfoStepFg.get('descriptionCtrl')!.valueChanges,
-		{
-			initialValue: '',
-		}
-	);
+	public descriptionSignal = toSignal(this.additionalInfoStepFg.get('descriptionCtrl')!.valueChanges, {
+		initialValue: '',
+	});
 
 	@Select(getPaymentAccounts)
 	paymentAccounts$!: Observable<PaymentAccountModel[]>;
@@ -121,17 +111,15 @@ export class PaymentAccountDialogComponent {
 
 				this.accountTypeStepFg
 					.get('accountTypeCtrl')
-					?.setValue(this.getAccountsTypes()[Number(paymentAccountForUpdate?.type)]);
+					?.setValue(this.getAccountsTypes()[Number(paymentAccountForUpdate?.type)], { onlySelf: true });
+
 				this.currencyStepFg
 					.get('currencyCtrl')
-					?.setValue(paymentAccountForUpdate?.currency);
+					?.setValue(paymentAccountForUpdate?.currency, { onlySelf: true });
+
 				this.balanceStepFg.get('balanceCtrl')?.setValue(paymentAccountForUpdate?.balance);
-				this.additionalInfoStepFg
-					.get('emitterCtrl')
-					?.setValue(paymentAccountForUpdate?.emitter);
-				this.additionalInfoStepFg
-					.get('descriptionCtrl')
-					?.setValue(paymentAccountForUpdate?.description);
+				this.additionalInfoStepFg.get('emitterCtrl')?.setValue(paymentAccountForUpdate?.emitter);
+				this.additionalInfoStepFg.get('descriptionCtrl')?.setValue(paymentAccountForUpdate?.description);
 			});
 	}
 
@@ -167,7 +155,18 @@ export class PaymentAccountDialogComponent {
 			)
 			.pipe(take(1))
 			.subscribe((response) => {
-				this.store.dispatch(new AddPaymentAccount(response.payload));
+				switch (this.dialogConfiguration.operationType) {
+					case DialogOperationTypes.Update: {
+						this.store.dispatch(new UpdatePaymentAccount(response.payload));
+						break;
+					}
+
+					default: {
+						this.store.dispatch(new AddPaymentAccount(response.payload));
+						break;
+					}
+				}
+
 				this.isLoadingSignal.set(false);
 				this.dialogRef.close();
 			});

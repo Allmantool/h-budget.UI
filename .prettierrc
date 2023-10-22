@@ -4,7 +4,7 @@
 	"singleQuote": true,
 	"semicolon": true,
 	"trailingComma": "es5",
-	"printWidth": 100,
+	"printWidth": 120,
 	"tabWidth": 4,
 	"useTabs": true,
 	"quoteProps": "as-needed",
@@ -14,13 +14,15 @@
 		{
 			"files": "*.component.html",
 			"options": {
-				"parser": "angular"
+				"parser": "angular",
+				"htmlWhitespaceSensitivity": "ignore"
 			}
 		},
 		{
 			"files": "*.html",
 			"options": {
-				"parser": "html"
+				"parser": "html",
+                "htmlWhitespaceSensitivity": "ignore"
 			}
 		}
 	]

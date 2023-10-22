@@ -10,6 +10,7 @@ import {
 	RemovePaymentAccount,
 	SetActivePaymentAccount,
 	SetInitialPaymentAccounts,
+	UpdatePaymentAccount,
 } from './actions/payment-acount.actions';
 
 @State<IPaymenentAccountStateModel>({
@@ -69,6 +70,26 @@ export class PaymentAccountState {
 
 		const accounts = [...state.accounts];
 		accounts.push(paymentAccount);
+
+		patchState({
+			accounts: [...accounts],
+		});
+	}
+
+	@Action(UpdatePaymentAccount)
+	update(
+		{ getState, patchState }: StateContext<IPaymenentAccountStateModel>,
+		{ paymentAccount }: UpdatePaymentAccount
+	): void {
+		const state = getState();
+
+		const accounts = [...state.accounts];
+
+		const indexForUpdate = _.findIndex(accounts, function (i) {
+			return _.isEqual(i.id?.toString(), paymentAccount.id?.toString());
+		});
+
+		accounts[indexForUpdate] = paymentAccount;
 
 		patchState({
 			accounts: [...accounts],

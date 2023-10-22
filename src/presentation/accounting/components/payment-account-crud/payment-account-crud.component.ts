@@ -47,9 +47,7 @@ export class PaymentAccountCrudComponent implements OnDestroy {
 	}
 
 	public updatePaymentAccount(): void {
-		this.paymentAccountService.openPaymentAccountForUpdate(
-			this.activePaymentAccountGuidSignal()
-		);
+		this.paymentAccountService.openPaymentAccountForUpdate(this.activePaymentAccountGuidSignal());
 	}
 
 	public removePaymentAccount(): void {

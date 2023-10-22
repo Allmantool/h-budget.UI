@@ -33,10 +33,7 @@
 	<ng-template #select>
 		<mat-form-field appearance="outline">
 			<mat-label>{{ title }}</mat-label>
-			<mat-select
-				[value]="defaultValue ?? (data$ | async)"
-				(selectionChange)="updateValue($event)"
-			>
+			<mat-select [value]="defaultValue ?? (data$ | async)" (selectionChange)="updateValue($event)">
 				<ng-container *ngFor="let selectOption of selectOptions; trackBy: trackByFn">
 					<mat-option [value]="selectOption">{{ selectOption }}</mat-option>
 				</ng-container>
@@ -47,11 +44,7 @@
 	<ng-template #textarea>
 		<mat-form-field appearance="outline">
 			<mat-label>{{ title }}</mat-label>
-			<textarea
-				matInput
-				[value]="data$ | async"
-				(input)="updateValue($event.target)"
-			></textarea>
+			<textarea matInput [value]="data$ | async" (input)="updateValue($event.target)"></textarea>
 		</mat-form-field>
 	</ng-template>
 </ng-container>
