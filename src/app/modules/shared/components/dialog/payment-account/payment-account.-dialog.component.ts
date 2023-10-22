@@ -24,7 +24,7 @@ import { DialogOperationTypes } from '../../../models/dialog-operation-types';
 import {
 	getPaymentAccounts,
 	getPaymentAccountId,
-} from '../../../store/states/accounting/selectors/payment-account.selector';s
+} from '../../../store/states/accounting/selectors/payment-account.selector';
 
 @Component({
 	selector: 'payment-account-dialog',
