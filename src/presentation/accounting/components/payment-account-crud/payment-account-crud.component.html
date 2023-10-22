@@ -4,20 +4,38 @@
 			<button
 				mat-fab
 				color="primary"
-				(click)="openCreatePaymentAccountDialog()"
+				(click)="createNewPaymentAccount()"
 				aria-label="Add a payment account"
 			>
 				<mat-icon>add</mat-icon>
 			</button>
 		</mat-list-item>
-		<mat-list-item role="listitem" class="payment-accounts-menu--item">
+		<mat-list-item
+			[disabled]="isAnyPaymentAccountSelected"
+			role="listitem"
+			class="payment-accounts-menu--item"
+		>
 			<button
 				mat-fab
 				color="warn"
-				(click)="RemovePaymentAccount()"
+				(click)="removePaymentAccount()"
 				aria-label="Delete the payment account"
 			>
 				<mat-icon>delete</mat-icon>
+			</button>
+		</mat-list-item>
+		<mat-list-item
+			[disabled]="isAnyPaymentAccountSelected"
+			role="listitem"
+			class="payment-accounts-menu--item"
+		>
+			<button
+				mat-fab
+				color="accent"
+				(click)="updatePaymentAccount()"
+				aria-label="Edit the payment account"
+			>
+				<mat-icon>edit</mat-icon>
 			</button>
 		</mat-list-item>
 	</mat-list>

@@ -3,7 +3,7 @@
 
 	<mat-divider></mat-divider>
 
-	<mat-dialog-content class="dialog-body" [formGroup]="dialogFg">
+	<mat-dialog-content class="dialog-body">
 		<mat-stepper orientation="vertical" [linear]="true" #stepper>
 			<mat-step [stepControl]="accountTypeStepFg">
 				<form [formGroup]="accountTypeStepFg" class="stepperForm">
@@ -100,18 +100,20 @@
 					</mat-list-item>
 					<mat-divider></mat-divider>
 					<mat-list-item
-						><mat-icon matListItemIcon>done</mat-icon>Initial balance: {{balanceSignal()
-						}} {{ currencySignal()}}
+						><mat-icon matListItemIcon>done</mat-icon>Initial balance:
+						{{balanceSignal()}} {{currencySignal()}}
 					</mat-list-item>
 					<mat-divider></mat-divider>
 					<mat-list-item
 						><mat-icon matListItemIcon>done</mat-icon>
-						Addtional: {{emmiterSignal()}} | {{descriptionSignal()}}
+						Addtional: {{additionalInfoSignal()}}
 					</mat-list-item>
 				</mat-list>
 				<div>
 					<button mat-raised-button matStepperPrevious>Back</button>
-					<button mat-raised-button color="primary" (click)="saveAccount()">Apply</button>
+					<button mat-raised-button color="primary" (click)="applyChanges()">
+						Apply
+					</button>
 				</div>
 			</mat-step>
 		</mat-stepper>

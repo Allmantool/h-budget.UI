@@ -4,7 +4,6 @@ import {
 	EnvironmentInjector,
 	OnDestroy,
 	OnInit,
-	Signal,
 	runInInjectionContext,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';

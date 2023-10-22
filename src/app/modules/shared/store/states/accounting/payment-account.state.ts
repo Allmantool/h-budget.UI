@@ -16,7 +16,7 @@ import {
 	name: 'paymentAccount',
 	defaults: {
 		activeAccountGuid: '',
-		paymentAccounts: [],
+		accounts: [],
 	},
 	children: [],
 })
@@ -40,8 +40,8 @@ export class PaymentAccountState {
 		const state = getState();
 
 		patchState({
-			paymentAccounts: [
-				..._.filter(state?.paymentAccounts, function (p) {
+			accounts: [
+				..._.filter(state?.accounts, function (p) {
 					return p.id?.toString() !== paymentAccountId;
 				}),
 			],
@@ -56,7 +56,7 @@ export class PaymentAccountState {
 		const state = getState();
 
 		patchState({
-			paymentAccounts: [..._.concat(state.paymentAccounts, paymentAccounts)],
+			accounts: [..._.concat(state.accounts, paymentAccounts)],
 		});
 	}
 
@@ -67,11 +67,11 @@ export class PaymentAccountState {
 	): void {
 		const state = getState();
 
-		const accounts = [...state.paymentAccounts];
+		const accounts = [...state.accounts];
 		accounts.push(paymentAccount);
 
 		patchState({
-			paymentAccounts: [...accounts],
+			accounts: [...accounts],
 		});
 	}
 
@@ -81,7 +81,7 @@ export class PaymentAccountState {
 		{ paymentAccounts }: AddPaymentAccounts
 	): void {
 		patchState({
-			paymentAccounts: [...paymentAccounts],
+			accounts: [...paymentAccounts],
 		});
 	}
 }

@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
 
-import { switchMap, take, tap, filter, map, concatMap, of, mergeMap } from 'rxjs';
+import { tap, filter, map, concatMap } from 'rxjs';
+import * as _ from 'lodash';
 
 import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
 import { Result } from '../../../core/result';
@@ -9,6 +10,7 @@ import { DialogContainer } from '../../../app/modules/shared/models/dialog-conta
 import { PaymentAccountDialogComponent } from '../../../app/modules/shared/components/dialog/payment-account/payment-account.-dialog.component';
 import { PaymentAccountModel } from '../../../domain/models/accounting/payment-account';
 import { DefaultPaymentAccountsProvider } from '../../../data/providers/accounting/payment-accounts.provider';
+import { DialogOperationTypes } from '../../../app/modules/shared/models/dialog-operation-types';
 
 @Injectable()
 export class PaymentAccountDialogService {
@@ -17,7 +19,7 @@ export class PaymentAccountDialogService {
 		private readonly defaultPaymentAccountsProvider: DefaultPaymentAccountsProvider
 	) {}
 
-	public openPaymentAccount(): void {
+	public openPaymentAccountForSave(): void {
 		const config = new MatDialogConfig<DialogContainer>();
 
 		const onSave = (operationResult: Result<PaymentAccountModel>) => {
@@ -48,8 +50,53 @@ export class PaymentAccountDialogService {
 		};
 
 		config.data = {
-			title: 'Payment account:',
+			title: 'Payment account: (Add new)',
 			onSubmit: onSave,
+		} as DialogContainer;
+
+		config.disableClose = true;
+
+		this.dialogProvider.openDialog(PaymentAccountDialogComponent, config);
+	}
+
+	public openPaymentAccountForUpdate(paymentAccountid: string): void {
+		const config = new MatDialogConfig<DialogContainer>();
+
+		const onUpdate = (operationResult: Result<PaymentAccountModel>) => {
+			if (!operationResult.isSucceeded) {
+				return;
+			}
+
+			if (_.isEmpty(paymentAccountid)) {
+				return;
+			}
+
+			return this.defaultPaymentAccountsProvider
+				.updatePaymentAccount(operationResult.payload, paymentAccountid)
+				.pipe(
+					filter((responseResult) => responseResult.isSucceeded),
+					map((responseResult) => responseResult.payload),
+					tap((newPaymentAccountGuid) => console.log(newPaymentAccountGuid)),
+					concatMap((newPaymentAccountGuid) => {
+						return this.defaultPaymentAccountsProvider
+							.getPaymentAccountById(newPaymentAccountGuid)
+							.pipe(
+								map(
+									(response) =>
+										new Result({
+											payload: response,
+											isSucceeded: true,
+										})
+								)
+							);
+					})
+				);
+		};
+
+		config.data = {
+			title: 'Payment account: (Update)',
+			operationType: DialogOperationTypes.Update,
+			onSubmit: onUpdate,
 		} as DialogContainer;
 
 		config.disableClose = true;

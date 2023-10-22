@@ -1,16 +1,30 @@
-import { ChangeDetectionStrategy, Component, Inject, signal } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	computed,
+	Inject,
+	signal,
+	Signal,
+} from '@angular/core';
+import { UntypedFormBuilder } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { Store } from '@ngxs/store';
-import { take } from 'rxjs';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
+import { Select, Store } from '@ngxs/store';
+import { Observable, filter, take } from 'rxjs';
+import * as _ from 'lodash';
+
+import { Result } from 'core/result';
 import { DialogContainer } from '../../../models/dialog-container';
 import { AccountTypes } from '../../../../../../domain/models/accounting/account-types';
 import { CurrencyAbbrevitions } from '../../../constants/rates-abbreviations';
-import { PaymentAccountModel } from 'domain/models/accounting/payment-account';
-import { Result } from 'core/result';
 import { AddPaymentAccount } from '../../../store/states/accounting/actions/payment-acount.actions';
+import { PaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account';
+import { DialogOperationTypes } from '../../../models/dialog-operation-types';
+import {
+	getPaymentAccounts,
+	getPaymentAccountId,
+} from '../../../store/states/accounting/selectors/payment-account.selector';s
 
 @Component({
 	selector: 'payment-account-dialog',
@@ -21,7 +35,18 @@ import { AddPaymentAccount } from '../../../store/states/accounting/actions/paym
 export class PaymentAccountDialogComponent {
 	private dialogConfiguration: DialogContainer;
 	public isLoadingSignal = signal<boolean>(false);
-	public dialogFg: UntypedFormGroup;
+	public additionalInfoSignal: Signal<string> = computed(() => {
+		if (_.isEmpty(this.emmiterSignal()) && _.isEmpty(this.descriptionSignal())) {
+			return `N/A`;
+		}
+
+		if (_.isEmpty(this.descriptionSignal()) || _.isEmpty(this.emmiterSignal())) {
+			return _.trim(`${this.emmiterSignal()} ${this.descriptionSignal()}`);
+		}
+
+		return `${this.emmiterSignal()} | ${this.descriptionSignal()}`;
+	});
+
 	public title: string;
 
 	public accountTypeStepFg = this.fb.group({
@@ -67,18 +92,47 @@ export class PaymentAccountDialogComponent {
 		}
 	);
 
+	@Select(getPaymentAccounts)
+	paymentAccounts$!: Observable<PaymentAccountModel[]>;
+
+	@Select(getPaymentAccountId)
+	paymentAccountId$!: Observable<string>;
+
 	constructor(
 		private readonly store: Store,
 		private readonly dialogRef: MatDialogRef<PaymentAccountDialogComponent>,
 		private readonly fb: UntypedFormBuilder,
 		@Inject(MAT_DIALOG_DATA) dialogConfiguration: DialogContainer
 	) {
-		this.dialogFg = fb.group({
-			startDate: new UntypedFormControl(new Date()),
-		});
-
 		this.title = dialogConfiguration.title;
 		this.dialogConfiguration = dialogConfiguration;
+
+		this.paymentAccountId$
+			.pipe(
+				takeUntilDestroyed(),
+				filter(() => this.dialogConfiguration.operationType === DialogOperationTypes.Update)
+			)
+			.subscribe((accountId) => {
+				const accountsSignal = toSignal(this.paymentAccounts$, { initialValue: [] });
+
+				const paymentAccountForUpdate = _.find(accountsSignal(), function (i) {
+					return _.isEqual(i.id?.toString(), accountId);
+				});
+
+				this.accountTypeStepFg
+					.get('accountTypeCtrl')
+					?.setValue(this.getAccountsTypes()[Number(paymentAccountForUpdate?.type)]);
+				this.currencyStepFg
+					.get('currencyCtrl')
+					?.setValue(paymentAccountForUpdate?.currency);
+				this.balanceStepFg.get('balanceCtrl')?.setValue(paymentAccountForUpdate?.balance);
+				this.additionalInfoStepFg
+					.get('emitterCtrl')
+					?.setValue(paymentAccountForUpdate?.emitter);
+				this.additionalInfoStepFg
+					.get('descriptionCtrl')
+					?.setValue(paymentAccountForUpdate?.description);
+			});
 	}
 
 	public close() {
@@ -93,7 +147,7 @@ export class PaymentAccountDialogComponent {
 		return Object.keys(CurrencyAbbrevitions).filter((v) => isNaN(Number(v)));
 	}
 
-	public saveAccount(): void {
+	public applyChanges(): void {
 		this.isLoadingSignal.set(true);
 
 		const paymentAccountForSave: PaymentAccountModel = {

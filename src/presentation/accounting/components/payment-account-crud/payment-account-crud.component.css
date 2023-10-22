@@ -1,11 +1,12 @@
 .payment-crud {
 	margin-top: 5em;
+	margin-bottom: 1em;
 }
 
 .payment-accounts-menu {
 	display: flex;
 	flex-direction: column;
-	height: 10em;
+	height: 17em;
 	justify-content: space-evenly;
 }
 
