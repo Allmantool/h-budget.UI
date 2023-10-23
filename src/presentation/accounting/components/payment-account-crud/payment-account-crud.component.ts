@@ -7,7 +7,7 @@ import * as _ from 'lodash';
 
 import { PaymentAccountDialogService } from '../../services/payment-account-dialog.service';
 import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
-import { getPaymentAccountId } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
+import { getActivePaymentAccountId } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { RemovePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
 
 @Component({
@@ -25,7 +25,7 @@ export class PaymentAccountCrudComponent implements OnDestroy {
 		this.destroy$.complete();
 	}
 
-	@Select(getPaymentAccountId)
+	@Select(getActivePaymentAccountId)
 	paymentAccountId$!: Observable<string>;
 
 	constructor(

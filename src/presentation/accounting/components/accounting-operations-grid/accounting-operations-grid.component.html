@@ -1,61 +1,132 @@
-<div class="accounting-table mat-elevation-z8" tabindex="0">
+<div
+	class="accounting-table mat-elevation-z8"
+	tabindex="0"
+>
 	<mat-accordion class="account-note">
 		<mat-expansion-panel hideToggle>
 			<mat-expansion-panel-header (click)="navigateToPaymentAccountsAsync()">
-				<mat-panel-title>Visa [BYN] {{paymentAccountId$ | async }} </mat-panel-title>
-				<mat-panel-description>Total Sum: +123 486.29 </mat-panel-description>
+				<mat-panel-title>Visa [BYN] {{paymentAccountId$ | async }}</mat-panel-title>
+				<mat-panel-description>Total Sum: {{paymentAccountSignal().balance}}</mat-panel-description>
 			</mat-expansion-panel-header>
 			<p>Main debit account at PriorBank</p>
 		</mat-expansion-panel>
 	</mat-accordion>
 
-	<mat-table #table [dataSource]="dataSource$">
-		<caption hidden>
-			Accounting grid
-		</caption>
+	<mat-table
+		#table
+		[dataSource]="dataSource$"
+	>
+		<caption hidden>Accounting grid</caption>
 
 		<ng-container matColumnDef="operationDate">
-			<th mat-header-cell *matHeaderCellDef>Date</th>
-			<td mat-cell *matCellDef="let element">{{ element.operationDate | date }}</td>
+			<th
+				mat-header-cell
+				*matHeaderCellDef
+			>
+				Date
+			</th>
+			<td
+				mat-cell
+				*matCellDef="let element"
+			>
+				{{ element.operationDate | date }}
+			</td>
 		</ng-container>
 
 		<ng-container matColumnDef="contractor">
-			<th mat-header-cell *matHeaderCellDef>Сontractor</th>
-			<td mat-cell *matCellDef="let element">{{ element.contractor }}</td>
+			<th
+				mat-header-cell
+				*matHeaderCellDef
+			>
+				Сontractor
+			</th>
+			<td
+				mat-cell
+				*matCellDef="let element"
+			>
+				{{ element.contractor }}
+			</td>
 		</ng-container>
 
 		<ng-container matColumnDef="category">
-			<th mat-header-cell *matHeaderCellDef>Category</th>
-			<td mat-cell *matCellDef="let element">{{ element.category }}</td>
+			<th
+				mat-header-cell
+				*matHeaderCellDef
+			>
+				Category
+			</th>
+			<td
+				mat-cell
+				*matCellDef="let element"
+			>
+				{{ element.category }}
+			</td>
 		</ng-container>
 
 		<ng-container matColumnDef="income">
-			<th mat-header-cell *matHeaderCellDef>Income</th>
-			<td mat-cell *matCellDef="let element">
+			<th
+				mat-header-cell
+				*matHeaderCellDef
+			>
+				Income
+			</th>
+			<td
+				mat-cell
+				*matCellDef="let element"
+			>
 				{{ element.income | accountingCurrencyFormat | currency:' ' }}
 			</td>
 		</ng-container>
 
 		<ng-container matColumnDef="expense">
-			<th mat-header-cell *matHeaderCellDef>Expense</th>
-			<td mat-cell *matCellDef="let element">
+			<th
+				mat-header-cell
+				*matHeaderCellDef
+			>
+				Expense
+			</th>
+			<td
+				mat-cell
+				*matCellDef="let element"
+			>
 				{{ element.expense | accountingCurrencyFormat | currency:' ' }}
 			</td>
 		</ng-container>
 
 		<ng-container matColumnDef="balance">
-			<th mat-header-cell *matHeaderCellDef>Balance</th>
-			<td mat-cell *matCellDef="let element">
+			<th
+				mat-header-cell
+				*matHeaderCellDef
+			>
+				Balance
+			</th>
+			<td
+				mat-cell
+				*matCellDef="let element"
+			>
 				{{ element.balance | accountingCurrencyFormat | currency:' ' }}
 			</td>
 		</ng-container>
 
 		<ng-container matColumnDef="comment">
-			<th mat-header-cell *matHeaderCellDef>Comment</th>
-			<td mat-cell *matCellDef="let element">{{ element.comment }}</td>
+			<th
+				mat-header-cell
+				*matHeaderCellDef
+			>
+				Comment
+			</th>
+			<td
+				mat-cell
+				*matCellDef="let element"
+			>
+				{{ element.comment }}
+			</td>
 		</ng-container>
 
-		<tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+		<tr
+			mat-header-row
+			*matHeaderRowDef="displayedColumns; sticky: true"
+		></tr>
 		<tr
 			class="row"
 			mat-row

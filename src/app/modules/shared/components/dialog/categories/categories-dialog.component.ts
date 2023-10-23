@@ -1,21 +1,8 @@
-import {
-	ChangeDetectionStrategy,
-	Component,
-	ElementRef,
-	Inject,
-	OnDestroy,
-	ViewChild,
-	signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Inject, OnDestroy, ViewChild, signal } from '@angular/core';
 import { ENTER } from '@angular/cdk/keycodes';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatChipInputEvent } from '@angular/material/chips';
-import {
-	FormControl,
-	UntypedFormBuilder,
-	UntypedFormControl,
-	UntypedFormGroup,
-} from '@angular/forms';
+import { FormControl, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { Observable, startWith, take, map, Subject } from 'rxjs';
@@ -23,9 +10,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import * as _ from 'lodash';
 
 import { DialogContainer } from '../../../models/dialog-container';
-import { Result } from 'core/result';
 import { AccountingOperationTypes } from 'domain/models/accounting/accounting-operation-types';
-import { OperationCategory } from '../../../../../../domain/models/accounting/operation-category';
+import { OperationCategory } from '../../../../../../domain/models/accounting/operation-category.model';
+import { Result } from '../../../../../../core/result';
 
 @Component({
 	selector: 'categories-dialog',
@@ -70,13 +57,12 @@ export class CategoriesDialogComponent implements OnDestroy {
 			takeUntilDestroyed(),
 			startWith(null),
 			map((categoryNode: string | null) =>
-				categoryNode
-					? _.filter(this.categoryNodes, categoryNode)
-					: this.categoryNodes.slice()
+				categoryNode ? _.filter(this.categoryNodes, categoryNode) : this.categoryNodes.slice()
 			)
 		);
 	}
-	ngOnDestroy(): void {
+
+	public ngOnDestroy(): void {
 		this.destroy$.next();
 		this.destroy$.complete();
 	}
@@ -86,7 +72,7 @@ export class CategoriesDialogComponent implements OnDestroy {
 	}
 
 	public getCategoryTypes(): string[] {
-		return Object.keys(AccountingOperationTypes).filter((v) => isNaN(Number(v)));
+		return Object.keys(AccountingOperationTypes).filter(v => isNaN(Number(v)));
 	}
 
 	public save(): void {
@@ -112,7 +98,7 @@ export class CategoriesDialogComponent implements OnDestroy {
 				})
 			)
 			.pipe(take(1))
-			.subscribe((_) => {
+			.subscribe(_ => {
 				this.isLoadingSignal.set(false);
 				this.dialogRef.close();
 			});

@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, Signal, signal } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 
 import { Select, Store } from '@ngxs/store';
 import { Observable, Subscription, BehaviorSubject } from 'rxjs';
@@ -10,8 +11,11 @@ import { AddRange } from '../../../../app/modules/shared/store/states/accounting
 import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { AccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
-import { getPaymentAccountId } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
-import { Router, ActivatedRoute } from '@angular/router';
+import {
+	getActivePaymentAccountId,
+	getActivePaymentAccount,
+} from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
+import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 
 @Component({
 	selector: 'accounting-operarions-grid',
@@ -25,8 +29,13 @@ export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
 	@Select(getAccountingRecords)
 	accountingRecords$!: Observable<AccountingGridRecord[]>;
 
-	@Select(getPaymentAccountId)
+	@Select(getActivePaymentAccountId)
 	paymentAccountId$!: Observable<string>;
+
+	@Select(getActivePaymentAccount)
+	paymentAccound$!: Observable<PaymentAccountModel>;
+
+	public paymentAccountSignal: Signal<PaymentAccountModel> = signal<PaymentAccountModel>({} as PaymentAccountModel);
 
 	public ELEMENT_DATA: AccountingGridRecord[] = [
 		{
@@ -81,27 +90,22 @@ export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
 		'comment',
 	];
 
-	public dataSource$: BehaviorSubject<AccountingGridRecord[]> = new BehaviorSubject<
-		AccountingGridRecord[]
-	>([]);
+	public dataSource$: BehaviorSubject<AccountingGridRecord[]> = new BehaviorSubject<AccountingGridRecord[]>([]);
 	public clickedRowGuids = new Set<Guid>();
 
 	@Select(getAccountingTableOptions)
 	accountingTableOptions$!: Observable<AccountingOperationsTableOptions>;
 
 	constructor(
-		private readonly route: ActivatedRoute,
 		private readonly router: Router,
 		private readonly store: Store
 	) {
 		this.store.dispatch(new AddRange(this.ELEMENT_DATA));
 	}
 	ngOnInit(): void {
-		const tableDataSource$ = this.accountingRecords$.subscribe((records) =>
-			this.dataSource$.next(records)
-		);
+		const tableDataSource$ = this.accountingRecords$.subscribe(records => this.dataSource$.next(records));
 
-		const tableOptions$ = this.accountingTableOptions$.subscribe((options) => {
+		const tableOptions$ = this.accountingTableOptions$.subscribe(options => {
 			this.clickedRowGuids.clear();
 			this.clickedRowGuids.add(options.selectedRecordGuid);
 		});
@@ -111,7 +115,7 @@ export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnDestroy(): void {
-		this.subs.forEach((s) => s.unsubscribe());
+		this.subs.forEach(s => s.unsubscribe());
 	}
 
 	public selectRow(record: AccountingGridRecord): void {
@@ -119,16 +123,6 @@ export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
 	}
 
 	public async navigateToPaymentAccountsAsync(): Promise<void> {
-		await this.router.navigate(['..'], { relativeTo: this.route });
-		/*
-		await this.router.navigate(
-			[
-				{
-					outlets: { primary: ['..'], rightSidebar: ['..'] },
-				},
-			],
-			{ relativeTo: this.route }
-		);
-		*/
+		await this.router.navigate(['/dashboard/accounting'], { relativeTo: null });
 	}
 }

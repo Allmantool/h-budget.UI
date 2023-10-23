@@ -1,6 +1,14 @@
 <!-- Toolbar -->
-<div class="toolbar" (click)="navigateToDashboardAsync()" role="banner">
-	<img class="toolbar-logo" alt="Angular Logo" src="/assets/angular-logo.png" />
+<div
+	class="toolbar"
+	(click)="navigateToDashboardAsync()"
+	role="banner"
+>
+	<img
+		class="toolbar-logo"
+		alt="Angular Logo"
+		src="/assets/angular-logo.png"
+	/>
 	<span>Welcome to h-budget app</span>
 </div>
 
@@ -19,11 +27,12 @@
 		</div>
 	</div>
 
-	<div *ngIf="isDataLoadeding$ | async" class="overlay">
+	<div
+		*ngIf="isDataLoadeding$ | async"
+		class="overlay"
+	>
 		<div class="spinner-wrapper">
-			<progress-spinner
-				[isLoading]="!rootAppOutlet.isActivated && (isDataLoadeding$ | async)"
-			></progress-spinner>
+			<progress-spinner [isLoading]="!rootAppOutlet.isActivated && (isDataLoadeding$ | async)"></progress-spinner>
 		</div>
 	</div>
 </div>

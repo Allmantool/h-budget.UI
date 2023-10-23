@@ -1,9 +1,13 @@
 .account-note {
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
 	align-items: end;
 	text-wrap: nowrap;
     flex-shrink: 0;
+}
+
+mat-expansion-panel {
+    width: 100%;
 }
 
 .accounting-table {

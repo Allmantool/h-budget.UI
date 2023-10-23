@@ -15,11 +15,11 @@ import {
 	AddPaymentAccount,
 	UpdatePaymentAccount,
 } from '../../../store/states/accounting/actions/payment-acount.actions';
-import { PaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account';
+import { PaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';
 import { DialogOperationTypes } from '../../../models/dialog-operation-types';
 import {
 	getPaymentAccounts,
-	getPaymentAccountId,
+	getActivePaymentAccountId,
 } from '../../../store/states/accounting/selectors/payment-account.selector';
 
 @Component({
@@ -85,7 +85,7 @@ export class PaymentAccountDialogComponent {
 	@Select(getPaymentAccounts)
 	paymentAccounts$!: Observable<PaymentAccountModel[]>;
 
-	@Select(getPaymentAccountId)
+	@Select(getActivePaymentAccountId)
 	paymentAccountId$!: Observable<string>;
 
 	constructor(

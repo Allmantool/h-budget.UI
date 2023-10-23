@@ -17,7 +17,7 @@ import { Guid } from 'typescript-guid';
 import * as _ from 'lodash';
 import { nameof } from 'ts-simple-nameof';
 
-import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account';
+import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 import { SetActivePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
 import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
 import { AccountTypes } from '../../../../domain/models/accounting/account-types';

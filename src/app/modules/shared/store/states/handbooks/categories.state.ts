@@ -6,7 +6,7 @@ import { nameof } from 'ts-simple-nameof';
 
 import { ICategoriesStateModel } from './models/ICategoriesStateModel';
 import { AddCategory } from './actions/category.actions';
-import { OperationCategory } from '../../../../../../domain/models/accounting/operation-category';
+import { OperationCategory } from '../../../../../../domain/models/accounting/operation-category.model';
 
 @State<ICategoriesStateModel>({
 	name: 'categoriesHandbook',

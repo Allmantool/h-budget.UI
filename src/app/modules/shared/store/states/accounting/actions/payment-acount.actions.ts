@@ -1,4 +1,4 @@
-import { PaymentAccountModel } from '../../../../../../../domain/models/accounting/payment-account';
+import { PaymentAccountModel } from '../../../../../../../domain/models/accounting/payment-account.model';
 
 export class SetActivePaymentAccount {
 	static readonly type = '[Payment account] Set Active';

@@ -1,40 +1,39 @@
 <div class="payment-crud">
-	<mat-list role="list" class="payment-accounts-menu">
-		<mat-list-item role="listitem" class="payment-accounts-menu--item">
+	<mat-list
+		role="list"
+		class="payment-accounts-menu">
+		<mat-list-item
+			role="listitem"
+			class="payment-accounts-menu--item">
 			<button
 				mat-fab
 				color="primary"
 				(click)="createNewPaymentAccount()"
-				aria-label="Add a payment account"
-			>
+				aria-label="Add a payment account">
 				<mat-icon>add</mat-icon>
 			</button>
 		</mat-list-item>
 		<mat-list-item
 			[disabled]="isAnyPaymentAccountSelected"
 			role="listitem"
-			class="payment-accounts-menu--item"
-		>
+			class="payment-accounts-menu--item">
 			<button
 				mat-fab
 				color="warn"
 				(click)="removePaymentAccount()"
-				aria-label="Delete the payment account"
-			>
+				aria-label="Delete the payment account">
 				<mat-icon>delete</mat-icon>
 			</button>
 		</mat-list-item>
 		<mat-list-item
 			[disabled]="isAnyPaymentAccountSelected"
 			role="listitem"
-			class="payment-accounts-menu--item"
-		>
+			class="payment-accounts-menu--item">
 			<button
 				mat-fab
 				color="accent"
 				(click)="updatePaymentAccount()"
-				aria-label="Edit the payment account"
-			>
+				aria-label="Edit the payment account">
 				<mat-icon>edit</mat-icon>
 			</button>
 		</mat-list-item>

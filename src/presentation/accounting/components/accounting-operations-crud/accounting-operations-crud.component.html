@@ -1,20 +1,29 @@
 <div class="crud-content">
-	<form [formGroup]="crudRecordFg" (ngSubmit)="saveRecord()">
+	<form
+		[formGroup]="crudRecordFg"
+		(ngSubmit)="saveRecord()"
+	>
 		<div class="record-crud-section-title">New record:</div>
 		<div class="date-section">
-			<app-datepicker placeholder="Choose a opeation date" formControlName="operationDate">
-			</app-datepicker>
+			<app-datepicker
+				placeholder="Choose a opeation date"
+				formControlName="operationDate"
+			></app-datepicker>
 		</div>
 		<div class="contractor-section">
 			<app-form-field
 				formControlName="contractor"
 				[fieldType]="'SELECT'"
 				[title]="'Contractor:'"
-				[selectOptions]="getContractorLabels()"
-			>
-			</app-form-field>
+				[selectOptions]="contractorsSignal()"
+			></app-form-field>
 
-			<button (click)="addContractor()" mat-fab color="primary" aria-label="add a contractor">
+			<button
+				(click)="addContractor()"
+				mat-fab
+				color="primary"
+				aria-label="add a contractor"
+			>
 				<mat-icon>add</mat-icon>
 			</button>
 		</div>
@@ -25,29 +34,38 @@
 				[fieldType]="'SELECT'"
 				[title]="'Category:'"
 				[selectOptions]="getCategoryLabels()"
-			>
-			</app-form-field>
+			></app-form-field>
 
-			<button (click)="addCategory()" mat-fab color="primary" aria-label="add a category">
+			<button
+				(click)="addCategory()"
+				mat-fab
+				color="primary"
+				aria-label="add a category"
+			>
 				<mat-icon>add</mat-icon>
 			</button>
 		</div>
 
-		<ng-container #expense *ngIf="expenseSignal(); else income">
+		<ng-container
+			#expense
+			*ngIf="expenseSignal(); else income"
+		>
 			<div class="expense-section">
 				<app-form-field
 					formControlName="expense"
 					[fieldType]="'INPUT'"
 					[title]="'Expense:'"
-				>
-				</app-form-field>
+				></app-form-field>
 			</div>
 		</ng-container>
 
 		<ng-template #income>
 			<div class="income-section">
-				<app-form-field formControlName="income" [fieldType]="'INPUT'" [title]="'Income:'">
-				</app-form-field>
+				<app-form-field
+					formControlName="income"
+					[fieldType]="'INPUT'"
+					[title]="'Income:'"
+				></app-form-field>
 			</div>
 		</ng-template>
 
@@ -56,13 +74,21 @@
 				formControlName="comment"
 				[fieldType]="'TEXT_AREA'"
 				[title]="'Comments:'"
-			>
-			</app-form-field>
+			></app-form-field>
 		</div>
 		<div class="command-buttons">
-			<app-button (click)="saveRecord()" title="Save"></app-button>
-			<app-button (click)="addRecord()" title="New"></app-button>
-			<app-button (click)="deleteRecord()" title="Delete"></app-button>
+			<app-button
+				(click)="saveRecord()"
+				title="Save"
+			></app-button>
+			<app-button
+				(click)="addRecord()"
+				title="New"
+			></app-button>
+			<app-button
+				(click)="deleteRecord()"
+				title="Delete"
+			></app-button>
 		</div>
 	</form>
 </div>

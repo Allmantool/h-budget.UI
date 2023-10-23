@@ -22,6 +22,8 @@ import { PaymentAccountCrudComponent } from './components/payment-account-crud/p
 import { PaymentAccountDialogService } from './services/payment-account-dialog.service';
 import { DefaultPaymentAccountsProvider } from '../../data/providers/accounting/payment-accounts.provider';
 import { DataAccountingMappingProfile } from '../../data/providers/accounting/mappers/data-accounting.mapping.profile';
+import { DefaultContractorsProvider } from '../../data/providers/accounting/contractors.provider';
+import { DataContractorProfile } from '../../data/providers/accounting/mappers/contractor.mapping.profile';
 
 @NgModule({
 	declarations: [
@@ -41,10 +43,11 @@ import { DataAccountingMappingProfile } from '../../data/providers/accounting/ma
 			CategoriesState,
 			PaymentAccountState,
 		]),
-		MapperModule.withProfiles([DataAccountingMappingProfile]),
+		MapperModule.withProfiles([DataAccountingMappingProfile, DataContractorProfile]),
 	],
 	providers: [
 		DefaultPaymentAccountsProvider,
+		DefaultContractorsProvider,
 		CategoriesDialogService,
 		CounterpartiesDialogService,
 		PaymentAccountDialogService,
