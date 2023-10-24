@@ -53,31 +53,22 @@ export class PaymentAccountComponent implements OnInit, OnDestroy {
 		this.paymentAccountsProvider
 			.getPaymentAccounts()
 			.pipe(retry(1), take(1))
-			.subscribe((accounts) => {
+			.subscribe(accounts => {
 				this.store.dispatch(new SetInitialPaymentAccounts(accounts));
 			});
 
 		runInInjectionContext(this.injector, () => {
-			this.paymentAccounts$.pipe(takeUntilDestroyed()).subscribe((accounts) => {
+			this.paymentAccounts$.pipe(takeUntilDestroyed()).subscribe(accounts => {
 				this.cashAccountsSignal.set(
-					_.filter(accounts, [
-						nameof<PaymentAccountModel>((p) => p.type),
-						AccountTypes.WalletCache,
-					])
+					_.filter(accounts, [nameof<PaymentAccountModel>(p => p.type), AccountTypes.WalletCache])
 				);
 
 				this.debitVirtualAccountsSignal.set(
-					_.filter(accounts, [
-						nameof<PaymentAccountModel>((p) => p.type),
-						AccountTypes.Virtual,
-					])
+					_.filter(accounts, [nameof<PaymentAccountModel>(p => p.type), AccountTypes.Virtual])
 				);
 
 				this.creditVirtualAccountsSignal.set(
-					_.filter(accounts, [
-						nameof<PaymentAccountModel>((p) => p.type),
-						AccountTypes.Loan,
-					])
+					_.filter(accounts, [nameof<PaymentAccountModel>(p => p.type), AccountTypes.Loan])
 				);
 			});
 		});

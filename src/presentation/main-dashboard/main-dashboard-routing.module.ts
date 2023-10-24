@@ -10,11 +10,11 @@ const routes: Routes = [
 	},
 	{
 		path: 'currency-rates',
-		loadChildren: () => import('../currency-rates').then((m) => m.CurrencyRatesModule),
+		loadChildren: () => import('../currency-rates').then(m => m.CurrencyRatesModule),
 	},
 	{
 		path: 'accounting',
-		loadChildren: () => import('../accounting').then((m) => m.AccountingModule),
+		loadChildren: () => import('../accounting').then(m => m.AccountingModule),
 	},
 ];
 

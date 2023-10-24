@@ -10,6 +10,7 @@ import { DialogContainer } from '../../../app/modules/shared/models/dialog-conta
 import { Result } from '../../../core/result';
 import { AddCounterParty } from '../../../app/modules/shared/store/states/handbooks/actions/counterparty.actions';
 import { CounterpartiesDialogComponent } from '../../../app/modules/shared/components/dialog/counterparties/counterparties-dialog.component';
+import { ContractorModel } from '../../../domain/models/accounting/contractor.model.';
 
 @Injectable()
 export class CounterpartiesDialogService {
@@ -21,7 +22,7 @@ export class CounterpartiesDialogService {
 	public openCategories(): void {
 		const config = new MatDialogConfig<DialogContainer>();
 
-		const onSave = (operationResult: Result<string>) => {
+		const onSave = (operationResult: Result<ContractorModel>) => {
 			if (!operationResult.isSucceeded) {
 				return;
 			}

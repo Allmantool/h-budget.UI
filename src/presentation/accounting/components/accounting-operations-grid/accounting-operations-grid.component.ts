@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, Signal, signal } from '@angular/core';
-import { Router, ActivatedRoute } from '@angular/router';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, Signal, signal, computed } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { Select, Store } from '@ngxs/store';
 import { Observable, Subscription, BehaviorSubject } from 'rxjs';
 import { Guid } from 'typescript-guid';
+import * as _ from 'lodash';
 
 import { AccountingGridRecord } from 'presentation/accounting/models/accounting-grid-record';
 import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
@@ -16,6 +17,7 @@ import {
 	getActivePaymentAccount,
 } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
 	selector: 'accounting-operarions-grid',
@@ -35,13 +37,17 @@ export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
 	@Select(getActivePaymentAccount)
 	paymentAccound$!: Observable<PaymentAccountModel>;
 
-	public paymentAccountSignal: Signal<PaymentAccountModel> = signal<PaymentAccountModel>({} as PaymentAccountModel);
+	public paymentAccountSignal: Signal<PaymentAccountModel> = toSignal(this.paymentAccound$, {
+		initialValue: {} as PaymentAccountModel,
+	});
+
+	public paymentAccountGeneralInfoSignal: Signal<string> = signal('');
 
 	public ELEMENT_DATA: AccountingGridRecord[] = [
 		{
 			id: Guid.create(),
 			operationDate: new Date(2022, 24, 4),
-			contractor: 'Перевозчик: Такси',
+			contractor: 'Transport: Taxi',
 			category: 'Транспорт: Такси',
 			income: 0,
 			expense: 0.35,
@@ -51,7 +57,7 @@ export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
 		{
 			id: Guid.create(),
 			operationDate: new Date(2022, 28, 4),
-			contractor: 'Перевозчик: Такси',
+			contractor: 'Transport: Taxi',
 			category: 'Транспорт: Общественный транспорт',
 			income: 0,
 			expense: 0.35,
@@ -61,7 +67,7 @@ export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
 		{
 			id: Guid.create(),
 			operationDate: new Date(2022, 29, 4),
-			contractor: 'Перевозчик: Такси',
+			contractor: 'Transport: Taxi',
 			category: 'Транспорт: Общественный транспорт',
 			income: 0,
 			expense: 11000.35,
@@ -71,7 +77,7 @@ export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
 		{
 			id: Guid.create(),
 			operationDate: new Date(2022, 5, 5),
-			contractor: 'Работа: GodelTech',
+			contractor: 'Work: GodelTech',
 			category: 'Доход: Аванс',
 			income: 15864,
 			expense: 0,
@@ -101,8 +107,18 @@ export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
 		private readonly store: Store
 	) {
 		this.store.dispatch(new AddRange(this.ELEMENT_DATA));
+
+		if (!_.isNil(this.paymentAccountSignal())) {
+			this.paymentAccountGeneralInfoSignal = computed(
+				() =>
+					`${this.paymentAccountSignal()?.id?.toString()} ${this.paymentAccountSignal().emitter} | ${
+						this.paymentAccountSignal().description
+					}`
+			);
+		}
 	}
-	ngOnInit(): void {
+
+	public ngOnInit(): void {
 		const tableDataSource$ = this.accountingRecords$.subscribe(records => this.dataSource$.next(records));
 
 		const tableOptions$ = this.accountingTableOptions$.subscribe(options => {
@@ -114,7 +130,7 @@ export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
 		this.subs.push(tableOptions$);
 	}
 
-	ngOnDestroy(): void {
+	public ngOnDestroy(): void {
 		this.subs.forEach(s => s.unsubscribe());
 	}
 

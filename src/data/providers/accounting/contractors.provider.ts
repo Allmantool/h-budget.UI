@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
 import { Mapper } from '@dynamic-mapper/angular';
-import { Observable, map, of, retry, take } from 'rxjs';
+import { Observable, map, retry, take } from 'rxjs';
 
 import { Result } from 'core/result';
 import { ContractorsProvider } from 'domain/providers/accounting/contractors.provider';
@@ -10,6 +10,7 @@ import { ContractorModel } from '../../../domain/models/accounting/contractor.mo
 import { ContractorEntity } from './entities/contractor-entity';
 import { DataContractorProfile } from './mappers/contractor.mapping.profile';
 import { RoutesSegments } from '../../../app/modules/shared/constants/routes-segments';
+import { ContractorCreateRequest } from 'domain/models/accounting/requests/contractor-create.request';
 
 @Injectable()
 export class DefaultContractorsProvider implements ContractorsProvider {
@@ -31,8 +32,9 @@ export class DefaultContractorsProvider implements ContractorsProvider {
 			);
 	}
 
-	public saveContractor(newContractor: ContractorModel): Observable<Result<string>> {
-		console.log(newContractor);
-		return of();
+	public saveContractor(request: ContractorCreateRequest): Observable<Result<string>> {
+		return this.http
+			.post<Result<string>>(`${RoutesSegments.HOME_BUDGET_ACCOUNTING_HOST}/contractors`, request)
+			.pipe(retry(3), take(1));
 	}
 }

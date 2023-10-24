@@ -3,14 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/ban-types */
 import { NG_VALUE_ACCESSOR, ControlValueAccessor } from '@angular/forms';
-import {
-	Component,
-	Input,
-	forwardRef,
-	ChangeDetectionStrategy,
-	Output,
-	EventEmitter,
-} from '@angular/core';
+import { Component, Input, forwardRef, ChangeDetectionStrategy, Output, EventEmitter } from '@angular/core';
 
 import { BehaviorSubject } from 'rxjs';
 
@@ -44,7 +37,7 @@ export class AppFormFieldComponent implements ControlValueAccessor {
 
 	@Input() public numberInputPrefix: string = '';
 
-	@Input() public defaultValue: FormInput = '';
+	@Input() public defaultValue: FormInput = undefined;
 
 	// eslint-disable-next-line @angular-eslint/no-output-on-prefix
 	@Output() public onDataChanged = new EventEmitter<string | number | undefined>();

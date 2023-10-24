@@ -1,7 +1,7 @@
 <div class="crud-content">
 	<form
 		[formGroup]="crudRecordFg"
-		(ngSubmit)="saveRecord()"
+		(ngSubmit)="applyChangesAsync()"
 	>
 		<div class="record-crud-section-title">New record:</div>
 		<div class="date-section">
@@ -78,15 +78,15 @@
 		</div>
 		<div class="command-buttons">
 			<app-button
-				(click)="saveRecord()"
+				(click)="applyChangesAsync()"
 				title="Save"
 			></app-button>
 			<app-button
-				(click)="addRecord()"
+				(click)="addRecordAsync()"
 				title="New"
 			></app-button>
 			<app-button
-				(click)="deleteRecord()"
+				(click)="deleteRecordAsync()"
 				title="Delete"
 			></app-button>
 		</div>

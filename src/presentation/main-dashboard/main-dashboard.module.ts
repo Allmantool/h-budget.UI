@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 import { MainDashboardRoutingModule } from './main-dashboard-routing.module';
 import { MainDashboardComponent } from './components/dashboard/main-dashboard.component';
 import { MainDashboardCartComponent } from './components/dashboard-item/main-dashboard-cart.component';
-import { AppSharedModule } from 'app/modules/shared';
+import { AppSharedModule } from '../../app/modules/shared/shared.module';
 
 @NgModule({
 	declarations: [MainDashboardComponent, MainDashboardCartComponent],

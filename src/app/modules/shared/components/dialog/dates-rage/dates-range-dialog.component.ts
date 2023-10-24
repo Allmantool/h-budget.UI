@@ -19,11 +19,11 @@ export class DateRangeDialogComponent {
 	public title: string;
 
 	constructor(
-		private dialogRef: MatDialogRef<DateRangeDialogComponent>,
-		fb: UntypedFormBuilder,
+		private readonly dialogRef: MatDialogRef<DateRangeDialogComponent>,
+		private readonly fb: UntypedFormBuilder,
 		@Inject(MAT_DIALOG_DATA) dialogConfiguration: DialogContainer
 	) {
-		this.dialogFg = fb.group({
+		this.dialogFg = this.fb.group({
 			startDate: new UntypedFormControl(new Date()),
 			endDate: new UntypedFormControl(new Date()),
 		});

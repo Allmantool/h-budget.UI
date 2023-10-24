@@ -10,10 +10,7 @@ import * as _ from 'lodash';
 export class DialogProvider {
 	constructor(public dialog: MatDialog) {}
 
-	openDialog<T, D>(
-		componentRef: ComponentType<T> | TemplateRef<T>,
-		сonfig?: MatDialogConfig<D>
-	): void {
+	openDialog<T, D>(componentRef: ComponentType<T> | TemplateRef<T>, сonfig?: MatDialogConfig<D>): void {
 		const defaultConfig = new MatDialogConfig();
 		defaultConfig.autoFocus = true;
 		defaultConfig.disableClose = true;

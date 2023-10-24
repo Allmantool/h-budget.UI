@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Action, State, StateContext } from '@ngxs/store';
 
 import { ICounterpartiesStateModel } from './models/ICounterpartiesStateModel';
-import { AddCounterParty } from './actions/counterparty.actions';
+import { AddCounterParty, SetInitialContractors } from './actions/counterparty.actions';
 
 @State<ICounterpartiesStateModel>({
 	name: 'counterpartiesHandbook',
@@ -19,12 +19,22 @@ export class CounterpartiesState {
 		{ getState, patchState }: StateContext<ICounterpartiesStateModel>,
 		{ counterparty }: AddCounterParty
 	): void {
-		const state = getState();
+		const newContractorsState = [...getState().counterparties];
 
-		const items = [...state.counterparties, counterparty];
+		newContractorsState.push(counterparty);
 
 		patchState({
-			counterparties: items,
+			counterparties: newContractorsState,
+		});
+	}
+
+	@Action(SetInitialContractors)
+	setInitialPaymentAccounts(
+		{ patchState }: StateContext<ICounterpartiesStateModel>,
+		{ contractors }: SetInitialContractors
+	): void {
+		patchState({
+			counterparties: [...contractors],
 		});
 	}
 }

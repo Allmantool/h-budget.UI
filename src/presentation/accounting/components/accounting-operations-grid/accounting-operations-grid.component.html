@@ -5,8 +5,12 @@
 	<mat-accordion class="account-note">
 		<mat-expansion-panel hideToggle>
 			<mat-expansion-panel-header (click)="navigateToPaymentAccountsAsync()">
-				<mat-panel-title>Visa [BYN] {{paymentAccountId$ | async }}</mat-panel-title>
-				<mat-panel-description>Total Sum: {{paymentAccountSignal().balance}}</mat-panel-description>
+				<mat-panel-title>
+					<span>{{paymentAccountGeneralInfoSignal()}}</span>
+				</mat-panel-title>
+				<mat-panel-description>
+					Total Sum: {{paymentAccountSignal()?.balance}} [{{paymentAccountSignal()?.currency}}]
+				</mat-panel-description>
 			</mat-expansion-panel-header>
 			<p>Main debit account at PriorBank</p>
 		</mat-expansion-panel>
@@ -38,7 +42,7 @@
 				mat-header-cell
 				*matHeaderCellDef
 			>
-				Сontractor
+				Contractor
 			</th>
 			<td
 				mat-cell
