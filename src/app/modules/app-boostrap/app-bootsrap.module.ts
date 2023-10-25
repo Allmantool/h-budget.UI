@@ -1,5 +1,7 @@
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { BrowserModule } from '@angular/platform-browser';
 
 import { NgxsModule } from '@ngxs/store';
 import { NgxsLoggerPluginModule } from '@ngxs/logger-plugin';
@@ -14,8 +16,6 @@ import { AppBootsrapRoutingModule } from './app-bootsrap-routing.module';
 import { AppRootComponent } from './components/app-root/app-root.component';
 import { CustomUIComponentsSharedModule } from '../shared/custom-ui-components.shared.module';
 import { AppCoreModule } from '../core';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { BrowserModule } from '@angular/platform-browser';
 
 @NgModule({
 	declarations: [AppRootComponent],

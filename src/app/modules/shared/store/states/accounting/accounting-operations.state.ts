@@ -21,15 +21,12 @@ import { AccountingGridRecord } from '../../../../../../presentation/accounting/
 @Injectable()
 export class AccountingOperationsState {
 	@Action(Add)
-	add(
-		{ getState, patchState }: StateContext<IAccountingOperationsStateModel>,
-		{ accountingRecord }: Add
-	): void {
+	add({ getState, patchState }: StateContext<IAccountingOperationsStateModel>, { accountingRecord }: Add): void {
 		const state = getState();
 
 		const records = _.orderBy(
 			[...state.operationRecords, accountingRecord],
-			[nameof<AccountingGridRecord>((r) => r.operationDate)],
+			[nameof<AccountingGridRecord>(r => r.operationDate)],
 			['asc']
 		);
 
@@ -51,50 +48,32 @@ export class AccountingOperationsState {
 		);
 
 		patchState({
-			operationRecords: [
-				..._.orderBy(
-					records,
-					[nameof<AccountingGridRecord>((r) => r.operationDate)],
-					['asc']
-				),
-			],
+			operationRecords: [..._.orderBy(records, [nameof<AccountingGridRecord>(r => r.operationDate)], ['asc'])],
 		});
 	}
 
 	@Action(Edit)
-	edit(
-		{ getState, patchState }: StateContext<IAccountingOperationsStateModel>,
-		{ accountingRecord }: Edit
-	): void {
+	edit({ getState, patchState }: StateContext<IAccountingOperationsStateModel>, { accountingRecord }: Edit): void {
 		const records = [...getState().operationRecords];
 
-		const updatedItemIndex = _.findIndex(records, (r) => r.id === accountingRecord.id);
+		const updatedItemIndex = _.findIndex(records, r => r.id === accountingRecord.id);
 
 		records.splice(updatedItemIndex, 1, accountingRecord);
 
 		patchState({
-			operationRecords: [
-				..._.orderBy(
-					records,
-					[nameof<AccountingGridRecord>((r) => r.operationDate)],
-					['asc']
-				),
-			],
+			operationRecords: [..._.orderBy(records, [nameof<AccountingGridRecord>(r => r.operationDate)], ['asc'])],
 		});
 	}
 
 	@Action(Delete)
-	delete(
-		{ getState, patchState }: StateContext<IAccountingOperationsStateModel>,
-		{ accountingGuid }: Delete
-	): void {
+	delete({ getState, patchState }: StateContext<IAccountingOperationsStateModel>, { accountingGuid }: Delete): void {
 		const state = getState();
 
 		const orderedRecords = _.chain(state.operationRecords)
 			.filter(function (record) {
 				return record.id !== accountingGuid;
 			})
-			.sortBy(nameof<AccountingGridRecord>((r) => r.operationDate))
+			.sortBy(nameof<AccountingGridRecord>(r => r.operationDate))
 			.value();
 
 		patchState({
