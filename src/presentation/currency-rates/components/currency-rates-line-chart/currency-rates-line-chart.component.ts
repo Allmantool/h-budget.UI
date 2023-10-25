@@ -1,12 +1,4 @@
-import {
-	AfterViewInit,
-	ChangeDetectionStrategy,
-	Component,
-	Input,
-	OnDestroy,
-	OnInit,
-	ViewChild,
-} from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 
 import { Select, Store } from '@ngxs/store';
 import * as _ from 'lodash';
@@ -50,9 +42,7 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit, O
 
 	public isChartInitialized$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
-	public currencyRates$: Subject<CurrencyGridRateModel[]> = new Subject<
-		CurrencyGridRateModel[]
-	>();
+	public currencyRates$: Subject<CurrencyGridRateModel[]> = new Subject<CurrencyGridRateModel[]>();
 
 	private subs: Subscription[] = [];
 
@@ -74,7 +64,7 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit, O
 	}
 
 	ngOnDestroy(): void {
-		this.subs.forEach((s) => s.unsubscribe());
+		this.subs.forEach(s => s.unsubscribe());
 	}
 
 	ngOnInit(): void {
@@ -86,18 +76,16 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit, O
 			combineLatest([this.currencyRatesGroupByCurrencyId$, this.currencyTableOptions$])
 				.pipe(
 					map(([ratesGroupByCurrencyId, tableOptions]) => {
-						const ratesGroup = ratesGroupByCurrencyId(
-							tableOptions.selectedItem.currencyId
-						);
+						const ratesGroup = ratesGroupByCurrencyId(tableOptions.selectedItem.currencyId);
 
 						return {
 							ratesGroup: ratesGroup,
 							tableOptions: tableOptions,
 						};
 					}),
-					filter((payload) => !_.isEmpty(payload.ratesGroup?.rateValues))
+					filter(payload => !_.isEmpty(payload.ratesGroup?.rateValues))
 				)
-				.subscribe((payload) => {
+				.subscribe(payload => {
 					this.chartOptions = this.linechartService.getChartOptions(
 						payload.ratesGroup?.rateValues ?? [],
 						payload.tableOptions,
@@ -111,10 +99,8 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit, O
 		this.subs.push(
 			this.currencyChartOptions$
 				.pipe()
-				.subscribe((chartOptions) =>
-					from(this.updateTitle(chartOptions.activeCurrencyTrendTitle))
-						.pipe(take(1))
-						.subscribe()
+				.subscribe(chartOptions =>
+					from(this.updateTitle(chartOptions.activeCurrencyTrendTitle)).pipe(take(1)).subscribe()
 				)
 		);
 	}

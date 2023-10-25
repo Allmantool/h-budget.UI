@@ -42,9 +42,7 @@ export class CurrencyRatesGridComponent implements OnInit, OnDestroy {
 
 	public selectedCurrencyPertionOption: number = RatesGridDefaultOptions.PERIOD_IN_MONTHS_AMMOUNT;
 
-	public todayCurrencyRateGroups$: Subject<CurrencyRateGroupModel[]> = new Subject<
-		CurrencyRateGroupModel[]
-	>();
+	public todayCurrencyRateGroups$: Subject<CurrencyRateGroupModel[]> = new Subject<CurrencyRateGroupModel[]>();
 
 	public todayRatesTableDataSource = new MatTableDataSource<CurrencyGridRateModel>([]);
 	public todayRatesTableSelection = new SelectionModel<CurrencyGridRateModel>(false, []);
@@ -61,7 +59,7 @@ export class CurrencyRatesGridComponent implements OnInit, OnDestroy {
 	) {}
 
 	ngOnDestroy(): void {
-		this.subs.forEach((s) => s.unsubscribe());
+		this.subs.forEach(s => s.unsubscribe());
 	}
 
 	ngOnInit(): void {
@@ -69,14 +67,10 @@ export class CurrencyRatesGridComponent implements OnInit, OnDestroy {
 			.pipe(take(1))
 			.subscribe(
 				(todayRateGroups: CurrencyRateGroupModel[]) =>
-					(this.todayRatesTableDataSource =
-						this.currencyRatesGridService.GetDataSource(todayRateGroups))
+					(this.todayRatesTableDataSource = this.currencyRatesGridService.GetDataSource(todayRateGroups))
 			);
 
-		const getTableOptions$ = combineLatest([
-			this.currencyTableOptions$,
-			this.todayCurrencyRateGroups$,
-		])
+		const getTableOptions$ = combineLatest([this.currencyTableOptions$, this.todayCurrencyRateGroups$])
 			.pipe(take(1))
 			.subscribe(([tableOptions, rateGroups]) => {
 				this.todayRatesTableSelection = this.currencyRatesGridService.GetTableSelection(
@@ -109,17 +103,14 @@ export class CurrencyRatesGridComponent implements OnInit, OnDestroy {
 			return;
 		}
 
-		const currencyRatesForselectByDefault: CurrencyGridRateModel =
-			this.todayRatesTableDataSource.data[0];
+		const currencyRatesForselectByDefault: CurrencyGridRateModel = this.todayRatesTableDataSource.data[0];
 
 		if (isAllSelected) {
 			this.todayRatesTableSelection.clear();
 			this.todayRatesTableSelection.select(currencyRatesForselectByDefault);
 		} else {
 			this.todayRatesTableSelection.select(
-				...this.todayRatesTableDataSource.data.filter(
-					(i) => (i?.currencyId as number) === selectedCurrencyId
-				)
+				...this.todayRatesTableDataSource.data.filter(i => (i?.currencyId as number) === selectedCurrencyId)
 			);
 		}
 	}
@@ -128,23 +119,16 @@ export class CurrencyRatesGridComponent implements OnInit, OnDestroy {
 		this.currencyRateProvider
 			.getTodayCurrencies()
 			.pipe(take(1))
-			.subscribe((todayRatesGroups) => {
+			.subscribe(todayRatesGroups => {
 				this.currencyRatesGridService.syncWithRatesStore(todayRatesGroups);
 
 				this.todayCurrencyRateGroups$.next(todayRatesGroups);
 			});
 
-		combineLatest([
-			this.previousDayRates$,
-			this.todayCurrencyRateGroups$,
-			this.currencyTableOptions$,
-		])
+		combineLatest([this.previousDayRates$, this.todayCurrencyRateGroups$, this.currencyTableOptions$])
 			.pipe(take(1))
 			.subscribe(([previousDayRates, todayRateGroups, tableOptions]) => {
-				const dataSource = this.currencyRatesGridService.enrichWithTrend(
-					previousDayRates,
-					todayRateGroups
-				);
+				const dataSource = this.currencyRatesGridService.enrichWithTrend(previousDayRates, todayRateGroups);
 				this.todayRatesTableDataSource = dataSource;
 
 				this.masterToggle(tableOptions.selectedItem.currencyId);

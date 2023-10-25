@@ -4,9 +4,7 @@ import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 
 import * as _ from 'lodash';
 
-@Injectable({
-	providedIn: 'root',
-})
+@Injectable()
 export class DialogProvider {
 	constructor(public dialog: MatDialog) {}
 

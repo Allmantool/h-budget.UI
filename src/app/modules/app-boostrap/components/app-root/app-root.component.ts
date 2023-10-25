@@ -22,7 +22,7 @@ export class AppRootComponent implements OnInit, OnDestroy {
 	public isDataLoadeding$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
 	public ngOnInit(): void {
-		this.requestsUnderProcessing$.pipe(takeUntil(this.destroy$)).subscribe((requestIds) => {
+		this.requestsUnderProcessing$.pipe(takeUntil(this.destroy$)).subscribe(requestIds => {
 			if (_.isEmpty(requestIds)) {
 				this.isDataLoadeding$.next(false);
 				return;

@@ -28,13 +28,13 @@ export class PaymentAccountDialogService {
 			}
 
 			return this.defaultPaymentAccountsProvider.savePaymentAccount(operationResult.payload).pipe(
-				filter((responseResult) => responseResult.isSucceeded),
-				map((responseResult) => responseResult.payload),
-				tap((newPaymentAccountGuid) => console.log(newPaymentAccountGuid)),
-				concatMap((newPaymentAccountGuid) => {
+				filter(responseResult => responseResult.isSucceeded),
+				map(responseResult => responseResult.payload),
+				tap(newPaymentAccountGuid => console.log(newPaymentAccountGuid)),
+				concatMap(newPaymentAccountGuid => {
 					return this.defaultPaymentAccountsProvider.getPaymentAccountById(newPaymentAccountGuid).pipe(
 						map(
-							(response) =>
+							response =>
 								new Result({
 									payload: response,
 									isSucceeded: true,
@@ -70,14 +70,14 @@ export class PaymentAccountDialogService {
 			return this.defaultPaymentAccountsProvider
 				.updatePaymentAccount(operationResult.payload, paymentAccountid)
 				.pipe(
-					filter((responseResult) => responseResult.isSucceeded),
-					map((responseResult) => responseResult.payload),
-					concatMap((updatedPaymentAccountGuid) => {
+					filter(responseResult => responseResult.isSucceeded),
+					map(responseResult => responseResult.payload),
+					concatMap(updatedPaymentAccountGuid => {
 						return this.defaultPaymentAccountsProvider
 							.getPaymentAccountById(updatedPaymentAccountGuid)
 							.pipe(
 								map(
-									(response) =>
+									response =>
 										new Result({
 											payload: response,
 											isSucceeded: true,

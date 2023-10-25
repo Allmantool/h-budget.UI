@@ -32,7 +32,26 @@ export class DefaultContractorsProvider implements ContractorsProvider {
 			);
 	}
 
-	public saveContractor(request: ContractorCreateRequest): Observable<Result<string>> {
+	public getContractorById(contractorId: string): Observable<ContractorModel> {
+		return this.http
+			.get<Result<ContractorEntity>>(
+				`${RoutesSegments.HOME_BUDGET_ACCOUNTING_HOST}/contractors/byId/${contractorId}`
+			)
+			.pipe(
+				map(
+					responseResult =>
+						this.mapper?.map(DataContractorProfile.ContractorEntityToDomain, responseResult.payload)
+				),
+				retry(3),
+				take(1)
+			);
+	}
+
+	public saveContractor(newContractorNamesNodes: string[]): Observable<Result<string>> {
+		const request: ContractorCreateRequest = {
+			nameNodes: newContractorNamesNodes,
+		};
+
 		return this.http
 			.post<Result<string>>(`${RoutesSegments.HOME_BUDGET_ACCOUNTING_HOST}/contractors`, request)
 			.pipe(retry(3), take(1));

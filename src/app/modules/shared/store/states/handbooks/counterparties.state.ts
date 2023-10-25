@@ -24,7 +24,7 @@ export class CounterpartiesState {
 		newContractorsState.push(counterparty);
 
 		patchState({
-			counterparties: newContractorsState,
+			counterparties: [...newContractorsState],
 		});
 	}
 

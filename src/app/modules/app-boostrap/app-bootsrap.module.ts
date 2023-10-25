@@ -1,20 +1,21 @@
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { CommonModule } from '@angular/common';
-import { BrowserModule } from '@angular/platform-browser';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 
 import { NgxsModule } from '@ngxs/store';
 import { NgxsLoggerPluginModule } from '@ngxs/logger-plugin';
 import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
 
-import { AppBootsrapRoutingModule, AppRootComponent } from '../app-boostrap';
 import { AppSharedModule } from './../shared/shared.module';
 import { ngxsConfig } from './../shared/store/ngxs.config';
 import { CorrelationIdInteceptor } from '../core/interceptors/correlation-id.interceptor';
 import { HttpRequestLoaderInterceptor } from '../core/interceptors/http-request-loader.interceptor';
 import { CoreAppState } from '../shared/store/states/core-app-root/core-app.state';
+import { AppBootsrapRoutingModule } from './app-bootsrap-routing.module';
+import { AppRootComponent } from './components/app-root/app-root.component';
+import { CustomUIComponentsSharedModule } from '../shared/custom-ui-components.shared.module';
+import { AppCoreModule } from '../core';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { BrowserModule } from '@angular/platform-browser';
 
 @NgModule({
 	declarations: [AppRootComponent],
@@ -23,12 +24,11 @@ import { CoreAppState } from '../shared/store/states/core-app-root/core-app.stat
 		NgxsLoggerPluginModule.forRoot(),
 		NgxsReduxDevtoolsPluginModule.forRoot(),
 		AppSharedModule,
-		CommonModule,
-		HttpClientModule,
+		CustomUIComponentsSharedModule,
+		AppCoreModule,
+		AppBootsrapRoutingModule,
 		BrowserModule,
 		BrowserAnimationsModule,
-		AppBootsrapRoutingModule,
-		RouterOutlet,
 	],
 	providers: [
 		[
