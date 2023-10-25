@@ -52,5 +52,5 @@ RUN npm run build-prod --if-present
 RUN npm run test-headless
 RUN npm run sonar-scanner -Dsonar.login=${SONAR_TOKEN}
 
-FROM nginx:alpine
+FROM nginx:alpine as publish
 COPY --from=node /app/dist/h-budget /usr/share/nginx/html
