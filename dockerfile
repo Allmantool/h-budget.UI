@@ -1,6 +1,12 @@
-FROM node:18 as node
+FROM node:18-alpine as build
 WORKDIR /app
+COPY package*.json ./
+RUN npm i
 COPY . .
+
+ARG SONAR_TOKEN
+
+ENV SONAR_TOKEN=${SONAR_TOKEN}
 
 # install manually all the missing libraries
 RUN apt-get update
@@ -47,10 +53,9 @@ RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.d
 RUN dpkg -i google-chrome-stable_current_amd64.deb; apt-get -fy install
 ENV CHROME_BIN=/usr/bin/google-chrome
 
-RUN npm i
 RUN npm run build-prod --if-present
 RUN npm run test-headless
-RUN npm run sonar-scanner -Dsonar.login=${SONAR_TOKEN}
 
 FROM nginx:alpine as publish
 COPY --from=node /app/dist/h-budget /usr/share/nginx/html
+EXPOSE 80
