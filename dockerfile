@@ -1,8 +1,9 @@
-FROM node:18-alpine as build
+FROM node:18.18-alpine3.18 as build
 WORKDIR /app
 COPY package*.json ./
-RUN npm i
+RUN npm ci
 COPY . .
+RUN npm run build
 
 ARG SONAR_TOKEN
 
@@ -56,6 +57,7 @@ ENV CHROME_BIN=/usr/bin/google-chrome
 RUN npm run build-prod --if-present
 RUN npm run test-headless
 
-FROM nginx:alpine as publish
-COPY --from=node /app/dist/h-budget /usr/share/nginx/html
+FROM nginx:alpine3.18 as publish
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY --from=build /app/dist/h-budget /usr/share/nginx/html
 EXPOSE 80
