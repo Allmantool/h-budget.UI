@@ -1,8 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, Signal, signal, computed } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { Select, Store } from '@ngxs/store';
 import { Observable, Subscription, BehaviorSubject } from 'rxjs';
 import { Guid } from 'typescript-guid';
+import * as _ from 'lodash';
 
 import { AccountingGridRecord } from 'presentation/accounting/models/accounting-grid-record';
 import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
@@ -10,8 +12,12 @@ import { AddRange } from '../../../../app/modules/shared/store/states/accounting
 import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { AccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
-import { getPaymentAccountId } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
-import { Router, ActivatedRoute } from '@angular/router';
+import {
+	getActivePaymentAccountId,
+	getActivePaymentAccount,
+} from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
+import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
 	selector: 'accounting-operarions-grid',
@@ -25,14 +31,23 @@ export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
 	@Select(getAccountingRecords)
 	accountingRecords$!: Observable<AccountingGridRecord[]>;
 
-	@Select(getPaymentAccountId)
+	@Select(getActivePaymentAccountId)
 	paymentAccountId$!: Observable<string>;
+
+	@Select(getActivePaymentAccount)
+	paymentAccound$!: Observable<PaymentAccountModel>;
+
+	public paymentAccountSignal: Signal<PaymentAccountModel> = toSignal(this.paymentAccound$, {
+		initialValue: {} as PaymentAccountModel,
+	});
+
+	public paymentAccountGeneralInfoSignal: Signal<string> = signal('');
 
 	public ELEMENT_DATA: AccountingGridRecord[] = [
 		{
 			id: Guid.create(),
 			operationDate: new Date(2022, 24, 4),
-			contractor: 'Перевозчик: Такси',
+			contractor: 'Transport: Taxi',
 			category: 'Транспорт: Такси',
 			income: 0,
 			expense: 0.35,
@@ -42,7 +57,7 @@ export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
 		{
 			id: Guid.create(),
 			operationDate: new Date(2022, 28, 4),
-			contractor: 'Перевозчик: Такси',
+			contractor: 'Transport: Taxi',
 			category: 'Транспорт: Общественный транспорт',
 			income: 0,
 			expense: 0.35,
@@ -52,7 +67,7 @@ export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
 		{
 			id: Guid.create(),
 			operationDate: new Date(2022, 29, 4),
-			contractor: 'Перевозчик: Такси',
+			contractor: 'Transport: Taxi',
 			category: 'Транспорт: Общественный транспорт',
 			income: 0,
 			expense: 11000.35,
@@ -62,7 +77,7 @@ export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
 		{
 			id: Guid.create(),
 			operationDate: new Date(2022, 5, 5),
-			contractor: 'Работа: GodelTech',
+			contractor: 'Work: GodelTech',
 			category: 'Доход: Аванс',
 			income: 15864,
 			expense: 0,
@@ -81,27 +96,32 @@ export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
 		'comment',
 	];
 
-	public dataSource$: BehaviorSubject<AccountingGridRecord[]> = new BehaviorSubject<
-		AccountingGridRecord[]
-	>([]);
+	public dataSource$: BehaviorSubject<AccountingGridRecord[]> = new BehaviorSubject<AccountingGridRecord[]>([]);
 	public clickedRowGuids = new Set<Guid>();
 
 	@Select(getAccountingTableOptions)
 	accountingTableOptions$!: Observable<AccountingOperationsTableOptions>;
 
 	constructor(
-		private readonly route: ActivatedRoute,
 		private readonly router: Router,
 		private readonly store: Store
 	) {
 		this.store.dispatch(new AddRange(this.ELEMENT_DATA));
-	}
-	ngOnInit(): void {
-		const tableDataSource$ = this.accountingRecords$.subscribe((records) =>
-			this.dataSource$.next(records)
-		);
 
-		const tableOptions$ = this.accountingTableOptions$.subscribe((options) => {
+		if (!_.isNil(this.paymentAccountSignal())) {
+			this.paymentAccountGeneralInfoSignal = computed(
+				() =>
+					`${this.paymentAccountSignal()?.id?.toString()} ${this.paymentAccountSignal().emitter} | ${
+						this.paymentAccountSignal().description
+					}`
+			);
+		}
+	}
+
+	public ngOnInit(): void {
+		const tableDataSource$ = this.accountingRecords$.subscribe(records => this.dataSource$.next(records));
+
+		const tableOptions$ = this.accountingTableOptions$.subscribe(options => {
 			this.clickedRowGuids.clear();
 			this.clickedRowGuids.add(options.selectedRecordGuid);
 		});
@@ -110,8 +130,8 @@ export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
 		this.subs.push(tableOptions$);
 	}
 
-	ngOnDestroy(): void {
-		this.subs.forEach((s) => s.unsubscribe());
+	public ngOnDestroy(): void {
+		this.subs.forEach(s => s.unsubscribe());
 	}
 
 	public selectRow(record: AccountingGridRecord): void {
@@ -119,16 +139,6 @@ export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
 	}
 
 	public async navigateToPaymentAccountsAsync(): Promise<void> {
-		await this.router.navigate(['..'], { relativeTo: this.route });
-		/*
-		await this.router.navigate(
-			[
-				{
-					outlets: { primary: ['..'], rightSidebar: ['..'] },
-				},
-			],
-			{ relativeTo: this.route }
-		);
-		*/
+		await this.router.navigate(['/dashboard/accounting'], { relativeTo: null });
 	}
 }

@@ -3,37 +3,39 @@
 	<h1 mat-dialog-title>{{ title }}</h1>
 
 	<mat-dialog-content class="dialog-body">
-		<form>
+		<form [formGroup]="dialogFg">
 			<!-- -->
-			<mat-form-field class="contractors-chip-list ">
+			<mat-form-field class="contractors-chip-list">
 				<mat-label>Couterparties</mat-label>
 
-				<mat-chip-grid #chipGrid aria-label="Couterparties selection">
+				<mat-chip-grid
+					#chipGrid
+					aria-label="Couterparties selection">
 					<mat-chip-row
 						*ngFor="let partyNode of partyNodes"
-						(removed)="remove(partyNode)"
-					>
+						(removed)="remove(partyNode)">
 						{{partyNode}}
-						<button matChipRemove [attr.aria-label]="'remove ' + partyNode">
+						<button
+							matChipRemove
+							[attr.aria-label]="'remove ' + partyNode">
 							<mat-icon>cancel</mat-icon>
 						</button>
 					</mat-chip-row>
 				</mat-chip-grid>
 				<input
 					placeholder="New counterparty..."
-                    formControlName="counterPartyController"
+					formControlName="partyCtrl"
 					#fruitInput
-					[formControl]="partyCtrl"
 					[matChipInputFor]="chipGrid"
 					[matAutocomplete]="auto"
 					[matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-					(matChipInputTokenEnd)="add($event)"
-				/>
-				<mat-autocomplete #auto="matAutocomplete" (optionSelected)="selected($event)">
+					(matChipInputTokenEnd)="add($event)" />
+				<mat-autocomplete
+					#auto="matAutocomplete"
+					(optionSelected)="selected($event)">
 					<mat-option
 						*ngFor="let filteredPartyNode of filteredPartyNodes$ | async"
-						[value]="filteredPartyNode"
-					>
+						[value]="filteredPartyNode">
 						{{filteredPartyNode}}
 					</mat-option>
 				</mat-autocomplete>
@@ -42,8 +44,17 @@
 	</mat-dialog-content>
 
 	<div mat-dialog-actions>
-		<button mat-raised-button mat-dialog-close (click)="close()">Close</button>
-		<button mat-raised-button color="primary" [disabled]="isSaveDisabled" (click)="save()">
+		<button
+			mat-raised-button
+			mat-dialog-close
+			(click)="close()">
+			Close
+		</button>
+		<button
+			mat-raised-button
+			color="primary"
+			[disabled]="isSaveDisabled"
+			(click)="save()">
 			Save
 		</button>
 	</div>

@@ -17,7 +17,7 @@ import { Guid } from 'typescript-guid';
 import * as _ from 'lodash';
 import { nameof } from 'ts-simple-nameof';
 
-import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account';
+import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 import { SetActivePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
 import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
 import { AccountTypes } from '../../../../domain/models/accounting/account-types';
@@ -53,31 +53,22 @@ export class PaymentAccountComponent implements OnInit, OnDestroy {
 		this.paymentAccountsProvider
 			.getPaymentAccounts()
 			.pipe(retry(1), take(1))
-			.subscribe((accounts) => {
+			.subscribe(accounts => {
 				this.store.dispatch(new SetInitialPaymentAccounts(accounts));
 			});
 
 		runInInjectionContext(this.injector, () => {
-			this.paymentAccounts$.pipe(takeUntilDestroyed()).subscribe((accounts) => {
+			this.paymentAccounts$.pipe(takeUntilDestroyed()).subscribe(accounts => {
 				this.cashAccountsSignal.set(
-					_.filter(accounts, [
-						nameof<PaymentAccountModel>((p) => p.type),
-						AccountTypes.WalletCache,
-					])
+					_.filter(accounts, [nameof<PaymentAccountModel>(p => p.type), AccountTypes.WalletCache])
 				);
 
 				this.debitVirtualAccountsSignal.set(
-					_.filter(accounts, [
-						nameof<PaymentAccountModel>((p) => p.type),
-						AccountTypes.Virtual,
-					])
+					_.filter(accounts, [nameof<PaymentAccountModel>(p => p.type), AccountTypes.Virtual])
 				);
 
 				this.creditVirtualAccountsSignal.set(
-					_.filter(accounts, [
-						nameof<PaymentAccountModel>((p) => p.type),
-						AccountTypes.Loan,
-					])
+					_.filter(accounts, [nameof<PaymentAccountModel>(p => p.type), AccountTypes.Loan])
 				);
 			});
 		});

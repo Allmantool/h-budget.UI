@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 
-import { PaymentAccountModel } from '../../models/accounting/payment-account';
+import { PaymentAccountModel } from '../../models/accounting/payment-account.model';
 import { Result } from '../../../core/result';
 
 export interface PaymentAccountsProvider {

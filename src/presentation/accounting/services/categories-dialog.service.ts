@@ -10,7 +10,7 @@ import { DialogContainer } from '../../../app/modules/shared/models/dialog-conta
 import { CategoriesDialogComponent } from '../../../app/modules/shared/components/dialog/categories/categories-dialog.component';
 import { Result } from '../../../core/result';
 import { AddCategory } from '../../../app/modules/shared/store/states/handbooks/actions/category.actions';
-import { OperationCategory } from 'domain/models/accounting/operation-category';
+import { OperationCategory } from 'domain/models/accounting/operation-category.model';
 
 @Injectable()
 export class CategoriesDialogService {

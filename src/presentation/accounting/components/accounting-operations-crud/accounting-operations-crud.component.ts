@@ -1,37 +1,26 @@
-import {
-	ChangeDetectionStrategy,
-	Component,
-	OnDestroy,
-	OnInit,
-	Signal,
-	signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, Signal, signal } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 import { Select, Store } from '@ngxs/store';
 import { combineLatest, Observable, Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
+import { filter, take, takeUntil } from 'rxjs/operators';
 import * as _ from 'lodash';
-import { Guid } from 'typescript-guid';
 import { nameof } from 'ts-simple-nameof';
 
 import { AccountingGridRecord } from '../../models/accounting-grid-record';
-import { OperationCategory } from '../../../../domain/models/accounting/operation-category';
+import { OperationCategory } from '../../../../domain/models/accounting/operation-category.model';
 import { AccountingOperationsTableOptions } from 'app/modules/shared/store/models/accounting/accounting-table-options';
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
-import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
 import { CategoriesDialogService } from '../../services/categories-dialog.service';
-import {
-	Edit,
-	Add,
-	Delete,
-} from '../../../../app/modules/shared/store/states/accounting/actions/accounting.actions';
 import { getCategories } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
 import { getContractors } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
 import { CounterpartiesDialogService } from '../../services/counterparties-dialog.service';
 import '../../../../domain/extensions/handbookExtensions';
+import { DefaultContractorsProvider } from '../../../../data/providers/accounting/contractors.provider';
+import { SetInitialContractors } from '../../../../app/modules/shared/store/states/handbooks/actions/counterparty.actions';
+import { AccountingOperationsService } from '../../services/accounting-operations.service';
 
 @Component({
 	selector: 'accounting-crud',
@@ -42,15 +31,15 @@ import '../../../../domain/extensions/handbookExtensions';
 export class AccountingOperationsCrudComponent implements OnInit, OnDestroy {
 	private destroy$ = new Subject<void>();
 
-	public contractors: string[] = [];
+	public contractorsSignal: Signal<string[]>;
+
+	public expenseSignal: Signal<string>;
+
+	public selectedRecordSignal: Signal<AccountingGridRecord>;
 
 	public categories: OperationCategory[] = [];
 
-	public selectedRecordSignal = signal<AccountingGridRecord | undefined>(undefined);
-
 	public crudRecordFg: UntypedFormGroup;
-
-	public expenseSignal: Signal<string>;
 
 	@Select(getAccountingTableOptions)
 	accountingTableOptions$!: Observable<AccountingOperationsTableOptions>;
@@ -65,6 +54,8 @@ export class AccountingOperationsCrudComponent implements OnInit, OnDestroy {
 	counterparties$!: Observable<string[]>;
 
 	constructor(
+		private readonly accountingOperationsService: AccountingOperationsService,
+		private readonly contractorProvider: DefaultContractorsProvider,
 		private readonly fb: UntypedFormBuilder,
 		private readonly categoriesDialogService: CategoriesDialogService,
 		private readonly counterpartiesDialogService: CounterpartiesDialogService,
@@ -79,33 +70,36 @@ export class AccountingOperationsCrudComponent implements OnInit, OnDestroy {
 			expense: new UntypedFormControl(),
 			comment: new UntypedFormControl(),
 		});
+		this.selectedRecordSignal = toSignal(this.crudRecordFg.valueChanges, { initialValue: {} });
+		this.contractorsSignal = toSignal(this.counterparties$, { initialValue: [] });
 
 		this.expenseSignal = toSignal(
-			this.crudRecordFg.get(nameof<AccountingGridRecord>((r) => r.expense))!.valueChanges,
+			this.crudRecordFg.get(nameof<AccountingGridRecord>(r => r.expense))!.valueChanges,
 			{
 				initialValue: '',
 			}
 		);
 	}
 
-	ngOnDestroy(): void {
+	public ngOnDestroy(): void {
 		this.destroy$.next();
 		this.destroy$.complete();
 	}
 
-	ngOnInit(): void {
+	public ngOnInit(): void {
+		this.contractorProvider
+			.getContractors()
+			.pipe(take(1), takeUntil(this.destroy$))
+			.subscribe(contractors => this.store.dispatch(new SetInitialContractors(contractors)));
+
 		combineLatest([this.accountingTableOptions$, this.accountingRecords$])
 			.pipe(
 				takeUntil(this.destroy$),
 				filter(([tableOptions, records]) => !_.isNil(tableOptions) && !_.isNil(records))
 			)
 			.subscribe(([tableOptions, records]) => {
-				this.selectedRecordSignal.set(
-					records.find((r) => tableOptions.selectedRecordGuid === r.id)
-				);
-
-				if (!_.isNil(this.crudRecordFg) && !_.isNil(this.selectedRecordSignal)) {
-					const recordData = this.selectedRecordSignal()!;
+				if (!_.isNil(this.crudRecordFg)) {
+					const recordData = records.find(r => tableOptions.selectedRecordGuid === r.id)!;
 
 					if (!_.isNil(recordData)) {
 						this.crudRecordFg.patchValue({
@@ -121,70 +115,35 @@ export class AccountingOperationsCrudComponent implements OnInit, OnDestroy {
 				}
 			});
 
-		this.crudRecordFg.valueChanges.pipe(takeUntil(this.destroy$)).subscribe((formData) => {
-			this.selectedRecordSignal.set(formData as AccountingGridRecord);
-		});
-
 		this.categories$.pipe(takeUntil(this.destroy$)).subscribe(
-			(payload) =>
+			payload =>
 				(this.categories = _.map(
 					payload,
-					(i) =>
+					i =>
 						<OperationCategory>{
 							type: i.type,
 							value: i.value.parseToTreeAsString(),
 						}
 				))
 		);
-
-		this.counterparties$
-			.pipe(takeUntil(this.destroy$))
-			.subscribe(
-				(payload) => (this.contractors = _.map(payload, (i) => i.parseToTreeAsString()))
-			);
 	}
 
 	public getCategoryLabels(): string[] {
-		return this.categories.map((c) => c.value);
+		return this.categories.map(c => c.value);
 	}
 
-	public getContractorLabels(): string[] {
-		return this.contractors;
+	public async applyChangesAsync(): Promise<void> {
+		await this.accountingOperationsService.updateOperationAsync(this.selectedRecordSignal());
 	}
 
-	public saveRecord(): void {
-		if (!_.isNil(this.selectedRecordSignal())) {
-			this.store.dispatch(new Edit(this.selectedRecordSignal()!));
-		}
+	public async addRecordAsync(): Promise<void> {
+		await this.accountingOperationsService.addOperationAsync();
 	}
 
-	public addRecord(): void {
-		const newRecord = {
-			id: Guid.create(),
-			operationDate: new Date(),
-			contractor: '',
-			category: '',
-			income: 0,
-			expense: 0,
-			balance: 0,
-			comment: '',
-		} as AccountingGridRecord;
-
-		this.store.dispatch(new Add(newRecord));
-
-		this.selectedRecordSignal.set(newRecord);
-
-		this.store.dispatch(new SetActiveAccountingOperation(newRecord.id));
-	}
-
-	public deleteRecord(): void {
+	public async deleteRecordAsync(): Promise<void> {
 		const recordGuid = this.selectedRecordSignal()?.id;
 
-		if (_.isNil(recordGuid)) {
-			return;
-		}
-
-		this.store.dispatch(new Delete(recordGuid));
+		await this.accountingOperationsService.deleteOperationByGuidAsync(recordGuid);
 	}
 
 	public addCategory(): void {

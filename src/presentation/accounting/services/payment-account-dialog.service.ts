@@ -8,7 +8,7 @@ import { DialogProvider } from '../../../app/modules/shared/providers/dialog-pro
 import { Result } from '../../../core/result';
 import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
 import { PaymentAccountDialogComponent } from '../../../app/modules/shared/components/dialog/payment-account/payment-account-dialog.component';
-import { PaymentAccountModel } from '../../../domain/models/accounting/payment-account';
+import { PaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
 import { DefaultPaymentAccountsProvider } from '../../../data/providers/accounting/payment-accounts.provider';
 import { DialogOperationTypes } from '../../../app/modules/shared/models/dialog-operation-types';
 
@@ -28,13 +28,13 @@ export class PaymentAccountDialogService {
 			}
 
 			return this.defaultPaymentAccountsProvider.savePaymentAccount(operationResult.payload).pipe(
-				filter((responseResult) => responseResult.isSucceeded),
-				map((responseResult) => responseResult.payload),
-				tap((newPaymentAccountGuid) => console.log(newPaymentAccountGuid)),
-				concatMap((newPaymentAccountGuid) => {
+				filter(responseResult => responseResult.isSucceeded),
+				map(responseResult => responseResult.payload),
+				tap(newPaymentAccountGuid => console.log(newPaymentAccountGuid)),
+				concatMap(newPaymentAccountGuid => {
 					return this.defaultPaymentAccountsProvider.getPaymentAccountById(newPaymentAccountGuid).pipe(
 						map(
-							(response) =>
+							response =>
 								new Result({
 									payload: response,
 									isSucceeded: true,
@@ -70,14 +70,14 @@ export class PaymentAccountDialogService {
 			return this.defaultPaymentAccountsProvider
 				.updatePaymentAccount(operationResult.payload, paymentAccountid)
 				.pipe(
-					filter((responseResult) => responseResult.isSucceeded),
-					map((responseResult) => responseResult.payload),
-					concatMap((updatedPaymentAccountGuid) => {
+					filter(responseResult => responseResult.isSucceeded),
+					map(responseResult => responseResult.payload),
+					concatMap(updatedPaymentAccountGuid => {
 						return this.defaultPaymentAccountsProvider
 							.getPaymentAccountById(updatedPaymentAccountGuid)
 							.pipe(
 								map(
-									(response) =>
+									response =>
 										new Result({
 											payload: response,
 											isSucceeded: true,

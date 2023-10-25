@@ -1,23 +1,20 @@
-import {
-	ChangeDetectionStrategy,
-	Component,
-	ElementRef,
-	Inject,
-	ViewChild,
-	signal,
-} from '@angular/core';
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+import { ChangeDetectionStrategy, Component, ElementRef, Inject, ViewChild, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ENTER } from '@angular/cdk/keycodes';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatChipInputEvent } from '@angular/material/chips';
-import { FormControl } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import { Observable, startWith, take, map } from 'rxjs';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable, startWith, filter, map, take } from 'rxjs';
 import * as _ from 'lodash';
 
 import { DialogContainer } from '../../../models/dialog-container';
 import { Result } from 'core/result';
+import { ContractorModel } from 'domain/models/accounting/contractor.model.';
+import { Store } from '@ngxs/store';
+import { AddCounterParty } from '../../../store/states/handbooks/actions/counterparty.actions';
 
 @Component({
 	selector: 'counterparties-dialog',
@@ -41,16 +38,23 @@ export class CounterpartiesDialogComponent {
 	public filteredPartyNodes$: Observable<string[]>;
 
 	public readonly separatorKeysCodes: number[] = [ENTER];
-	public partyCtrl = new FormControl('');
+
+	public dialogFg: UntypedFormGroup;
 
 	constructor(
+		private readonly store: Store,
+		private readonly fb: UntypedFormBuilder,
 		private dialogRef: MatDialogRef<CounterpartiesDialogComponent>,
 		@Inject(MAT_DIALOG_DATA) dialogConfiguration: DialogContainer
 	) {
 		this.title = dialogConfiguration.title;
 		this.dialogConfiguration = dialogConfiguration;
 
-		this.filteredPartyNodes$ = this.partyCtrl.valueChanges.pipe(
+		this.dialogFg = this.fb.group({
+			partyCtrl: new UntypedFormControl(''),
+		});
+
+		this.filteredPartyNodes$ = this.dialogFg.controls['partyCtrl'].valueChanges.pipe(
 			takeUntilDestroyed(),
 			startWith(null),
 			map((partyNode: string | null) =>
@@ -72,14 +76,11 @@ export class CounterpartiesDialogComponent {
 		}
 
 		this.dialogConfiguration
-			.onSubmit(
-				new Result<string>({
-					payload: JSON.stringify(this.partyNodes),
-					isSucceeded: true,
-				})
-			)
+			.onSubmit({ nameNodes: this.partyNodes } as ContractorModel)
 			.pipe(take(1))
-			.subscribe((_) => {
+			.subscribe(response => {
+				this.store.dispatch(new AddCounterParty(response));
+
 				this.isLoadingSignal.set(false);
 				this.dialogRef.close();
 			});
@@ -94,7 +95,7 @@ export class CounterpartiesDialogComponent {
 
 		event.chipInput.clear();
 
-		this.partyCtrl.setValue(null);
+		this.dialogFg.controls['partyCtrl'].setValue(null);
 
 		this.isSaveDisabled = _.isEmpty(this.partyNodes);
 	}
@@ -112,6 +113,6 @@ export class CounterpartiesDialogComponent {
 	public selected(event: MatAutocompleteSelectedEvent): void {
 		this.partyNodes.push(event.option.viewValue);
 		this.chipGrid.nativeElement.value = '';
-		this.partyCtrl.setValue(null);
+		this.dialogFg.controls['partyCtrl'].setValue(null);
 	}
 }

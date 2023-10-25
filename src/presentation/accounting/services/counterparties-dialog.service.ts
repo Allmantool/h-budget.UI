@@ -1,34 +1,32 @@
 import { Injectable } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
 
-import { Store } from '@ngxs/store';
-import { of } from 'rxjs';
+import { concatMap, map } from 'rxjs';
 import * as _ from 'lodash';
 
 import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
 import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
-import { Result } from '../../../core/result';
-import { AddCounterParty } from '../../../app/modules/shared/store/states/handbooks/actions/counterparty.actions';
 import { CounterpartiesDialogComponent } from '../../../app/modules/shared/components/dialog/counterparties/counterparties-dialog.component';
+import { ContractorModel } from '../../../domain/models/accounting/contractor.model.';
+import { DefaultContractorsProvider } from '../../../data/providers/accounting/contractors.provider';
 
 @Injectable()
 export class CounterpartiesDialogService {
 	constructor(
-		private dialogProvider: DialogProvider,
-		private store: Store
+		private readonly contractorProvider: DefaultContractorsProvider,
+		private readonly dialogProvider: DialogProvider
 	) {}
 
 	public openCategories(): void {
 		const config = new MatDialogConfig<DialogContainer>();
 
-		const onSave = (operationResult: Result<string>) => {
-			if (!operationResult.isSucceeded) {
-				return;
-			}
-
-			this.store.dispatch(new AddCounterParty(operationResult.payload));
-
-			return of(operationResult.payload);
+		const onSave = (contractorForSave: ContractorModel) => {
+			return this.contractorProvider.saveContractor(contractorForSave.nameNodes).pipe(
+				map(saveOesponseResult => saveOesponseResult.payload),
+				concatMap(contractorId => {
+					return this.contractorProvider.getContractorById(contractorId);
+				})
+			);
 		};
 
 		config.data = {

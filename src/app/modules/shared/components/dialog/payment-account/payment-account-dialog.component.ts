@@ -15,11 +15,11 @@ import {
 	AddPaymentAccount,
 	UpdatePaymentAccount,
 } from '../../../store/states/accounting/actions/payment-acount.actions';
-import { PaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account';
+import { PaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';
 import { DialogOperationTypes } from '../../../models/dialog-operation-types';
 import {
 	getPaymentAccounts,
-	getPaymentAccountId,
+	getActivePaymentAccountId,
 } from '../../../store/states/accounting/selectors/payment-account.selector';
 
 @Component({
@@ -85,7 +85,7 @@ export class PaymentAccountDialogComponent {
 	@Select(getPaymentAccounts)
 	paymentAccounts$!: Observable<PaymentAccountModel[]>;
 
-	@Select(getPaymentAccountId)
+	@Select(getActivePaymentAccountId)
 	paymentAccountId$!: Observable<string>;
 
 	constructor(
@@ -102,7 +102,7 @@ export class PaymentAccountDialogComponent {
 				takeUntilDestroyed(),
 				filter(() => this.dialogConfiguration.operationType === DialogOperationTypes.Update)
 			)
-			.subscribe((accountId) => {
+			.subscribe(accountId => {
 				const accountsSignal = toSignal(this.paymentAccounts$, { initialValue: [] });
 
 				const paymentAccountForUpdate = _.find(accountsSignal(), function (i) {
@@ -128,11 +128,11 @@ export class PaymentAccountDialogComponent {
 	}
 
 	public getAccountsTypes(): string[] {
-		return Object.keys(AccountTypes).filter((v) => isNaN(Number(v)));
+		return Object.keys(AccountTypes).filter(v => isNaN(Number(v)));
 	}
 
 	public getCurrencyTypes(): string[] {
-		return Object.keys(CurrencyAbbrevitions).filter((v) => isNaN(Number(v)));
+		return Object.keys(CurrencyAbbrevitions).filter(v => isNaN(Number(v)));
 	}
 
 	public applyChanges(): void {
@@ -154,7 +154,7 @@ export class PaymentAccountDialogComponent {
 				})
 			)
 			.pipe(take(1))
-			.subscribe((response) => {
+			.subscribe(response => {
 				switch (this.dialogConfiguration.operationType) {
 					case DialogOperationTypes.Update: {
 						this.store.dispatch(new UpdatePaymentAccount(response.payload));
