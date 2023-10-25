@@ -10,19 +10,16 @@ import { AngularMaterailSharedModule } from './angular-material.shared.module';
 import { AppSharedModule } from './shared.module';
 import { AppCoreModule } from '../core';
 
+const dialogComponents = [
+	DateRangeDialogComponent,
+	CategoriesDialogComponent,
+	PaymentAccountDialogComponent,
+	CounterpartiesDialogComponent,
+];
+
 @NgModule({
-	declarations: [
-		DateRangeDialogComponent,
-		CategoriesDialogComponent,
-		PaymentAccountDialogComponent,
-		CounterpartiesDialogComponent,
-	],
-	exports: [
-		DateRangeDialogComponent,
-		CategoriesDialogComponent,
-		PaymentAccountDialogComponent,
-		CounterpartiesDialogComponent,
-	],
+	declarations: [dialogComponents],
+	exports: [dialogComponents],
 	imports: [AppCoreModule, AngularMaterailSharedModule, CustomUIComponentsSharedModule, AppSharedModule],
 	schemas: [],
 	providers: [DialogProvider],
