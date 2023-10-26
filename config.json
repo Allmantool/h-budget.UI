@@ -1,0 +1,4 @@
+{
+	"ratesApi": "http://localhost:5207",
+	"accountingApi": "http://localhost:5307"
+}

@@ -1,55 +1,117 @@
 name: Build
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - master
-      - feature/*
-      - test/*
-    tags:
-      - "v*"
-  pull_request:
-    types: [opened, synchronize, reopened]
+    workflow_dispatch:
+    push:
+        branches:
+            - master
+            - feature/*
+            - test/*
+        tags:
+            - 'v*'
+    pull_request:
+        types: [opened, synchronize, reopened]
 
 env:
-  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+    SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
+    DOCKERHUB_USERNAME: ${{secrets.DOCKERHUB_USERNAME}}
+    DOCKERHUB_TOKEN: ${{secrets.DOCKERHUB_TOKEN}}
 
 jobs:
+    build-ui:
+        name: Angular UI
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: .
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
-  build-ui:
-    name: Angular UI
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: .
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+            - name: Use Node.js 18.x
+              uses: actions/setup-node@v3
+              with:
+                  node-version: '18'
+                  cache: 'npm'
+                  cache-dependency-path: package-lock.json
 
-      - name: Use Node.js 18.x
-        uses: actions/setup-node@v3
-        with:
-          node-version: "18"
-          cache: "npm"
-          cache-dependency-path: package-lock.json
+            - name: Upload & Install UI dependencies
+              run: |
+                  npm i --legacy-peer-deps
 
-      - name: Upload & Install UI dependencies
-        run: |
-          npm i --legacy-peer-deps
+            - name: Build UI project
+              run: |
+                  npm run build-prod --if-present
 
-      - name: Build UI project
-        run: |
-          npm run build-prod --if-present
+            - name: Run UI tests
+              run: |
+                  npm run test-headless
 
-      - name: Run UI tests
-        run: |
-          npm run test-headless
+            - name: Run sonnarqube
+              env:
+                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+              run: |
+                  npm run sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-      - name: Run sonnarqube
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          npm run sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+            - name: Enquire last git tag
+              id: last_tag
+              shell: bash
+              run: |
+                  tag_v=$(git describe --tags $(git rev-list --tags --max-count=1))
+                  tag=$(echo $tag_v | sed 's/v//')
+
+                  echo "TARGET_TAG=${tag}" >> $GITHUB_OUTPUT
+
+            - name: Set up 'Find Current Pull Request'
+              uses: jwalton/gh-find-current-pr@v1
+              id: findPr
+              with:
+                  # Can be "open", "closed", or "all".  Defaults to "open".
+                  state: open
+
+            - name: Build docker image
+              env:
+                  GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+                  SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+                  GITHUB_RUN_ID: ${{ github.run_id }}
+                  RUN_NUMBER: ${{ github.run_number }}
+                  RUN_ATTEMPT: ${{ github.run_attempt }}
+                  PULL_REQUEST_ID: ${{ steps.findPr.outputs.pr }}
+                  PULL_REQUEST_SOURCE_BRANCH: ${{ github.ref }}
+                  PULL_REQUEST_TARGET_BRANCH: refs/heads/master
+                  ACTION: ${{ github.action }}
+                  EVENT_NAME: ${{ github.event_name }}
+              shell: bash
+              run: |
+
+                  echo "latest tag is ${{ steps.last_tag.outputs.TARGET_TAG }}"
+
+                  docker build \
+                  --target 'publish' -t "${{ env.DOCKERHUB_USERNAME }}/homebudget-rates-api:${{ steps.last_tag.outputs.TARGET_TAG }}" \
+                  --build-arg PULL_REQUEST_ID='${{ steps.findPr.outputs.pr }}' \
+                  --build-arg PULL_REQUEST_SOURCE_BRANCH='${{ github.ref }}' \
+                  --build-arg PULL_REQUEST_TARGET_BRANCH=refs/heads/master \
+                  --build-arg GITHUB_RUN_ID='${{ github.run_id }}' \
+                  --build-arg SONAR_TOKEN='${{ env.SONAR_TOKEN }}' \
+                  .
+
+            - name: Set up QEMU
+              uses: docker/setup-qemu-action@v2
+
+            - name: Set up Docker Buildx
+              uses: docker/setup-buildx-action@v2
+
+            - name: Login to Docker Hub
+              uses: docker/login-action@v2
+              with:
+                  username: ${{ env.DOCKERHUB_USERNAME }}
+                  password: ${{ env.DOCKERHUB_TOKEN }}
+
+            - name: Push docker image with Buildx
+              uses: docker/build-push-action@v5
+              with:
+                  push: true
+                  tags: '${{ env.DOCKERHUB_USERNAME }}/homebudget-rates-api:${{ steps.last_tag.outputs.TARGET_TAG }}'
