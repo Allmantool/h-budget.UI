@@ -1,5 +1,5 @@
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BrowserModule } from '@angular/platform-browser';
 
@@ -32,6 +32,18 @@ import { AppCoreModule } from '../core';
 	],
 	providers: [
 		[
+			{
+				provider: APP_INITIALIZER,
+				useFactory: () => {
+					return () =>
+						new Promise(resolve => {
+							console.log('hey there');
+							/* const settings = require('../../../../../UI/config.json');*/
+							resolve(true);
+						});
+				},
+				multi: true,
+			},
 			{
 				provide: HTTP_INTERCEPTORS,
 				useClass: CorrelationIdInteceptor,
