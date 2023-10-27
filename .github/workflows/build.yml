@@ -90,7 +90,7 @@ jobs:
                   echo "latest tag is ${{ steps.last_tag.outputs.TARGET_TAG }}"
 
                   docker build \
-                  --target 'publish' -t "${{ env.DOCKERHUB_USERNAME }}/homebudget-rates-api:${{ steps.last_tag.outputs.TARGET_TAG }}" \
+                  --target 'publish' -t "${{ env.DOCKERHUB_USERNAME }}/homebudget-ui:${{ steps.last_tag.outputs.TARGET_TAG }}" \
                   --build-arg PULL_REQUEST_ID='${{ steps.findPr.outputs.pr }}' \
                   --build-arg PULL_REQUEST_SOURCE_BRANCH='${{ github.ref }}' \
                   --build-arg PULL_REQUEST_TARGET_BRANCH=refs/heads/master \
@@ -114,4 +114,4 @@ jobs:
               uses: docker/build-push-action@v5
               with:
                   push: true
-                  tags: '${{ env.DOCKERHUB_USERNAME }}/homebudget-rates-api:${{ steps.last_tag.outputs.TARGET_TAG }}'
+                  tags: '${{ env.DOCKERHUB_USERNAME }}/homebudget-ui:${{ steps.last_tag.outputs.TARGET_TAG }}'
