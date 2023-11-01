@@ -9,11 +9,9 @@ export class CurrencyRateGroupModel {
 		this.scale = currencyRates.scale;
 		this.name = currencyRates.name;
 
-		this.rateValues = currencyRates.rateValues?.map((rv) => {
+		this.rateValues = currencyRates.rateValues?.map(rv => {
 			return <CurrencyRateValueModel>{
-				updateDate: !_.isNil(rv.updateDate)
-					? new Date(rv.updateDate)
-					: rv.updateDate,
+				updateDate: !_.isNil(rv.updateDate) ? new Date(rv.updateDate) : rv.updateDate,
 				ratePerUnit: rv.ratePerUnit,
 			};
 		});
