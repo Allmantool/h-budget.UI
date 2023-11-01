@@ -1,11 +1,12 @@
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
-import { APP_INITIALIZER, NgModule } from '@angular/core';
+import { HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
+import { APP_INITIALIZER, NgModule, inject } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { NgxsModule } from '@ngxs/store';
 import { NgxsLoggerPluginModule } from '@ngxs/logger-plugin';
 import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
+import { tap, of, take, catchError } from 'rxjs';
 
 import { AppSharedModule } from './../shared/shared.module';
 import { ngxsConfig } from './../shared/store/ngxs.config';
@@ -16,6 +17,10 @@ import { AppBootsrapRoutingModule } from './app-bootsrap-routing.module';
 import { AppRootComponent } from './components/app-root/app-root.component';
 import { CustomUIComponentsSharedModule } from '../shared/custom-ui-components.shared.module';
 import { AppCoreModule } from '../core';
+import { AppSettingsModel } from 'domain/models/app-settings.model';
+import * as appSettings from '../../../../../UI/config.json';
+import { AppConfigurationService } from '../shared/services/app-configuration.service';
+import { environment } from 'environments/environment';
 
 @NgModule({
 	declarations: [AppRootComponent],
@@ -31,30 +36,48 @@ import { AppCoreModule } from '../core';
 		BrowserAnimationsModule,
 	],
 	providers: [
-		[
-			{
-				provider: APP_INITIALIZER,
-				useFactory: () => {
-					return () =>
-						new Promise(resolve => {
-							console.log('hey there');
-							/* const settings = require('../../../../../UI/config.json');*/
+		{
+			provide: APP_INITIALIZER,
+			useFactory: () => {
+				const appConfigurationService = inject(AppConfigurationService);
+				const httpClient = inject(HttpClient);
+
+				return () =>
+					new Promise(resolve => {
+						if (environment.production) {
+							httpClient
+								.get('./config.json')
+								.pipe(
+									take(1),
+									tap(appSettings => {
+										appConfigurationService.settings = appSettings as AppSettingsModel;
+										resolve(true);
+									}),
+									catchError(() => {
+										appConfigurationService.settings = undefined;
+										return of(null);
+									})
+								)
+								.subscribe();
+						} else {
+							appConfigurationService.settings = appSettings as AppSettingsModel;
+
 							resolve(true);
-						});
-				},
-				multi: true,
+						}
+					});
 			},
-			{
-				provide: HTTP_INTERCEPTORS,
-				useClass: CorrelationIdInteceptor,
-				multi: true,
-			},
-			{
-				provide: HTTP_INTERCEPTORS,
-				useClass: HttpRequestLoaderInterceptor,
-				multi: true,
-			},
-		],
+			multi: true,
+		},
+		{
+			provide: HTTP_INTERCEPTORS,
+			useClass: CorrelationIdInteceptor,
+			multi: true,
+		},
+		{
+			provide: HTTP_INTERCEPTORS,
+			useClass: HttpRequestLoaderInterceptor,
+			multi: true,
+		},
 	],
 	bootstrap: [AppRootComponent],
 })
