@@ -59,7 +59,7 @@ import { environment } from 'environments/environment';
 								)
 								.subscribe();
 						} else {
-							const appSettings: AppSettingsModel = required('../../../../../UI/config.json');
+							const appSettings: AppSettingsModel = require('../../../../../UI/config.json');
 							appConfigurationService.settings = appSettings;
 
 							resolve(true);
