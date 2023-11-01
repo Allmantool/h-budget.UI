@@ -18,7 +18,6 @@ import { AppRootComponent } from './components/app-root/app-root.component';
 import { CustomUIComponentsSharedModule } from '../shared/custom-ui-components.shared.module';
 import { AppCoreModule } from '../core';
 import { AppSettingsModel } from 'domain/models/app-settings.model';
-import * as appSettings from '../../../../../UI/config.json';
 import { AppConfigurationService } from '../shared/services/app-configuration.service';
 import { environment } from 'environments/environment';
 
@@ -60,7 +59,8 @@ import { environment } from 'environments/environment';
 								)
 								.subscribe();
 						} else {
-							appConfigurationService.settings = appSettings as AppSettingsModel;
+							const appSettings: AppSettingsModel = required('../../../../../UI/config.json');
+							appConfigurationService.settings = appSettings;
 
 							resolve(true);
 						}
