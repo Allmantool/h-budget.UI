@@ -45,7 +45,7 @@ import { environment } from 'environments/environment';
 					new Promise(resolve => {
 						if (environment.production) {
 							httpClient
-								.get('./assets/config.json')
+								.get('assets/config.json')
 								.pipe(
 									take(1),
 									tap(appSettings => {
