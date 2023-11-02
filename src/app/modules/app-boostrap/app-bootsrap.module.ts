@@ -45,7 +45,7 @@ import { environment } from 'environments/environment';
 					new Promise(resolve => {
 						if (environment.production) {
 							httpClient
-								.get('./config.json')
+								.get('./assets/config.json')
 								.pipe(
 									take(1),
 									tap(appSettings => {
@@ -59,7 +59,7 @@ import { environment } from 'environments/environment';
 								)
 								.subscribe();
 						} else {
-							const appSettings: AppSettingsModel = require('../../../../../UI/config.json');
+							const appSettings: AppSettingsModel = require('/src/assets/config.json');
 							appConfigurationService.settings = appSettings;
 
 							resolve(true);
