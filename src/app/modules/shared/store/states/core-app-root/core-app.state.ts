@@ -29,7 +29,7 @@ export class CoreAppState {
 	}
 
 	@Action(RemoveProcessingRequest)
-	DeleleProcessingRequest(
+	deleleProcessingRequest(
 		{ getState, patchState }: StateContext<ICoreAppStateModel>,
 		{ requestCorrelationId }: RemoveProcessingRequest
 	): void {

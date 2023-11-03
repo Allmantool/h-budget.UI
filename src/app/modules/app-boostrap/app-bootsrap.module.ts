@@ -50,10 +50,17 @@ import { environment } from 'environments/environment';
 									take(1),
 									tap(appSettings => {
 										appConfigurationService.settings = appSettings as AppSettingsModel;
+										console.log(
+											`Prod settings is: ${JSON.stringify(appConfigurationService.settings)}`
+										);
+
 										resolve(true);
 									}),
-									catchError(() => {
+									catchError(err => {
 										appConfigurationService.settings = undefined;
+
+										console.error(`Prod bootstrap error: ${JSON.stringify(err)}`);
+
 										return of(null);
 									})
 								)

@@ -17,11 +17,11 @@ export class ErrorLoggingInterceptor implements HttpInterceptor {
 
 		errorMessage =
 			handleError.error instanceof ErrorEvent
-				? `Error: ${handleError.error.message}`
+				? `Error: ${JSON.stringify(handleError.error)}`
 				: `Error Code: ${handleError.status}\nMessage: ${handleError.message}`;
 
 		window.alert(errorMessage);
 
-		return throwError(errorMessage);
+		return throwError(() => errorMessage);
 	}
 }
