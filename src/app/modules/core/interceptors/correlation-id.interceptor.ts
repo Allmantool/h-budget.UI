@@ -6,12 +6,17 @@ import { Injectable } from '@angular/core';
 
 import { v4 as uuidv4 } from 'uuid';
 import { Observable } from 'rxjs';
+import _ from 'lodash';
 
 import { ApiHeaders } from '../../shared/constants/api-headers';
 
 @Injectable()
 export class CorrelationIdInteceptor implements HttpInterceptor {
 	intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+		if (_.endsWith(req.url, 'config.json')) {
+			return next.handle(req);
+		}
+
 		const headersWithCorrelationId = req.headers.set(ApiHeaders.CORRELATION_ID, uuidv4());
 
 		const requestWithCarrelationId = req.clone({
