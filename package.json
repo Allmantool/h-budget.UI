@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "nx serve --watch --open",
-    "start-prod": "nx serve --watch --open --configuration=production",
+    "start-prod": "nx serve --watch --open --port=4300 --configuration=production",
     "build": "nx build",
     "build-prod": "nx build --configuration=production",
     "watch": "nx build --watch --configuration=development",
