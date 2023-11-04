@@ -19,4 +19,7 @@ FROM nginx:alpine3.18 as publish
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY --from=build /app/dist/h-budget /usr/share/nginx/html
 
+RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
+    ln -sf /dev/stderr /var/log/nginx/error.log
+
 EXPOSE 80
