@@ -2,30 +2,32 @@
 <div class="dialog-content">
 	<h1 mat-dialog-title>{{ title }}</h1>
 
-	<mat-dialog-content
-		class="dialog-body"
-		[formGroup]="dialogFg">
-		<form>
+	<mat-dialog-content class="dialog-body">
+		<form [formGroup]="dialogFg">
 			<app-form-field
 				formControlName="categoryType"
 				[fieldType]="'SELECT'"
 				[title]="'Category type:'"
 				[defaultValue]="getCategoryTypes()[0]"
-				[selectOptions]="getCategoryTypes()"></app-form-field>
+				[selectOptions]="getCategoryTypes()"
+			></app-form-field>
 			<!-- -->
 			<mat-form-field class="categories-chip-list">
 				<mat-label>Budget categories</mat-label>
 
 				<mat-chip-grid
 					#chipGrid
-					aria-label="Category selection">
+					aria-label="Category selection"
+				>
 					<mat-chip-row
 						*ngFor="let categoryNode of categoryNodes"
-						(removed)="remove(categoryNode)">
+						(removed)="remove(categoryNode)"
+					>
 						{{categoryNode}}
 						<button
 							matChipRemove
-							[attr.aria-label]="'remove ' + categoryNode">
+							[attr.aria-label]="'remove ' + categoryNode"
+						>
 							<mat-icon>cancel</mat-icon>
 						</button>
 					</mat-chip-row>
@@ -37,13 +39,16 @@
 					[matChipInputFor]="chipGrid"
 					[matAutocomplete]="auto"
 					[matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-					(matChipInputTokenEnd)="add($event)" />
+					(matChipInputTokenEnd)="add($event)"
+				/>
 				<mat-autocomplete
 					#auto="matAutocomplete"
-					(optionSelected)="selected($event)">
+					(optionSelected)="selected($event)"
+				>
 					<mat-option
 						*ngFor="let filteredCategoryNode of filteredCategoryNodes$ | async"
-						[value]="filteredCategoryNode">
+						[value]="filteredCategoryNode"
+					>
 						{{filteredCategoryNode}}
 					</mat-option>
 				</mat-autocomplete>
@@ -55,14 +60,16 @@
 		<button
 			mat-raised-button
 			mat-dialog-close
-			(click)="close()">
+			(click)="close()"
+		>
 			Close
 		</button>
 		<button
 			mat-raised-button
 			color="primary"
 			[disabled]="isSaveDisabled"
-			(click)="save()">
+			(click)="save()"
+		>
 			Save
 		</button>
 	</div>

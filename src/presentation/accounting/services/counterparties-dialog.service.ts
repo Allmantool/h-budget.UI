@@ -20,9 +20,9 @@ export class CounterpartiesDialogService {
 	public openCategories(): void {
 		const config = new MatDialogConfig<DialogContainer>();
 
-		const onSave = (contractorForSave: ContractorModel) => {
-			return this.contractorProvider.saveContractor(contractorForSave.nameNodes).pipe(
-				map(saveOesponseResult => saveOesponseResult.payload),
+		const onSave = (payloadForSave: ContractorModel) => {
+			return this.contractorProvider.saveContractor(payloadForSave.nameNodes).pipe(
+				map(responseResult => responseResult.payload),
 				concatMap(contractorId => {
 					return this.contractorProvider.getContractorById(contractorId);
 				})

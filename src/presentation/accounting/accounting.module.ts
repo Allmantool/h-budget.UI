@@ -30,6 +30,7 @@ import { AppCoreModule } from '../../app/modules/core/core.module';
 import { CustomUIComponentsSharedModule } from '../../app/modules/shared/custom-ui-components.shared.module';
 import { AngularMaterailSharedModule } from '../../app/modules/shared/angular-material.shared.module';
 import { DataCategoryProfile } from '../../data/providers/accounting/mappers/category.mapping.profile';
+import { DefaultCategoriesProvider } from '../../data/providers/accounting/categories.provider';
 
 @NgModule({
 	declarations: [
@@ -58,6 +59,7 @@ import { DataCategoryProfile } from '../../data/providers/accounting/mappers/cat
 	providers: [
 		DefaultPaymentAccountsProvider,
 		DefaultContractorsProvider,
+		DefaultCategoriesProvider,
 		CategoriesDialogService,
 		CounterpartiesDialogService,
 		PaymentAccountDialogService,

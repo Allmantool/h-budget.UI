@@ -8,5 +8,5 @@ export interface CategoriesProvider {
 
 	getCategoryById(categoryId: string): Observable<CategoryModel>;
 
-	saveContractor(operationType: number, newCategoryNamesNodes: string[]): Observable<Result<string>>;
+	saveCategory(operationType: number, newCategoryNamesNodes: string[]): Observable<Result<string>>;
 }

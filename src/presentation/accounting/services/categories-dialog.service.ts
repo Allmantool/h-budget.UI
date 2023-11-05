@@ -1,35 +1,32 @@
 import { Injectable } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
 
-import { Store } from '@ngxs/store';
-import { of } from 'rxjs';
+import { concatMap, map } from 'rxjs';
 import * as _ from 'lodash';
 
 import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
 import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
-import { CategoriesDialogComponent } from '../../../app/modules/shared/components/dialog/categories/categories-dialog.component';
-import { Result } from '../../../core/result';
-import { AddCategory } from '../../../app/modules/shared/store/states/handbooks/actions/category.actions';
+import { CategoriesDialogComponent } from '../../../app/modules/shared/components/dialog/categories/categories-dialog.component';;
 import { CategoryModel } from 'domain/models/accounting/category.model';
+import { DefaultCategoriesProvider } from '../../../data/providers/accounting/categories.provider';
 
 @Injectable()
 export class CategoriesDialogService {
 	constructor(
-		private dialogProvider: DialogProvider,
-		private store: Store
+		private readonly categoriesProvider: DefaultCategoriesProvider,
+		private dialogProvider: DialogProvider
 	) {}
 
 	public openCategories(): void {
 		const config = new MatDialogConfig<DialogContainer>();
 
-		const onSave = (operationResult: Result<CategoryModel>) => {
-			if (!operationResult.isSucceeded) {
-				return;
-			}
-
-			this.store.dispatch(new AddCategory(operationResult.payload));
-
-			return of(operationResult.payload);
+		const onSave = (payloadForSave: CategoryModel) => {
+			return this.categoriesProvider.saveCategory(payloadForSave.operationType, payloadForSave.nameNodes).pipe(
+				map(responseResult => responseResult.payload),
+				concatMap(categoryId => {
+					return this.categoriesProvider.getCategoryById(categoryId);
+				})
+			);
 		};
 
 		config.data = {

@@ -17,8 +17,8 @@ export class DataCategoryProfile extends Profile {
 				opt.mapFrom(src => Guid.parse(src.id.toString()));
 			},
 			operationType: opt => {
-				opt.preCondition(src => !_.isNil(src.operationType));
-				opt.mapFrom(src => src.operationType);
+				opt.preCondition(src => !_.isNil(src.categoryType));
+				opt.mapFrom(src => src.categoryType);
 			},
 			nameNodes: opt => {
 				opt.preCondition(src => !_.isNil(src.nameNodes));

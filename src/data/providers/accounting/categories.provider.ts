@@ -40,7 +40,7 @@ export class DefaultCategoriesProvider implements CategoriesProvider {
 		);
 	}
 
-	public saveContractor(operationType: number, newCategoryNamesNodes: string[]): Observable<Result<string>> {
+	public saveCategory(operationType: number, newCategoryNamesNodes: string[]): Observable<Result<string>> {
 		const request: CategoryCreateRequest = {
 			nameNodes: newCategoryNamesNodes,
 			operationType: operationType,
