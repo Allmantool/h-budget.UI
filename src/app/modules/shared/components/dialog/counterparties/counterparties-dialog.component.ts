@@ -7,13 +7,12 @@ import { MatChipInputEvent } from '@angular/material/chips';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import { Observable, startWith, filter, map, take } from 'rxjs';
+import { Store } from '@ngxs/store';
+import { Observable, startWith, map, take } from 'rxjs';
 import * as _ from 'lodash';
 
 import { DialogContainer } from '../../../models/dialog-container';
-import { Result } from 'core/result';
 import { ContractorModel } from 'domain/models/accounting/contractor.model.';
-import { Store } from '@ngxs/store';
 import { AddCounterParty } from '../../../store/states/handbooks/actions/counterparty.actions';
 
 @Component({

@@ -10,8 +10,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import * as _ from 'lodash';
 
 import { DialogContainer } from '../../../models/dialog-container';
-import { AccountingOperationTypes } from 'domain/models/accounting/accounting-operation-types';
-import { OperationCategory } from '../../../../../../domain/models/accounting/operation-category.model';
+import { OperationTypes } from 'domain/models/accounting/operation-types';
+import { CategoryModel } from '../../../../../../domain/models/accounting/category.model';
 import { Result } from '../../../../../../core/result';
 
 @Component({
@@ -47,7 +47,7 @@ export class CategoriesDialogComponent implements OnDestroy {
 		@Inject(MAT_DIALOG_DATA) dialogConfiguration: DialogContainer
 	) {
 		this.dialogFg = fb.group({
-			categoryType: new UntypedFormControl(AccountingOperationTypes[AccountingOperationTypes.Income]),
+			categoryType: new UntypedFormControl(OperationTypes[OperationTypes.Income]),
 		});
 
 		this.title = dialogConfiguration.title;
@@ -72,7 +72,7 @@ export class CategoriesDialogComponent implements OnDestroy {
 	}
 
 	public getCategoryTypes(): string[] {
-		return Object.keys(AccountingOperationTypes).filter(v => isNaN(Number(v)));
+		return Object.keys(OperationTypes).filter(v => isNaN(Number(v)));
 	}
 
 	public save(): void {
@@ -86,13 +86,13 @@ export class CategoriesDialogComponent implements OnDestroy {
 		const categoryType = this.dialogFg.controls['categoryType'].value as string;
 
 		const payloadForSave = {
-			type: AccountingOperationTypes[categoryType as keyof typeof AccountingOperationTypes],
-			value: JSON.stringify(this.categoryNodes),
-		} as OperationCategory;
+			operationType: OperationTypes[categoryType as keyof typeof OperationTypes],
+			nameNodes: this.categoryNodes,
+		} as CategoryModel;
 
 		this.dialogConfiguration
 			.onSubmit(
-				new Result<OperationCategory>({
+				new Result<CategoryModel>({
 					payload: payloadForSave,
 					isSucceeded: true,
 				})

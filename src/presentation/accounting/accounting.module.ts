@@ -29,6 +29,7 @@ import { DialogsSharedModule } from '../../app/modules/shared/dialogs.shared.mod
 import { AppCoreModule } from '../../app/modules/core/core.module';
 import { CustomUIComponentsSharedModule } from '../../app/modules/shared/custom-ui-components.shared.module';
 import { AngularMaterailSharedModule } from '../../app/modules/shared/angular-material.shared.module';
+import { DataCategoryProfile } from '../../data/providers/accounting/mappers/category.mapping.profile';
 
 @NgModule({
 	declarations: [
@@ -52,7 +53,7 @@ import { AngularMaterailSharedModule } from '../../app/modules/shared/angular-ma
 			CategoriesState,
 			PaymentAccountState,
 		]),
-		MapperModule.withProfiles([DataAccountingMappingProfile, DataContractorProfile]),
+		MapperModule.withProfiles([DataAccountingMappingProfile, DataContractorProfile, DataCategoryProfile]),
 	],
 	providers: [
 		DefaultPaymentAccountsProvider,

@@ -1,9 +1,12 @@
 import { Injectable } from '@angular/core';
 
 import { Action, State, StateContext } from '@ngxs/store';
+import _ from 'lodash';
+import { nameof } from 'ts-simple-nameof';
 
 import { ICounterpartiesStateModel } from './models/ICounterpartiesStateModel';
 import { AddCounterParty, SetInitialContractors } from './actions/counterparty.actions';
+import { ContractorModel } from 'domain/models/accounting/contractor.model.';
 
 @State<ICounterpartiesStateModel>({
 	name: 'counterpartiesHandbook',
@@ -23,13 +26,19 @@ export class CounterpartiesState {
 
 		newContractorsState.push(counterparty);
 
+		const orderedContractors = _.orderBy(
+			[...newContractorsState, counterparty],
+			nameof<ContractorModel>(op => op.nameNodes),
+			['asc']
+		);
+
 		patchState({
-			counterparties: [...newContractorsState],
+			counterparties: [...orderedContractors],
 		});
 	}
 
 	@Action(SetInitialContractors)
-	setInitialPaymentAccounts(
+	setInitialContractors(
 		{ patchState }: StateContext<ICounterpartiesStateModel>,
 		{ contractors }: SetInitialContractors
 	): void {
