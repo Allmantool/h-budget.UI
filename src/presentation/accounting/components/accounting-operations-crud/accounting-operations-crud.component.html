@@ -33,7 +33,7 @@
 				formControlName="category"
 				[fieldType]="'SELECT'"
 				[title]="'Category:'"
-				[selectOptions]="getCategoryLabels()"
+				[selectOptions]="categoriesSignal()"
 			></app-form-field>
 
 			<button

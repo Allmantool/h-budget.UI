@@ -20,7 +20,7 @@ import { ChartOptions } from '../models/chart-options';
 @Injectable()
 export class LineChartService {
 	constructor(protected readonly store: Store) {
-		this.chartCurrencyTrendTitle$.subscribe((p) => {
+		this.chartCurrencyTrendTitle$.subscribe(p => {
 			const updatedState = { ...this.charOptions$.value, title: p };
 
 			this.charOptions$.next(updatedState);
@@ -36,14 +36,13 @@ export class LineChartService {
 		tableOptions: CurrencyTableOptions,
 		options: LineChartOptions
 	): ChartOptions {
-		const ratesFilterByDateRange = _.sortBy(rates, (i) => i.updateDate);
+		const ratesFilterByDateRange = _.sortBy(rates, i => i.updateDate);
 
 		const selectedDateRange = tableOptions.selectedDateRange;
 
 		const ratesForPeriod = _.filter(
 			ratesFilterByDateRange,
-			(r) =>
-				r.updateDate! >= selectedDateRange.start && r.updateDate! <= selectedDateRange.end
+			r => r.updateDate! >= selectedDateRange.start && r.updateDate! <= selectedDateRange.end
 		);
 
 		const abbreviation = tableOptions.selectedItem.abbreviation;
@@ -51,7 +50,7 @@ export class LineChartService {
 		this.chartCurrencyTrendTitle$.next(
 			LineChartTitleService.calculateTitle(
 				abbreviation,
-				_.map(ratesForPeriod, (r) => r.ratePerUnit!)
+				_.map(ratesForPeriod, r => r.ratePerUnit!)
 			)
 		);
 
@@ -59,14 +58,13 @@ export class LineChartService {
 			series: [
 				{
 					name: abbreviation,
-					data: _.map(ratesForPeriod, (r) => r.ratePerUnit ?? 0),
+					data: _.map(ratesForPeriod, r => r.ratePerUnit ?? 0),
 				},
 			],
 			chart: {
 				events: {
 					zoomed: (chartContext, { xaxis }) => {
-						const dataPyaload: number[] =
-							LineChartService.getRatesFromChartContext(chartContext);
+						const dataPyaload: number[] = LineChartService.getRatesFromChartContext(chartContext);
 
 						const zoomedData = _.slice(dataPyaload, xaxis.min - 1, xaxis.max);
 
@@ -74,11 +72,7 @@ export class LineChartService {
 							LineChartTitleService.calculateTitle(abbreviation, zoomedData)
 						);
 
-						this.store.dispatch(
-							new SetActiveCurrencyTrendTitle(
-								this.chartCurrencyTrendTitle$.value.text
-							)
-						);
+						this.store.dispatch(new SetActiveCurrencyTrendTitle(this.chartCurrencyTrendTitle$.value.text));
 					},
 				},
 				height: options.height,
@@ -87,7 +81,7 @@ export class LineChartService {
 			},
 			title: this.chartCurrencyTrendTitle$.value,
 			xaxis: {
-				categories: _.map(ratesForPeriod, (r) => format(r.updateDate!, options.dateFormat)),
+				categories: _.map(ratesForPeriod, r => format(r.updateDate!, options.dateFormat)),
 			},
 		});
 

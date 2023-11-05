@@ -5,8 +5,8 @@ import * as _ from 'lodash';
 import { nameof } from 'ts-simple-nameof';
 
 import { ICategoriesStateModel } from './models/ICategoriesStateModel';
-import { AddCategory } from './actions/category.actions';
-import { OperationCategory } from '../../../../../../domain/models/accounting/operation-category.model';
+import { AddCategory, SetInitialCategories } from './actions/category.actions';
+import { CategoryModel } from '../../../../../../domain/models/accounting/category.model';
 
 @State<ICategoriesStateModel>({
 	name: 'categoriesHandbook',
@@ -18,20 +18,29 @@ import { OperationCategory } from '../../../../../../domain/models/accounting/op
 @Injectable()
 export class CategoriesState {
 	@Action(AddCategory)
-	AddCategory(
-		{ getState, patchState }: StateContext<ICategoriesStateModel>,
-		{ category }: AddCategory
-	): void {
-		const state = getState();
+	AddCategory({ getState, patchState }: StateContext<ICategoriesStateModel>, { category }: AddCategory): void {
+		const newCategoriesState = [...getState().categories];
 
-		const items = _.orderBy(
-			[...state.categories, category],
-			nameof<OperationCategory>((op) => op.value),
+		newCategoriesState.push(category);
+
+		const orderedCategories = _.orderBy(
+			[...newCategoriesState],
+			nameof<CategoryModel>(op => op.nameNodes),
 			['asc']
 		);
 
 		patchState({
-			categories: items,
+			categories: [...orderedCategories],
+		});
+	}
+
+	@Action(SetInitialCategories)
+	setInitialCategories(
+		{ patchState }: StateContext<ICategoriesStateModel>,
+		{ categories }: SetInitialCategories
+	): void {
+		patchState({
+			categories: [...categories],
 		});
 	}
 }

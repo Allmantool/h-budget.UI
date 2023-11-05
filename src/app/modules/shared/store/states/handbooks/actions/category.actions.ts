@@ -1,6 +1,11 @@
-import { OperationCategory } from '../../../../../../../domain/models/accounting/operation-category.model';
+import { CategoryModel } from '../../../../../../../domain/models/accounting/category.model';
 
 export class AddCategory {
-	static readonly type = '[CategoriesHandbook] Add';
-	constructor(public category: OperationCategory) {}
+	static readonly type = '[Categories handbook] Add';
+	constructor(public category: CategoryModel) {}
+}
+
+export class SetInitialCategories {
+	static readonly type = '[Categories handbook] Set initial categories';
+	constructor(public categories: CategoryModel[]) {}
 }

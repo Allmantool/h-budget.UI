@@ -8,7 +8,7 @@ import { FormInput } from '../types/form-input.type';
 	name: 'accountingCurrencyFormat',
 })
 export class AccountingCurrencyFormatPipe implements PipeTransform {
-	public transform(value: FormInput | null): number {
-		return _.isNil(value) ? 0 : Number(value);
+	public transform(value: FormInput | null): number | null {
+		return _.isNil(value) || value == 0 ? null : Number(value);
 	}
 }

@@ -5,14 +5,16 @@ import { MatChipInputEvent } from '@angular/material/chips';
 import { FormControl, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import { Observable, startWith, take, map, Subject } from 'rxjs';
+import { Store } from '@ngxs/store';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable, startWith, take, map, Subject } from 'rxjs';
 import * as _ from 'lodash';
 
 import { DialogContainer } from '../../../models/dialog-container';
-import { AccountingOperationTypes } from 'domain/models/accounting/accounting-operation-types';
-import { OperationCategory } from '../../../../../../domain/models/accounting/operation-category.model';
-import { Result } from '../../../../../../core/result';
+import { OperationTypes } from 'domain/models/accounting/operation-types';
+import { CategoryModel } from '../../../../../../domain/models/accounting/category.model';
+import { AddCategory } from '../../../store/states/handbooks/actions/category.actions';
+
 
 @Component({
 	selector: 'categories-dialog',
@@ -42,12 +44,13 @@ export class CategoriesDialogComponent implements OnDestroy {
 	public categoryCtrl = new FormControl('');
 
 	constructor(
+		private readonly store: Store,
 		private dialogRef: MatDialogRef<CategoriesDialogComponent>,
 		fb: UntypedFormBuilder,
 		@Inject(MAT_DIALOG_DATA) dialogConfiguration: DialogContainer
 	) {
 		this.dialogFg = fb.group({
-			categoryType: new UntypedFormControl(AccountingOperationTypes[AccountingOperationTypes.Income]),
+			categoryType: new UntypedFormControl(OperationTypes[OperationTypes.Income]),
 		});
 
 		this.title = dialogConfiguration.title;
@@ -72,7 +75,7 @@ export class CategoriesDialogComponent implements OnDestroy {
 	}
 
 	public getCategoryTypes(): string[] {
-		return Object.keys(AccountingOperationTypes).filter(v => isNaN(Number(v)));
+		return Object.keys(OperationTypes).filter(v => isNaN(Number(v)));
 	}
 
 	public save(): void {
@@ -86,19 +89,16 @@ export class CategoriesDialogComponent implements OnDestroy {
 		const categoryType = this.dialogFg.controls['categoryType'].value as string;
 
 		const payloadForSave = {
-			type: AccountingOperationTypes[categoryType as keyof typeof AccountingOperationTypes],
-			value: JSON.stringify(this.categoryNodes),
-		} as OperationCategory;
+			operationType: OperationTypes[categoryType as keyof typeof OperationTypes],
+			nameNodes: this.categoryNodes,
+		} as CategoryModel;
 
 		this.dialogConfiguration
-			.onSubmit(
-				new Result<OperationCategory>({
-					payload: payloadForSave,
-					isSucceeded: true,
-				})
-			)
+			.onSubmit(payloadForSave)
 			.pipe(take(1))
-			.subscribe(_ => {
+			.subscribe(response => {
+				this.store.dispatch(new AddCategory(response));
+
 				this.isLoadingSignal.set(false);
 				this.dialogRef.close();
 			});
