@@ -43,7 +43,7 @@ export class DefaultCategoriesProvider implements CategoriesProvider {
 	public saveCategory(operationType: number, newCategoryNamesNodes: string[]): Observable<Result<string>> {
 		const request: CategoryCreateRequest = {
 			nameNodes: newCategoryNamesNodes,
-			operationType: operationType,
+			categoryType: operationType,
 		};
 
 		return this.http.post<Result<string>>(`${this.accountingHostUrl}/categories`, request).pipe(retry(3), take(1));

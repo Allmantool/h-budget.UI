@@ -24,7 +24,7 @@ export class CategoriesState {
 		newCategoriesState.push(category);
 
 		const orderedCategories = _.orderBy(
-			[...newCategoriesState, category],
+			[...newCategoriesState],
 			nameof<CategoryModel>(op => op.nameNodes),
 			['asc']
 		);

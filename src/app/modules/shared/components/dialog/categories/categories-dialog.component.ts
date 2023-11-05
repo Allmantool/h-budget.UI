@@ -5,14 +5,16 @@ import { MatChipInputEvent } from '@angular/material/chips';
 import { FormControl, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import { Observable, startWith, take, map, Subject } from 'rxjs';
+import { Store } from '@ngxs/store';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable, startWith, take, map, Subject } from 'rxjs';
 import * as _ from 'lodash';
 
 import { DialogContainer } from '../../../models/dialog-container';
 import { OperationTypes } from 'domain/models/accounting/operation-types';
 import { CategoryModel } from '../../../../../../domain/models/accounting/category.model';
-import { Result } from '../../../../../../core/result';
+import { AddCategory } from '../../../store/states/handbooks/actions/category.actions';
+
 
 @Component({
 	selector: 'categories-dialog',
@@ -42,6 +44,7 @@ export class CategoriesDialogComponent implements OnDestroy {
 	public categoryCtrl = new FormControl('');
 
 	constructor(
+		private readonly store: Store,
 		private dialogRef: MatDialogRef<CategoriesDialogComponent>,
 		fb: UntypedFormBuilder,
 		@Inject(MAT_DIALOG_DATA) dialogConfiguration: DialogContainer
@@ -91,14 +94,11 @@ export class CategoriesDialogComponent implements OnDestroy {
 		} as CategoryModel;
 
 		this.dialogConfiguration
-			.onSubmit(
-				new Result<CategoryModel>({
-					payload: payloadForSave,
-					isSucceeded: true,
-				})
-			)
+			.onSubmit(payloadForSave)
 			.pipe(take(1))
-			.subscribe(_ => {
+			.subscribe(response => {
+				this.store.dispatch(new AddCategory(response));
+
 				this.isLoadingSignal.set(false);
 				this.dialogRef.close();
 			});
