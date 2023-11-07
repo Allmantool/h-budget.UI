@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
 import { MatTableDataSource } from '@angular/material/table';
 
 import { Select, Store } from '@ngxs/store';
-import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
+import { combineLatest, Observable, Subject } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import * as _ from 'lodash';
@@ -11,19 +11,20 @@ import * as _ from 'lodash';
 import { CurrencyGridRateModel } from '../../models/currency-grid-rate.model';
 import { RatesDialogService } from './../../services/rates-dialog.service';
 import { CurrencyRatesGridService } from '../../services/currency-rates-grid.service';
-import { PreviousDayCurrencyRate } from 'app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
 import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group.model';
 import { NationalBankCurrencyProvider } from 'data/providers/rates/national-bank-currency.provider';
-import { RatesGridDefaultOptions } from 'app/modules/shared/constants/rates-grid-default-options';
-import { CurrencyTableOptions } from 'app/modules/shared/store/models/currency-rates/currency-table-options';
 import { RatesGridColumnOptions } from 'presentation/currency-rates/constants/rates-grid-options';
 import { CurrencyRateValueModel } from 'domain/models/rates/currency-rate-value.model';
-import { getCurrencyTableOptions } from 'app/modules/shared/store/states/rates/selectors/currency-table-options.selectors';
 import { SetCurrencyDateRange } from '../../../../app/modules/shared/store/states/rates/actions/currency-table-options.actions';
+import { PreviousDayCurrencyRate } from '../../../../app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
+import { RatesGridDefaultOptions } from '../../../../app/modules/shared/constants/rates-grid-default-options';
+import { CurrencyTableOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-table-options';
+import { getCurrencyTableOptions } from '../../../../app/modules/shared/store/states/rates/selectors/currency-table-options.selectors';
 import {
 	getCurrencyRatesFromPreviousDay,
 	getRates,
-} from 'app/modules/shared/store/states/rates/selectors/currency.selectors';
+} from '../../../../app/modules/shared/store/states/rates/selectors/currency.selectors';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
 	selector: 'app-currency-rates-grid',
@@ -31,7 +32,8 @@ import {
 	styleUrls: ['./currency-rates-grid.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CurrencyRatesGridComponent implements OnInit, OnDestroy {
+export class CurrencyRatesGridComponent implements OnInit {
+	private readonly destroyRef = inject(DestroyRef);
 	@Select(getRates) rates$!: Observable<CurrencyRateValueModel[]>;
 
 	@Select(getCurrencyTableOptions)
@@ -49,8 +51,6 @@ export class CurrencyRatesGridComponent implements OnInit, OnDestroy {
 
 	public ratesGridColumnOptions: typeof RatesGridColumnOptions = RatesGridColumnOptions;
 
-	private subs: Subscription[] = [];
-
 	constructor(
 		private readonly currencyRateProvider: NationalBankCurrencyProvider,
 		private readonly store: Store,
@@ -58,20 +58,16 @@ export class CurrencyRatesGridComponent implements OnInit, OnDestroy {
 		private readonly currencyRatesGridService: CurrencyRatesGridService
 	) {}
 
-	ngOnDestroy(): void {
-		this.subs.forEach(s => s.unsubscribe());
-	}
-
 	ngOnInit(): void {
-		const getRatesSub$ = this.todayCurrencyRateGroups$
-			.pipe(take(1))
+		this.todayCurrencyRateGroups$
+			.pipe(take(1), takeUntilDestroyed(this.destroyRef))
 			.subscribe(
 				(todayRateGroups: CurrencyRateGroupModel[]) =>
 					(this.todayRatesTableDataSource = this.currencyRatesGridService.GetDataSource(todayRateGroups))
 			);
 
-		const getTableOptions$ = combineLatest([this.currencyTableOptions$, this.todayCurrencyRateGroups$])
-			.pipe(take(1))
+		combineLatest([this.currencyTableOptions$, this.todayCurrencyRateGroups$])
+			.pipe(take(1), takeUntilDestroyed(this.destroyRef))
 			.subscribe(([tableOptions, rateGroups]) => {
 				this.todayRatesTableSelection = this.currencyRatesGridService.GetTableSelection(
 					rateGroups,
@@ -80,11 +76,6 @@ export class CurrencyRatesGridComponent implements OnInit, OnDestroy {
 
 				this.selectedCurrencyPertionOption = tableOptions.selectedDateRange.diffInMonths;
 			});
-
-		if (getRatesSub$) {
-			this.subs.push(getRatesSub$);
-			this.subs.push(getTableOptions$);
-		}
 
 		this.getTodayCurrencyRates();
 	}

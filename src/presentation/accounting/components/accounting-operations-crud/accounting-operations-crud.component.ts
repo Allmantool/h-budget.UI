@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, Signal, inject } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import { Select, Store } from '@ngxs/store';
-import { combineLatest, Observable, Subject } from 'rxjs';
-import { filter, take, takeUntil } from 'rxjs/operators';
+import { combineLatest, Observable } from 'rxjs';
+import { filter, take } from 'rxjs/operators';
 import * as _ from 'lodash';
 import { nameof } from 'ts-simple-nameof';
 
@@ -30,8 +30,8 @@ import { SetInitialCategories } from '../../../../app/modules/shared/store/state
 	styleUrls: ['./accounting-operations-crud.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AccountingOperationsCrudComponent implements OnInit, OnDestroy {
-	private destroy$ = new Subject<void>();
+export class AccountingOperationsCrudComponent implements OnInit {
+	private readonly destroyRef = inject(DestroyRef);
 
 	public contractorsSignal: Signal<string[]>;
 
@@ -87,25 +87,20 @@ export class AccountingOperationsCrudComponent implements OnInit, OnDestroy {
 		);
 	}
 
-	public ngOnDestroy(): void {
-		this.destroy$.next();
-		this.destroy$.complete();
-	}
-
 	public ngOnInit(): void {
 		this.contractorsProvider
 			.getContractors()
-			.pipe(take(1), takeUntil(this.destroy$))
+			.pipe(take(1), takeUntilDestroyed(this.destroyRef))
 			.subscribe(contractors => this.store.dispatch(new SetInitialContractors(contractors)));
 
 		this.categoriesProvider
 			.getCategoriries()
-			.pipe(take(1), takeUntil(this.destroy$))
+			.pipe(take(1), takeUntilDestroyed(this.destroyRef))
 			.subscribe(categories => this.store.dispatch(new SetInitialCategories(categories)));
 
 		combineLatest([this.accountingTableOptions$, this.accountingRecords$])
 			.pipe(
-				takeUntil(this.destroy$),
+				takeUntilDestroyed(this.destroyRef),
 				filter(([tableOptions, records]) => !_.isNil(tableOptions) && !_.isNil(records))
 			)
 			.subscribe(([tableOptions, records]) => {

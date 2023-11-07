@@ -1,8 +1,18 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, Signal, signal, computed } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	OnInit,
+	Signal,
+	signal,
+	computed,
+	DestroyRef,
+	inject,
+} from '@angular/core';
 import { Router } from '@angular/router';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import { Select, Store } from '@ngxs/store';
-import { Observable, Subscription, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
 import { Guid } from 'typescript-guid';
 import * as _ from 'lodash';
 
@@ -17,7 +27,6 @@ import {
 	getActivePaymentAccount,
 } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
-import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
 	selector: 'accounting-operarions-grid',
@@ -25,8 +34,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 	styleUrls: ['./accounting-operations-grid.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
-	private subs: Subscription[] = [];
+export class AccountingOperatiosGridComponent implements OnInit {
+	private readonly destroyRef = inject(DestroyRef);
 
 	@Select(getAccountingRecords)
 	accountingRecords$!: Observable<AccountingGridRecord[]>;
@@ -119,19 +128,14 @@ export class AccountingOperatiosGridComponent implements OnInit, OnDestroy {
 	}
 
 	public ngOnInit(): void {
-		const tableDataSource$ = this.accountingRecords$.subscribe(records => this.dataSource$.next(records));
+		this.accountingRecords$
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe(records => this.dataSource$.next(records));
 
-		const tableOptions$ = this.accountingTableOptions$.subscribe(options => {
+		this.accountingTableOptions$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(options => {
 			this.clickedRowGuids.clear();
 			this.clickedRowGuids.add(options.selectedRecordGuid);
 		});
-
-		this.subs.push(tableDataSource$);
-		this.subs.push(tableOptions$);
-	}
-
-	public ngOnDestroy(): void {
-		this.subs.forEach(s => s.unsubscribe());
 	}
 
 	public selectRow(record: AccountingGridRecord): void {

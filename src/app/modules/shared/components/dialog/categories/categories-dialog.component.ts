@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Inject, OnDestroy, ViewChild, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Inject, ViewChild, signal } from '@angular/core';
 import { ENTER } from '@angular/cdk/keycodes';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatChipInputEvent } from '@angular/material/chips';
@@ -7,7 +7,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { Store } from '@ngxs/store';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, startWith, take, map, Subject } from 'rxjs';
+import { Observable, startWith, take, map } from 'rxjs';
 import * as _ from 'lodash';
 
 import { DialogContainer } from '../../../models/dialog-container';
@@ -15,15 +15,13 @@ import { OperationTypes } from 'domain/models/accounting/operation-types';
 import { CategoryModel } from '../../../../../../domain/models/accounting/category.model';
 import { AddCategory } from '../../../store/states/handbooks/actions/category.actions';
 
-
 @Component({
 	selector: 'categories-dialog',
 	templateUrl: './categories-dialog.component.html',
 	styleUrls: ['./categories-dialog.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CategoriesDialogComponent implements OnDestroy {
-	private destroy$ = new Subject<void>();
+export class CategoriesDialogComponent {
 
 	private dialogConfiguration: DialogContainer;
 
@@ -63,11 +61,6 @@ export class CategoriesDialogComponent implements OnDestroy {
 				categoryNode ? _.filter(this.categoryNodes, categoryNode) : this.categoryNodes.slice()
 			)
 		);
-	}
-
-	public ngOnDestroy(): void {
-		this.destroy$.next();
-		this.destroy$.complete();
 	}
 
 	public close() {

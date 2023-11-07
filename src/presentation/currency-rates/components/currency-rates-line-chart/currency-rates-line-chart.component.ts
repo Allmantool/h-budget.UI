@@ -1,9 +1,9 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, DestroyRef, Input, OnInit, ViewChild, inject } from '@angular/core';
 
 import { Select, Store } from '@ngxs/store';
 import * as _ from 'lodash';
 import { ChartComponent } from 'ng-apexcharts';
-import { BehaviorSubject, combineLatest, from, Observable, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, Observable, Subject } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
 import { CurrencyGridRateModel } from '../../models/currency-grid-rate.model';
@@ -17,6 +17,7 @@ import { ChartOptions } from '../../models/chart-options';
 import { CurrencyRateGroupModel } from '../../../../domain/models/rates/currency-rates-group.model';
 import { CurrencyTableOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-table-options';
 import { getCurrencyTableOptions } from '../../../../app/modules/shared/store/states/rates/selectors/currency-table-options.selectors';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
 	selector: 'currency-rates-line-chart',
@@ -24,7 +25,9 @@ import { getCurrencyTableOptions } from '../../../../app/modules/shared/store/st
 	styleUrls: ['./currency-rates-line-chart.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit, OnDestroy {
+export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
+	private readonly destroyRef = inject(DestroyRef);
+
 	@Select(getCurrencyRatesGroupByCurrencyId)
 	currencyRatesGroupByCurrencyId$!: Observable<(id: number) => CurrencyRateGroupModel>;
 
@@ -44,8 +47,6 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit, O
 
 	public currencyRates$: Subject<CurrencyGridRateModel[]> = new Subject<CurrencyGridRateModel[]>();
 
-	private subs: Subscription[] = [];
-
 	private lineChartOptions: LineChartOptions;
 
 	constructor(
@@ -59,50 +60,43 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit, O
 			type: 'area',
 		} as LineChartOptions;
 	}
-	ngAfterViewInit(): void {
+	public ngAfterViewInit(): void {
 		this.populateChartOptions();
 	}
 
-	ngOnDestroy(): void {
-		this.subs.forEach(s => s.unsubscribe());
-	}
-
-	ngOnInit(): void {
+	public ngOnInit(): void {
 		this.store.dispatch(new FetchAllCurrencyRates());
 	}
 
 	private populateChartOptions(): void {
-		this.subs.push(
-			combineLatest([this.currencyRatesGroupByCurrencyId$, this.currencyTableOptions$])
-				.pipe(
-					map(([ratesGroupByCurrencyId, tableOptions]) => {
-						const ratesGroup = ratesGroupByCurrencyId(tableOptions.selectedItem.currencyId);
+		combineLatest([this.currencyRatesGroupByCurrencyId$, this.currencyTableOptions$])
+			.pipe(
+				takeUntilDestroyed(this.destroyRef),
+				map(([ratesGroupByCurrencyId, tableOptions]) => {
+					const ratesGroup = ratesGroupByCurrencyId(tableOptions.selectedItem.currencyId);
 
-						return {
-							ratesGroup: ratesGroup,
-							tableOptions: tableOptions,
-						};
-					}),
-					filter(payload => !_.isEmpty(payload.ratesGroup?.rateValues))
-				)
-				.subscribe(payload => {
-					this.chartOptions = this.linechartService.getChartOptions(
-						payload.ratesGroup?.rateValues ?? [],
-						payload.tableOptions,
-						this.lineChartOptions
-					);
+					return {
+						ratesGroup: ratesGroup,
+						tableOptions: tableOptions,
+					};
+				}),
+				filter(payload => !_.isEmpty(payload.ratesGroup?.rateValues))
+			)
+			.subscribe(payload => {
+				this.chartOptions = this.linechartService.getChartOptions(
+					payload.ratesGroup?.rateValues ?? [],
+					payload.tableOptions,
+					this.lineChartOptions
+				);
 
-					this.isChartInitialized$.next(true);
-				})
-		);
+				this.isChartInitialized$.next(true);
+			});
 
-		this.subs.push(
-			this.currencyChartOptions$
-				.pipe()
-				.subscribe(chartOptions =>
-					from(this.updateTitle(chartOptions.activeCurrencyTrendTitle)).pipe(take(1)).subscribe()
-				)
-		);
+		this.currencyChartOptions$
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe(chartOptions =>
+				from(this.updateTitle(chartOptions.activeCurrencyTrendTitle)).pipe(take(1)).subscribe()
+			);
 	}
 
 	private async updateTitle(titleText: string): Promise<void> {
