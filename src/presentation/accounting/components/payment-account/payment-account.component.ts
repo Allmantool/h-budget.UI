@@ -1,18 +1,11 @@
-import {
-	ChangeDetectionStrategy,
-	Component,
-	EnvironmentInjector,
-	OnDestroy,
-	OnInit,
-	runInInjectionContext,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, EnvironmentInjector, OnInit, runInInjectionContext } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSelectionListChange } from '@angular/material/list';
 import { signal } from '@angular/core';
 
 import { Select, Store } from '@ngxs/store';
-import { Observable, Subject, retry, take } from 'rxjs';
+import { Observable, retry, take } from 'rxjs';
 import { Guid } from 'typescript-guid';
 import * as _ from 'lodash';
 import { nameof } from 'ts-simple-nameof';
@@ -30,9 +23,7 @@ import { getPaymentAccounts } from '../../../../app/modules/shared/store/states/
 	styleUrls: ['./payment-account.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PaymentAccountComponent implements OnInit, OnDestroy {
-	private destroy$ = new Subject<void>();
-
+export class PaymentAccountComponent implements OnInit {
 	public isNavigateToOperationsDisabled: boolean = true;
 	public cashAccountsSignal = signal<PaymentAccountModel[]>([]);
 	public debitVirtualAccountsSignal = signal<PaymentAccountModel[]>([]);
@@ -72,11 +63,6 @@ export class PaymentAccountComponent implements OnInit, OnDestroy {
 				);
 			});
 		});
-	}
-
-	public ngOnDestroy(): void {
-		this.destroy$.next();
-		this.destroy$.complete();
 	}
 
 	public step: number = 0;

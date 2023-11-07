@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import { Observable, Subject, filter, take } from 'rxjs';
+import { Observable, filter, take } from 'rxjs';
 import { Select, Store } from '@ngxs/store';
 import * as _ from 'lodash';
 
@@ -16,14 +16,8 @@ import { RemovePaymentAccount } from '../../../../app/modules/shared/store/state
 	styleUrls: ['./payment-account-crud.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PaymentAccountCrudComponent implements OnDestroy {
-	private destroy$ = new Subject<void>();
+export class PaymentAccountCrudComponent {
 	public activePaymentAccountGuidSignal: Signal<string>;
-
-	public ngOnDestroy(): void {
-		this.destroy$.next();
-		this.destroy$.complete();
-	}
 
 	@Select(getActivePaymentAccountId)
 	paymentAccountId$!: Observable<string>;
@@ -56,7 +50,7 @@ export class PaymentAccountCrudComponent implements OnDestroy {
 		this.paymentAccountsProvider
 			.removePaymentAccount(paymentAccountGuidForDelete)
 			.pipe(
-				filter((payload) => payload.isSucceeded),
+				filter(payload => payload.isSucceeded),
 				take(1)
 			)
 			.subscribe(() => {
