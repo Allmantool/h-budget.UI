@@ -40,7 +40,7 @@ jobs:
 
             - name: Upload & Install UI dependencies
               run: |
-                  npm i --legacy-peer-deps
+                  npm i
 
             - name: Build UI project
               run: |
