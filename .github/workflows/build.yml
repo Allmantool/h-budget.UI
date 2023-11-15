@@ -40,7 +40,6 @@ jobs:
 
             - name: Upload & Install UI dependencies
               run: |
-                  ncu --peer -u
                   npm i
 
             - name: Build UI project
