@@ -8,56 +8,46 @@ import { RateValueEntity } from '../entities/rate-value.entity';
 import { CurrencyRateValueModel } from 'domain/models/rates/currency-rate-value.model';
 
 export class DataRatesMappingProfile extends Profile {
-	static readonly RatesGroupEntityToDomain = new MappingPair<
-		RatesGroupEntity,
-		CurrencyRateGroupModel
-	>();
+	static readonly RatesGroupEntityToDomain = new MappingPair<RatesGroupEntity, CurrencyRateGroupModel>();
 
-	static readonly RateValueEntityToDomain = new MappingPair<
-		RateValueEntity,
-		CurrencyRateValueModel
-	>();
+	static readonly RateValueEntityToDomain = new MappingPair<RateValueEntity, CurrencyRateValueModel>();
 
 	constructor() {
 		super();
 
 		this.createMap(DataRatesMappingProfile.RateValueEntityToDomain, {
-			officialRate: (opt) => {
-				opt.preCondition((src) => !_.isNil(src.officialRate));
-				opt.mapFrom((src) => src.officialRate);
+			officialRate: opt => {
+				opt.preCondition(src => !_.isNil(src.officialRate));
+				opt.mapFrom(src => src.officialRate);
 			},
-			ratePerUnit: (opt) => {
-				opt.preCondition((src) => !_.isNil(src.ratePerUnit));
-				opt.mapFrom((src) => src.ratePerUnit);
+			ratePerUnit: opt => {
+				opt.preCondition(src => !_.isNil(src.ratePerUnit));
+				opt.mapFrom(src => src.ratePerUnit);
 			},
-			updateDate: (opt) => {
-				opt.preCondition((src) => !_.isNil(src.updateDate));
-				opt.mapFrom((src) => new Date(src.updateDate));
+			updateDate: opt => {
+				opt.preCondition(src => !_.isNil(src.updateDate));
+				opt.mapFrom(src => new Date(src.updateDate));
 			},
 		});
 
 		this.createMap(DataRatesMappingProfile.RatesGroupEntityToDomain, {
-			currencyId: (opt) => {
-				opt.preCondition((src) => !_.isNil(src.currencyId));
-				opt.mapFrom((src) => src.currencyId);
+			currencyId: opt => {
+				opt.preCondition(src => !_.isNil(src.currencyId));
+				opt.mapFrom(src => src.currencyId);
 			},
-			name: (opt) => {
-				opt.preCondition((src) => !_.isNil(src.name));
-				opt.mapFrom((src) => src.name);
+			name: opt => {
+				opt.preCondition(src => !_.isNil(src.name));
+				opt.mapFrom(src => src.name);
 			},
-			scale: (opt) => {
-				opt.preCondition((src) => !_.isNil(src.scale));
-				opt.mapFrom((src) => src.scale);
+			scale: opt => {
+				opt.preCondition(src => !_.isNil(src.scale));
+				opt.mapFrom(src => src.scale);
 			},
-			abbreviation: (opt) => {
-				opt.preCondition((src) => !_.isNil(src.abbreviation));
-				opt.mapFrom((src) => src.abbreviation);
+			abbreviation: opt => {
+				opt.preCondition(src => !_.isNil(src.abbreviation));
+				opt.mapFrom(src => src.abbreviation);
 			},
-			rateValues: (opt) =>
-				opt.mapFromUsing(
-					(src) => src.rateValues,
-					DataRatesMappingProfile.RateValueEntityToDomain
-				),
+			rateValues: opt => opt.auto(),
 		});
 	}
 }
