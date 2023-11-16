@@ -1,13 +1,6 @@
 name: Upgrade NPM packages
 
 on:
-    push:
-        branches: ['**']
-
-    pull_request:
-        # The branches below must be a subset of the branches above
-        branches: [master]
-
     schedule:
         - cron: '0 0 * * *'
 
@@ -28,8 +21,8 @@ jobs:
 
             - name: Check and update packages 🔀
               run: |
-                  npm i
                   npx npm-check-updates --upgrade --peer --target minor
+                  npm i
 
             - name: Commit and create PR 🔀
               uses: peter-evans/create-pull-request@v5
