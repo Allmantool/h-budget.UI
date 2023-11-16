@@ -29,7 +29,7 @@ jobs:
             - name: Check and update packages 🔀
               run: |
                   npm i
-                  npx npm-check-updates --upgrade --peer
+                  npx npm-check-updates --upgrade --peer --target minor
 
             - name: Commit and create PR 🔀
               uses: peter-evans/create-pull-request@v5
