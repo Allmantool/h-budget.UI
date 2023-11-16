@@ -1,8 +1,6 @@
 name: Manage versions
 
-on:
-    push:
-        branches: [master]
+on: [push]
 
 env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
