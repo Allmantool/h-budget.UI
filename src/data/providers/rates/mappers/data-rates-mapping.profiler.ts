@@ -47,7 +47,8 @@ export class DataRatesMappingProfile extends Profile {
 				opt.preCondition(src => !_.isNil(src.abbreviation));
 				opt.mapFrom(src => src.abbreviation);
 			},
-			rateValues: opt => opt.auto(),
+			rateValues: opt =>
+				opt.mapFromUsing(src => src.rateValues!, DataRatesMappingProfile.RateValueEntityToDomain),
 		});
 	}
 }
