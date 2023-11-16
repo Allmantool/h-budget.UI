@@ -1,8 +1,6 @@
 name: Manage versions
 
-on:
-    push:
-        branches: [master]
+on: [push]
 
 env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -18,12 +16,16 @@ jobs:
 
         steps:
             - name: Check out code
-              uses: actions/checkout@v3
+              uses: actions/checkout@v4
               with:
                   fetch-depth: 0
-            - uses: actions/setup-node@v3
+                  lfs: true
+                  token: ${{ env.GITHUB_TOKEN }}
+
+            - uses: actions/setup-node@v4
               with:
                   node-version: '18'
+
             - name: Version Bumper
               uses: michmich112/version-bumper@1.2.4
               with:
