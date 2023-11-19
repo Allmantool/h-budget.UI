@@ -7,7 +7,7 @@ import { Observable, map, retry, take } from 'rxjs';
 import { Result } from 'core/result';
 import { ContractorsProvider } from 'domain/providers/accounting/contractors.provider';
 import { ContractorModel } from '../../../domain/models/accounting/contractor.model.';
-import { ContractorEntity } from './entities/contractor-entity';
+import { ContractorEntity } from './entities/contractor.entity';
 import { DataContractorProfile } from './mappers/contractor.mapping.profile';
 import { ContractorCreateRequest } from 'domain/models/accounting/requests/contractor-create.request';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';

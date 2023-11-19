@@ -21,7 +21,7 @@ import { PaymentAccountState } from '../../app/modules/shared/store/states/accou
 import { PaymentAccountCrudComponent } from './components/payment-account-crud/payment-account-crud.component';
 import { PaymentAccountDialogService } from './services/payment-account-dialog.service';
 import { DefaultPaymentAccountsProvider } from '../../data/providers/accounting/payment-accounts.provider';
-import { DataAccountingMappingProfile } from '../../data/providers/accounting/mappers/data-accounting.mapping.profile';
+import { PaymentAccountsMappingProfile } from '../../data/providers/accounting/mappers/payment-accounts.mapping.profile';
 import { DefaultContractorsProvider } from '../../data/providers/accounting/contractors.provider';
 import { DataContractorProfile } from '../../data/providers/accounting/mappers/contractor.mapping.profile';
 import { AccountingOperationsService } from './services/accounting-operations.service';
@@ -31,6 +31,7 @@ import { CustomUIComponentsSharedModule } from '../../app/modules/shared/custom-
 import { AngularMaterailSharedModule } from '../../app/modules/shared/angular-material.shared.module';
 import { DataCategoryProfile } from '../../data/providers/accounting/mappers/category.mapping.profile';
 import { DefaultCategoriesProvider } from '../../data/providers/accounting/categories.provider';
+import { PaymentOperationsMappingProfile } from '../../data/providers/accounting/mappers/payment-operations.mapping.profile';
 
 @NgModule({
 	declarations: [
@@ -54,7 +55,12 @@ import { DefaultCategoriesProvider } from '../../data/providers/accounting/categ
 			CategoriesState,
 			PaymentAccountState,
 		]),
-		MapperModule.withProfiles([DataAccountingMappingProfile, DataContractorProfile, DataCategoryProfile]),
+		MapperModule.withProfiles([
+			PaymentAccountsMappingProfile,
+			PaymentOperationsMappingProfile,
+			DataContractorProfile,
+			DataCategoryProfile,
+		]),
 	],
 	providers: [
 		DefaultPaymentAccountsProvider,

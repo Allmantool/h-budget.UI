@@ -120,7 +120,7 @@ export class AccountingOperatiosGridComponent implements OnInit {
 		if (!_.isNil(this.paymentAccountSignal())) {
 			this.paymentAccountGeneralInfoSignal = computed(
 				() =>
-					`${this.paymentAccountSignal()?.id?.toString()} ${this.paymentAccountSignal().emitter} | ${
+					`${this.paymentAccountSignal()?.key?.toString()} ${this.paymentAccountSignal().emitter} | ${
 						this.paymentAccountSignal().description
 					}`
 			);

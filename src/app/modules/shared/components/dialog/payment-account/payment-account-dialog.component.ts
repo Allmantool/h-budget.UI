@@ -106,7 +106,7 @@ export class PaymentAccountDialogComponent {
 				const accountsSignal = toSignal(this.paymentAccounts$, { initialValue: [] });
 
 				const paymentAccountForUpdate = _.find(accountsSignal(), function (i) {
-					return _.isEqual(i.id?.toString(), accountId);
+					return _.isEqual(i.key?.toString(), accountId);
 				});
 
 				this.accountTypeStepFg

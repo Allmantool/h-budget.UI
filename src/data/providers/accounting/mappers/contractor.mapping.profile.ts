@@ -3,7 +3,7 @@ import { Guid } from 'typescript-guid';
 import * as _ from 'lodash';
 
 import { ContractorModel } from '../../../../domain/models/accounting/contractor.model.';
-import { ContractorEntity } from '../entities/contractor-entity';
+import { ContractorEntity } from '../entities/contractor.entity';
 
 export class DataContractorProfile extends Profile {
 	static readonly ContractorEntityToDomain = new MappingPair<ContractorEntity, ContractorModel>();

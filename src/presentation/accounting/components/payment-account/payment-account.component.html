@@ -21,7 +21,7 @@
 		>
 			<mat-list-option
 				*ngFor="let paymentAccount of cashAccountsSignal()"
-				[value]="paymentAccount.id"
+				[value]="paymentAccount.key"
 			>
 				<span
 					class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
@@ -67,7 +67,7 @@
 		>
 			<mat-list-option
 				*ngFor="let paymentAccount of debitVirtualAccountsSignal()"
-				[value]="paymentAccount.id"
+				[value]="paymentAccount.key"
 			>
 				<span
 					class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
@@ -126,7 +126,7 @@
 		>
 			<mat-list-option
 				*ngFor="let paymentAccount of creditVirtualAccountsSignal()"
-				[value]="paymentAccount.id"
+				[value]="paymentAccount.key"
 			>
 				<span
 					class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"

@@ -43,7 +43,7 @@ export class PaymentAccountState {
 		patchState({
 			accounts: [
 				..._.filter(state?.accounts, function (p) {
-					return p.id?.toString() !== paymentAccountId;
+					return p.key?.toString() !== paymentAccountId;
 				}),
 			],
 		});
@@ -86,7 +86,7 @@ export class PaymentAccountState {
 		const accounts = [...state.accounts];
 
 		const indexForUpdate = _.findIndex(accounts, function (i) {
-			return _.isEqual(i.id?.toString(), paymentAccount.id?.toString());
+			return _.isEqual(i.key?.toString(), paymentAccount.key?.toString());
 		});
 
 		accounts[indexForUpdate] = paymentAccount;

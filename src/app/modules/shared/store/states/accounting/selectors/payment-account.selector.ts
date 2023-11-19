@@ -12,7 +12,7 @@ export const getActivePaymentAccountId = createSelector(
 
 export const getActivePaymentAccount = createSelector([PaymentAccountState], (state: IPaymenentAccountStateModel) =>
 	_.find(state?.accounts, function (account) {
-		return account.id?.toString() === state?.activeAccountGuid;
+		return account.key?.toString() === state?.activeAccountGuid;
 	})
 );
 
