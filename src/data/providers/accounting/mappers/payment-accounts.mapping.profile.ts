@@ -1,10 +1,12 @@
 import * as _ from 'lodash';
+
 import { MappingPair, Profile } from '@dynamic-mapper/mapper';
+
 import { Guid } from 'typescript-guid';
 
+import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 import { PaymentAccountCreateOrUpdateRequest } from '../../../../domain/models/accounting/requests/payment-account-create-or-update.request';
 import { PaymentAccountEntity } from '../entities/payment-account.entity';
-import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 
 export class PaymentAccountsMappingProfile extends Profile {
 	static readonly PaymentAccountEntityToDomain = new MappingPair<PaymentAccountEntity, PaymentAccountModel>();

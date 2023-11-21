@@ -1,18 +1,20 @@
 import { Injectable } from '@angular/core';
 
+import * as _ from 'lodash';
+
 import { Store } from '@ngxs/store';
 import { firstValueFrom } from 'rxjs';
-import * as _ from 'lodash';
-import { Guid } from 'typescript-guid';
 
 import { Result } from 'core/result';
+import { Guid } from 'typescript-guid';
+
+import { SetActiveAccountingOperation } from '../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
 import {
 	Add,
 	Delete,
 	Edit,
 } from '../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
 import { AccountingGridRecord } from '../models/accounting-grid-record';
-import { SetActiveAccountingOperation } from '../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
 
 @Injectable()
 export class AccountingOperationsService {

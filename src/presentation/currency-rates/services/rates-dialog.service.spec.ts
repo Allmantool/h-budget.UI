@@ -1,9 +1,11 @@
 import { TestBed } from '@angular/core/testing';
+
 import { Store } from '@ngxs/store';
 
-import { RatesDialogService } from './rates-dialog.service';
 import { DialogProvider } from 'app/modules/shared/providers/dialog-provider';
 import { NationalBankCurrencyProvider } from 'data/providers/rates/national-bank-currency.provider';
+
+import { RatesDialogService } from './rates-dialog.service';
 
 describe('Rate dialog service', () => {
 	let nationalBankCurrencyProviderSpy: jasmine.SpyObj<NationalBankCurrencyProvider>;

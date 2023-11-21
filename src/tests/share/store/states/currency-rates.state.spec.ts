@@ -5,28 +5,31 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import { TestBed } from '@angular/core/testing';
 
-import { NgxsModule, Store } from '@ngxs/store';
 import * as _ from 'lodash';
+
+import { NgxsModule, Store } from '@ngxs/store';
 import { of } from 'rxjs';
+
+import { CurrencyTableState } from 'app/modules/shared/store/states/rates/currency-table.state';
 
 import { CurrencyTrend } from './../../../../app/modules/shared/store/models/currency-rates/currency-trend';
 import { ngxsConfig } from './../../../../app/modules/shared/store/ngxs.config';
-import { CurrencyRatesState } from '../../../../app/modules/shared/store/states/rates/currency-rates.state';
-import { NationalBankCurrencyProvider } from '../../../../data/providers/rates/national-bank-currency.provider';
-import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group.model';
-import { CurrencyRateValueModel } from 'domain/models/rates/currency-rate-value.model';
 import {
 	AddCurrencyGroups,
 	FetchAllCurrencyRates,
 } from '../../../../app/modules/shared/store/states/rates/actions/currency.actions';
-import { CurrencyTableState } from 'app/modules/shared/store/states/rates/currency-table.state';
 import { CurrencyChartState } from '../../../../app/modules/shared/store/states/rates/currency-chart.state';
+import { CurrencyRatesState } from '../../../../app/modules/shared/store/states/rates/currency-rates.state';
 import {
 	getCurrencyRatesFromPreviousDay,
 	getCurrencyRatesGroupByCurrencyId,
 } from '../../../../app/modules/shared/store/states/rates/selectors/currency.selectors';
+import { NationalBankCurrencyProvider } from '../../../../data/providers/rates/national-bank-currency.provider';
+import { CurrencyRateValueModel } from 'domain/models/rates/currency-rate-value.model';
+import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group.model';
 
 describe('Currency rates store', () => {
 	let store: Store;

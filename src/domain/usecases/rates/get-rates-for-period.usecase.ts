@@ -1,9 +1,10 @@
 import { Observable } from 'rxjs';
 
+import { UseCase } from 'core/use-case';
+
+import { DaysRangePayload } from 'domain/models/dates-range-payload.model';
 import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group.model';
 import { BankCurrencyProvider } from 'domain/providers/rates/bank-currency.provider';
-import { DaysRangePayload } from 'domain/models/dates-range-payload.model';
-import { UseCase } from 'core/use-case';
 
 export class GetRatesForPeriodUseCase
 	implements UseCase<{ requestPayload: DaysRangePayload }, CurrencyRateGroupModel[]>

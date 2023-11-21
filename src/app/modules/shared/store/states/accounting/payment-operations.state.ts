@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 
-import { Action, State, StateContext } from '@ngxs/store';
 import * as _ from 'lodash';
+
+import { Action, State, StateContext } from '@ngxs/store';
 import { nameof } from 'ts-simple-nameof';
 
 import { AccountingOperationsTableState } from './accounting-operations-table.state';
 import { Add, AddRange, Delete, Edit, SetInitialPaymentOperations } from './actions/payment-operation.actions';
 import { IAccountingOperationsStateModel } from './models/accounting-state.model';
-import { CurrencyAbbrevitions } from '../../../constants/rates-abbreviations';
 import { AccountingGridRecord } from '../../../../../../presentation/accounting/models/accounting-grid-record';
+import { CurrencyAbbrevitions } from '../../../constants/rates-abbreviations';
 
 @State<IAccountingOperationsStateModel>({
 	name: 'accountingOperations',

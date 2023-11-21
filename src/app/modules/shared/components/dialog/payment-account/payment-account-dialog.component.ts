@@ -1,22 +1,24 @@
-import { ChangeDetectionStrategy, Component, Inject, Signal, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, Inject, signal, Signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { UntypedFormBuilder } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
-import { Select, Store } from '@ngxs/store';
-import { Observable, filter, take } from 'rxjs';
 import * as _ from 'lodash';
 
+import { Select, Store } from '@ngxs/store';
+import { filter, Observable, take } from 'rxjs';
+
 import { Result } from 'core/result';
-import { DialogContainer } from '../../../models/dialog-container';
+
 import { AccountTypes } from '../../../../../../domain/models/accounting/account-types';
+import { PaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';
 import { CurrencyAbbrevitions } from '../../../constants/rates-abbreviations';
+import { DialogContainer } from '../../../models/dialog-container';
+import { DialogOperationTypes } from '../../../models/dialog-operation-types';
 import {
 	AddPaymentAccount,
 	UpdatePaymentAccount,
 } from '../../../store/states/accounting/actions/payment-acount.actions';
-import { PaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';
-import { DialogOperationTypes } from '../../../models/dialog-operation-types';
 import {
 	getActivePaymentAccountId,
 	getPaymentAccounts,

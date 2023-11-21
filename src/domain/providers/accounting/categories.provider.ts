@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs';
 
 import { Result } from 'core/result';
+
 import { CategoryModel } from '../../models/accounting/category.model';
 
 export interface CategoriesProvider {

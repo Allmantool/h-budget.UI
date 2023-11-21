@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 
-import { Action, State, StateContext } from '@ngxs/store';
 import _ from 'lodash';
+
+import { Action, State, StateContext } from '@ngxs/store';
 import { nameof } from 'ts-simple-nameof';
 
-import { ICounterpartiesStateModel } from './models/ICounterpartiesStateModel';
 import { AddCounterParty, SetInitialContractors } from './actions/counterparty.actions';
+import { ICounterpartiesStateModel } from './models/ICounterpartiesStateModel';
 import { ContractorModel } from 'domain/models/accounting/contractor.model.';
 
 @State<ICounterpartiesStateModel>({

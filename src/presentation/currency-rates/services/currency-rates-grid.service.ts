@@ -1,19 +1,21 @@
+import { SelectionModel } from '@angular/cdk/collections';
 import { Injectable } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
-import { SelectionModel } from '@angular/cdk/collections';
+
+import * as _ from 'lodash';
 
 import { Mapper } from '@dynamic-mapper/angular';
 import { Store } from '@ngxs/store';
-import * as _ from 'lodash';
 
-import { CurrencyGridRateModel } from '../models/currency-grid-rate.model';
-import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group.model';
-import { PreviousDayCurrencyRate } from 'app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
 import { RatesGridDefaultOptions } from 'app/modules/shared/constants/rates-grid-default-options';
 import { CurrencyTrend } from 'app/modules/shared/store/models/currency-rates/currency-trend';
-import { PresentationRatesMappingProfile } from '../mappers/presentation-rates-mapping.profiler';
-import { AddCurrencyGroups } from '../../../app/modules/shared/store/states/rates/actions/currency.actions';
+import { PreviousDayCurrencyRate } from 'app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
+
 import { SetActiveCurrency } from '../../../app/modules/shared/store/states/rates/actions/currency-table-options.actions';
+import { AddCurrencyGroups } from '../../../app/modules/shared/store/states/rates/actions/currency.actions';
+import { PresentationRatesMappingProfile } from '../mappers/presentation-rates-mapping.profiler';
+import { CurrencyGridRateModel } from '../models/currency-grid-rate.model';
+import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group.model';
 
 @Injectable()
 export class CurrencyRatesGridService {

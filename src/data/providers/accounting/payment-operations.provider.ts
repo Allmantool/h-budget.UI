@@ -1,15 +1,14 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 
 import { Mapper } from '@dynamic-mapper/angular';
-import { Observable, map, retry, take } from 'rxjs';
-
-import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
-import { Result } from '../../../core/result';
+import { map, Observable, retry, take } from 'rxjs';
 
 import { PaymentOperationEntity } from './entities/payment-operation.entity';
-import { PaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 import { PaymentOperationsMappingProfile } from './mappers/payment-operations.mapping.profile';
+import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
+import { Result } from '../../../core/result';
+import { PaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 
 @Injectable()
 export class PaymentOperationsProvider {

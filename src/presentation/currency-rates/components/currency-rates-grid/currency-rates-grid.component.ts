@@ -1,30 +1,31 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { SelectionModel } from '@angular/cdk/collections';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatTableDataSource } from '@angular/material/table';
-
-import { Select, Store } from '@ngxs/store';
-import { Observable, Subject, combineLatest } from 'rxjs';
-import { take } from 'rxjs/operators';
 
 import * as _ from 'lodash';
 
-import { CurrencyGridRateModel } from '../../models/currency-grid-rate.model';
-import { RatesDialogService } from './../../services/rates-dialog.service';
-import { CurrencyRatesGridService } from '../../services/currency-rates-grid.service';
-import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group.model';
+import { Select, Store } from '@ngxs/store';
+import { combineLatest, Observable, Subject } from 'rxjs';
+import { take } from 'rxjs/operators';
+
 import { NationalBankCurrencyProvider } from 'data/providers/rates/national-bank-currency.provider';
 import { RatesGridColumnOptions } from 'presentation/currency-rates/constants/rates-grid-options';
-import { CurrencyRateValueModel } from 'domain/models/rates/currency-rate-value.model';
-import { SetCurrencyDateRange } from '../../../../app/modules/shared/store/states/rates/actions/currency-table-options.actions';
-import { PreviousDayCurrencyRate } from '../../../../app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
+
+import { RatesDialogService } from './../../services/rates-dialog.service';
 import { RatesGridDefaultOptions } from '../../../../app/modules/shared/constants/rates-grid-default-options';
 import { CurrencyTableOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-table-options';
+import { PreviousDayCurrencyRate } from '../../../../app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
+import { SetCurrencyDateRange } from '../../../../app/modules/shared/store/states/rates/actions/currency-table-options.actions';
 import { getCurrencyTableOptions } from '../../../../app/modules/shared/store/states/rates/selectors/currency-table-options.selectors';
 import {
 	getCurrencyRatesFromPreviousDay,
 	getRates,
 } from '../../../../app/modules/shared/store/states/rates/selectors/currency.selectors';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { CurrencyGridRateModel } from '../../models/currency-grid-rate.model';
+import { CurrencyRatesGridService } from '../../services/currency-rates-grid.service';
+import { CurrencyRateValueModel } from 'domain/models/rates/currency-rate-value.model';
+import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group.model';
 
 @Component({
 	selector: 'app-currency-rates-grid',

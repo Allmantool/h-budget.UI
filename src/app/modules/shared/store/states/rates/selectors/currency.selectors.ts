@@ -1,12 +1,12 @@
-import { createSelector } from '@ngxs/store';
-
 import * as _ from 'lodash';
 
-import { CurrencyRatesState } from '../currency-rates.state';
-import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group.model';
+import { createSelector } from '@ngxs/store';
+
 import { PreviousDayCurrencyRate } from '../../../models/currency-rates/previous-day-currency-rate';
-import { CurrencyRateValueModel } from 'domain/models/rates/currency-rate-value.model';
+import { CurrencyRatesState } from '../currency-rates.state';
 import { ICurrencyRatesStateModel } from '../models/currency-rates-state.model';
+import { CurrencyRateValueModel } from 'domain/models/rates/currency-rate-value.model';
+import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group.model';
 
 export const getRates = createSelector([CurrencyRatesState], (state: ICurrencyRatesStateModel) => state.rateGroups);
 

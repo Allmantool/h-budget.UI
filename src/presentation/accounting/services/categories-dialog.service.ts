@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
 
-import { concatMap, map } from 'rxjs';
 import * as _ from 'lodash';
 
-import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
-import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
+import { concatMap, map } from 'rxjs';
+
 import { CategoriesDialogComponent } from '../../../app/modules/shared/components/dialog/categories/categories-dialog.component';
-import { CategoryModel } from 'domain/models/accounting/category.model';
+import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
+import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
 import { DefaultCategoriesProvider } from '../../../data/providers/accounting/categories.provider';
+import { CategoryModel } from 'domain/models/accounting/category.model';
 
 @Injectable()
 export class CategoriesDialogService {

@@ -2,20 +2,23 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+
 import { Injectable } from '@angular/core';
 
-import { format } from 'date-fns';
 import * as _ from 'lodash';
+
 import { Store } from '@ngxs/store';
+import { format } from 'date-fns';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 
-import { LineChartOptions } from '../models/line-chart-options';
 import { CurrencyTableOptions } from 'app/modules/shared/store/models/currency-rates/currency-table-options';
-import { CurrencyRateValueModel } from 'domain/models/rates/currency-rate-value.model';
-import { SetActiveCurrencyTrendTitle } from '../../../app/modules/shared/store/states/rates/actions/currency-chart-options.actions';
+
 import { LineChartTitleService } from './line-chart-title.service';
 import { CurrencyChartTitle } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-title';
+import { SetActiveCurrencyTrendTitle } from '../../../app/modules/shared/store/states/rates/actions/currency-chart-options.actions';
 import { ChartOptions } from '../models/chart-options';
+import { LineChartOptions } from '../models/line-chart-options';
+import { CurrencyRateValueModel } from 'domain/models/rates/currency-rate-value.model';
 
 @Injectable()
 export class LineChartService {

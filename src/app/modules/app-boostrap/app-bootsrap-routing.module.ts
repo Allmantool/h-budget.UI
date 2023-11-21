@@ -1,5 +1,5 @@
-import { PreloadAllModules, Routes, provideRouter, withDebugTracing, withPreloading } from '@angular/router';
 import { NgModule } from '@angular/core';
+import { PreloadAllModules, provideRouter, Routes, withDebugTracing, withPreloading } from '@angular/router';
 
 import { PageNotFoundComponent } from './../shared/components/page-not-found/page-not-found.component';
 

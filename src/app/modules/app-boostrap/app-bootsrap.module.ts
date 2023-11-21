@@ -1,25 +1,26 @@
 import { HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
-import { APP_INITIALIZER, NgModule, inject } from '@angular/core';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { APP_INITIALIZER, inject, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
-import { NgxsModule } from '@ngxs/store';
-import { NgxsLoggerPluginModule } from '@ngxs/logger-plugin';
 import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
+import { NgxsLoggerPluginModule } from '@ngxs/logger-plugin';
+import { NgxsModule } from '@ngxs/store';
 import { catchError, of, take, tap } from 'rxjs';
+
+import { environment } from 'environments/environment';
 
 import { AppSharedModule } from './../shared/shared.module';
 import { ngxsConfig } from './../shared/store/ngxs.config';
-import { CorrelationIdInteceptor } from '../core/interceptors/correlation-id.interceptor';
-import { HttpRequestLoaderInterceptor } from '../core/interceptors/http-request-loader.interceptor';
-import { CoreAppState } from '../shared/store/states/core-app-root/core-app.state';
 import { AppBootsrapRoutingModule } from './app-bootsrap-routing.module';
 import { AppRootComponent } from './components/app-root/app-root.component';
-import { CustomUIComponentsSharedModule } from '../shared/custom-ui-components.shared.module';
 import { AppCoreModule } from '../core';
-import { AppSettingsModel } from 'domain/models/app-settings.model';
+import { CorrelationIdInteceptor } from '../core/interceptors/correlation-id.interceptor';
+import { HttpRequestLoaderInterceptor } from '../core/interceptors/http-request-loader.interceptor';
+import { CustomUIComponentsSharedModule } from '../shared/custom-ui-components.shared.module';
 import { AppConfigurationService } from '../shared/services/app-configuration.service';
-import { environment } from 'environments/environment';
+import { CoreAppState } from '../shared/store/states/core-app-root/core-app.state';
+import { AppSettingsModel } from 'domain/models/app-settings.model';
 
 @NgModule({
 	declarations: [AppRootComponent],

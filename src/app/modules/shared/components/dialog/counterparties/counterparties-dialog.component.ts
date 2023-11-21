@@ -1,19 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { ChangeDetectionStrategy, Component, ElementRef, Inject, ViewChild, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
 import { ENTER } from '@angular/cdk/keycodes';
+import { ChangeDetectionStrategy, Component, ElementRef, Inject, signal, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatChipInputEvent } from '@angular/material/chips';
-import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import { Store } from '@ngxs/store';
-import { Observable, map, startWith, take } from 'rxjs';
 import * as _ from 'lodash';
 
+import { Store } from '@ngxs/store';
+import { map, Observable, startWith, take } from 'rxjs';
+
 import { DialogContainer } from '../../../models/dialog-container';
-import { ContractorModel } from 'domain/models/accounting/contractor.model.';
 import { AddCounterParty } from '../../../store/states/handbooks/actions/counterparty.actions';
+import { ContractorModel } from 'domain/models/accounting/contractor.model.';
 
 @Component({
 	selector: 'counterparties-dialog',

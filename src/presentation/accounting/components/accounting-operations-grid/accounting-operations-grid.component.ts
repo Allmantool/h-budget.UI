@@ -1,34 +1,36 @@
 import {
 	ChangeDetectionStrategy,
 	Component,
-	DestroyRef,
-	OnInit,
-	Signal,
 	computed,
+	DestroyRef,
 	inject,
+	OnInit,
 	signal,
+	Signal,
 } from '@angular/core';
-import { Router } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
+
+import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
 import { BehaviorSubject, Observable, retry } from 'rxjs';
-import { Guid } from 'typescript-guid';
-import * as _ from 'lodash';
+import { take } from 'rxjs/operators';
 
-import { AccountingGridRecord } from 'presentation/accounting/models/accounting-grid-record';
-import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
-import { SetInitialPaymentOperations } from '../../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
-import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
-import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
+import { Guid } from 'typescript-guid';
+
 import { AccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
+import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
+import { SetInitialPaymentOperations } from '../../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
+import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import {
 	getActivePaymentAccount,
 	getActivePaymentAccountId,
 } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
-import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
+import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { PaymentOperationsProvider } from '../../../../data/providers/accounting/payment-operations.provider';
-import { take } from 'rxjs/operators';
+import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
+import { AccountingGridRecord } from '../../models/accounting-grid-record';
 
 @Component({
 	selector: 'accounting-operarions-grid',

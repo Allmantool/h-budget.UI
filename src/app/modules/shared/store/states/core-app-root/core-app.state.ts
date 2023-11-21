@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 
-import { Action, State, StateContext } from '@ngxs/store';
 import * as _ from 'lodash';
 
-import { ICoreAppStateModel } from './models/core-app-state.model';
+import { Action, State, StateContext } from '@ngxs/store';
+
 import { AddProcessingRequest, RemoveProcessingRequest } from './actions/core-app.actions';
+import { ICoreAppStateModel } from './models/core-app-state.model';
 
 @State<ICoreAppStateModel>({
 	name: 'coreAppState',

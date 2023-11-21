@@ -1,21 +1,23 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, Signal, inject } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, Signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+
+import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
-import { Observable, combineLatest } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
-import * as _ from 'lodash';
 import { nameof } from 'ts-simple-nameof';
 
-import { AccountingGridRecord } from '../../models/accounting-grid-record';
-import { CategoryModel } from '../../../../domain/models/accounting/category.model';
 import { AccountingOperationsTableOptions } from 'app/modules/shared/store/models/accounting/accounting-table-options';
-import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
+
 import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
-import { CategoriesDialogService } from '../../services/categories-dialog.service';
+import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { getCategories } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
 import { getContractors } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
+import { CategoryModel } from '../../../../domain/models/accounting/category.model';
+import { AccountingGridRecord } from '../../models/accounting-grid-record';
+import { CategoriesDialogService } from '../../services/categories-dialog.service';
 import { CounterpartiesDialogService } from '../../services/counterparties-dialog.service';
 import '../../../../domain/extensions/handbookExtensions';
 import { DefaultContractorsProvider } from '../../../../data/providers/accounting/contractors.provider';

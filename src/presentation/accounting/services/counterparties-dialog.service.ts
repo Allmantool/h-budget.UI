@@ -1,14 +1,15 @@
 import { Injectable } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
 
-import { concatMap, map } from 'rxjs';
 import * as _ from 'lodash';
 
-import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
-import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
+import { concatMap, map } from 'rxjs';
+
 import { CounterpartiesDialogComponent } from '../../../app/modules/shared/components/dialog/counterparties/counterparties-dialog.component';
-import { ContractorModel } from '../../../domain/models/accounting/contractor.model.';
+import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
+import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
 import { DefaultContractorsProvider } from '../../../data/providers/accounting/contractors.provider';
+import { ContractorModel } from '../../../domain/models/accounting/contractor.model.';
 
 @Injectable()
 export class CounterpartiesDialogService {

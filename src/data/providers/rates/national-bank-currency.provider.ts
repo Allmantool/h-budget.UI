@@ -2,18 +2,19 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { Mapper } from '@dynamic-mapper/angular';
+import { format } from 'date-fns';
 import { Observable } from 'rxjs';
 import { map, retry, take, tap } from 'rxjs/operators';
-import { format } from 'date-fns';
 
-import { BankCurrencyProvider } from '../../../domain/providers/rates/bank-currency.provider';
+import { CurrencyGridRateModel } from 'presentation/currency-rates/models/currency-grid-rate.model';
+
+import { RatesGroupEntity } from './entities/rates-group.entity';
+import { DataRatesMappingProfile } from './mappers/data-rates-mapping.profiler';
+import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
 import { Result } from '../../../core/result';
 import { DaysRangePayload } from '../../../domain/models/dates-range-payload.model';
 import { CurrencyRateGroupModel } from '../../../domain/models/rates/currency-rates-group.model';
-import { DataRatesMappingProfile } from './mappers/data-rates-mapping.profiler';
-import { RatesGroupEntity } from './entities/rates-group.entity';
-import { CurrencyGridRateModel } from 'presentation/currency-rates/models/currency-grid-rate.model';
-import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
+import { BankCurrencyProvider } from '../../../domain/providers/rates/bank-currency.provider';
 
 @Injectable()
 export class NationalBankCurrencyProvider implements BankCurrencyProvider {

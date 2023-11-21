@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
+
 import { Action, State, StateContext } from '@ngxs/store';
 
+import { SetActiveAccountingOperation } from './actions/accounting-table-options.actions';
 import { IAccountingTableStateModel } from './models/accounting-table-state.model';
 import { AccountingOperationsTableOptions } from '../../models/accounting/accounting-table-options';
-import { SetActiveAccountingOperation } from './actions/accounting-table-options.actions';
 
 @State<IAccountingTableStateModel>({
 	name: 'accountingOpertaionsTableState',

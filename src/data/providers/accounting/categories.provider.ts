@@ -1,16 +1,17 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 
 import { Mapper } from '@dynamic-mapper/angular';
-import { Observable, map, retry, take } from 'rxjs';
+import { map, Observable, retry, take } from 'rxjs';
 
 import { Result } from 'core/result';
-import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
-import { CategoriesProvider } from '../../../domain/providers/accounting/categories.provider';
-import { CategoryModel } from '../../../domain/models/accounting/category.model';
-import { CategoryCreateRequest } from '../../../domain/models/accounting/requests/category-create.request';
+
 import { CategoryEntity } from './entities/operation-category.entity';
 import { DataCategoryProfile } from './mappers/category.mapping.profile';
+import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
+import { CategoryModel } from '../../../domain/models/accounting/category.model';
+import { CategoryCreateRequest } from '../../../domain/models/accounting/requests/category-create.request';
+import { CategoriesProvider } from '../../../domain/providers/accounting/categories.provider';
 
 @Injectable()
 export class DefaultCategoriesProvider implements CategoriesProvider {

@@ -1,16 +1,17 @@
 import { Injectable } from '@angular/core';
 
-import { Action, State, StateContext } from '@ngxs/store';
-import { take, tap } from 'rxjs';
 import * as _ from 'lodash';
 
-import { CurrencyRateValueModel } from 'domain/models/rates/currency-rate-value.model';
+import { Action, State, StateContext } from '@ngxs/store';
+import { take, tap } from 'rxjs';
+
 import { AddCurrencyGroups, FetchAllCurrencyRates } from './actions/currency.actions';
-import { ICurrencyRatesStateModel } from './models/currency-rates-state.model';
-import { CurrencyTableState } from './currency-table.state';
 import { CurrencyChartState } from './currency-chart.state';
+import { CurrencyTableState } from './currency-table.state';
+import { ICurrencyRatesStateModel } from './models/currency-rates-state.model';
+import { NationalBankCurrencyProvider } from '../../../../../../data/providers/rates/national-bank-currency.provider';
+import { CurrencyRateValueModel } from '../../../../../../domain/models/rates/currency-rate-value.model';
 import { CurrencyRateGroupModel } from '../../../../../../domain/models/rates/currency-rates-group.model';
-import { NationalBankCurrencyProvider } from 'data/providers/rates/national-bank-currency.provider';
 
 @State<ICurrencyRatesStateModel>({
 	name: 'currencyState',

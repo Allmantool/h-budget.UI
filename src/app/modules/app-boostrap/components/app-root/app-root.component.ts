@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
+
+import * as _ from 'lodash';
 
 import { Select } from '@ngxs/store';
 import { BehaviorSubject, Observable } from 'rxjs';
-import * as _ from 'lodash';
 
 import { requestsUnderProcessing } from '../../../shared/store/states/core-app-root/selectors/core-app.selectores';
 

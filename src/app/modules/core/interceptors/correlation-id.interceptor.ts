@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import { v4 as uuidv4 } from 'uuid';
-import { Observable } from 'rxjs';
 import _ from 'lodash';
+
+import { Observable } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 
 import { ApiHeaders } from '../../shared/constants/api-headers';
 

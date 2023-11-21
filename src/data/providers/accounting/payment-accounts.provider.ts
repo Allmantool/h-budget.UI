@@ -1,15 +1,15 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 
 import { Mapper } from '@dynamic-mapper/angular';
-import { Observable, filter, map, retry, take, tap } from 'rxjs';
+import { filter, map, Observable, retry, take, tap } from 'rxjs';
 
-import { PaymentAccountsProvider } from '../../../domain/providers/accounting/payment-accounts.provider';
-import { PaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
 import { PaymentAccountEntity } from './entities/payment-account.entity';
-import { Result } from '../../../core/result';
 import { PaymentAccountsMappingProfile } from './mappers/payment-accounts.mapping.profile';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
+import { Result } from '../../../core/result';
+import { PaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
+import { PaymentAccountsProvider } from '../../../domain/providers/accounting/payment-accounts.provider';
 
 @Injectable()
 export class DefaultPaymentAccountsProvider implements PaymentAccountsProvider {

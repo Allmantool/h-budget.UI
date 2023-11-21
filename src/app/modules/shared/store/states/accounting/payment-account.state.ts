@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 
-import { Action, State, StateContext } from '@ngxs/store';
 import * as _ from 'lodash';
 
-import { IPaymenentAccountStateModel } from './models/payment-account-state.model';
+import { Action, State, StateContext } from '@ngxs/store';
+
 import {
 	AddPaymentAccount,
 	AddPaymentAccounts,
@@ -12,6 +12,7 @@ import {
 	SetInitialPaymentAccounts,
 	UpdatePaymentAccount,
 } from './actions/payment-acount.actions';
+import { IPaymenentAccountStateModel } from './models/payment-account-state.model';
 
 @State<IPaymenentAccountStateModel>({
 	name: 'paymentAccount',

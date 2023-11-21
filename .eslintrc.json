@@ -4,6 +4,7 @@
 	"overrides": [
 		{
 			"files": ["*.ts"],
+			"parser": "@typescript-eslint/parser",
 			"parserOptions": {
 				"project": ["tsconfig.json", "e2e/tsconfig.json"],
 				"createDefaultProgram": true
@@ -17,9 +18,88 @@
 				"plugin:prettier/recommended"
 			],
 			"rules": {
-                "no-restricted-imports":"warn",
-                "max-depth": 1,
-                "sort-imports":"warn",
+				"no-restricted-imports": "warn",
+				"max-depth": 1,
+				"sort-imports": [
+					"warn",
+					{
+						"ignoreCase": true,
+						"ignoreDeclarationSort": true,
+						"ignoreMemberSort": false,
+						"memberSyntaxSortOrder": ["none", "all", "multiple", "single"],
+						"allowSeparatedGroups": true
+					}
+				],
+				"import/namespace": ["error", { "allowComputed": true }],
+				"import/order": [
+					"warn",
+					{
+						"groups": [
+							"internal",
+							"unknown",
+							"external",
+							["builtin", "sibling", "parent"],
+							"index"
+						],
+						"pathGroups": [
+                            {
+								"pattern": "@angular/**",
+								"group": "internal"
+							},
+                            {
+								"pattern": "@angular",
+								"group": "internal"
+							},
+							{
+								"pattern": "rxjs",
+								"group": "unknown"
+							},
+							{
+								"pattern": "rxjs/**",
+								"group": "unknown"
+							},
+                            {
+								"pattern": "uuid",
+								"group": "unknown"
+							},
+                            {
+								"pattern": "ng-**",
+								"group": "unknown"
+							},
+                            {
+								"pattern": "ts-simple-nameof",
+								"group": "unknown"
+							},
+                            {
+								"pattern": "date-fns",
+								"group": "unknown"
+							},
+                            {
+								"pattern": "@dynamic-mapper/**",
+								"group": "unknown"
+							},
+                            {
+								"pattern": "lodash",
+								"group": "unknown",
+                                "position": "before"
+							},
+                            {
+								"pattern": "@ngxs/**",
+								"group": "unknown"
+							},
+							{
+								"pattern": "@internal-library",
+								"group": "builtin"
+							}
+						],
+						"pathGroupsExcludedImportTypes": ["type", "object"],
+						"newlines-between": "always",
+						"alphabetize": {
+							"order": "asc",
+							"caseInsensitive": true
+						}
+					}
+				],
 				"@angular-eslint/component-selector": [
 					"error",
 					{
@@ -40,7 +120,32 @@
 		},
 		{
 			"files": ["*.html"],
-			"extends": ["plugin:@angular-eslint/template/recommended", "plugin:prettier/recommended"],
+			"plugins": ["@typescript-eslint", "prettier", "import"], // Add "import" plugin,
+			"settings": {
+				"import/internal-regex": "@angular/**",
+				"import/external-module-folders": ["node_modules"],
+				"import/parsers": {
+					"@typescript-eslint/parser": [".ts"]
+				},
+				"import/resolver": {
+					"alias": true,
+					"typescript": {
+						"alwaysTryTypes": true,
+						"project": "./tsconfig.json"
+					}
+				}
+			},
+			"extends": [
+				"plugin:import/typescript",
+				"plugin:import/errors",
+				"plugin:import/warnings",
+				"plugin:import/recommended",
+				"plugin:@angular-eslint/template/recommended",
+				"plugin:prettier/recommended",
+				"eslint:recommended",
+				"plugin:@typescript-eslint/recommended",
+				"plugin:prettier/recommended"
+			],
 			"rules": {}
 		}
 	]

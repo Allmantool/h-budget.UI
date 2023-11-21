@@ -1,10 +1,11 @@
-import { MappingPair, Profile } from '@dynamic-mapper/mapper';
-
 import * as _ from 'lodash';
 
-import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group.model';
-import { CurrencyGridRateModel } from '../models/currency-grid-rate.model';
+import { MappingPair, Profile } from '@dynamic-mapper/mapper';
+
 import { CurrencyTrend } from 'app/modules/shared/store/models/currency-rates/currency-trend';
+
+import { CurrencyGridRateModel } from '../models/currency-grid-rate.model';
+import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group.model';
 
 export class PresentationRatesMappingProfile extends Profile {
 	static readonly CurrencyRateGroupModelToGridRates = new MappingPair<

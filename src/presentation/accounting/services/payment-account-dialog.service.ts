@@ -1,16 +1,17 @@
 import { Injectable } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
 
-import { concatMap, filter, map, tap } from 'rxjs';
 import * as _ from 'lodash';
 
+import { concatMap, filter, map, tap } from 'rxjs';
+
+import { PaymentAccountDialogComponent } from '../../../app/modules/shared/components/dialog/payment-account/payment-account-dialog.component';
+import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
+import { DialogOperationTypes } from '../../../app/modules/shared/models/dialog-operation-types';
 import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
 import { Result } from '../../../core/result';
-import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
-import { PaymentAccountDialogComponent } from '../../../app/modules/shared/components/dialog/payment-account/payment-account-dialog.component';
-import { PaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
 import { DefaultPaymentAccountsProvider } from '../../../data/providers/accounting/payment-accounts.provider';
-import { DialogOperationTypes } from '../../../app/modules/shared/models/dialog-operation-types';
+import { PaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
 
 @Injectable()
 export class PaymentAccountDialogService {

@@ -1,5 +1,5 @@
-import { Routes, provideRouter, withDebugTracing } from '@angular/router';
 import { NgModule } from '@angular/core';
+import { provideRouter, Routes, withDebugTracing } from '@angular/router';
 
 import { CurrencyRatesDashboardComponent } from '../currency-rates';
 
