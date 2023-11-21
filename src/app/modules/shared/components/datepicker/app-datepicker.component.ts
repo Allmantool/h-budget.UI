@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @angular-eslint/no-output-on-prefix */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Component, ChangeDetectionStrategy, forwardRef, Input, Output, EventEmitter } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, forwardRef } from '@angular/core';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 

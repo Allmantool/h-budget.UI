@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { State, Action, StateContext } from '@ngxs/store';
+import { Action, State, StateContext } from '@ngxs/store';
 import { addMonths } from 'date-fns';
 
 import { ICurrencyTableStateModel } from './models/currency-table-state.model';

@@ -1,9 +1,18 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, DestroyRef, Input, OnInit, ViewChild, inject } from '@angular/core';
+import {
+	AfterViewInit,
+	ChangeDetectionStrategy,
+	Component,
+	DestroyRef,
+	Input,
+	OnInit,
+	ViewChild,
+	inject,
+} from '@angular/core';
 
 import { Select, Store } from '@ngxs/store';
 import * as _ from 'lodash';
 import { ChartComponent } from 'ng-apexcharts';
-import { BehaviorSubject, combineLatest, from, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, combineLatest, from } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
 import { CurrencyGridRateModel } from '../../models/currency-grid-rate.model';

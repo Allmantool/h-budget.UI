@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { State, Action, StateContext } from '@ngxs/store';
+import { Action, State, StateContext } from '@ngxs/store';
 
 import { ICurrencyChartStateModel } from './models/currency-chart-state.model';
 import { CurrencyChartOptions } from '../../models/currency-rates/currency-chart-option.';

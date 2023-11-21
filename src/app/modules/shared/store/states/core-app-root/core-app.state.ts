@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 
-import { State, Action, StateContext } from '@ngxs/store';
+import { Action, State, StateContext } from '@ngxs/store';
 import * as _ from 'lodash';
 
 import { ICoreAppStateModel } from './models/core-app-state.model';

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
 
-import { take, Subject } from 'rxjs';
+import { Subject, take } from 'rxjs';
 import { Store } from '@ngxs/store';
 
 import * as _ from 'lodash';
@@ -34,7 +34,7 @@ export class RatesDialogService {
 			this.currencyRateProvider
 				.getCurrenciesForSpecifiedPeriod(payload)
 				.pipe(take(1))
-				.subscribe((rateGroups) => {
+				.subscribe(rateGroups => {
 					this.store.dispatch(new AddCurrencyGroups(rateGroups));
 
 					ratesAmountForPeriodSubject.next(rateGroups?.length);

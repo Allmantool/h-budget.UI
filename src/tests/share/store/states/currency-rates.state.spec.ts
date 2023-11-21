@@ -32,51 +32,39 @@ describe('Currency rates store', () => {
 	let store: Store;
 	let currencyRateProviderSpy: any;
 
-	const initialStoreRateGroups: CurrencyRateGroupModel[] =
-		new Array<CurrencyRateGroupModel>(
-			{
-				currencyId: 1,
-				rateValues: [
-					{
-						ratePerUnit: 14,
-						currencyTrend: CurrencyTrend.notChanged,
-						updateDate: new Date(2022, 1, 3),
-					} as CurrencyRateValueModel,
-					{
-						ratePerUnit: 16,
-						currencyTrend: CurrencyTrend.notChanged,
-						updateDate: new Date(2022, 1, 4),
-					} as CurrencyRateValueModel,
-				],
-			} as CurrencyRateGroupModel,
-			{
-				currencyId: 2,
-				rateValues: [
-					{
-						ratePerUnit: 12,
-						currencyTrend: CurrencyTrend.up,
-						updateDate: new Date(2022, 4, 4),
-					} as CurrencyRateValueModel,
-				],
-			} as CurrencyRateGroupModel
-		);
+	const initialStoreRateGroups: CurrencyRateGroupModel[] = new Array<CurrencyRateGroupModel>(
+		{
+			currencyId: 1,
+			rateValues: [
+				{
+					ratePerUnit: 14,
+					currencyTrend: CurrencyTrend.notChanged,
+					updateDate: new Date(2022, 1, 3),
+				} as CurrencyRateValueModel,
+				{
+					ratePerUnit: 16,
+					currencyTrend: CurrencyTrend.notChanged,
+					updateDate: new Date(2022, 1, 4),
+				} as CurrencyRateValueModel,
+			],
+		} as CurrencyRateGroupModel,
+		{
+			currencyId: 2,
+			rateValues: [
+				{
+					ratePerUnit: 12,
+					currencyTrend: CurrencyTrend.up,
+					updateDate: new Date(2022, 4, 4),
+				} as CurrencyRateValueModel,
+			],
+		} as CurrencyRateGroupModel
+	);
 
 	beforeEach(() => {
-		currencyRateProviderSpy = jasmine.createSpyObj('currencyRateProvider', [
-			'getCurrencies',
-		]);
+		currencyRateProviderSpy = jasmine.createSpyObj('currencyRateProvider', ['getCurrencies']);
 
 		TestBed.configureTestingModule({
-			imports: [
-				NgxsModule.forRoot(
-					[
-						CurrencyRatesState,
-						CurrencyTableState,
-						CurrencyChartState,
-					],
-					ngxsConfig
-				),
-			],
+			imports: [NgxsModule.forRoot([CurrencyRatesState, CurrencyTableState, CurrencyChartState], ngxsConfig)],
 			providers: [
 				{
 					provide: NationalBankCurrencyProvider,
@@ -92,8 +80,8 @@ describe('Currency rates store', () => {
 
 	it('it "AddCurrencyGroups": initial setup - expect 2 carrency groups', () => {
 		store
-			.selectOnce((state) => state.currencyState.rateGroups)
-			.subscribe((groups) => {
+			.selectOnce(state => state.currencyState.rateGroups)
+			.subscribe(groups => {
 				expect(groups.length).toBe(2);
 			});
 	});
@@ -118,8 +106,8 @@ describe('Currency rates store', () => {
 		store.dispatch(new AddCurrencyGroups(updatedCurrencyRateGroups));
 
 		store
-			.selectOnce((state) => state.currencyState.rateGroups)
-			.subscribe((groups) => {
+			.selectOnce(state => state.currencyState.rateGroups)
+			.subscribe(groups => {
 				expect(groups.length).toBe(2);
 			});
 	});
@@ -144,17 +132,12 @@ describe('Currency rates store', () => {
 		store.dispatch(new AddCurrencyGroups(updatedCurrencyRateGroups));
 
 		store
-			.selectOnce((state) => state.currencyState.rateGroups)
-			.subscribe((groups) => {
-				const updatedRateGroup = _.find(
-					groups,
-					(g) => g.currencyId == 1
-				);
+			.selectOnce(state => state.currencyState.rateGroups)
+			.subscribe(groups => {
+				const updatedRateGroup = _.find(groups, g => g.currencyId == 1);
 				const updatedRate = _.find(
 					updatedRateGroup.rateValues,
-					(r) =>
-						r.updateDate.toDateString() ===
-						new Date(2022, 1, 3).toDateString()
+					r => r.updateDate.toDateString() === new Date(2022, 1, 3).toDateString()
 				);
 
 				expect(updatedRate?.ratePerUnit).toBe(14);
@@ -181,11 +164,9 @@ describe('Currency rates store', () => {
 		store.dispatch(new AddCurrencyGroups(updatedCurrencyRateGroups));
 
 		store
-			.selectOnce((state) => state.currencyState.rateGroups)
+			.selectOnce(state => state.currencyState.rateGroups)
 			.subscribe((groups: CurrencyRateGroupModel[]) => {
-				const items = _.flattenDeep(
-					_.map(groups, (g) => g.rateValues!)
-				);
+				const items = _.flattenDeep(_.map(groups, g => g.rateValues!));
 
 				expect(items.length).toBe(5);
 			});
@@ -214,13 +195,9 @@ describe('Currency rates store', () => {
 		currencyRateProviderSpy.getCurrencies.and.returnValue(of(stubValue));
 		store.dispatch(new FetchAllCurrencyRates());
 
-		const groups = store.selectSnapshot(
-			(state) => state.currencyState.rateGroups
-		);
+		const groups = store.selectSnapshot(state => state.currencyState.rateGroups);
 
-		const items = _.flattenDeep(
-			_.map(groups, (g: CurrencyRateGroupModel) => g.rateValues!)
-		);
+		const items = _.flattenDeep(_.map(groups, (g: CurrencyRateGroupModel) => g.rateValues!));
 
 		expect(items.length).toBe(2);
 	});

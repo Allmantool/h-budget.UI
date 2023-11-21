@@ -29,20 +29,13 @@ describe('Rate dialog service', () => {
 	});
 
 	it('should use ValueService', () => {
-		const dialogProviderSpy = jasmine.createSpyObj('DialogProvider', [
-			'openDialog',
+		const dialogProviderSpy = jasmine.createSpyObj('DialogProvider', ['openDialog']);
+		const currencyRateProviderSpy = jasmine.createSpyObj('NationalBankCurrencyProvider', [
+			'getCurrenciesForSpecifiedPeriod',
 		]);
-		const currencyRateProviderSpy = jasmine.createSpyObj(
-			'NationalBankCurrencyProvider',
-			['getCurrenciesForSpecifiedPeriod']
-		);
 		const storeSpy = jasmine.createSpyObj('Store', ['dispatch']);
 
-		const rateService = new RatesDialogService(
-			dialogProviderSpy,
-			currencyRateProviderSpy,
-			storeSpy
-		);
+		const rateService = new RatesDialogService(dialogProviderSpy, currencyRateProviderSpy, storeSpy);
 
 		expect(rateService.openLoadRatesForPeriod());
 	});

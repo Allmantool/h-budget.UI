@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, computed, Inject, signal, Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject, Signal, computed, signal } from '@angular/core';
 import { UntypedFormBuilder } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import { Select, Store } from '@ngxs/store';
@@ -18,8 +18,8 @@ import {
 import { PaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';
 import { DialogOperationTypes } from '../../../models/dialog-operation-types';
 import {
-	getPaymentAccounts,
 	getActivePaymentAccountId,
+	getPaymentAccounts,
 } from '../../../store/states/accounting/selectors/payment-account.selector';
 
 @Component({

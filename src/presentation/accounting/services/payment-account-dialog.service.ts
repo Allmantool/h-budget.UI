@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
 
-import { tap, filter, map, concatMap } from 'rxjs';
+import { concatMap, filter, map, tap } from 'rxjs';
 import * as _ from 'lodash';
 
 import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';

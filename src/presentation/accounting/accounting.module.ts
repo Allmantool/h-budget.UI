@@ -4,9 +4,9 @@ import { NgxsModule } from '@ngxs/store';
 import { MapperModule } from '@dynamic-mapper/angular';
 
 import {
-	AccountingRoutingModule,
-	AccountingOperatiosGridComponent,
 	AccountingOperationsCrudComponent,
+	AccountingOperatiosGridComponent,
+	AccountingRoutingModule,
 } from '../accounting';
 import { AccountingOperationsTableState } from '../../app/modules/shared/store/states/accounting/accounting-operations-table.state';
 import { CategoriesDialogService } from 'presentation/accounting/services/categories-dialog.service';

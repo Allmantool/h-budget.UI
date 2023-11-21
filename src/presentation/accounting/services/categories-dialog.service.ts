@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 
 import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
 import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
-import { CategoriesDialogComponent } from '../../../app/modules/shared/components/dialog/categories/categories-dialog.component';;
+import { CategoriesDialogComponent } from '../../../app/modules/shared/components/dialog/categories/categories-dialog.component';
 import { CategoryModel } from 'domain/models/accounting/category.model';
 import { DefaultCategoriesProvider } from '../../../data/providers/accounting/categories.provider';
 

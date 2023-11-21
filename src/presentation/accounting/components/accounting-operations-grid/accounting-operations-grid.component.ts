@@ -1,33 +1,30 @@
 import {
 	ChangeDetectionStrategy,
 	Component,
+	DestroyRef,
 	OnInit,
 	Signal,
-	signal,
 	computed,
-	DestroyRef,
 	inject,
+	signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import { Select, Store } from '@ngxs/store';
-import { Observable, BehaviorSubject, retry } from 'rxjs';
+import { BehaviorSubject, Observable, retry } from 'rxjs';
 import { Guid } from 'typescript-guid';
 import * as _ from 'lodash';
 
 import { AccountingGridRecord } from 'presentation/accounting/models/accounting-grid-record';
 import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
-import {
-	AddRange,
-	SetInitialPaymentOperations,
-} from '../../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
+import { SetInitialPaymentOperations } from '../../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
 import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { AccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
 import {
-	getActivePaymentAccountId,
 	getActivePaymentAccount,
+	getActivePaymentAccountId,
 } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 import { PaymentOperationsProvider } from '../../../../data/providers/accounting/payment-operations.provider';

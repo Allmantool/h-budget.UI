@@ -8,7 +8,7 @@ import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angul
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { Store } from '@ngxs/store';
-import { Observable, startWith, map, take } from 'rxjs';
+import { Observable, map, startWith, take } from 'rxjs';
 import * as _ from 'lodash';
 
 import { DialogContainer } from '../../../models/dialog-container';

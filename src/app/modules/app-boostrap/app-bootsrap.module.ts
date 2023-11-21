@@ -6,7 +6,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgxsModule } from '@ngxs/store';
 import { NgxsLoggerPluginModule } from '@ngxs/logger-plugin';
 import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
-import { tap, of, take, catchError } from 'rxjs';
+import { catchError, of, take, tap } from 'rxjs';
 
 import { AppSharedModule } from './../shared/shared.module';
 import { ngxsConfig } from './../shared/store/ngxs.config';

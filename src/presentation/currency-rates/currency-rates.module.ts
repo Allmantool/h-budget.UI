@@ -4,10 +4,10 @@ import { MapperModule } from '@dynamic-mapper/angular';
 import { NgxsModule } from '@ngxs/store';
 
 import {
-	CurrencyRatesRoutingModule,
 	CurrencyRatesDashboardComponent,
 	CurrencyRatesGridComponent,
 	CurrencyRatesLineChartComponent,
+	CurrencyRatesRoutingModule,
 } from '../currency-rates';
 import { LineChartService } from './services/line-chart.service';
 import { DataRatesMappingProfile } from 'data/providers/rates/mappers/data-rates-mapping.profiler';

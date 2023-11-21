@@ -7,7 +7,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { Store } from '@ngxs/store';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, startWith, take, map } from 'rxjs';
+import { Observable, map, startWith, take } from 'rxjs';
 import * as _ from 'lodash';
 
 import { DialogContainer } from '../../../models/dialog-container';
@@ -22,7 +22,6 @@ import { AddCategory } from '../../../store/states/handbooks/actions/category.ac
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CategoriesDialogComponent {
-
 	private dialogConfiguration: DialogContainer;
 
 	@ViewChild('chipGrid ')

@@ -3,7 +3,7 @@ import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angul
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import { Select, Store } from '@ngxs/store';
-import { combineLatest, Observable } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import * as _ from 'lodash';
 import { nameof } from 'ts-simple-nameof';
