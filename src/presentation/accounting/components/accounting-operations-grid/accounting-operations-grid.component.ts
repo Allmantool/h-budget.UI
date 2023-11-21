@@ -12,13 +12,16 @@ import { Router } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import { Select, Store } from '@ngxs/store';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, retry } from 'rxjs';
 import { Guid } from 'typescript-guid';
 import * as _ from 'lodash';
 
 import { AccountingGridRecord } from 'presentation/accounting/models/accounting-grid-record';
 import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
-import { AddRange } from '../../../../app/modules/shared/store/states/accounting/actions/accounting.actions';
+import {
+	AddRange,
+	SetInitialPaymentOperations,
+} from '../../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
 import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { AccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
@@ -27,6 +30,8 @@ import {
 	getActivePaymentAccount,
 } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
+import { PaymentOperationsProvider } from '../../../../data/providers/accounting/payment-operations.provider';
+import { take } from 'rxjs/operators';
 
 @Component({
 	selector: 'accounting-operarions-grid',
@@ -52,49 +57,6 @@ export class AccountingOperatiosGridComponent implements OnInit {
 
 	public paymentAccountGeneralInfoSignal: Signal<string> = signal('');
 
-	public ELEMENT_DATA: AccountingGridRecord[] = [
-		{
-			id: Guid.create(),
-			operationDate: new Date(2022, 24, 4),
-			contractor: 'Transport: Taxi',
-			category: 'Transport: Taxi',
-			income: 0,
-			expense: 0.35,
-			balance: 0.35,
-			comment: 'comment',
-		},
-		{
-			id: Guid.create(),
-			operationDate: new Date(2022, 28, 4),
-			contractor: 'Transport: Taxi',
-			category: 'Transport: Public',
-			income: 0,
-			expense: 0.35,
-			balance: 0.35,
-			comment: 'long long comment very long long long',
-		},
-		{
-			id: Guid.create(),
-			operationDate: new Date(2022, 29, 4),
-			contractor: 'Transport: Taxi',
-			category: 'Transport: Public',
-			income: 0,
-			expense: 11000.35,
-			balance: 1201030.35,
-			comment: 'long long comment very long long long',
-		},
-		{
-			id: Guid.create(),
-			operationDate: new Date(2022, 5, 5),
-			contractor: 'Work: GodelTech',
-			category: 'Income: Advance',
-			income: 15864,
-			expense: 0,
-			balance: 1201030.35,
-			comment: 'long long comment very long long long',
-		},
-	];
-
 	public displayedColumns: string[] = [
 		'operationDate',
 		'contractor',
@@ -112,11 +74,10 @@ export class AccountingOperatiosGridComponent implements OnInit {
 	accountingTableOptions$!: Observable<AccountingOperationsTableOptions>;
 
 	constructor(
+		private readonly paymentOperationsService: PaymentOperationsProvider,
 		private readonly router: Router,
 		private readonly store: Store
 	) {
-		this.store.dispatch(new AddRange(this.ELEMENT_DATA));
-
 		if (!_.isNil(this.paymentAccountSignal())) {
 			this.paymentAccountGeneralInfoSignal = computed(
 				() =>
@@ -124,6 +85,25 @@ export class AccountingOperatiosGridComponent implements OnInit {
 						this.paymentAccountSignal().description
 					}`
 			);
+			this.paymentOperationsService
+				.getOperationsForPaymentAccount(this.paymentAccountSignal().key!.toString())
+				.pipe(retry(1), take(1))
+				.subscribe(operations => {
+					const gridRecords: AccountingGridRecord[] = _.map(operations, function (op) {
+						return {
+							id: op.key,
+							operationDate: op.operationDate,
+							contractor: op.contractorId.toString(),
+							category: op.categoryId.toString(),
+							comment: op.comment,
+							income: op.amount,
+							expense: op.amount,
+							balance: op.amount,
+						} as AccountingGridRecord;
+					});
+
+					this.store.dispatch(new SetInitialPaymentOperations(gridRecords));
+				});
 		}
 	}
 

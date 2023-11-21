@@ -14,7 +14,7 @@ import { CounterpartiesState } from '../../app/modules/shared/store/states/handb
 import { CategoriesState } from '../../app/modules/shared/store/states/handbooks/categories.state';
 import { HandbbooksState } from '../../app/modules/shared/store/states/handbooks/handbooks.state';
 import { AppSharedModule } from '../../app/modules/shared/shared.module';
-import { AccountingOperationsState } from '../../app/modules/shared/store/states/accounting/accounting-operations.state';
+import { AccountingOperationsState } from '../../app/modules/shared/store/states/accounting/payment-operations.state';
 import { CounterpartiesDialogService } from './services/counterparties-dialog.service';
 import { PaymentAccountComponent } from './components/payment-account/payment-account.component';
 import { PaymentAccountState } from '../../app/modules/shared/store/states/accounting/payment-account.state';
@@ -32,6 +32,7 @@ import { AngularMaterailSharedModule } from '../../app/modules/shared/angular-ma
 import { DataCategoryProfile } from '../../data/providers/accounting/mappers/category.mapping.profile';
 import { DefaultCategoriesProvider } from '../../data/providers/accounting/categories.provider';
 import { PaymentOperationsMappingProfile } from '../../data/providers/accounting/mappers/payment-operations.mapping.profile';
+import { PaymentOperationsProvider } from '../../data/providers/accounting/payment-operations.provider';
 
 @NgModule({
 	declarations: [
@@ -64,6 +65,7 @@ import { PaymentOperationsMappingProfile } from '../../data/providers/accounting
 	],
 	providers: [
 		DefaultPaymentAccountsProvider,
+		PaymentOperationsProvider,
 		DefaultContractorsProvider,
 		DefaultCategoriesProvider,
 		CategoriesDialogService,

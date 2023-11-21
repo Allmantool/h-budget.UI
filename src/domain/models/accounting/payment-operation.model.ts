@@ -1,10 +1,11 @@
 import { Guid } from 'typescript-guid';
 
 export interface PaymentOperationModel {
-	key?: Guid;
+	key: Guid;
 	operationDate: Date;
 	comment: string;
-	contractorId: string;
-	categoryId: string;
+	contractorId: Guid;
+	categoryId: Guid;
+	paymentAccountId: Guid;
 	amount: number;
 }

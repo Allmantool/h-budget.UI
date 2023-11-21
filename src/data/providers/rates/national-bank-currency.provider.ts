@@ -17,18 +17,20 @@ import { AppConfigurationService } from '../../../app/modules/shared/services/ap
 
 @Injectable()
 export class NationalBankCurrencyProvider implements BankCurrencyProvider {
-	private ratesHostUrl?: string;
+	private hostUrl?: string;
+
+	private apiUrl: string = 'currency-rates';
 
 	constructor(
 		private readonly http: HttpClient,
 		private readonly mapper: Mapper,
 		private readonly appConfigurationService: AppConfigurationService
 	) {
-		this.ratesHostUrl = this.appConfigurationService.settings?.ratesHost;
+		this.hostUrl = this.appConfigurationService.settings?.ratesHost;
 	}
 
 	public getCurrenciesForSpecifiedPeriod(payload: DaysRangePayload): Observable<CurrencyRateGroupModel[]> {
-		const ratesUrl: string = `${this.ratesHostUrl}/currencyRates/period`;
+		const ratesUrl: string = `${this.hostUrl}/${this.apiUrl}/period`;
 
 		// prettier-ignore
 		const parametersSegmentUri = `${format(payload.startDate,'yyyy-MM-dd')}/${format(payload.endDate, 'yyyy-MM-dd')}`;
@@ -45,7 +47,7 @@ export class NationalBankCurrencyProvider implements BankCurrencyProvider {
 
 	public saveCurrencies(rates: CurrencyGridRateModel[]): Observable<Result<number>> {
 		return this.http
-			.post<Result<number>>(`${this.ratesHostUrl}/currencyRates`, {
+			.post<Result<number>>(`${this.hostUrl}/${this.apiUrl}`, {
 				currencyRates: rates,
 			})
 			.pipe(
@@ -55,7 +57,7 @@ export class NationalBankCurrencyProvider implements BankCurrencyProvider {
 	}
 
 	public getCurrencies(): Observable<CurrencyRateGroupModel[]> {
-		return this.http.get<Result<RatesGroupEntity[]>>(`${this.ratesHostUrl}/currencyRates`).pipe(
+		return this.http.get<Result<RatesGroupEntity[]>>(`${this.hostUrl}/${this.apiUrl}`).pipe(
 			map(
 				responseResult =>
 					this.mapper?.map(DataRatesMappingProfile.RatesGroupEntityToDomain, responseResult.payload)
@@ -66,7 +68,7 @@ export class NationalBankCurrencyProvider implements BankCurrencyProvider {
 	}
 
 	public getTodayCurrencies(): Observable<CurrencyRateGroupModel[]> {
-		return this.http.get<Result<RatesGroupEntity[]>>(`${this.ratesHostUrl}/currencyRates/today`).pipe(
+		return this.http.get<Result<RatesGroupEntity[]>>(`${this.hostUrl}/${this.apiUrl}/today`).pipe(
 			map(
 				responseResult =>
 					this.mapper?.map(DataRatesMappingProfile.RatesGroupEntityToDomain, responseResult.payload)

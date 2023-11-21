@@ -17,6 +17,9 @@
 				"plugin:prettier/recommended"
 			],
 			"rules": {
+                "no-restricted-imports":"warn",
+                "max-depth": 1,
+                "sort-imports":"warn",
 				"@angular-eslint/component-selector": [
 					"error",
 					{

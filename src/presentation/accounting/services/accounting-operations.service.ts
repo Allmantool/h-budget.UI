@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import { Guid } from 'typescript-guid';
 
 import { Result } from 'core/result';
-import { Add, Delete, Edit } from '../../../app/modules/shared/store/states/accounting/actions/accounting.actions';
+import { Add, Delete, Edit } from '../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
 import { AccountingGridRecord } from '../models/accounting-grid-record';
 import { SetActiveAccountingOperation } from '../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
 

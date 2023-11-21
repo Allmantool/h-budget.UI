@@ -30,15 +30,11 @@ export class CurrencyRatesState {
 	): void {
 		const ratesFromTheState = getState().rateGroups;
 
-		const upToDateCurrencyGroups = ratesFromTheState.map((cg) => {
+		const upToDateCurrencyGroups = ratesFromTheState.map(cg => {
 			const addingRates: CurrencyRateValueModel[] =
-				addedRateGroups.find((i) => i.currencyId == cg.currencyId)?.rateValues ?? [];
+				addedRateGroups.find(i => i.currencyId == cg.currencyId)?.rateValues ?? [];
 
-			const ratesForUpdate = _.differenceWith(
-				addingRates,
-				cg.rateValues!,
-				_.isEqual.bind(this)
-			);
+			const ratesForUpdate = _.differenceWith(addingRates, cg.rateValues!, _.isEqual.bind(this));
 
 			if (_.isNil(ratesForUpdate) || _.isEmpty(ratesForUpdate)) {
 				return cg;
@@ -46,23 +42,20 @@ export class CurrencyRatesState {
 
 			const notUpdatedOrNewRates = _.filter(
 				cg.rateValues,
-				(cgRate) =>
-					!_.some(addingRates, (addRate) => addRate.updateDate === cgRate.updateDate)
+				cgRate => !_.some(addingRates, addRate => addRate.updateDate === cgRate.updateDate)
 			);
 
 			const updatedCarrencyGroup = _.cloneDeep(cg);
 
 			const upToDateRates = _.concat(notUpdatedOrNewRates, ratesForUpdate);
 
-			updatedCarrencyGroup.rateValues = _.orderBy(upToDateRates, (r) => r.updateDate);
+			updatedCarrencyGroup.rateValues = _.orderBy(upToDateRates, r => r.updateDate);
 
 			return updatedCarrencyGroup;
 		});
 
 		patchState({
-			rateGroups: _.isEmpty(upToDateCurrencyGroups)
-				? addedRateGroups
-				: upToDateCurrencyGroups,
+			rateGroups: _.isEmpty(upToDateCurrencyGroups) ? addedRateGroups : upToDateCurrencyGroups,
 		});
 	}
 
@@ -70,17 +63,17 @@ export class CurrencyRatesState {
 	fetchAllCurrencyRates(ctx: StateContext<ICurrencyRatesStateModel>) {
 		return this.currencyRateProvider.getCurrencies().pipe(
 			take(1),
-			tap((currencyRateGroups) =>
+			tap(currencyRateGroups =>
 				ctx.patchState({
 					rateGroups: _.map(
 						currencyRateGroups,
-						(rg) =>
+						rg =>
 							({
 								currencyId: rg.currencyId,
 								name: rg.name,
 								abbreviation: rg.abbreviation,
 								scale: rg.scale,
-								rateValues: _.orderBy(rg.rateValues, (i) => i.updateDate),
+								rateValues: _.orderBy(rg.rateValues, i => i.updateDate),
 							}) as CurrencyRateGroupModel
 					),
 				})

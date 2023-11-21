@@ -6,8 +6,9 @@ import { Observable, map, retry, take } from 'rxjs';
 
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
 import { Result } from '../../../core/result';
-import { PaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
+
 import { PaymentOperationEntity } from './entities/payment-operation.entity';
+import { PaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 import { PaymentOperationsMappingProfile } from './mappers/payment-operations.mapping.profile';
 
 @Injectable()
@@ -23,9 +24,11 @@ export class PaymentOperationsProvider {
 		this.accountingHostUrl = this.appConfigurationService.settings?.accountingHost;
 	}
 
-	public getOperationsForPaymentAccount(): Observable<PaymentOperationModel[]> {
+	public getOperationsForPaymentAccount(paymentAccountId: string): Observable<PaymentOperationModel[]> {
 		return this.http
-			.get<Result<PaymentOperationEntity[]>>(`${this.accountingHostUrl}/${this.paymentOperationsApi}`)
+			.get<Result<PaymentOperationEntity[]>>(
+				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}`
+			)
 			.pipe(
 				map(
 					responseResult =>

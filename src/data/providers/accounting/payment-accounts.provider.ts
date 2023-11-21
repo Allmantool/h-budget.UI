@@ -13,7 +13,7 @@ import { AppConfigurationService } from '../../../app/modules/shared/services/ap
 
 @Injectable()
 export class DefaultPaymentAccountsProvider implements PaymentAccountsProvider {
-	private paymentAccountApi: string = 'paymentAccounts';
+	private paymentAccountApi: string = 'payment-accounts';
 	private accountingHostUrl?: string;
 
 	constructor(
