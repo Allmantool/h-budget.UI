@@ -1,7 +1,6 @@
 import * as _ from 'lodash';
 
 import { MappingPair, Profile } from '@dynamic-mapper/mapper';
-
 import { Guid } from 'typescript-guid';
 
 import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';

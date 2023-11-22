@@ -4,13 +4,38 @@ import { MappingPair, Profile } from '@dynamic-mapper/mapper';
 import { Guid } from 'typescript-guid';
 
 import { PaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
+import { PaymentOperationCreateOrUpdateRequest } from '../../../../domain/models/accounting/requests/payment-pperation-create-or-update.request';
 import { PaymentOperationEntity } from '../entities/payment-operation.entity';
 
 export class PaymentOperationsMappingProfile extends Profile {
 	static readonly PaymentOperaionEntityToDomain = new MappingPair<PaymentOperationEntity, PaymentOperationModel>();
 
+	static readonly DomainToPaymentOperationSaveRequest = new MappingPair<
+		PaymentOperationModel,
+		PaymentOperationCreateOrUpdateRequest
+	>();
+
 	constructor() {
 		super();
+
+		this.createMap(PaymentOperationsMappingProfile.DomainToPaymentOperationSaveRequest, {
+			amount: opt => {
+				opt.preCondition(src => !_.isNil(src.amount));
+				opt.mapFrom(src => src.amount);
+			},
+			comment: opt => {
+				opt.preCondition(src => !_.isNil(src.amount));
+				opt.mapFrom(src => src.comment);
+			},
+			contractorId: opt => {
+				opt.preCondition(src => !_.isNil(src.contractorId));
+				opt.mapFrom(src => src.contractorId.toString());
+			},
+			categoryId: opt => {
+				opt.preCondition(src => !_.isNil(src.categoryId));
+				opt.mapFrom(src => src.categoryId.toString());
+			},
+		});
 
 		this.createMap(PaymentOperationsMappingProfile.PaymentOperaionEntityToDomain, {
 			key: opt => {
