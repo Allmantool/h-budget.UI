@@ -71,6 +71,10 @@
 								"group": "unknown"
 							},
                             {
+								"pattern": "typescript-guid",
+								"group": "unknown"
+							},
+                            {
 								"pattern": "date-fns",
 								"group": "unknown"
 							},

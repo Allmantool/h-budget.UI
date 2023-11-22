@@ -14,9 +14,8 @@ import { Router } from '@angular/router';
 import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
-import { BehaviorSubject, Observable, retry } from 'rxjs';
-import { take } from 'rxjs/operators';
-
+import { BehaviorSubject, combineLatest, Observable, zip } from 'rxjs';
+import { filter, map, switchMap, take } from 'rxjs/operators';
 import { Guid } from 'typescript-guid';
 
 import { AccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
@@ -28,9 +27,14 @@ import {
 	getActivePaymentAccountId,
 } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
+import { getCategories } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
+import { getContractors } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
 import { PaymentOperationsProvider } from '../../../../data/providers/accounting/payment-operations.provider';
+import { CategoryModel } from '../../../../domain/models/accounting/category.model';
+import { ContractorModel } from '../../../../domain/models/accounting/contractor.model.';
 import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 import { AccountingGridRecord } from '../../models/accounting-grid-record';
+import { OperationTypes } from 'domain/models/accounting/operation-types';
 
 @Component({
 	selector: 'accounting-operarions-grid',
@@ -41,6 +45,12 @@ import { AccountingGridRecord } from '../../models/accounting-grid-record';
 export class AccountingOperatiosGridComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);
 
+	@Select(getCategories)
+	categories$!: Observable<CategoryModel[]>;
+
+	@Select(getContractors)
+	contractors$!: Observable<ContractorModel[]>;
+
 	@Select(getAccountingRecords)
 	accountingRecords$!: Observable<AccountingGridRecord[]>;
 
@@ -50,8 +60,17 @@ export class AccountingOperatiosGridComponent implements OnInit {
 	@Select(getActivePaymentAccount)
 	paymentAccound$!: Observable<PaymentAccountModel>;
 
+	@Select(getAccountingTableOptions)
+	accountingTableOptions$!: Observable<AccountingOperationsTableOptions>;
+
 	public paymentAccountSignal: Signal<PaymentAccountModel> = toSignal(this.paymentAccound$, {
 		initialValue: {} as PaymentAccountModel,
+	});
+
+	public contractorsSignal: Signal<ContractorModel[]>;
+
+	public categoriesSignal: Signal<CategoryModel[]> = toSignal(this.categories$, {
+		initialValue: {} as CategoryModel[],
 	});
 
 	public paymentAccountGeneralInfoSignal: Signal<string> = signal('');
@@ -69,14 +88,15 @@ export class AccountingOperatiosGridComponent implements OnInit {
 	public dataSource$: BehaviorSubject<AccountingGridRecord[]> = new BehaviorSubject<AccountingGridRecord[]>([]);
 	public clickedRowGuids = new Set<Guid>();
 
-	@Select(getAccountingTableOptions)
-	accountingTableOptions$!: Observable<AccountingOperationsTableOptions>;
-
 	constructor(
 		private readonly paymentOperationsService: PaymentOperationsProvider,
 		private readonly router: Router,
 		private readonly store: Store
 	) {
+		this.contractorsSignal = toSignal(this.contractors$, {
+			initialValue: {} as ContractorModel[],
+		});
+
 		if (!_.isNil(this.paymentAccountSignal())) {
 			this.paymentAccountGeneralInfoSignal = computed(
 				() =>
@@ -84,25 +104,44 @@ export class AccountingOperatiosGridComponent implements OnInit {
 						this.paymentAccountSignal().description
 					}`
 			);
-			this.paymentOperationsService
-				.getOperationsForPaymentAccount(this.paymentAccountSignal().key!.toString())
-				.pipe(retry(1), take(1))
-				.subscribe(operations => {
-					const gridRecords: AccountingGridRecord[] = _.map(operations, function (op) {
-						return {
-							id: op.key,
-							operationDate: op.operationDate,
-							contractor: op.contractorId.toString(),
-							category: op.categoryId.toString(),
-							comment: op.comment,
-							income: op.amount,
-							expense: op.amount,
-							balance: op.amount,
-						} as AccountingGridRecord;
-					});
 
-					this.store.dispatch(new SetInitialPaymentOperations(gridRecords));
-				});
+			const getPaymentAccountOperations$ = this.paymentOperationsService.getOperationsForPaymentAccount(
+				this.paymentAccountSignal().key!.toString()
+			);
+
+			combineLatest([this.categories$, this.contractors$, this.paymentAccound$])
+				.pipe(
+					filter(([categ, contr]) => !_.isEmpty(categ) && !_.isEmpty(contr)),
+					switchMap(([categories, contractors, paymentAccount]) =>
+						getPaymentAccountOperations$.pipe(
+							take(1),
+							map(operations =>
+								_.map(operations, function (op) {
+									const targetContractor = _.find(contractors, c => c.key.equals(op.contractorId));
+									const targetCategories = _.find(categories, c => c.key.equals(op.categoryId));
+
+									const isIncome = targetCategories?.operationType === OperationTypes.Income;
+
+									const updatedBalance = isIncome
+										? paymentAccount.balance + op.amount
+										: paymentAccount.balance - op.amount;
+
+									return {
+										id: op.key,
+										operationDate: op.operationDate,
+										contractor: targetContractor!.nameNodes.parseToTreeAsString(),
+										category: targetCategories!.nameNodes.parseToTreeAsString(),
+										comment: op.comment,
+										income: isIncome ? op.amount : 0,
+										expense: isIncome ? 0 : op.amount,
+										balance: updatedBalance,
+									} as AccountingGridRecord;
+								})
+							)
+						)
+					)
+				)
+				.subscribe(gridRecords => this.store.dispatch(new SetInitialPaymentOperations(gridRecords)));
 		}
 	}
 

@@ -14,9 +14,9 @@ export class DataContractorProfile extends Profile {
 		super();
 
 		this.createMap(DataContractorProfile.ContractorEntityToDomain, {
-			id: opt => {
-				opt.preCondition(src => !_.isNil(src.id));
-				opt.mapFrom(src => Guid.parse(src.id.toString()));
+			key: opt => {
+				opt.preCondition(src => !_.isNil(src.key));
+				opt.mapFrom(src => Guid.parse(src.key));
 			},
 			nameNodes: opt => {
 				opt.preCondition(src => !_.isNil(src.nameNodes));

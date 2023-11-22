@@ -1,7 +1,6 @@
 import * as _ from 'lodash';
 
 import { MappingPair, Profile } from '@dynamic-mapper/mapper';
-
 import { Guid } from 'typescript-guid';
 
 import { PaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
@@ -33,6 +32,10 @@ export class PaymentOperationsMappingProfile extends Profile {
 			comment: opt => {
 				opt.preCondition(src => !_.isNil(src.comment));
 				opt.mapFrom(src => src.comment);
+			},
+			amount: opt => {
+				opt.preCondition(src => !_.isNil(src.amount));
+				opt.mapFrom(src => src.amount);
 			},
 			operationDate: opt => {
 				opt.preCondition(src => !_.isNil(src.operationDate));

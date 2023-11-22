@@ -3,7 +3,7 @@ import { Guid } from 'typescript-guid';
 import { OperationTypes } from './operation-types';
 
 export interface CategoryModel {
-	id: Guid;
+	key: Guid;
 	operationType: OperationTypes;
 	nameNodes: string[];
 }

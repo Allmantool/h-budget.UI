@@ -13,8 +13,8 @@ import { AccountingOperationsTableOptions } from 'app/modules/shared/store/model
 
 import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
-import { getCategories } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
-import { getContractors } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
+import { getCategoryNodes } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
+import { getContractorNodes } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
 import { CategoryModel } from '../../../../domain/models/accounting/category.model';
 import { AccountingGridRecord } from '../../models/accounting-grid-record';
 import { CategoriesDialogService } from '../../services/categories-dialog.service';
@@ -53,10 +53,10 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	@Select(getAccountingRecords)
 	accountingRecords$!: Observable<AccountingGridRecord[]>;
 
-	@Select(getCategories)
+	@Select(getCategoryNodes)
 	categories$!: Observable<string[]>;
 
-	@Select(getContractors)
+	@Select(getContractorNodes)
 	counterparties$!: Observable<string[]>;
 
 	constructor(

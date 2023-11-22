@@ -14,9 +14,9 @@ export class DataCategoryProfile extends Profile {
 		super();
 
 		this.createMap(DataCategoryProfile.CategoryEntityToDomain, {
-			id: opt => {
-				opt.preCondition(src => !_.isNil(src.id));
-				opt.mapFrom(src => Guid.parse(src.id.toString()));
+			key: opt => {
+				opt.preCondition(src => !_.isNil(src.key));
+				opt.mapFrom(src => Guid.parse(src.key));
 			},
 			operationType: opt => {
 				opt.preCondition(src => !_.isNil(src.categoryType));
