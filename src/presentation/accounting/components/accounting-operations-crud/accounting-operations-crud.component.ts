@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, Signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 
@@ -11,20 +11,22 @@ import { nameof } from 'ts-simple-nameof';
 
 import { AccountingOperationsTableOptions } from 'app/modules/shared/store/models/accounting/accounting-table-options';
 
+import { getCategories } from './../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
 import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
+import { SetInitialCategories } from '../../../../app/modules/shared/store/states/handbooks/actions/category.actions';
+import { SetInitialContractors } from '../../../../app/modules/shared/store/states/handbooks/actions/counterparty.actions';
 import { getCategoryNodes } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
 import { getContractorNodes } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
+import { DefaultCategoriesProvider } from '../../../../data/providers/accounting/categories.provider';
+import { DefaultContractorsProvider } from '../../../../data/providers/accounting/contractors.provider';
 import { CategoryModel } from '../../../../domain/models/accounting/category.model';
 import { AccountingGridRecord } from '../../models/accounting-grid-record';
+import { AccountingOperationsService } from '../../services/accounting-operations.service';
 import { CategoriesDialogService } from '../../services/categories-dialog.service';
 import { CounterpartiesDialogService } from '../../services/counterparties-dialog.service';
 import '../../../../domain/extensions/handbookExtensions';
-import { DefaultContractorsProvider } from '../../../../data/providers/accounting/contractors.provider';
-import { SetInitialContractors } from '../../../../app/modules/shared/store/states/handbooks/actions/counterparty.actions';
-import { AccountingOperationsService } from '../../services/accounting-operations.service';
-import { DefaultCategoriesProvider } from '../../../../data/providers/accounting/categories.provider';
-import { SetInitialCategories } from '../../../../app/modules/shared/store/states/handbooks/actions/category.actions';
+import { OperationTypes } from 'domain/models/accounting/operation-types';
 
 @Component({
 	selector: 'accounting-crud',
@@ -37,13 +39,15 @@ export class AccountingOperationsCrudComponent implements OnInit {
 
 	public contractorsSignal: Signal<string[]>;
 
-	public categoriesSignal: Signal<string[]>;
+	public categoryNodesSignal: Signal<string[]>;
 
-	public expenseSignal: Signal<string>;
+	public categoriesSignal: Signal<CategoryModel[]>;
+
+	public selectedCategorySignal: Signal<string>;
+
+	public isExpenseSignal: Signal<boolean>;
 
 	public selectedRecordSignal: Signal<AccountingGridRecord>;
-
-	public categories: CategoryModel[] = [];
 
 	public crudRecordFg: UntypedFormGroup;
 
@@ -54,7 +58,10 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	accountingRecords$!: Observable<AccountingGridRecord[]>;
 
 	@Select(getCategoryNodes)
-	categories$!: Observable<string[]>;
+	categoryNodes$!: Observable<string[]>;
+
+	@Select(getCategories)
+	categories$!: Observable<CategoryModel[]>;
 
 	@Select(getContractorNodes)
 	counterparties$!: Observable<string[]>;
@@ -79,14 +86,20 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		});
 		this.selectedRecordSignal = toSignal(this.crudRecordFg.valueChanges, { initialValue: {} });
 		this.contractorsSignal = toSignal(this.counterparties$, { initialValue: [] });
+		this.categoryNodesSignal = toSignal(this.categoryNodes$, { initialValue: [] });
 		this.categoriesSignal = toSignal(this.categories$, { initialValue: [] });
-
-		this.expenseSignal = toSignal(
-			this.crudRecordFg.get(nameof<AccountingGridRecord>(r => r.expense))!.valueChanges,
-			{
-				initialValue: '',
-			}
+		this.selectedCategorySignal = toSignal(
+			this.crudRecordFg.get(nameof<AccountingGridRecord>(r => r.category))!.valueChanges,
+			{ initialValue: '' }
 		);
+
+		this.isExpenseSignal = computed(() => {
+			const selectedCategory = _.find(this.categoriesSignal(), c => {
+				return c.nameNodes.parseToTreeAsString() == this.selectedCategorySignal();
+			});
+
+			return selectedCategory?.operationType == OperationTypes.Expense;
+		});
 	}
 
 	public ngOnInit(): void {
@@ -122,10 +135,6 @@ export class AccountingOperationsCrudComponent implements OnInit {
 					}
 				}
 			});
-	}
-
-	public getCategoryLabels(): string[] {
-		return this.categories.map(c => c.nameNodes.toString());
 	}
 
 	public async applyChangesAsync(): Promise<void> {

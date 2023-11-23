@@ -97,52 +97,55 @@ export class AccountingOperatiosGridComponent implements OnInit {
 			initialValue: {} as ContractorModel[],
 		});
 
-		if (!_.isNil(this.paymentAccountSignal())) {
-			this.paymentAccountGeneralInfoSignal = computed(
-				() =>
-					`${this.paymentAccountSignal()?.key?.toString()} ${this.paymentAccountSignal().emitter} | ${
-						this.paymentAccountSignal().description
-					}`
-			);
+		if (_.isNil(this.paymentAccountSignal())) {
+			this.navigateToPaymentAccountsAsync();
+			return;
+		}
 
-			const getPaymentAccountOperations$ = this.paymentOperationsService.getOperationsForPaymentAccount(
-				this.paymentAccountSignal().key!.toString()
-			);
+		this.paymentAccountGeneralInfoSignal = computed(
+			() =>
+				`${this.paymentAccountSignal()?.key?.toString()} ${this.paymentAccountSignal().emitter} | ${
+					this.paymentAccountSignal().description
+				}`
+		);
 
-			combineLatest([this.categories$, this.contractors$, this.paymentAccound$])
-				.pipe(
-					filter(([categ, contr]) => !_.isEmpty(categ) && !_.isEmpty(contr)),
-					switchMap(([categories, contractors, paymentAccount]) =>
-						getPaymentAccountOperations$.pipe(
-							take(1),
-							map(operations =>
-								_.map(operations, function (op) {
-									const targetContractor = _.find(contractors, c => c.key.equals(op.contractorId));
-									const targetCategories = _.find(categories, c => c.key.equals(op.categoryId));
+		const getPaymentAccountOperations$ = this.paymentOperationsService.getOperationsForPaymentAccount(
+			this.paymentAccountSignal().key!.toString()
+		);
 
-									const isIncome = targetCategories?.operationType === OperationTypes.Income;
+		combineLatest([this.categories$, this.contractors$, this.paymentAccound$])
+			.pipe(
+				filter(([categ, contr]) => !_.isEmpty(categ) && !_.isEmpty(contr)),
+				switchMap(([categories, contractors, paymentAccount]) =>
+					getPaymentAccountOperations$.pipe(
+						take(1),
+						map(operations =>
+							_.map(operations, function (op) {
+								const targetContractor = _.find(contractors, c => c.key.equals(op.contractorId));
+								const targetCategories = _.find(categories, c => c.key.equals(op.categoryId));
 
-									const updatedBalance = isIncome
-										? paymentAccount.balance + op.amount
-										: paymentAccount.balance - op.amount;
+								const isIncome = targetCategories?.operationType === OperationTypes.Income;
 
-									return {
-										id: op.key,
-										operationDate: op.operationDate,
-										contractor: targetContractor!.nameNodes.parseToTreeAsString(),
-										category: targetCategories!.nameNodes.parseToTreeAsString(),
-										comment: op.comment,
-										income: isIncome ? op.amount : 0,
-										expense: isIncome ? 0 : op.amount,
-										balance: updatedBalance,
-									} as AccountingGridRecord;
-								})
-							)
+								const updatedBalance = isIncome
+									? paymentAccount.balance + op.amount
+									: paymentAccount.balance - op.amount;
+
+								return {
+									id: op.key,
+									operationDate: op.operationDate,
+									contractor: targetContractor!.nameNodes.parseToTreeAsString(),
+									category: targetCategories!.nameNodes.parseToTreeAsString(),
+									comment: op.comment,
+									income: isIncome ? op.amount : 0,
+									expense: isIncome ? 0 : op.amount,
+									balance: updatedBalance,
+								} as AccountingGridRecord;
+							})
 						)
 					)
 				)
-				.subscribe(gridRecords => this.store.dispatch(new SetInitialPaymentOperations(gridRecords)));
-		}
+			)
+			.subscribe(gridRecords => this.store.dispatch(new SetInitialPaymentOperations(gridRecords)));
 	}
 
 	public ngOnInit(): void {
