@@ -31,6 +31,10 @@ export class PaymentOperationsMappingProfile extends Profile {
 				opt.preCondition(src => !_.isNil(src.contractorId));
 				opt.mapFrom(src => src.contractorId.toString());
 			},
+			operationDay: opt => {
+				opt.preCondition(src => !_.isNil(src.operationDate));
+				opt.mapFrom(src => src.operationDate);
+			},
 			categoryId: opt => {
 				opt.preCondition(src => !_.isNil(src.categoryId));
 				opt.mapFrom(src => src.categoryId.toString());
@@ -63,8 +67,8 @@ export class PaymentOperationsMappingProfile extends Profile {
 				opt.mapFrom(src => src.amount);
 			},
 			operationDate: opt => {
-				opt.preCondition(src => !_.isNil(src.operationDate));
-				opt.mapFrom(src => new Date(src.operationDate));
+				opt.preCondition(src => !_.isNil(src.operationDay));
+				opt.mapFrom(src => new Date(src.operationDay));
 			},
 		});
 	}

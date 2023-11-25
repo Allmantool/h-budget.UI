@@ -19,9 +19,9 @@ import { getActivePaymentAccountId } from '../../../app/modules/shared/store/sta
 import { getCategoryAsNodesMap } from '../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
 import { getContractorAsNodesMap } from '../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
 import { PaymentOperationsProvider } from '../../../data/providers/accounting/payment-operations.provider';
+import { CategoryModel } from '../../../domain/models/accounting/category.model';
 import { PaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 import { AccountingGridRecord } from '../models/accounting-grid-record';
-import { CategoryModel } from 'domain/models/accounting/category.model';
 
 @Injectable()
 export class AccountingOperationsService {
@@ -55,10 +55,17 @@ export class AccountingOperationsService {
 			});
 		}
 
+		const deleteResponse = await firstValueFrom(
+			this.paymentOperationsProvider.removePaymentOperation(
+				this.activePaymentAccountIdSignal(),
+				operationGuid.toString()
+			)
+		);
+
 		return await firstValueFrom(this.store.dispatch(new Delete(operationGuid))).then(
 			() =>
 				new Result({
-					isSucceeded: true,
+					isSucceeded: true && deleteResponse.isSucceeded,
 				})
 		);
 	}
@@ -88,7 +95,7 @@ export class AccountingOperationsService {
 
 	public async updateOperationAsync(gridRecord: AccountingGridRecord): Promise<Result<boolean>> {
 		const payload: PaymentOperationModel = {
-			key: Guid.EMPTY,
+			key: gridRecord.id,
 			operationDate: gridRecord.operationDate,
 			comment: gridRecord.comment,
 			contractorId: this.contractorsMapSignal().get(gridRecord.contractor)!,
@@ -97,9 +104,28 @@ export class AccountingOperationsService {
 			amount: gridRecord.expense === 0 ? gridRecord.income : gridRecord.expense,
 		};
 
-		const saveResponse = await firstValueFrom(
-			this.paymentOperationsProvider.savePaymentOperation(this.activePaymentAccountIdSignal(), payload)
-		);
+		switch (payload.key) {
+			case Guid.EMPTY: {
+				const saveResponse = await firstValueFrom(
+					this.paymentOperationsProvider.savePaymentOperation(this.activePaymentAccountIdSignal(), payload)
+				);
+
+				gridRecord.id = Guid.parse(saveResponse.payload.paymentOperationId);
+
+				break;
+			}
+			default: {
+				const updateResponse = await firstValueFrom(
+					this.paymentOperationsProvider.updatePaymentOperation(
+						payload,
+						this.activePaymentAccountIdSignal(),
+						payload.key.toString()
+					)
+				);
+
+				gridRecord.id = Guid.parse(updateResponse.payload.paymentOperationId);
+			}
+		}
 
 		return await firstValueFrom(this.store.dispatch(new Edit(gridRecord))).then(
 			() =>

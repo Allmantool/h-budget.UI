@@ -3,4 +3,5 @@ export interface PaymentOperationCreateOrUpdateRequest {
 	comment: string;
 	contractorId: string;
 	categoryId: string;
+	operationDay: Date;
 }
