@@ -1,6 +1,6 @@
 import { Guid } from 'typescript-guid';
 
 export interface ContractorModel {
-	id: Guid;
+	key: Guid;
 	nameNodes: string[];
 }

@@ -1,8 +1,10 @@
-import { MappingPair, Profile } from '@dynamic-mapper/mapper';
-import { Guid } from 'typescript-guid';
 import * as _ from 'lodash';
 
-import { CategoryModel } from '../../../../domain/models/accounting/category.model';;
+import { MappingPair, Profile } from '@dynamic-mapper/mapper';
+
+import { Guid } from 'typescript-guid';
+
+import { CategoryModel } from '../../../../domain/models/accounting/category.model';
 import { CategoryEntity } from '../entities/operation-category.entity';
 
 export class DataCategoryProfile extends Profile {
@@ -12,9 +14,9 @@ export class DataCategoryProfile extends Profile {
 		super();
 
 		this.createMap(DataCategoryProfile.CategoryEntityToDomain, {
-			id: opt => {
-				opt.preCondition(src => !_.isNil(src.id));
-				opt.mapFrom(src => Guid.parse(src.id.toString()));
+			key: opt => {
+				opt.preCondition(src => !_.isNil(src.key));
+				opt.mapFrom(src => Guid.parse(src.key));
 			},
 			operationType: opt => {
 				opt.preCondition(src => !_.isNil(src.categoryType));

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Inject, signal } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { take } from 'rxjs';
 
@@ -42,7 +42,7 @@ export class DateRangeDialogComponent {
 		this.dialogConfiguration
 			.onSubmit(this.dialogFg.value)
 			.pipe(take(1))
-			.subscribe((_) => {
+			.subscribe(_ => {
 				this.isLoadingSignal.set(false);
 				this.dialogRef.close();
 			});

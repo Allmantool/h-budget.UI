@@ -1,9 +1,9 @@
-import { createSelector } from '@ngxs/store';
-
 import * as _ from 'lodash';
 
-import { ICoreAppStateModel } from '../models/core-app-state.model';
+import { createSelector } from '@ngxs/store';
+
 import { CoreAppState } from '../core-app.state';
+import { ICoreAppStateModel } from '../models/core-app-state.model';
 
 export const requestsUnderProcessing = createSelector(
 	[CoreAppState],

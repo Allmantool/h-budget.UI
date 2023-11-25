@@ -1,21 +1,23 @@
 import { ChangeDetectionStrategy, Component, EnvironmentInjector, OnInit, runInInjectionContext } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSelectionListChange } from '@angular/material/list';
-import { signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+
+import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
 import { Observable, retry, take } from 'rxjs';
-import { Guid } from 'typescript-guid';
-import * as _ from 'lodash';
 import { nameof } from 'ts-simple-nameof';
 
-import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
+import { Guid } from 'typescript-guid';
+
 import { SetActivePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
-import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
-import { AccountTypes } from '../../../../domain/models/accounting/account-types';
 import { SetInitialPaymentAccounts } from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
 import { getPaymentAccounts } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
+import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
+import { AccountTypes } from '../../../../domain/models/accounting/account-types';
+import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 
 @Component({
 	selector: 'payment-accounts',

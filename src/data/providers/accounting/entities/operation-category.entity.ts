@@ -1,7 +1,5 @@
-import { Guid } from 'typescript-guid';
-
 export interface CategoryEntity {
-	id: Guid;
+	key: string;
 	nameNodes: string[];
 	categoryType: number;
 }

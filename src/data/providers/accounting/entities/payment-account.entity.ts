@@ -1,5 +1,5 @@
 export interface PaymentAccountEntity {
-	id: string;
+	key: string;
 	type: number;
 	currency: string;
 	balance: number;

@@ -1,18 +1,19 @@
-import { ChangeDetectionStrategy, Component, ElementRef, Inject, ViewChild, signal } from '@angular/core';
 import { ENTER } from '@angular/cdk/keycodes';
+import { ChangeDetectionStrategy, Component, ElementRef, Inject, signal, ViewChild } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatChipInputEvent } from '@angular/material/chips';
-import { FormControl, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
-import { Store } from '@ngxs/store';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Observable, startWith, take, map } from 'rxjs';
 import * as _ from 'lodash';
 
-import { DialogContainer } from '../../../models/dialog-container';
-import { OperationTypes } from 'domain/models/accounting/operation-types';
+import { Store } from '@ngxs/store';
+import { map, Observable, startWith, take } from 'rxjs';
+
 import { CategoryModel } from '../../../../../../domain/models/accounting/category.model';
+import { OperationTypes } from '../../../../../../domain/models/accounting/operation-types';
+import { DialogContainer } from '../../../models/dialog-container';
 import { AddCategory } from '../../../store/states/handbooks/actions/category.actions';
 
 @Component({
@@ -22,7 +23,6 @@ import { AddCategory } from '../../../store/states/handbooks/actions/category.ac
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CategoriesDialogComponent {
-
 	private dialogConfiguration: DialogContainer;
 
 	@ViewChild('chipGrid ')

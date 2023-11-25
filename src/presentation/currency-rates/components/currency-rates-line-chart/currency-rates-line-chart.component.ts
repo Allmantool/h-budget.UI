@@ -1,23 +1,34 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, DestroyRef, Input, OnInit, ViewChild, inject } from '@angular/core';
+import {
+	AfterViewInit,
+	ChangeDetectionStrategy,
+	Component,
+	DestroyRef,
+	inject,
+	Input,
+	OnInit,
+	ViewChild,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
-import * as _ from 'lodash';
 import { ChartComponent } from 'ng-apexcharts';
 import { BehaviorSubject, combineLatest, from, Observable, Subject } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
-import { CurrencyGridRateModel } from '../../models/currency-grid-rate.model';
-import { LineChartService } from '../../services/line-chart.service';
-import { LineChartOptions } from '../../models/line-chart-options';
 import { getCurrencyRatesGroupByCurrencyId } from 'app/modules/shared/store/states/rates/selectors/currency.selectors';
-import { FetchAllCurrencyRates } from '../../../../app/modules/shared/store/states/rates/actions/currency.actions';
+
 import { CurrencyChartOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-chart-option.';
-import { getCurrencyChartOptions } from '../../../../app/modules/shared/store/states/rates/selectors/currency-chart-options.selectors';
-import { ChartOptions } from '../../models/chart-options';
-import { CurrencyRateGroupModel } from '../../../../domain/models/rates/currency-rates-group.model';
 import { CurrencyTableOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-table-options';
+import { FetchAllCurrencyRates } from '../../../../app/modules/shared/store/states/rates/actions/currency.actions';
+import { getCurrencyChartOptions } from '../../../../app/modules/shared/store/states/rates/selectors/currency-chart-options.selectors';
 import { getCurrencyTableOptions } from '../../../../app/modules/shared/store/states/rates/selectors/currency-table-options.selectors';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { CurrencyRateGroupModel } from '../../../../domain/models/rates/currency-rates-group.model';
+import { ChartOptions } from '../../models/chart-options';
+import { CurrencyGridRateModel } from '../../models/currency-grid-rate.model';
+import { LineChartOptions } from '../../models/line-chart-options';
+import { LineChartService } from '../../services/line-chart.service';
 
 @Component({
 	selector: 'currency-rates-line-chart',

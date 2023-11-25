@@ -1,16 +1,17 @@
 import { Injectable } from '@angular/core';
 
-import { State, Action, StateContext } from '@ngxs/store';
-import { take, tap } from 'rxjs';
 import * as _ from 'lodash';
 
-import { CurrencyRateValueModel } from 'domain/models/rates/currency-rate-value.model';
+import { Action, State, StateContext } from '@ngxs/store';
+import { take, tap } from 'rxjs';
+
 import { AddCurrencyGroups, FetchAllCurrencyRates } from './actions/currency.actions';
-import { ICurrencyRatesStateModel } from './models/currency-rates-state.model';
-import { CurrencyTableState } from './currency-table.state';
 import { CurrencyChartState } from './currency-chart.state';
+import { CurrencyTableState } from './currency-table.state';
+import { ICurrencyRatesStateModel } from './models/currency-rates-state.model';
+import { NationalBankCurrencyProvider } from '../../../../../../data/providers/rates/national-bank-currency.provider';
+import { CurrencyRateValueModel } from '../../../../../../domain/models/rates/currency-rate-value.model';
 import { CurrencyRateGroupModel } from '../../../../../../domain/models/rates/currency-rates-group.model';
-import { NationalBankCurrencyProvider } from 'data/providers/rates/national-bank-currency.provider';
 
 @State<ICurrencyRatesStateModel>({
 	name: 'currencyState',
@@ -30,15 +31,11 @@ export class CurrencyRatesState {
 	): void {
 		const ratesFromTheState = getState().rateGroups;
 
-		const upToDateCurrencyGroups = ratesFromTheState.map((cg) => {
+		const upToDateCurrencyGroups = ratesFromTheState.map(cg => {
 			const addingRates: CurrencyRateValueModel[] =
-				addedRateGroups.find((i) => i.currencyId == cg.currencyId)?.rateValues ?? [];
+				addedRateGroups.find(i => i.currencyId == cg.currencyId)?.rateValues ?? [];
 
-			const ratesForUpdate = _.differenceWith(
-				addingRates,
-				cg.rateValues!,
-				_.isEqual.bind(this)
-			);
+			const ratesForUpdate = _.differenceWith(addingRates, cg.rateValues!, _.isEqual.bind(this));
 
 			if (_.isNil(ratesForUpdate) || _.isEmpty(ratesForUpdate)) {
 				return cg;
@@ -46,23 +43,20 @@ export class CurrencyRatesState {
 
 			const notUpdatedOrNewRates = _.filter(
 				cg.rateValues,
-				(cgRate) =>
-					!_.some(addingRates, (addRate) => addRate.updateDate === cgRate.updateDate)
+				cgRate => !_.some(addingRates, addRate => addRate.updateDate === cgRate.updateDate)
 			);
 
 			const updatedCarrencyGroup = _.cloneDeep(cg);
 
 			const upToDateRates = _.concat(notUpdatedOrNewRates, ratesForUpdate);
 
-			updatedCarrencyGroup.rateValues = _.orderBy(upToDateRates, (r) => r.updateDate);
+			updatedCarrencyGroup.rateValues = _.orderBy(upToDateRates, r => r.updateDate);
 
 			return updatedCarrencyGroup;
 		});
 
 		patchState({
-			rateGroups: _.isEmpty(upToDateCurrencyGroups)
-				? addedRateGroups
-				: upToDateCurrencyGroups,
+			rateGroups: _.isEmpty(upToDateCurrencyGroups) ? addedRateGroups : upToDateCurrencyGroups,
 		});
 	}
 
@@ -70,17 +64,17 @@ export class CurrencyRatesState {
 	fetchAllCurrencyRates(ctx: StateContext<ICurrencyRatesStateModel>) {
 		return this.currencyRateProvider.getCurrencies().pipe(
 			take(1),
-			tap((currencyRateGroups) =>
+			tap(currencyRateGroups =>
 				ctx.patchState({
 					rateGroups: _.map(
 						currencyRateGroups,
-						(rg) =>
+						rg =>
 							({
 								currencyId: rg.currencyId,
 								name: rg.name,
 								abbreviation: rg.abbreviation,
 								scale: rg.scale,
-								rateValues: _.orderBy(rg.rateValues, (i) => i.updateDate),
+								rateValues: _.orderBy(rg.rateValues, i => i.updateDate),
 							}) as CurrencyRateGroupModel
 					),
 				})

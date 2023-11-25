@@ -1,7 +1,8 @@
 import * as _ from 'lodash';
 
-import { NationalBankCurrencyRate } from './national-bank-currency-rate';
 import { CurrencyTrend } from 'app/modules/shared/store/models/currency-rates/currency-trend';
+
+import { NationalBankCurrencyRate } from './national-bank-currency-rate';
 
 export class CurrencyGridRateModel {
 	constructor(rate: Partial<NationalBankCurrencyRate>) {

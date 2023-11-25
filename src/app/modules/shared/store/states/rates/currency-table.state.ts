@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 
-import { State, Action, StateContext } from '@ngxs/store';
+import { Action, State, StateContext } from '@ngxs/store';
 import { addMonths } from 'date-fns';
 
+import { SetActiveCurrency, SetCurrencyDateRange } from './actions/currency-table-options.actions';
 import { ICurrencyTableStateModel } from './models/currency-table-state.model';
-import { CurrencyTableOptions } from '../../models/currency-rates/currency-table-options';
 import { RatesGridDefaultOptions } from '../../../constants/rates-grid-default-options';
 import { CurrencyDateRange } from '../../models/currency-rates/currency-date-range';
 import { CurrencyTableItem } from '../../models/currency-rates/currency-table-item';
-import { SetActiveCurrency, SetCurrencyDateRange } from './actions/currency-table-options.actions';
+import { CurrencyTableOptions } from '../../models/currency-rates/currency-table-options';
 
 @State<ICurrencyTableStateModel>({
 	name: 'currencyTableState',

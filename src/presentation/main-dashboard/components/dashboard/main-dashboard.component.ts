@@ -1,6 +1,6 @@
+import { Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
-import { Location } from '@angular/common';
 
 @Component({
 	selector: 'main-dashboard',

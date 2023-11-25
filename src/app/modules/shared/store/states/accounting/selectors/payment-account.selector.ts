@@ -1,9 +1,9 @@
-import { createSelector } from '@ngxs/store';
-
 import * as _ from 'lodash';
 
-import { PaymentAccountState } from '../payment-account.state';
+import { createSelector } from '@ngxs/store';
+
 import { IPaymenentAccountStateModel } from '../models/payment-account-state.model';
+import { PaymentAccountState } from '../payment-account.state';
 
 export const getActivePaymentAccountId = createSelector(
 	[PaymentAccountState],
@@ -12,7 +12,7 @@ export const getActivePaymentAccountId = createSelector(
 
 export const getActivePaymentAccount = createSelector([PaymentAccountState], (state: IPaymenentAccountStateModel) =>
 	_.find(state?.accounts, function (account) {
-		return account.id?.toString() === state?.activeAccountGuid;
+		return account.key?.toString() === state?.activeAccountGuid;
 	})
 );
 

@@ -3,10 +3,7 @@ import * as _ from 'lodash';
 import { CurrencyChartTitle } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-title';
 
 export class LineChartTitleService {
-	public static calculateTitle(
-		abbreviation: string,
-		rateValuesForPeriod: number[]
-	): CurrencyChartTitle {
+	public static calculateTitle(abbreviation: string, rateValuesForPeriod: number[]): CurrencyChartTitle {
 		const trend = LineChartTitleService.getPeriodTrendInPercentage(rateValuesForPeriod);
 
 		if (trend > 0) {

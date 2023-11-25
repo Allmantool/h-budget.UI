@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 
-import { State, Action, StateContext } from '@ngxs/store';
+import { Action, State, StateContext } from '@ngxs/store';
 
+import { SetActiveCurrencyTrendTitle } from './actions/currency-chart-options.actions';
 import { ICurrencyChartStateModel } from './models/currency-chart-state.model';
 import { CurrencyChartOptions } from '../../models/currency-rates/currency-chart-option.';
-import { SetActiveCurrencyTrendTitle } from './actions/currency-chart-options.actions';
 
 @State<ICurrencyChartStateModel>({
 	name: 'currencyChartState',

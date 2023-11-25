@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 
-import { State, Action, StateContext } from '@ngxs/store';
 import * as _ from 'lodash';
 
-import { IPaymenentAccountStateModel } from './models/payment-account-state.model';
+import { Action, State, StateContext } from '@ngxs/store';
+
 import {
 	AddPaymentAccount,
 	AddPaymentAccounts,
@@ -12,6 +12,7 @@ import {
 	SetInitialPaymentAccounts,
 	UpdatePaymentAccount,
 } from './actions/payment-acount.actions';
+import { IPaymenentAccountStateModel } from './models/payment-account-state.model';
 
 @State<IPaymenentAccountStateModel>({
 	name: 'paymentAccount',
@@ -43,7 +44,7 @@ export class PaymentAccountState {
 		patchState({
 			accounts: [
 				..._.filter(state?.accounts, function (p) {
-					return p.id?.toString() !== paymentAccountId;
+					return p.key?.toString() !== paymentAccountId;
 				}),
 			],
 		});
@@ -86,7 +87,7 @@ export class PaymentAccountState {
 		const accounts = [...state.accounts];
 
 		const indexForUpdate = _.findIndex(accounts, function (i) {
-			return _.isEqual(i.id?.toString(), paymentAccount.id?.toString());
+			return _.isEqual(i.key?.toString(), paymentAccount.key?.toString());
 		});
 
 		accounts[indexForUpdate] = paymentAccount;

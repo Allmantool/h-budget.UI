@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 
-import { PaymentAccountModel } from '../../models/accounting/payment-account.model';
 import { Result } from '../../../core/result';
+import { PaymentAccountModel } from '../../models/accounting/payment-account.model';
 
 export interface PaymentAccountsProvider {
 	removePaymentAccount(accountGuid: string): Observable<Result<boolean>>;

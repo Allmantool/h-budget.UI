@@ -4,9 +4,7 @@ import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group
 import { BankCurrencyProvider } from 'domain/providers/rates/bank-currency.provider';
 import { UseCase } from 'domain/use-case';
 
-export class GetTodayRatesUseCase
-	implements UseCase<{}, CurrencyRateGroupModel[]>
-{
+export class GetTodayRatesUseCase implements UseCase<{}, CurrencyRateGroupModel[]> {
 	constructor(private readonly ratesRepository: BankCurrencyProvider) {}
 
 	execute(): Observable<CurrencyRateGroupModel[]> {

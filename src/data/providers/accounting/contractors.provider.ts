@@ -1,16 +1,17 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
 
 import { Mapper } from '@dynamic-mapper/angular';
-import { Observable, map, retry, take } from 'rxjs';
+import { map, Observable, retry, take } from 'rxjs';
 
 import { Result } from 'core/result';
-import { ContractorsProvider } from 'domain/providers/accounting/contractors.provider';
-import { ContractorModel } from '../../../domain/models/accounting/contractor.model.';
-import { ContractorEntity } from './entities/contractor-entity';
+
+import { ContractorEntity } from './entities/contractor.entity';
 import { DataContractorProfile } from './mappers/contractor.mapping.profile';
-import { ContractorCreateRequest } from 'domain/models/accounting/requests/contractor-create.request';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
+import { ContractorModel } from '../../../domain/models/accounting/contractor.model.';
+import { ContractorCreateRequest } from '../../../domain/models/accounting/requests/contractor-create.request';
+import { ContractorsProvider } from '../../../domain/providers/accounting/contractors.provider';
 
 @Injectable()
 export class DefaultContractorsProvider implements ContractorsProvider {

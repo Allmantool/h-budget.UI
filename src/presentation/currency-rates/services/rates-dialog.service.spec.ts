@@ -1,9 +1,11 @@
 import { TestBed } from '@angular/core/testing';
+
 import { Store } from '@ngxs/store';
 
-import { RatesDialogService } from './rates-dialog.service';
 import { DialogProvider } from 'app/modules/shared/providers/dialog-provider';
 import { NationalBankCurrencyProvider } from 'data/providers/rates/national-bank-currency.provider';
+
+import { RatesDialogService } from './rates-dialog.service';
 
 describe('Rate dialog service', () => {
 	let nationalBankCurrencyProviderSpy: jasmine.SpyObj<NationalBankCurrencyProvider>;
@@ -29,20 +31,13 @@ describe('Rate dialog service', () => {
 	});
 
 	it('should use ValueService', () => {
-		const dialogProviderSpy = jasmine.createSpyObj('DialogProvider', [
-			'openDialog',
+		const dialogProviderSpy = jasmine.createSpyObj('DialogProvider', ['openDialog']);
+		const currencyRateProviderSpy = jasmine.createSpyObj('NationalBankCurrencyProvider', [
+			'getCurrenciesForSpecifiedPeriod',
 		]);
-		const currencyRateProviderSpy = jasmine.createSpyObj(
-			'NationalBankCurrencyProvider',
-			['getCurrenciesForSpecifiedPeriod']
-		);
 		const storeSpy = jasmine.createSpyObj('Store', ['dispatch']);
 
-		const rateService = new RatesDialogService(
-			dialogProviderSpy,
-			currencyRateProviderSpy,
-			storeSpy
-		);
+		const rateService = new RatesDialogService(dialogProviderSpy, currencyRateProviderSpy, storeSpy);
 
 		expect(rateService.openLoadRatesForPeriod());
 	});

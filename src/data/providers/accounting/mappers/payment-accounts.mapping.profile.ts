@@ -1,12 +1,13 @@
-import { MappingPair, Profile } from '@dynamic-mapper/mapper';
-import { Guid } from 'typescript-guid';
 import * as _ from 'lodash';
 
-import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
-import { PaymentAccountEntity } from '../entities/payment-account-entity';
-import { PaymentAccountCreateOrUpdateRequest } from '../../../../domain/models/accounting/requests/payment-account-create-or-update.request';
+import { MappingPair, Profile } from '@dynamic-mapper/mapper';
+import { Guid } from 'typescript-guid';
 
-export class DataAccountingMappingProfile extends Profile {
+import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
+import { PaymentAccountCreateOrUpdateRequest } from '../../../../domain/models/accounting/requests/payment-account-create-or-update.request';
+import { PaymentAccountEntity } from '../entities/payment-account.entity';
+
+export class PaymentAccountsMappingProfile extends Profile {
 	static readonly PaymentAccountEntityToDomain = new MappingPair<PaymentAccountEntity, PaymentAccountModel>();
 
 	static readonly DomainToPaymentAccountCreateRequest = new MappingPair<
@@ -17,10 +18,10 @@ export class DataAccountingMappingProfile extends Profile {
 	constructor() {
 		super();
 
-		this.createMap(DataAccountingMappingProfile.PaymentAccountEntityToDomain, {
-			id: opt => {
-				opt.preCondition(src => !_.isNil(src.id));
-				opt.mapFrom(src => Guid.parse(src.id));
+		this.createMap(PaymentAccountsMappingProfile.PaymentAccountEntityToDomain, {
+			key: opt => {
+				opt.preCondition(src => !_.isNil(src.key));
+				opt.mapFrom(src => Guid.parse(src.key));
 			},
 			type: opt => {
 				opt.preCondition(src => !_.isNil(src.type));
@@ -44,7 +45,7 @@ export class DataAccountingMappingProfile extends Profile {
 			},
 		});
 
-		this.createMap(DataAccountingMappingProfile.DomainToPaymentAccountCreateRequest, {
+		this.createMap(PaymentAccountsMappingProfile.DomainToPaymentAccountCreateRequest, {
 			accountType: opt => {
 				opt.preCondition(src => !_.isNil(src.type));
 				opt.mapFrom(src => src.type); // should work (should be checked)

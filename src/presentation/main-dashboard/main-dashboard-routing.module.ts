@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { Routes, provideRouter, withDebugTracing } from '@angular/router';
+import { provideRouter, Routes, withDebugTracing } from '@angular/router';
 
 import { MainDashboardComponent } from './components/dashboard/main-dashboard.component';
 

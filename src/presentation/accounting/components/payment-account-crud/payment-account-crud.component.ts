@@ -1,14 +1,15 @@
 import { ChangeDetectionStrategy, Component, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import { Observable, filter, take } from 'rxjs';
-import { Select, Store } from '@ngxs/store';
 import * as _ from 'lodash';
 
-import { PaymentAccountDialogService } from '../../services/payment-account-dialog.service';
-import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
-import { getActivePaymentAccountId } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
+import { Select, Store } from '@ngxs/store';
+import { filter, Observable, take } from 'rxjs';
+
 import { RemovePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
+import { getActivePaymentAccountId } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
+import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
+import { PaymentAccountDialogService } from '../../services/payment-account-dialog.service';
 
 @Component({
 	selector: 'payment-account-crud',

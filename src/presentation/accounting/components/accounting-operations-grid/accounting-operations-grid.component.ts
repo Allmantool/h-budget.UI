@@ -1,32 +1,40 @@
 import {
 	ChangeDetectionStrategy,
 	Component,
-	OnInit,
-	Signal,
-	signal,
 	computed,
 	DestroyRef,
 	inject,
+	OnInit,
+	signal,
+	Signal,
 } from '@angular/core';
-import { Router } from '@angular/router';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 
-import { Select, Store } from '@ngxs/store';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { Guid } from 'typescript-guid';
 import * as _ from 'lodash';
 
-import { AccountingGridRecord } from 'presentation/accounting/models/accounting-grid-record';
-import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
-import { AddRange } from '../../../../app/modules/shared/store/states/accounting/actions/accounting.actions';
-import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
-import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
+import { Select, Store } from '@ngxs/store';
+import { BehaviorSubject, combineLatest, Observable, zip } from 'rxjs';
+import { filter, map, switchMap, take } from 'rxjs/operators';
+import { Guid } from 'typescript-guid';
+
 import { AccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
+import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
+import { SetInitialPaymentOperations } from '../../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
+import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import {
-	getActivePaymentAccountId,
 	getActivePaymentAccount,
+	getActivePaymentAccountId,
 } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
+import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
+import { getCategories } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
+import { getContractors } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
+import { PaymentOperationsProvider } from '../../../../data/providers/accounting/payment-operations.provider';
+import { CategoryModel } from '../../../../domain/models/accounting/category.model';
+import { ContractorModel } from '../../../../domain/models/accounting/contractor.model.';
+import { OperationTypes } from '../../../../domain/models/accounting/operation-types';
 import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
+import { AccountingGridRecord } from '../../models/accounting-grid-record';
 
 @Component({
 	selector: 'accounting-operarions-grid',
@@ -37,6 +45,12 @@ import { PaymentAccountModel } from '../../../../domain/models/accounting/paymen
 export class AccountingOperatiosGridComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);
 
+	@Select(getCategories)
+	categories$!: Observable<CategoryModel[]>;
+
+	@Select(getContractors)
+	contractors$!: Observable<ContractorModel[]>;
+
 	@Select(getAccountingRecords)
 	accountingRecords$!: Observable<AccountingGridRecord[]>;
 
@@ -46,54 +60,20 @@ export class AccountingOperatiosGridComponent implements OnInit {
 	@Select(getActivePaymentAccount)
 	paymentAccound$!: Observable<PaymentAccountModel>;
 
+	@Select(getAccountingTableOptions)
+	accountingTableOptions$!: Observable<AccountingOperationsTableOptions>;
+
 	public paymentAccountSignal: Signal<PaymentAccountModel> = toSignal(this.paymentAccound$, {
 		initialValue: {} as PaymentAccountModel,
 	});
 
-	public paymentAccountGeneralInfoSignal: Signal<string> = signal('');
+	public contractorsSignal: Signal<ContractorModel[]>;
 
-	public ELEMENT_DATA: AccountingGridRecord[] = [
-		{
-			id: Guid.create(),
-			operationDate: new Date(2022, 24, 4),
-			contractor: 'Transport: Taxi',
-			category: 'Transport: Taxi',
-			income: 0,
-			expense: 0.35,
-			balance: 0.35,
-			comment: 'comment',
-		},
-		{
-			id: Guid.create(),
-			operationDate: new Date(2022, 28, 4),
-			contractor: 'Transport: Taxi',
-			category: 'Transport: Public',
-			income: 0,
-			expense: 0.35,
-			balance: 0.35,
-			comment: 'long long comment very long long long',
-		},
-		{
-			id: Guid.create(),
-			operationDate: new Date(2022, 29, 4),
-			contractor: 'Transport: Taxi',
-			category: 'Transport: Public',
-			income: 0,
-			expense: 11000.35,
-			balance: 1201030.35,
-			comment: 'long long comment very long long long',
-		},
-		{
-			id: Guid.create(),
-			operationDate: new Date(2022, 5, 5),
-			contractor: 'Work: GodelTech',
-			category: 'Income: Advance',
-			income: 15864,
-			expense: 0,
-			balance: 1201030.35,
-			comment: 'long long comment very long long long',
-		},
-	];
+	public categoriesSignal: Signal<CategoryModel[]> = toSignal(this.categories$, {
+		initialValue: {} as CategoryModel[],
+	});
+
+	public paymentAccountGeneralInfoSignal: Signal<string> = signal('');
 
 	public displayedColumns: string[] = [
 		'operationDate',
@@ -108,23 +88,64 @@ export class AccountingOperatiosGridComponent implements OnInit {
 	public dataSource$: BehaviorSubject<AccountingGridRecord[]> = new BehaviorSubject<AccountingGridRecord[]>([]);
 	public clickedRowGuids = new Set<Guid>();
 
-	@Select(getAccountingTableOptions)
-	accountingTableOptions$!: Observable<AccountingOperationsTableOptions>;
-
 	constructor(
+		private readonly paymentOperationsService: PaymentOperationsProvider,
 		private readonly router: Router,
 		private readonly store: Store
 	) {
-		this.store.dispatch(new AddRange(this.ELEMENT_DATA));
+		this.contractorsSignal = toSignal(this.contractors$, {
+			initialValue: {} as ContractorModel[],
+		});
 
-		if (!_.isNil(this.paymentAccountSignal())) {
-			this.paymentAccountGeneralInfoSignal = computed(
-				() =>
-					`${this.paymentAccountSignal()?.id?.toString()} ${this.paymentAccountSignal().emitter} | ${
-						this.paymentAccountSignal().description
-					}`
-			);
+		if (_.isNil(this.paymentAccountSignal())) {
+			this.navigateToPaymentAccountsAsync();
+			return;
 		}
+
+		this.paymentAccountGeneralInfoSignal = computed(
+			() =>
+				`${this.paymentAccountSignal()?.key?.toString()} ${this.paymentAccountSignal().emitter} | ${
+					this.paymentAccountSignal().description
+				}`
+		);
+
+		const getPaymentAccountOperations$ = this.paymentOperationsService.getOperationsForPaymentAccount(
+			this.paymentAccountSignal().key!.toString()
+		);
+
+		combineLatest([this.categories$, this.contractors$, this.paymentAccound$])
+			.pipe(
+				filter(([categ, contr]) => !_.isEmpty(categ) && !_.isEmpty(contr)),
+				switchMap(([categories, contractors, paymentAccount]) =>
+					getPaymentAccountOperations$.pipe(
+						take(1),
+						map(operations =>
+							_.map(operations, function (op) {
+								const targetContractor = _.find(contractors, c => c.key.equals(op.contractorId));
+								const targetCategories = _.find(categories, c => c.key.equals(op.categoryId));
+
+								const isIncome = targetCategories?.operationType === OperationTypes.Income;
+
+								const updatedBalance = isIncome
+									? paymentAccount.balance + op.amount
+									: paymentAccount.balance - op.amount;
+
+								return {
+									id: op.key,
+									operationDate: op.operationDate,
+									contractor: targetContractor!.nameNodes.parseToTreeAsString(),
+									category: targetCategories!.nameNodes.parseToTreeAsString(),
+									comment: op.comment,
+									income: isIncome ? op.amount : 0,
+									expense: isIncome ? 0 : op.amount,
+									balance: updatedBalance,
+								} as AccountingGridRecord;
+							})
+						)
+					)
+				)
+			)
+			.subscribe(gridRecords => this.store.dispatch(new SetInitialPaymentOperations(gridRecords)));
 	}
 
 	public ngOnInit(): void {

@@ -1,7 +1,6 @@
 <div class="crud-content">
 	<form
 		[formGroup]="crudRecordFg"
-		(ngSubmit)="applyChangesAsync()"
 	>
 		<div class="record-crud-section-title">New record:</div>
 		<div class="date-section">
@@ -33,7 +32,7 @@
 				formControlName="category"
 				[fieldType]="'SELECT'"
 				[title]="'Category:'"
-				[selectOptions]="categoriesSignal()"
+				[selectOptions]="categoryNodesSignal()"
 			></app-form-field>
 
 			<button
@@ -48,13 +47,13 @@
 
 		<ng-container
 			#expense
-			*ngIf="expenseSignal(); else income"
+			*ngIf="isExpenseSignal(); else income"
 		>
 			<div class="expense-section">
 				<app-form-field
 					formControlName="expense"
 					[fieldType]="'INPUT'"
-					[title]="'Expense:'"
+					[title]="'Amount(Exponse)::'"
 				></app-form-field>
 			</div>
 		</ng-container>
@@ -64,7 +63,7 @@
 				<app-form-field
 					formControlName="income"
 					[fieldType]="'INPUT'"
-					[title]="'Income:'"
+					[title]="'Amount(Income):'"
 				></app-form-field>
 			</div>
 		</ng-template>
@@ -82,6 +81,7 @@
 				title="Save"
 			></app-button>
 			<app-button
+                [hidden]="false"
 				(click)="addRecordAsync()"
 				title="New"
 			></app-button>

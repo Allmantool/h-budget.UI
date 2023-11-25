@@ -1,11 +1,12 @@
 import { Injectable } from '@angular/core';
 
-import { Action, State, StateContext } from '@ngxs/store';
 import * as _ from 'lodash';
+
+import { Action, State, StateContext } from '@ngxs/store';
 import { nameof } from 'ts-simple-nameof';
 
-import { ICategoriesStateModel } from './models/ICategoriesStateModel';
 import { AddCategory, SetInitialCategories } from './actions/category.actions';
+import { ICategoriesStateModel } from './models/ICategoriesStateModel';
 import { CategoryModel } from '../../../../../../domain/models/accounting/category.model';
 
 @State<ICategoriesStateModel>({
