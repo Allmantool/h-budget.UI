@@ -3,6 +3,8 @@ import * as _ from 'lodash';
 import { MappingPair, Profile } from '@dynamic-mapper/mapper';
 import { Guid } from 'typescript-guid';
 
+import format from 'date-fns/format';
+
 import { PaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
 import { PaymentOperationCreateOrUpdateRequest } from '../../../../domain/models/accounting/requests/payment-pperation-create-or-update.request';
 import { PaymentOperationEntity } from '../entities/payment-operation.entity';
@@ -31,9 +33,9 @@ export class PaymentOperationsMappingProfile extends Profile {
 				opt.preCondition(src => !_.isNil(src.contractorId));
 				opt.mapFrom(src => src.contractorId.toString());
 			},
-			operationDay: opt => {
+			operationDate: opt => {
 				opt.preCondition(src => !_.isNil(src.operationDate));
-				opt.mapFrom(src => src.operationDate);
+				opt.mapFrom(src => format(src.operationDate, 'yyyy-MM-dd'));
 			},
 			categoryId: opt => {
 				opt.preCondition(src => !_.isNil(src.categoryId));
