@@ -13,9 +13,9 @@ import * as _ from 'lodash';
 import { Store } from '@ngxs/store';
 import { map, Observable, startWith, take } from 'rxjs';
 
+import { ContractorModel } from '../../../../../../domain/models/accounting/contractor.model.';
 import { DialogContainer } from '../../../models/dialog-container';
 import { AddCounterParty } from '../../../store/states/handbooks/actions/counterparty.actions';
-import { ContractorModel } from 'domain/models/accounting/contractor.model.';
 
 @Component({
 	selector: 'counterparties-dialog',

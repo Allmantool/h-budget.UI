@@ -12,7 +12,7 @@ import { DialogProvider } from 'app/modules/shared/providers/dialog-provider';
 import { NationalBankCurrencyProvider } from 'data/providers/rates/national-bank-currency.provider';
 
 import { AddCurrencyGroups } from '../../../app/modules/shared/store/states/rates/actions/currency.actions';
-import { DaysRangePayload } from 'domain/models/dates-range-payload.model';
+import { DaysRangePayload } from '../../../domain/models/dates-range-payload.model';
 
 @Injectable()
 export class RatesDialogService {

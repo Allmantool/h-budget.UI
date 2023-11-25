@@ -13,9 +13,9 @@ import { PreviousDayCurrencyRate } from 'app/modules/shared/store/models/currenc
 
 import { SetActiveCurrency } from '../../../app/modules/shared/store/states/rates/actions/currency-table-options.actions';
 import { AddCurrencyGroups } from '../../../app/modules/shared/store/states/rates/actions/currency.actions';
+import { CurrencyRateGroupModel } from '../../../domain/models/rates/currency-rates-group.model';
 import { PresentationRatesMappingProfile } from '../mappers/presentation-rates-mapping.profiler';
 import { CurrencyGridRateModel } from '../models/currency-grid-rate.model';
-import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group.model';
 
 @Injectable()
 export class CurrencyRatesGridService {

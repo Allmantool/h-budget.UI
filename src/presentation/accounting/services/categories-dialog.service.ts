@@ -9,7 +9,7 @@ import { CategoriesDialogComponent } from '../../../app/modules/shared/component
 import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
 import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
 import { DefaultCategoriesProvider } from '../../../data/providers/accounting/categories.provider';
-import { CategoryModel } from 'domain/models/accounting/category.model';
+import { CategoryModel } from '../../../domain/models/accounting/category.model';
 
 @Injectable()
 export class CategoriesDialogService {

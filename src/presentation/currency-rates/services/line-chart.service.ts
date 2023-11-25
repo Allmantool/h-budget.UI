@@ -16,9 +16,9 @@ import { CurrencyTableOptions } from 'app/modules/shared/store/models/currency-r
 import { LineChartTitleService } from './line-chart-title.service';
 import { CurrencyChartTitle } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-title';
 import { SetActiveCurrencyTrendTitle } from '../../../app/modules/shared/store/states/rates/actions/currency-chart-options.actions';
+import { CurrencyRateValueModel } from '../../../domain/models/rates/currency-rate-value.model';
 import { ChartOptions } from '../models/chart-options';
 import { LineChartOptions } from '../models/line-chart-options';
-import { CurrencyRateValueModel } from 'domain/models/rates/currency-rate-value.model';
 
 @Injectable()
 export class LineChartService {

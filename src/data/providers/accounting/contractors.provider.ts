@@ -10,8 +10,8 @@ import { ContractorEntity } from './entities/contractor.entity';
 import { DataContractorProfile } from './mappers/contractor.mapping.profile';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
 import { ContractorModel } from '../../../domain/models/accounting/contractor.model.';
-import { ContractorCreateRequest } from 'domain/models/accounting/requests/contractor-create.request';
-import { ContractorsProvider } from 'domain/providers/accounting/contractors.provider';
+import { ContractorCreateRequest } from '../../../domain/models/accounting/requests/contractor-create.request';
+import { ContractorsProvider } from '../../../domain/providers/accounting/contractors.provider';
 
 @Injectable()
 export class DefaultContractorsProvider implements ContractorsProvider {

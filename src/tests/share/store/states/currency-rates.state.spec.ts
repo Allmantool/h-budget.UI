@@ -28,8 +28,8 @@ import {
 	getCurrencyRatesGroupByCurrencyId,
 } from '../../../../app/modules/shared/store/states/rates/selectors/currency.selectors';
 import { NationalBankCurrencyProvider } from '../../../../data/providers/rates/national-bank-currency.provider';
-import { CurrencyRateValueModel } from 'domain/models/rates/currency-rate-value.model';
-import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group.model';
+import { CurrencyRateValueModel } from '../../../../domain/models/rates/currency-rate-value.model';
+import { CurrencyRateGroupModel } from '../../../../domain/models/rates/currency-rates-group.model';
 
 describe('Currency rates store', () => {
 	let store: Store;

@@ -32,9 +32,9 @@ import { getContractors } from '../../../../app/modules/shared/store/states/hand
 import { PaymentOperationsProvider } from '../../../../data/providers/accounting/payment-operations.provider';
 import { CategoryModel } from '../../../../domain/models/accounting/category.model';
 import { ContractorModel } from '../../../../domain/models/accounting/contractor.model.';
+import { OperationTypes } from '../../../../domain/models/accounting/operation-types';
 import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 import { AccountingGridRecord } from '../../models/accounting-grid-record';
-import { OperationTypes } from 'domain/models/accounting/operation-types';
 
 @Component({
 	selector: 'accounting-operarions-grid',

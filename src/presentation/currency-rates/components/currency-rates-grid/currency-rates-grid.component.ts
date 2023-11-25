@@ -9,9 +9,6 @@ import { Select, Store } from '@ngxs/store';
 import { combineLatest, Observable, Subject } from 'rxjs';
 import { take } from 'rxjs/operators';
 
-import { NationalBankCurrencyProvider } from 'data/providers/rates/national-bank-currency.provider';
-import { RatesGridColumnOptions } from 'presentation/currency-rates/constants/rates-grid-options';
-
 import { RatesDialogService } from './../../services/rates-dialog.service';
 import { RatesGridDefaultOptions } from '../../../../app/modules/shared/constants/rates-grid-default-options';
 import { CurrencyTableOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-table-options';
@@ -22,10 +19,12 @@ import {
 	getCurrencyRatesFromPreviousDay,
 	getRates,
 } from '../../../../app/modules/shared/store/states/rates/selectors/currency.selectors';
+import { NationalBankCurrencyProvider } from '../../../../data/providers/rates/national-bank-currency.provider';
+import { CurrencyRateValueModel } from '../../../../domain/models/rates/currency-rate-value.model';
+import { CurrencyRateGroupModel } from '../../../../domain/models/rates/currency-rates-group.model';
+import { RatesGridColumnOptions } from '../../constants/rates-grid-options';
 import { CurrencyGridRateModel } from '../../models/currency-grid-rate.model';
 import { CurrencyRatesGridService } from '../../services/currency-rates-grid.service';
-import { CurrencyRateValueModel } from 'domain/models/rates/currency-rate-value.model';
-import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group.model';
 
 @Component({
 	selector: 'app-currency-rates-grid',

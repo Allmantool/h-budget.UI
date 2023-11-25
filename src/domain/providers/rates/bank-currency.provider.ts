@@ -1,8 +1,7 @@
 import { Observable } from 'rxjs';
 
-import { CurrencyGridRateModel } from 'presentation/currency-rates/models/currency-grid-rate.model';
-
 import { Result } from '../../../core/result';
+import { CurrencyGridRateModel } from '../../../presentation/currency-rates/models/currency-grid-rate.model';
 import { DaysRangePayload } from '../../models/dates-range-payload.model';
 import { CurrencyRateGroupModel } from '../../models/rates/currency-rates-group.model';
 
