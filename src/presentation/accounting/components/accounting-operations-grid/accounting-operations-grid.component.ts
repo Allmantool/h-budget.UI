@@ -120,15 +120,21 @@ export class AccountingOperatiosGridComponent implements OnInit {
 					getPaymentAccountOperations$.pipe(
 						take(1),
 						map(operations =>
-							_.map(operations, function (op) {
+							_.map(operations, function (op, operationIndex) {
 								const targetContractor = _.find(contractors, c => c.key.equals(op.contractorId));
 								const targetCategories = _.find(categories, c => c.key.equals(op.categoryId));
 
 								const isIncome = targetCategories?.operationType === OperationTypes.Income;
 
-								const updatedBalance = isIncome
-									? paymentAccount.balance + op.amount
-									: paymentAccount.balance - op.amount;
+								const accumulatedValue = _.sumBy(
+									_.slice(operations, 0, operationIndex + 1),
+									function (operation) {
+										return _.find(categories, c => c.key.equals(operation.categoryId))
+											?.operationType === OperationTypes.Income
+											? operation.amount
+											: -operation.amount;
+									}
+								);
 
 								return {
 									id: op.key,
@@ -137,8 +143,8 @@ export class AccountingOperatiosGridComponent implements OnInit {
 									category: targetCategories!.nameNodes.parseToTreeAsString(),
 									comment: op.comment,
 									income: isIncome ? op.amount : 0,
-									expense: isIncome ? 0 : op.amount,
-									balance: updatedBalance,
+									expense: isIncome ? 0 : -op.amount,
+									balance: paymentAccount.balance + accumulatedValue,
 								} as AccountingGridRecord;
 							})
 						)

@@ -6,18 +6,17 @@ import { format } from 'date-fns';
 import { Observable } from 'rxjs';
 import { map, retry, take, tap } from 'rxjs/operators';
 
-import { CurrencyGridRateModel } from 'presentation/currency-rates/models/currency-grid-rate.model';
-
 import { RatesGroupEntity } from './entities/rates-group.entity';
 import { DataRatesMappingProfile } from './mappers/data-rates-mapping.profiler';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
 import { Result } from '../../../core/result';
 import { DaysRangePayload } from '../../../domain/models/dates-range-payload.model';
 import { CurrencyRateGroupModel } from '../../../domain/models/rates/currency-rates-group.model';
-import { BankCurrencyProvider } from '../../../domain/providers/rates/bank-currency.provider';
+import { BankCurrenciesProvider } from '../../../domain/providers/rates/bank-currencies.provider';
+import { CurrencyGridRateModel } from '../../../presentation/currency-rates/models/currency-grid-rate.model';
 
 @Injectable()
-export class NationalBankCurrencyProvider implements BankCurrencyProvider {
+export class NationalBankCurrenciesProvider implements BankCurrenciesProvider {
 	private hostUrl?: string;
 
 	private apiUrl: string = 'currency-rates';

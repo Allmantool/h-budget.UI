@@ -19,7 +19,7 @@ import {
 	getCurrencyRatesFromPreviousDay,
 	getRates,
 } from '../../../../app/modules/shared/store/states/rates/selectors/currency.selectors';
-import { NationalBankCurrencyProvider } from '../../../../data/providers/rates/national-bank-currency.provider';
+import { NationalBankCurrenciesProvider } from '../../../../data/providers/rates/national-bank-currencies.provider';
 import { CurrencyRateValueModel } from '../../../../domain/models/rates/currency-rate-value.model';
 import { CurrencyRateGroupModel } from '../../../../domain/models/rates/currency-rates-group.model';
 import { RatesGridColumnOptions } from '../../constants/rates-grid-options';
@@ -52,7 +52,7 @@ export class CurrencyRatesGridComponent implements OnInit {
 	public ratesGridColumnOptions: typeof RatesGridColumnOptions = RatesGridColumnOptions;
 
 	constructor(
-		private readonly currencyRateProvider: NationalBankCurrencyProvider,
+		private readonly currencyRateProvider: NationalBankCurrenciesProvider,
 		private readonly store: Store,
 		private readonly ratesDialogService: RatesDialogService,
 		private readonly currencyRatesGridService: CurrencyRatesGridService
