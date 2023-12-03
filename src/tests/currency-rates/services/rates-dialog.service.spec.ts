@@ -2,10 +2,9 @@ import { TestBed } from '@angular/core/testing';
 
 import { Store } from '@ngxs/store';
 
-import { DialogProvider } from 'app/modules/shared/providers/dialog-provider';
-import { NationalBankCurrenciesProvider } from 'data/providers/rates/national-bank-currencies.provider';
-
-import { RatesDialogService } from './rates-dialog.service';
+import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
+import { NationalBankCurrenciesProvider } from '../../../data/providers/rates/national-bank-currencies.provider';
+import { RatesDialogService } from '../../../presentation/currency-rates/services/rates-dialog.service';
 
 describe('Rate dialog service', () => {
 	let nationalBankCurrencyProviderSpy: jasmine.SpyObj<NationalBankCurrenciesProvider>;
