@@ -9,7 +9,7 @@ import { AddCurrencyGroups, FetchAllCurrencyRates } from './actions/currency.act
 import { CurrencyChartState } from './currency-chart.state';
 import { CurrencyTableState } from './currency-table.state';
 import { ICurrencyRatesStateModel } from './models/currency-rates-state.model';
-import { NationalBankCurrencyProvider } from '../../../../../../data/providers/rates/national-bank-currency.provider';
+import { NationalBankCurrenciesProvider } from '../../../../../../data/providers/rates/national-bank-currencies.provider';
 import { CurrencyRateValueModel } from '../../../../../../domain/models/rates/currency-rate-value.model';
 import { CurrencyRateGroupModel } from '../../../../../../domain/models/rates/currency-rates-group.model';
 
@@ -22,7 +22,7 @@ import { CurrencyRateGroupModel } from '../../../../../../domain/models/rates/cu
 })
 @Injectable()
 export class CurrencyRatesState {
-	constructor(private readonly currencyRateProvider: NationalBankCurrencyProvider) {}
+	constructor(private readonly currencyRateProvider: NationalBankCurrenciesProvider) {}
 
 	@Action(AddCurrencyGroups)
 	addCurrencyGroups(

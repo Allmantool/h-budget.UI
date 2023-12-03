@@ -4,7 +4,7 @@ import { MapperModule } from '@dynamic-mapper/angular';
 import { NgxsModule } from '@ngxs/store';
 
 import { DataRatesMappingProfile } from 'data/providers/rates/mappers/data-rates-mapping.profiler';
-import { NationalBankCurrencyProvider } from 'data/providers/rates/national-bank-currency.provider';
+import { NationalBankCurrenciesProvider } from 'data/providers/rates/national-bank-currencies.provider';
 
 import { PresentationRatesMappingProfile } from './mappers/presentation-rates-mapping.profiler';
 import { CurrencyRatesGridService } from './services/currency-rates-grid.service';
@@ -37,7 +37,7 @@ import {
 		NgxsModule.forFeature([CurrencyRatesState, CurrencyTableState, CurrencyChartState]),
 		MapperModule.withProfiles([DataRatesMappingProfile, PresentationRatesMappingProfile]),
 	],
-	providers: [LineChartService, RatesDialogService, NationalBankCurrencyProvider, CurrencyRatesGridService],
+	providers: [LineChartService, RatesDialogService, NationalBankCurrenciesProvider, CurrencyRatesGridService],
 	bootstrap: [],
 })
 export class CurrencyRatesModule {}

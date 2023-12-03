@@ -9,7 +9,7 @@ import { Subject, take } from 'rxjs';
 import { DateRangeDialogComponent } from 'app/modules/shared/components/dialog/dates-rage/dates-range-dialog.component';
 import { DialogContainer } from 'app/modules/shared/models/dialog-container';
 import { DialogProvider } from 'app/modules/shared/providers/dialog-provider';
-import { NationalBankCurrencyProvider } from 'data/providers/rates/national-bank-currency.provider';
+import { NationalBankCurrenciesProvider } from 'data/providers/rates/national-bank-currencies.provider';
 
 import { AddCurrencyGroups } from '../../../app/modules/shared/store/states/rates/actions/currency.actions';
 import { DaysRangePayload } from '../../../domain/models/dates-range-payload.model';
@@ -18,7 +18,7 @@ import { DaysRangePayload } from '../../../domain/models/dates-range-payload.mod
 export class RatesDialogService {
 	constructor(
 		private dialogProvider: DialogProvider,
-		private currencyRateProvider: NationalBankCurrencyProvider,
+		private currencyRateProvider: NationalBankCurrenciesProvider,
 		private store: Store
 	) {}
 
