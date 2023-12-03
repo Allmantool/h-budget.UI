@@ -1,7 +1,9 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { getTestBed, TestBed } from '@angular/core/testing';
 
 import { Mapper, MapperModule } from '@dynamic-mapper/angular';
+import { take } from 'rxjs';
 
 import { RatesGroupEntity } from 'data/providers/rates/entities/rates-group.entity';
 
@@ -15,6 +17,7 @@ import { CurrencyGridRateModel } from '../../../presentation/currency-rates/mode
 
 describe('National bank currencies provider', () => {
 	const RATE_HOST: string = 'test-rates-host';
+	const RATE_API: string = 'currency-rates';
 
 	let injector: TestBed;
 
@@ -63,7 +66,7 @@ describe('National bank currencies provider', () => {
 			done();
 		});
 
-		const requestResponseMock: RatesGroupEntity[] = [
+		const responseMock: RatesGroupEntity[] = [
 			{
 				currencyId: 1,
 				name: 'currency for test',
@@ -79,14 +82,14 @@ describe('National bank currencies provider', () => {
 			},
 		];
 
-		httpMock.expectOne(`${RATE_HOST}/currency-rates/period/2022-11-30/2023-12-02`).flush(
+		httpMock.expectOne(`${RATE_HOST}/${RATE_API}/period/2022-11-30/2023-12-02`).flush(
 			new Result({
-				payload: requestResponseMock,
+				payload: responseMock,
 			})
 		);
 	});
 
-	it('should return amount of saved record for "saveCurrencies" request', (done: DoneFn) => {
+	it('should return expected amount of saved record for "saveCurrencies" request', (done: DoneFn) => {
 		const payloadRequest: CurrencyGridRateModel[] = [
 			new CurrencyGridRateModel({
 				currencyId: 1,
@@ -108,15 +111,101 @@ describe('National bank currencies provider', () => {
 			}),
 		];
 
-		sut.saveCurrencies(payloadRequest).subscribe(response => {
-			expect(response.payload).toBe(3);
-			done();
-		});
+		sut.saveCurrencies(payloadRequest)
+			.pipe(take(1))
+			.subscribe(response => {
+				expect(response.payload).toBe(3);
+				done();
+			});
 
-		const requestResponseMock: Result<number> = new Result({
+		const responseMock: Result<number> = new Result({
 			payload: payloadRequest.length,
 		});
 
-		httpMock.expectOne(`${RATE_HOST}/currency-rates`).flush(requestResponseMock);
+		const request = httpMock.expectOne({ method: 'POST', url: `${RATE_HOST}/${RATE_API}` }, 'save request');
+
+		expect(request.request.method).toBe('POST');
+
+		request.flush(responseMock);
+	});
+
+	it('should succesfully return response for "getCurrencies" request', (done: DoneFn) => {
+		sut.getCurrencies()
+			.pipe(take(1))
+			.subscribe(response => {
+				expect(response.length).toBe(1);
+				done();
+			});
+
+		const mockResponse: RatesGroupEntity[] = [
+			{
+				currencyId: 1,
+				name: 'currency for test',
+				abbreviation: 'test',
+				scale: 1,
+				rateValues: [
+					{
+						officialRate: 20,
+						ratePerUnit: 1,
+						updateDate: new Date(2023, 11, 2),
+					},
+				],
+			},
+		];
+
+		const request = httpMock.expectOne({ method: 'GET', url: `${RATE_HOST}/${RATE_API}` }, 'get request');
+
+		expect(request.request.method).toBe('GET');
+
+		request.flush(new Result({ payload: mockResponse }), { status: 200, statusText: 'ok' });
+	});
+
+	it('should succesfully return response for "getTodayCurrencies" request', (done: DoneFn) => {
+		sut.getTodayCurrencies()
+			.pipe(take(1))
+			.subscribe(response => {
+				expect(response.length).toBe(1);
+				done();
+			});
+
+		const mockResponse: RatesGroupEntity[] = [
+			{
+				currencyId: 1,
+				name: 'currency for test',
+				abbreviation: 'test',
+				scale: 1,
+				rateValues: [
+					{
+						officialRate: 20,
+						ratePerUnit: 1,
+						updateDate: new Date(2023, 11, 2),
+					},
+				],
+			},
+		];
+
+		const request = httpMock.expectOne({ method: 'GET', url: `${RATE_HOST}/${RATE_API}/today` });
+
+		expect(request.request.method).toBe('GET');
+
+		request.flush(new Result({ payload: mockResponse }), { status: 200, statusText: 'ok' });
+	});
+
+	it('should retry "getTodayCurrencies" request expected amount of times.', (done: DoneFn) => {
+		sut.getTodayCurrencies()
+			.pipe(take(1))
+			.subscribe({
+				error: (error: HttpErrorResponse) => {
+					expect(error.status).toBe(500);
+					done();
+				},
+			});
+
+		const expectedRetryAmount = 3;
+
+		for (let i = 0, c = expectedRetryAmount + 1; i < c; i++) {
+			const request = httpMock.expectOne({ method: 'GET', url: `${RATE_HOST}/${RATE_API}/today` });
+			request.flush('The service temporary unavalable', { status: 500, statusText: 'Internal Server Error' });
+		}
 	});
 });
