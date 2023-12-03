@@ -18,7 +18,7 @@ import { DaysRangePayload } from '../../../domain/models/dates-range-payload.mod
 export class RatesDialogService {
 	constructor(
 		private dialogProvider: DialogProvider,
-		private currencyRateProvider: NationalBankCurrenciesProvider,
+		private currencyRatesProvider: NationalBankCurrenciesProvider,
 		private store: Store
 	) {}
 
@@ -32,7 +32,7 @@ export class RatesDialogService {
 
 			const ratesAmountForPeriodSubject = new Subject<number>();
 
-			this.currencyRateProvider
+			this.currencyRatesProvider
 				.getCurrenciesForSpecifiedPeriod(payload)
 				.pipe(take(1))
 				.subscribe(rateGroups => {

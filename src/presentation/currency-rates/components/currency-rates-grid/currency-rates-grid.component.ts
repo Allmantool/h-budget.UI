@@ -52,7 +52,7 @@ export class CurrencyRatesGridComponent implements OnInit {
 	public ratesGridColumnOptions: typeof RatesGridColumnOptions = RatesGridColumnOptions;
 
 	constructor(
-		private readonly currencyRateProvider: NationalBankCurrenciesProvider,
+		private readonly currencyRatesProvider: NationalBankCurrenciesProvider,
 		private readonly store: Store,
 		private readonly ratesDialogService: RatesDialogService,
 		private readonly currencyRatesGridService: CurrencyRatesGridService
@@ -107,7 +107,7 @@ export class CurrencyRatesGridComponent implements OnInit {
 	}
 
 	public getTodayCurrencyRates(): void {
-		this.currencyRateProvider
+		this.currencyRatesProvider
 			.getTodayCurrencies()
 			.pipe(take(1))
 			.subscribe(todayRatesGroups => {
