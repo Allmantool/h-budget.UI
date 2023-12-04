@@ -73,6 +73,13 @@ export class CurrencyRatesGridComponent implements OnInit {
 				);
 			});
 
+		combineLatest([this.previousDayRates$, this.todayCurrencyRateGroups$])
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe(([previousDayRates, todayRateGroups]) => {
+				const dataSource = this.currencyRatesGridService.enrichWithTrend(previousDayRates, todayRateGroups);
+				this.todayRatesTableDataSource = dataSource;
+			});
+
 		await this.getTodayCurrencyRatesAsync();
 	}
 
@@ -82,13 +89,6 @@ export class CurrencyRatesGridComponent implements OnInit {
 
 	public async getTodayCurrencyRatesAsync(): Promise<void> {
 		this.todayCurrencyRateGroups$.next(await this.currencyRatesGridService.getTodayCurrenciesAsync());
-
-		combineLatest([this.previousDayRates$, this.todayCurrencyRateGroups$, this.currencyTableOptions$])
-			.pipe(takeUntilDestroyed(this.destroyRef))
-			.subscribe(([previousDayRates, todayRateGroups]) => {
-				const dataSource = this.currencyRatesGridService.enrichWithTrend(previousDayRates, todayRateGroups);
-				this.todayRatesTableDataSource = dataSource;
-			});
 	}
 
 	public openGetCurrencyRatesDialog(): void {

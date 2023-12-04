@@ -1,20 +1,19 @@
-/* eslint-disable @typescript-eslint/no-floating-promises */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { TestBed } from '@angular/core/testing';
 
 import { MapperModule } from '@dynamic-mapper/angular';
 import { NgxsModule, Store } from '@ngxs/store';
-import { of } from 'rxjs';
+import { firstValueFrom, of, take } from 'rxjs';
 
 import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
 import { AppSharedModule } from '../../../app/modules/shared/shared.module';
 import { ngxsConfig } from '../../../app/modules/shared/store/ngxs.config';
+import { SetActiveCurrency } from '../../../app/modules/shared/store/states/rates/actions/currency-table-options.actions';
 import { CurrencyChartState } from '../../../app/modules/shared/store/states/rates/currency-chart.state';
 import { CurrencyRatesState } from '../../../app/modules/shared/store/states/rates/currency-rates.state';
 import { CurrencyTableState } from '../../../app/modules/shared/store/states/rates/currency-table.state';
+import { ICurrencyTableStateModel } from '../../../app/modules/shared/store/states/rates/models/currency-table-state.model';
 import { DataRatesMappingProfile } from '../../../data/providers/rates/mappers/data-rates-mapping.profiler';
 import { NationalBankCurrenciesProvider } from '../../../data/providers/rates/national-bank-currencies.provider';
 import { CurrencyRateValueModel } from '../../../domain/models/rates/currency-rate-value.model';
@@ -46,6 +45,7 @@ describe('Currency rates grid conponent', () => {
 
 		dialogProviderSpy = jasmine.createSpyObj('dialogProvider', ['openDialog']);
 
+		// eslint-disable-next-line @typescript-eslint/no-floating-promises
 		TestBed.configureTestingModule({
 			imports: [
 				NgxsModule.forRoot([CurrencyRatesState, CurrencyTableState, CurrencyChartState], ngxsConfig),
@@ -65,10 +65,52 @@ describe('Currency rates grid conponent', () => {
 		}).compileComponents();
 
 		sut = TestBed.inject(CurrencyRatesGridComponent);
+		store = TestBed.inject(Store);
 	});
 
-	it('it "getTodayCurrencyRates": ', (done: DoneFn) => {
-		sut.getTodayCurrencyRates();
+	it('Should set store with appropriate target currency settings by "masterToggle"', (done: DoneFn) => {
+		const currencyIdUnderTest: number = 1;
+		const currencyAbbreviationUnderTest: string = 'test currency';
+
+		sut.masterToggle(currencyIdUnderTest, currencyAbbreviationUnderTest);
+		const tableOptionsStore: ICurrencyTableStateModel = store.selectSnapshot(CurrencyTableState);
+
+		expect(tableOptionsStore.tableOptions.selectedItem.currencyId).toBe(currencyIdUnderTest);
+		expect(tableOptionsStore.tableOptions.selectedItem.abbreviation).toBe(currencyAbbreviationUnderTest);
+		done();
+	});
+
+	it('Should populate today curreny rate groups by "getTodayCurrencyRatesAsync"', async () => {
+		await sut.getTodayCurrencyRatesAsync();
+
+		sut.todayCurrencyRateGroups$.pipe(take(1)).subscribe(rateGroups => {
+			expect(rateGroups.length).toBe(1);
+		});
+	});
+
+	it('Should trigger open rates dialog "openGetCurrencyRatesDialog"', () => {
+		sut.openGetCurrencyRatesDialog();
+
+		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+		expect(dialogProviderSpy.openDialog).toHaveBeenCalled();
+	});
+
+	it('Should go along with expected currency table options by "isSelectedCurrency"', (done: DoneFn) => {
+		const currencyIdUnderTest: number = 3;
+
+		store.dispatch(new SetActiveCurrency(currencyIdUnderTest, ''));
+
+		expect(sut.isSelectedCurrency(currencyIdUnderTest)).toBe(true);
+		done();
+	});
+
+	it('Should set store with appropriate target currency table settings by "setDateRange"', (done: DoneFn) => {
+		const defaultMonthAmount: number = 7;
+
+		sut.setDateRange(defaultMonthAmount);
+		const tableOptionsStore: ICurrencyTableStateModel = store.selectSnapshot(CurrencyTableState);
+
+		expect(tableOptionsStore.tableOptions.selectedDateRange.diffInMonths).toBe(defaultMonthAmount);
 		done();
 	});
 });

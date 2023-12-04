@@ -6,12 +6,11 @@ import * as _ from 'lodash';
 import { Store } from '@ngxs/store';
 import { Subject, take } from 'rxjs';
 
-import { DateRangeDialogComponent } from 'app/modules/shared/components/dialog/dates-rage/dates-range-dialog.component';
-import { DialogContainer } from 'app/modules/shared/models/dialog-container';
-import { DialogProvider } from 'app/modules/shared/providers/dialog-provider';
-import { NationalBankCurrenciesProvider } from 'data/providers/rates/national-bank-currencies.provider';
-
+import { DateRangeDialogComponent } from '../../../app/modules/shared/components/dialog/dates-rage/dates-range-dialog.component';
+import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
+import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
 import { AddCurrencyGroups } from '../../../app/modules/shared/store/states/rates/actions/currency.actions';
+import { NationalBankCurrenciesProvider } from '../../../data/providers/rates/national-bank-currencies.provider';
 import { DaysRangePayload } from '../../../domain/models/dates-range-payload.model';
 
 @Injectable()
