@@ -6,13 +6,13 @@ import * as _ from 'lodash';
 
 import { Mapper } from '@dynamic-mapper/angular';
 import { Store } from '@ngxs/store';
+import { firstValueFrom } from 'rxjs';
 
-import { RatesGridDefaultOptions } from 'app/modules/shared/constants/rates-grid-default-options';
-import { CurrencyTrend } from 'app/modules/shared/store/models/currency-rates/currency-trend';
-import { PreviousDayCurrencyRate } from 'app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
-
-import { SetActiveCurrency } from '../../../app/modules/shared/store/states/rates/actions/currency-table-options.actions';
+import { RatesGridDefaultOptions } from '../../../app/modules/shared/constants/rates-grid-default-options';
+import { CurrencyTrend } from '../../../app/modules/shared/store/models/currency-rates/currency-trend';
+import { PreviousDayCurrencyRate } from '../../../app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
 import { AddCurrencyGroups } from '../../../app/modules/shared/store/states/rates/actions/currency.actions';
+import { NationalBankCurrenciesProvider } from '../../../data/providers/rates/national-bank-currencies.provider';
 import { CurrencyRateGroupModel } from '../../../domain/models/rates/currency-rates-group.model';
 import { PresentationRatesMappingProfile } from '../mappers/presentation-rates-mapping.profiler';
 import { CurrencyGridRateModel } from '../models/currency-grid-rate.model';
@@ -21,7 +21,8 @@ import { CurrencyGridRateModel } from '../models/currency-grid-rate.model';
 export class CurrencyRatesGridService {
 	constructor(
 		private readonly mapper: Mapper,
-		private readonly store: Store
+		private readonly store: Store,
+		private readonly currencyRatesProvider: NationalBankCurrenciesProvider
 	) {}
 
 	public GetDataSource(rateGroups: CurrencyRateGroupModel[]): MatTableDataSource<CurrencyGridRateModel> {
@@ -44,23 +45,12 @@ export class CurrencyRatesGridService {
 		return new SelectionModel<CurrencyGridRateModel>(false, source);
 	}
 
-	public syncWithRatesStore(todayRatesGroups: CurrencyRateGroupModel[]): void {
+	public async getTodayCurrenciesAsync(): Promise<CurrencyRateGroupModel[]> {
+		const todayRatesGroups = await firstValueFrom(this.currencyRatesProvider.getTodayCurrencies());
+
 		this.store.dispatch(new AddCurrencyGroups(todayRatesGroups));
-	}
 
-	public isAllCheckboxesSelected(selectedItems: CurrencyGridRateModel[], supportedCurrenciesAmount: number): boolean {
-		const selectedTableItem = selectedItems;
-		const selectedRate = _.first(selectedTableItem);
-
-		if (_.isNil(selectedRate) || _.isNil(selectedRate?.currencyId)) {
-			return false;
-		}
-
-		if (!_.isNil(selectedRate.currencyId) && !_.isNil(selectedRate.abbreviation)) {
-			this.store.dispatch(new SetActiveCurrency(selectedRate.currencyId, selectedRate.abbreviation));
-		}
-
-		return selectedTableItem.length === supportedCurrenciesAmount;
+		return todayRatesGroups;
 	}
 
 	public enrichWithTrend(

@@ -2,13 +2,18 @@
 	class="currency-rates-grid__show-button currency-rates-grid__show-button--align-center"
 	*ngIf="todayCurrencyRateGroups$ | async as todayCurrencyRateGroups"
 >
-	<button mat-raised-button (click)="getTodayCurrencyRates()">Get today currency rates</button>
+	<button
+		mat-raised-button
+		(click)="getTodayCurrencyRatesAsync()"
+	>
+		Get today currency rates
+	</button>
 
 	<ng-container>
 		<mat-button-toggle-group
 			aria-label="Font Style"
 			mat-raised-button
-			value="{{ selectedCurrencyPertionOption }}"
+			value="{{ tableOptionsSignal().selectedDateRange.diffInMonths }}"
 			(change)="setDateRange($event.value)"
 		>
 			<mat-button-toggle value="1">1 Month</mat-button-toggle>
@@ -21,7 +26,10 @@
 		</mat-button-toggle-group>
 	</ng-container>
 
-	<button mat-raised-button (click)="openGetCurrencyRatesDialog()">
+	<button
+		mat-raised-button
+		(click)="openGetCurrencyRatesDialog()"
+	>
 		Get currency rates for date range
 	</button>
 </div>
@@ -30,42 +38,59 @@
 	class="currency-rates-grid currency-rates-grid--width"
 	*ngIf="todayCurrencyRateGroups$ | async as todayCurrencyRateGroups"
 >
-	<table mat-table [dataSource]="todayRatesTableDataSource" class="mat-elevation-z8">
-		<caption>
-			Currency rates grid
-		</caption>
+	<table
+		mat-table
+		[dataSource]="todayRatesTableDataSource"
+		class="mat-elevation-z8"
+	>
+		<caption>Currency rates grid</caption>
 
 		<ng-container [matColumnDef]="ratesGridColumnOptions.SELECT">
-			<th mat-header-cell *matHeaderCellDef>
-				<mat-checkbox
-					[checked]="todayRatesTableSelection.hasValue() && isAllSelected()"
-					[indeterminate]="todayRatesTableSelection.hasValue() && !isAllSelected()"
-					[disabled]="true"
-				>
-				</mat-checkbox>
+			<th
+				mat-header-cell
+				*matHeaderCellDef
+			>
+				<mat-checkbox [disabled]="true"></mat-checkbox>
 			</th>
-			<td mat-cell *matCellDef="let row">
+			<td
+				mat-cell
+				*matCellDef="let row"
+			>
 				<mat-checkbox
 					(click)="$event.stopPropagation()"
-					(change)="$event ? todayRatesTableSelection.toggle(row) : null"
-					[checked]="todayRatesTableSelection.isSelected(row)"
-				>
-				</mat-checkbox>
+					(change)="$event ? masterToggle(row.currencyId, row.abbreviation) : null"
+					[checked]="isSelectedCurrency(row.currencyId)"
+				></mat-checkbox>
 			</td>
 		</ng-container>
 
 		<ng-container [matColumnDef]="ratesGridColumnOptions.ID">
-			<th mat-header-cell *matHeaderCellDef>
+			<th
+				mat-header-cell
+				*matHeaderCellDef
+			>
 				{{ ratesGridColumnOptions.DESCRIPTIONS.get(ratesGridColumnOptions.ID) }}
 			</th>
-			<td mat-cell *matCellDef="let element">{{ element.currencyId }}</td>
+			<td
+				mat-cell
+				*matCellDef="let element"
+			>
+				{{ element.currencyId }}
+			</td>
 		</ng-container>
 
 		<ng-container [matColumnDef]="ratesGridColumnOptions.ABBREVIATION">
-			<th mat-header-cell *matHeaderCellDef>
+			<th
+				mat-header-cell
+				*matHeaderCellDef
+			>
 				{{ ratesGridColumnOptions.DESCRIPTIONS.get(ratesGridColumnOptions.ABBREVIATION) }}
 			</th>
-			<td mat-cell *matCellDef="let element" class="country-column">
+			<td
+				mat-cell
+				*matCellDef="let element"
+				class="country-column"
+			>
 				<span
 					class="abbreviation-flag fi fi-{{ element.abbreviation | currencyAbbreviationToFlagFormat }}"
 				></span>
@@ -73,16 +98,25 @@
 		</ng-container>
 
 		<ng-container [matColumnDef]="ratesGridColumnOptions.NAME">
-			<th mat-header-cell *matHeaderCellDef>
+			<th
+				mat-header-cell
+				*matHeaderCellDef
+			>
 				{{ ratesGridColumnOptions.DESCRIPTIONS.get(ratesGridColumnOptions.NAME) }}
 			</th>
-			<td mat-cell *matCellDef="let element">
+			<td
+				mat-cell
+				*matCellDef="let element"
+			>
 				{{ element.name }} [{{ element.abbreviation }}]
 			</td>
 		</ng-container>
 
 		<ng-container [matColumnDef]="ratesGridColumnOptions.RATE_PER_UNIT">
-			<th mat-header-cell *matHeaderCellDef>
+			<th
+				mat-header-cell
+				*matHeaderCellDef
+			>
 				{{ ratesGridColumnOptions.DESCRIPTIONS.get(ratesGridColumnOptions.RATE_PER_UNIT) }}
 			</th>
 			<td
@@ -95,9 +129,11 @@
 		</ng-container>
 
 		<ng-container [matColumnDef]="ratesGridColumnOptions.PERCENTAGE_DIFF">
-			<th mat-header-cell *matHeaderCellDef>
-				{{ ratesGridColumnOptions.DESCRIPTIONS.get(ratesGridColumnOptions.PERCENTAGE_DIFF)
-				}}
+			<th
+				mat-header-cell
+				*matHeaderCellDef
+			>
+				{{ ratesGridColumnOptions.DESCRIPTIONS.get(ratesGridColumnOptions.PERCENTAGE_DIFF) }}
 			</th>
 			<td
 				[style.color]="ratesGridColumnOptions.TRENDS[element.currencyTrend]"
@@ -110,13 +146,27 @@
 		</ng-container>
 
 		<ng-container [matColumnDef]="ratesGridColumnOptions.UPDATE_DATE">
-			<th mat-header-cell *matHeaderCellDef>
+			<th
+				mat-header-cell
+				*matHeaderCellDef
+			>
 				{{ ratesGridColumnOptions.DESCRIPTIONS.get(ratesGridColumnOptions.UPDATE_DATE) }}
 			</th>
-			<td mat-cell *matCellDef="let element">{{ element.updateDate | date }}</td>
+			<td
+				mat-cell
+				*matCellDef="let element"
+			>
+				{{ element.updateDate | date }}
+			</td>
 		</ng-container>
 
-		<tr mat-header-row *matHeaderRowDef="ratesGridColumnOptions.NAMES"></tr>
-		<tr mat-row *matRowDef="let row; columns: ratesGridColumnOptions.NAMES"></tr>
+		<tr
+			mat-header-row
+			*matHeaderRowDef="ratesGridColumnOptions.NAMES"
+		></tr>
+		<tr
+			mat-row
+			*matRowDef="let row; columns: ratesGridColumnOptions.NAMES"
+		></tr>
 	</table>
 </div>
