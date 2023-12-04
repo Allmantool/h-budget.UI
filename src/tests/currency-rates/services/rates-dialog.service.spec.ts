@@ -2,15 +2,15 @@ import { TestBed } from '@angular/core/testing';
 
 import { Store } from '@ngxs/store';
 
-import { DialogProvider } from 'app/modules/shared/providers/dialog-provider';
-import { NationalBankCurrenciesProvider } from 'data/providers/rates/national-bank-currencies.provider';
-
-import { RatesDialogService } from './rates-dialog.service';
+import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
+import { NationalBankCurrenciesProvider } from '../../../data/providers/rates/national-bank-currencies.provider';
+import { RatesDialogService } from '../../../presentation/currency-rates/services/rates-dialog.service';
 
 describe('Rate dialog service', () => {
 	let nationalBankCurrencyProviderSpy: jasmine.SpyObj<NationalBankCurrenciesProvider>;
-	let storerSpy: jasmine.SpyObj<Store>;
+	let storeSpy: jasmine.SpyObj<Store>;
 	let dialogProviderSpy: jasmine.SpyObj<DialogProvider>;
+	let currencyRateProviderSpy: jasmine.SpyObj<NationalBankCurrenciesProvider>;
 
 	let sut: RatesDialogService;
 
@@ -19,7 +19,7 @@ describe('Rate dialog service', () => {
 			providers: [
 				RatesDialogService,
 				{ provide: DialogProvider, useValue: dialogProviderSpy },
-				{ provide: Store, useValue: storerSpy },
+				{ provide: Store, useValue: storeSpy },
 				{
 					provide: NationalBankCurrenciesProvider,
 					useValue: nationalBankCurrencyProviderSpy,
@@ -31,11 +31,9 @@ describe('Rate dialog service', () => {
 	});
 
 	it('should use ValueService', () => {
-		const dialogProviderSpy = jasmine.createSpyObj('DialogProvider', ['openDialog']);
-		const currencyRateProviderSpy = jasmine.createSpyObj('NationalBankCurrencyProvider', [
-			'getCurrenciesForSpecifiedPeriod',
-		]);
-		const storeSpy = jasmine.createSpyObj('Store', ['dispatch']);
+		dialogProviderSpy = jasmine.createSpyObj('dialogProvider', ['openDialog']);
+		currencyRateProviderSpy = jasmine.createSpyObj('currencyRatesProvider', ['getCurrenciesForSpecifiedPeriod']);
+		storeSpy = jasmine.createSpyObj('store', ['dispatch']);
 
 		const rateService = new RatesDialogService(dialogProviderSpy, currencyRateProviderSpy, storeSpy);
 
