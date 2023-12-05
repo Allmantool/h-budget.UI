@@ -62,15 +62,13 @@ export class CurrencyRatesGridService {
 			todayRateGroups
 		);
 
-		gridRates.forEach(gridRateREcord => {
-			const previousDayRate = _.find(previousDayRates, r => r.currencyId === gridRateREcord.currencyId);
-			const previousDayRatePerUnit = previousDayRate?.ratePerUnit;
+		const previousDayRatesMap = new Map(previousDayRates.map(r => [r.currencyId, r.ratePerUnit]));
 
-			gridRateREcord.currencyTrend = this.getTrend(gridRateREcord.ratePerUnit, previousDayRatePerUnit);
-			gridRateREcord.rateDiff = this.getRateDiff(
-				previousDayRatePerUnit as number,
-				gridRateREcord.ratePerUnit ?? 0
-			);
+		gridRates.forEach(gridRecord => {
+			const previousDayRatePerUnit = previousDayRatesMap.get(gridRecord.currencyId!);
+
+			gridRecord.currencyTrend = this.getTrend(gridRecord.ratePerUnit, previousDayRatePerUnit);
+			gridRecord.rateDiff = this.getRateDiff(previousDayRatePerUnit!, gridRecord.ratePerUnit ?? 0);
 		});
 
 		return new MatTableDataSource<CurrencyGridRateModel>(gridRates);
