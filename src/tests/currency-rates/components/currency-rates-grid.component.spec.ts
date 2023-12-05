@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { MapperModule } from '@dynamic-mapper/angular';
 import { NgxsModule, Store } from '@ngxs/store';
-import { firstValueFrom, of, take } from 'rxjs';
+import { of, take } from 'rxjs';
 
 import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
 import { AppSharedModule } from '../../../app/modules/shared/shared.module';
