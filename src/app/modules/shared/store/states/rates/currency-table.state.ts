@@ -50,9 +50,9 @@ export class CurrencyTableState {
 	@Action(SetCurrencyDateRange)
 	setCurrencyDateRange(
 		{ getState, patchState }: StateContext<ICurrencyTableStateModel>,
-		{ amountOfMonths }: SetCurrencyDateRange
+		{ amountOfMonths, endDate }: SetCurrencyDateRange
 	): void {
-		const currentDate = new Date();
+		const currentDate = endDate ?? new Date();
 
 		patchState({
 			tableOptions: {

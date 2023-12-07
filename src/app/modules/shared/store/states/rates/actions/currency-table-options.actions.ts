@@ -8,5 +8,8 @@ export class SetActiveCurrency {
 
 export class SetCurrencyDateRange {
 	static readonly type = '[CURR-TABLE-OPTIONS] Set currency date range';
-	constructor(public amountOfMonths: number) {}
+	constructor(
+		public amountOfMonths: number,
+		public endDate?: Date
+	) {}
 }
