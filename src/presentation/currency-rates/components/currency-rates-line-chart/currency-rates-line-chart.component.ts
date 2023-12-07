@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import {
 	AfterViewInit,
 	ChangeDetectionStrategy,
@@ -15,7 +16,7 @@ import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
 import { ChartComponent } from 'ng-apexcharts';
-import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { CurrencyChartOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-chart-option.';
@@ -28,6 +29,7 @@ import { CurrencyRateGroupModel } from '../../../../domain/models/rates/currency
 import { ChartOptions } from '../../models/chart-options';
 import { CurrencyGridRateModel } from '../../models/currency-grid-rate.model';
 import { LineChartOptions } from '../../models/line-chart-options';
+import { LineChartTitleService } from '../../services/line-chart-title.service';
 import { LineChartService } from '../../services/line-chart.service';
 
 @Component({
@@ -97,6 +99,11 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
 					rateValues,
 					this.chart,
 					this.lineChartOptions
+				);
+
+				chartOptions.title = LineChartTitleService.calculateTitle(
+					this.tableOptionsSignal().selectedItem.abbreviation,
+					chartOptions.series[0].data as number[]
 				);
 
 				if (_.isNil(this.chartOptions.chart)) {
