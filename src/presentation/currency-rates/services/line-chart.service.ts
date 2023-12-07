@@ -56,6 +56,7 @@ export class LineChartService {
 			.value();
 
 		const rateValueSeriesData = _.map(ratesForPeriod, r => r.ratePerUnit ?? 0);
+		const rateValueLabels = _.map(ratesForPeriod, r => format(r.updateDate!, options.dateFormat));
 
 		this.charOptions$.next({
 			series: [
@@ -94,7 +95,7 @@ export class LineChartService {
 			},
 			title: {},
 			xaxis: {
-				categories: _.map(ratesForPeriod, r => format(r.updateDate!, options.dateFormat)),
+				categories: rateValueLabels,
 			},
 		});
 
