@@ -3,30 +3,49 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 
-import { Injectable } from '@angular/core';
+import { Injectable, Signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import * as _ from 'lodash';
 
-import { Store } from '@ngxs/store';
+import { Select, Store } from '@ngxs/store';
 import { format } from 'date-fns';
+import { ChartComponent } from 'ng-apexcharts';
+import { filter, Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 
-import { CurrencyTableOptions } from 'app/modules/shared/store/models/currency-rates/currency-table-options';
-
 import { LineChartTitleService } from './line-chart-title.service';
+import { CurrencyChartOptions } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-option.';
 import { CurrencyChartTitle } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-title';
+import { CurrencyTableOptions } from '../../../app/modules/shared/store/models/currency-rates/currency-table-options';
 import { SetActiveCurrencyTrendTitle } from '../../../app/modules/shared/store/states/rates/actions/currency-chart-options.actions';
+import { getCurrencyChartOptions } from '../../../app/modules/shared/store/states/rates/selectors/currency-chart-options.selectors';
+import { getCurrencyTableOptions } from '../../../app/modules/shared/store/states/rates/selectors/currency-table-options.selectors';
 import { CurrencyRateValueModel } from '../../../domain/models/rates/currency-rate-value.model';
 import { ChartOptions } from '../models/chart-options';
 import { LineChartOptions } from '../models/line-chart-options';
 
 @Injectable()
 export class LineChartService {
+	public tableOptionsSignal: Signal<CurrencyTableOptions>;
+	public currencyChartOptionSignal: Signal<CurrencyChartOptions>;
+
+	@Select(getCurrencyTableOptions)
+	public currencyTableOptions$!: Observable<CurrencyTableOptions>;
+
+	@Select(getCurrencyChartOptions)
+	currencyChartOptions$!: Observable<CurrencyChartOptions>;
+
 	constructor(protected readonly store: Store) {
-		this.chartCurrencyTrendTitle$.subscribe(p => {
+		this.chartCurrencyTrendTitle$.pipe(takeUntilDestroyed()).subscribe(p => {
 			const updatedState = { ...this.charOptions$.value, title: p };
 
 			this.charOptions$.next(updatedState);
+		});
+
+		this.tableOptionsSignal = toSignal(this.currencyTableOptions$, { initialValue: {} as CurrencyTableOptions });
+		this.currencyChartOptionSignal = toSignal(this.currencyChartOptions$, {
+			initialValue: {} as CurrencyChartOptions,
 		});
 	}
 
@@ -36,46 +55,45 @@ export class LineChartService {
 
 	public getChartOptions(
 		rates: CurrencyRateValueModel[],
-		tableOptions: CurrencyTableOptions,
+		chartComponentRef: ChartComponent,
 		options: LineChartOptions
 	): ChartOptions {
-		const ratesFilterByDateRange = _.sortBy(rates, i => i.updateDate);
+		const selectedDateRange = this.tableOptionsSignal().selectedDateRange;
 
-		const selectedDateRange = tableOptions.selectedDateRange;
+		const ratesForPeriod = _.chain(rates)
+			.sortBy(i => i.updateDate)
+			.filter(r => r.updateDate! >= selectedDateRange.start && r.updateDate! <= selectedDateRange.end)
+			.value();
 
-		const ratesForPeriod = _.filter(
-			ratesFilterByDateRange,
-			r => r.updateDate! >= selectedDateRange.start && r.updateDate! <= selectedDateRange.end
-		);
-
-		const abbreviation = tableOptions.selectedItem.abbreviation;
-
-		this.chartCurrencyTrendTitle$.next(
-			LineChartTitleService.calculateTitle(
-				abbreviation,
-				_.map(ratesForPeriod, r => r.ratePerUnit!)
-			)
-		);
+		const rateValueSeriesData = _.map(ratesForPeriod, r => r.ratePerUnit ?? 0);
 
 		this.charOptions$.next({
 			series: [
 				{
-					name: abbreviation,
-					data: _.map(ratesForPeriod, r => r.ratePerUnit ?? 0),
+					name: this.tableOptionsSignal().selectedItem.abbreviation,
+					data: rateValueSeriesData,
 				},
 			],
 			chart: {
+				id: 'mock-id',
 				events: {
 					zoomed: (chartContext, { xaxis }) => {
 						const dataPyaload: number[] = LineChartService.getRatesFromChartContext(chartContext);
-
 						const zoomedData = _.slice(dataPyaload, xaxis.min - 1, xaxis.max);
 
-						this.chartCurrencyTrendTitle$.next(
-							LineChartTitleService.calculateTitle(abbreviation, zoomedData)
-						);
+						if (dataPyaload.length === zoomedData.length) {
+							this.updateChartTitle(rateValueSeriesData, chartComponentRef);
+							return;
+						}
 
-						this.store.dispatch(new SetActiveCurrencyTrendTitle(this.chartCurrencyTrendTitle$.value.text));
+						const updatedSeries = { ...this.charOptions$.value.series, data: zoomedData };
+
+						this.charOptions$.next({
+							...this.charOptions$.value,
+							series: updatedSeries,
+						});
+
+						this.updateChartTitle(zoomedData, chartComponentRef);
 					},
 				},
 				height: options.height,
@@ -88,7 +106,35 @@ export class LineChartService {
 			},
 		});
 
+		this.updateChartTitle(rateValueSeriesData, chartComponentRef);
+
 		return this.charOptions$.value;
+	}
+
+	private updateChartTitle(rates: number[], chartComponentRef: ChartComponent) {
+		const chartTitle = LineChartTitleService.calculateTitle(
+			this.tableOptionsSignal().selectedItem.abbreviation,
+			rates
+		);
+
+		const fromSignal = this.currencyChartOptionSignal().activeCurrencyTrendTitle;
+
+		if (!_.isEqual(fromSignal, chartTitle.text)) {
+			this.chartCurrencyTrendTitle$.next(chartTitle);
+			this.store.dispatch(new SetActiveCurrencyTrendTitle(chartTitle.text));
+
+			chartComponentRef.updateOptions({
+				series: [
+					{
+						data: rates,
+					},
+				],
+				title: {
+					text: chartTitle.text,
+					style: chartTitle.style,
+				},
+			});
+		}
 	}
 
 	private static getRatesFromChartContext(chartContext: any): number[] {
