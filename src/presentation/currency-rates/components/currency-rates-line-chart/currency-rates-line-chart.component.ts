@@ -7,9 +7,9 @@ import {
 	inject,
 	Input,
 	OnInit,
+	Signal,
 	ViewChild,
 } from '@angular/core';
-import { Signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import * as _ from 'lodash';
