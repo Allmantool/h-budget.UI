@@ -9,7 +9,6 @@ import {
 } from '../../../app/modules/shared/store/states/rates/actions/currency-table-options.actions';
 import { CurrencyChartState } from '../../../app/modules/shared/store/states/rates/currency-chart.state';
 import { CurrencyTableState } from '../../../app/modules/shared/store/states/rates/currency-table.state';
-import { ICurrencyChartStateModel } from '../../../app/modules/shared/store/states/rates/models/currency-chart-state.model';
 import { CurrencyRateValueModel } from '../../../domain/models/rates/currency-rate-value.model';
 import { LineChartOptions } from '../../../presentation/currency-rates/models/line-chart-options';
 import { LineChartService } from '../../../presentation/currency-rates/services/line-chart.service';
@@ -62,7 +61,7 @@ describe('Line chart service', () => {
 		done();
 	});
 
-	it('Should calculate expected chart currency trend title for period by "getChartOptions"', (done: DoneFn) => {
+	it('Should calculate expected negative chart currency trend title for period by "getChartOptions"', (done: DoneFn) => {
 		const rates: CurrencyRateValueModel[] = [
 			new CurrencyRateValueModel({
 				ratePerUnit: 1.12,
@@ -92,6 +91,62 @@ describe('Line chart service', () => {
 		const chartOptions = sut.getChartOptions(rates, options);
 
 		expect(chartOptions.title.text).toBe('cur-a ↓ (-29.697 %)');
+		done();
+	});
+
+	it('Should calculate expected positive chart currency trend title for period by "getChartOptions"', (done: DoneFn) => {
+		const rates: CurrencyRateValueModel[] = [
+			new CurrencyRateValueModel({
+				ratePerUnit: 1.12,
+				officialRate: 11.2,
+				updateDate: new Date(2023, 0, 11),
+			}),
+			new CurrencyRateValueModel({
+				ratePerUnit: 3.3,
+				officialRate: 3.3,
+				updateDate: new Date(2024, 0, 10),
+			}),
+		];
+
+		const options: LineChartOptions = new LineChartOptions({
+			height: 12,
+			width: 15,
+		});
+
+		store.dispatch(new SetCurrencyDateRange(48, new Date(2024, 3, 10)));
+		store.dispatch(new SetActiveCurrency(11, 'cur-a'));
+
+		const chartOptions = sut.getChartOptions(rates, options);
+
+		expect(chartOptions.title.text).toBe('cur-a ↑ (+194.643 %)');
+		done();
+	});
+
+	it('Should calculate expected no a change for chart currency trend title for period by "getChartOptions"', (done: DoneFn) => {
+		const rates: CurrencyRateValueModel[] = [
+			new CurrencyRateValueModel({
+				ratePerUnit: 1.12,
+				officialRate: 11.2,
+				updateDate: new Date(2023, 0, 11),
+			}),
+			new CurrencyRateValueModel({
+				ratePerUnit: 1.12,
+				officialRate: 1.12,
+				updateDate: new Date(2024, 0, 10),
+			}),
+		];
+
+		const options: LineChartOptions = new LineChartOptions({
+			height: 12,
+			width: 15,
+		});
+
+		store.dispatch(new SetCurrencyDateRange(48, new Date(2024, 3, 10)));
+		store.dispatch(new SetActiveCurrency(11, 'cur-a'));
+
+		const chartOptions = sut.getChartOptions(rates, options);
+
+		expect(chartOptions.title.text).toBe('cur-a');
 		done();
 	});
 });
