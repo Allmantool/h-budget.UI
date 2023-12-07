@@ -10,12 +10,12 @@ import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
 import { format } from 'date-fns';
-import { ChartComponent } from 'ng-apexcharts';
 import { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 
 import { LineChartTitleService } from './line-chart-title.service';
 import { CurrencyChartOptions } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-option.';
+import { CurrencyChartTitle } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-title';
 import { CurrencyTableOptions } from '../../../app/modules/shared/store/models/currency-rates/currency-table-options';
 import { getCurrencyChartOptions } from '../../../app/modules/shared/store/states/rates/selectors/currency-chart-options.selectors';
 import { getCurrencyTableOptions } from '../../../app/modules/shared/store/states/rates/selectors/currency-table-options.selectors';
@@ -45,8 +45,8 @@ export class LineChartService {
 
 	public getChartOptions(
 		rates: CurrencyRateValueModel[],
-		chartComponentRef: ChartComponent,
-		options: LineChartOptions
+		options: LineChartOptions,
+		onZoomedCallback?: (title: CurrencyChartTitle) => void
 	): ChartOptions {
 		const selectedDateRange = this.tableOptionsSignal().selectedDateRange;
 
@@ -57,6 +57,10 @@ export class LineChartService {
 
 		const rateValueSeriesData = _.map(ratesForPeriod, r => r.ratePerUnit ?? 0);
 		const rateValueLabels = _.map(ratesForPeriod, r => format(r.updateDate!, options.dateFormat));
+		const defaultTitle = LineChartTitleService.calculateTitle(
+			this.tableOptionsSignal().selectedItem.abbreviation,
+			rateValueSeriesData
+		);
 
 		this.charOptions$.next({
 			series: [
@@ -79,13 +83,8 @@ export class LineChartService {
 
 						const trendTitle = this.currencyChartOptionSignal().activeCurrencyTrendTitle;
 
-						if (!_.isEqual(trendTitle, chartTitle.text)) {
-							chartComponentRef.updateOptions({
-								title: {
-									text: chartTitle.text,
-									style: chartTitle.style,
-								},
-							});
+						if (!_.isEqual(trendTitle, chartTitle.text) && !_.isNil(onZoomedCallback)) {
+							onZoomedCallback(chartTitle);
 						}
 					},
 				},
@@ -93,7 +92,7 @@ export class LineChartService {
 				width: options.width,
 				type: options.type,
 			},
-			title: {},
+			title: defaultTitle,
 			xaxis: {
 				categories: rateValueLabels,
 			},

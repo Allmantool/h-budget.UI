@@ -89,11 +89,9 @@ describe('Line chart service', () => {
 		store.dispatch(new SetCurrencyDateRange(3, new Date(2024, 3, 10)));
 		store.dispatch(new SetActiveCurrency(11, 'cur-a'));
 
-		sut.getChartOptions(rates, options);
+		const chartOptions = sut.getChartOptions(rates, options);
 
-		const ChartState: ICurrencyChartStateModel = store.selectSnapshot(CurrencyChartState);
-
-		expect(ChartState.chartOptions.activeCurrencyTrendTitle).toBe('cur-a ↓ (-29.697 %)');
+		expect(chartOptions.title.text).toBe('cur-a ↓ (-29.697 %)');
 		done();
 	});
 });

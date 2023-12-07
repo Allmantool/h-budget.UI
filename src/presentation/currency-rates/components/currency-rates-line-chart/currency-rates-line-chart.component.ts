@@ -16,18 +16,15 @@ import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
 import { ChartComponent } from 'ng-apexcharts';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { CurrencyChartOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-chart-option.';
 import { CurrencyTableOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-table-options';
 import { FetchAllCurrencyRates } from '../../../../app/modules/shared/store/states/rates/actions/currency.actions';
-import { getCurrencyChartOptions } from '../../../../app/modules/shared/store/states/rates/selectors/currency-chart-options.selectors';
 import { getCurrencyTableOptions } from '../../../../app/modules/shared/store/states/rates/selectors/currency-table-options.selectors';
 import { getCurrencyRatesGroupByCurrencyId } from '../../../../app/modules/shared/store/states/rates/selectors/currency.selectors';
 import { CurrencyRateGroupModel } from '../../../../domain/models/rates/currency-rates-group.model';
 import { ChartOptions } from '../../models/chart-options';
-import { CurrencyGridRateModel } from '../../models/currency-grid-rate.model';
 import { LineChartOptions } from '../../models/line-chart-options';
 import { LineChartTitleService } from '../../services/line-chart-title.service';
 import { LineChartService } from '../../services/line-chart.service';
@@ -49,9 +46,6 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
 	@Select(getCurrencyTableOptions)
 	public currencyTableOptions$!: Observable<CurrencyTableOptions>;
 
-	@Select(getCurrencyChartOptions)
-	public currencyChartOptions$!: Observable<CurrencyChartOptions>;
-
 	@ViewChild(ChartComponent, { static: false }) chart!: ChartComponent;
 	public chartOptions: Partial<ChartOptions> = {};
 
@@ -59,7 +53,6 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
 	@Input() public chartHeight = '360';
 
 	public isChartInitialized$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-	public currencyRates$: Subject<CurrencyGridRateModel[]> = new Subject<CurrencyGridRateModel[]>();
 
 	private lineChartOptions: LineChartOptions;
 
@@ -97,8 +90,15 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
 			.subscribe(rateValues => {
 				const chartOptions = this.linechartService.getChartOptions(
 					rateValues,
-					this.chart,
-					this.lineChartOptions
+					this.lineChartOptions,
+					chartTitle => {
+						this.chart.updateOptions({
+							title: {
+								text: chartTitle.text,
+								style: chartTitle.style,
+							},
+						});
+					}
 				);
 
 				chartOptions.title = LineChartTitleService.calculateTitle(
