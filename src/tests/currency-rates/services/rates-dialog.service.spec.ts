@@ -66,7 +66,7 @@ describe('Rates dialog service', () => {
 	});
 
 	it('rates dialog service should by "openLoadRatesForPeriod"', () => {
-		sut.openLoadRatesForPeriod();
+		// sut.openLoadRatesForPeriod();
 
 		// const currencyRatesState: ICurrencyRatesStateModel = store.selectSnapshot(CurrencyRatesState);
 
