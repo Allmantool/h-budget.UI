@@ -1,8 +1,8 @@
 export class CurrencyRateValueModel {
-	constructor(currencyRates: Partial<CurrencyRateValueModel>) {
-		this.updateDate = currencyRates.updateDate;
-		this.officialRate = currencyRates.officialRate;
-		this.ratePerUnit = currencyRates.ratePerUnit;
+	constructor(currencyRate: Partial<CurrencyRateValueModel>) {
+		this.officialRate = currencyRate.officialRate;
+		this.updateDate = currencyRate.updateDate;
+		this.ratePerUnit = currencyRate.ratePerUnit;
 	}
 
 	ratePerUnit?: number;

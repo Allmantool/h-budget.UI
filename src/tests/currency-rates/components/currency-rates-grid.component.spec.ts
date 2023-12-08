@@ -29,8 +29,8 @@ describe('Currency rates grid conponent', () => {
 	let fixture: ComponentFixture<CurrencyRatesGridComponent>;
 
 	let store: Store;
-	let currencyRateProviderSpy: any;
-	let dialogProviderSpy: any;
+	let currencyRateProviderSpy: jasmine.SpyObj<NationalBankCurrenciesProvider>;
+	let dialogProviderSpy: jasmine.SpyObj<DialogProvider>;
 
 	beforeEach(() => {
 		currencyRateProviderSpy = jasmine.createSpyObj('currencyRatesProvider', {
