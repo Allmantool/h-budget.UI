@@ -1,5 +1,5 @@
-import { AccountingOperationsTableOptions } from '../../../models/accounting/accounting-table-options';
+import { IAccountingOperationsTableOptions } from '../../../models/accounting/accounting-table-options';
 
 export interface IAccountingTableStateModel {
-	tableOptions: AccountingOperationsTableOptions;
+	tableOptions: IAccountingOperationsTableOptions;
 }

@@ -11,7 +11,7 @@ import { filter, Observable, take } from 'rxjs';
 import { Result } from 'core/result';
 
 import { AccountTypes } from '../../../../../../domain/models/accounting/account-types';
-import { PaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';
+import { IPaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';
 import { CurrencyAbbrevitions } from '../../../constants/rates-abbreviations';
 import { DialogContainer } from '../../../models/dialog-container';
 import { DialogOperationTypes } from '../../../models/dialog-operation-types';
@@ -85,7 +85,7 @@ export class PaymentAccountDialogComponent {
 	});
 
 	@Select(getPaymentAccounts)
-	paymentAccounts$!: Observable<PaymentAccountModel[]>;
+	paymentAccounts$!: Observable<IPaymentAccountModel[]>;
 
 	@Select(getActivePaymentAccountId)
 	paymentAccountId$!: Observable<string>;
@@ -140,7 +140,7 @@ export class PaymentAccountDialogComponent {
 	public applyChanges(): void {
 		this.isLoadingSignal.set(true);
 
-		const paymentAccountForSave: PaymentAccountModel = {
+		const paymentAccountForSave: IPaymentAccountModel = {
 			type: AccountTypes[this.accountTypeSignal()! as keyof typeof AccountTypes],
 			currency: this.currencySignal()! as string,
 			balance: this.balanceSignal()! as number,
@@ -150,7 +150,7 @@ export class PaymentAccountDialogComponent {
 
 		this.dialogConfiguration
 			.onSubmit(
-				new Result<PaymentAccountModel>({
+				new Result<IPaymentAccountModel>({
 					payload: paymentAccountForSave,
 					isSucceeded: true,
 				})

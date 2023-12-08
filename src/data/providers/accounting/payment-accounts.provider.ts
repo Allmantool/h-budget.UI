@@ -4,15 +4,15 @@ import { Injectable } from '@angular/core';
 import { Mapper } from '@dynamic-mapper/angular';
 import { filter, map, Observable, retry, take, tap } from 'rxjs';
 
-import { PaymentAccountEntity } from './entities/payment-account.entity';
+import { IPaymentAccountEntity } from './entities/payment-account.entity';
 import { PaymentAccountsMappingProfile } from './mappers/payment-accounts.mapping.profile';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
 import { Result } from '../../../core/result';
-import { PaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
-import { PaymentAccountsProvider } from '../../../domain/providers/accounting/payment-accounts.provider';
+import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
+import { IPaymentAccountsProvider } from '../../../domain/providers/accounting/payment-accounts.provider';
 
 @Injectable()
-export class DefaultPaymentAccountsProvider implements PaymentAccountsProvider {
+export class DefaultPaymentAccountsProvider implements IPaymentAccountsProvider {
 	private paymentAccountApi: string = 'payment-accounts';
 	private accountingHostUrl?: string;
 
@@ -35,7 +35,7 @@ export class DefaultPaymentAccountsProvider implements PaymentAccountsProvider {
 			);
 	}
 
-	public savePaymentAccount(newPaymentAccount: PaymentAccountModel): Observable<Result<string>> {
+	public savePaymentAccount(newPaymentAccount: IPaymentAccountModel): Observable<Result<string>> {
 		const request = this.mapper?.map(
 			PaymentAccountsMappingProfile.DomainToPaymentAccountCreateRequest,
 			newPaymentAccount
@@ -47,7 +47,7 @@ export class DefaultPaymentAccountsProvider implements PaymentAccountsProvider {
 	}
 
 	public updatePaymentAccount(
-		updatedPaymentAccount: PaymentAccountModel,
+		updatedPaymentAccount: IPaymentAccountModel,
 		accountGuid: string
 	): Observable<Result<string>> {
 		const request = this.mapper?.map(
@@ -60,9 +60,9 @@ export class DefaultPaymentAccountsProvider implements PaymentAccountsProvider {
 			.pipe(retry(3), take(1));
 	}
 
-	public getPaymentAccountById(paymentAccountId: string): Observable<PaymentAccountModel> {
+	public getPaymentAccountById(paymentAccountId: string): Observable<IPaymentAccountModel> {
 		return this.http
-			.get<Result<PaymentAccountEntity>>(
+			.get<Result<IPaymentAccountEntity>>(
 				`${this.accountingHostUrl}/${this.paymentAccountApi}/byId/${paymentAccountId}`
 			)
 			.pipe(
@@ -78,9 +78,9 @@ export class DefaultPaymentAccountsProvider implements PaymentAccountsProvider {
 			);
 	}
 
-	public getPaymentAccounts(): Observable<PaymentAccountModel[]> {
+	public getPaymentAccounts(): Observable<IPaymentAccountModel[]> {
 		return this.http
-			.get<Result<PaymentAccountEntity[]>>(`${this.accountingHostUrl}/${this.paymentAccountApi}`)
+			.get<Result<IPaymentAccountEntity[]>>(`${this.accountingHostUrl}/${this.paymentAccountApi}`)
 			.pipe(
 				map(
 					responseResult =>

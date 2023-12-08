@@ -1,6 +1,6 @@
-import { PaymentAccountModel } from 'domain/models/accounting/payment-account.model';
+import { IPaymentAccountModel } from 'domain/models/accounting/payment-account.model';
 
 export interface IPaymenentAccountStateModel {
 	activeAccountGuid: string;
-	accounts: PaymentAccountModel[];
+	accounts: IPaymentAccountModel[];
 }

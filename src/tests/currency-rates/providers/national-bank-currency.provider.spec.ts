@@ -1,17 +1,19 @@
-import { HttpErrorResponse } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClient, HttpErrorResponse, HttpInterceptor } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { getTestBed, TestBed } from '@angular/core/testing';
 
 import { Mapper, MapperModule } from '@dynamic-mapper/angular';
 import { take } from 'rxjs';
+import { Guid } from 'typescript-guid';
 
-import { RatesGroupEntity } from 'data/providers/rates/entities/rates-group.entity';
+import { IRatesGroupEntity } from 'data/providers/rates/entities/rates-group.entity';
 
+import { CorrelationIdInteceptor } from '../../../app/modules/core/interceptors/correlation-id.interceptor';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
 import { Result } from '../../../core/result';
 import { DataRatesMappingProfile } from '../../../data/providers/rates/mappers/data-rates-mapping.profiler';
 import { NationalBankCurrenciesProvider } from '../../../data/providers/rates/national-bank-currencies.provider';
-import { AppSettingsModel } from '../../../domain/models/app-settings.model';
+import { IAppSettingsModel } from '../../../domain/models/app-settings.model';
 import { DaysRangePayload } from '../../../domain/models/dates-range-payload.model';
 import { CurrencyGridRateModel } from '../../../presentation/currency-rates/models/currency-grid-rate.model';
 
@@ -23,11 +25,12 @@ describe('National bank currencies provider', () => {
 
 	let sut: NationalBankCurrenciesProvider;
 	let httpMock: HttpTestingController;
+	let httpClient: HttpClient;
 
 	beforeEach(() => {
 		const appConfigurationService = new AppConfigurationService();
 
-		const appSettings: AppSettingsModel = {
+		const appSettings: IAppSettingsModel = {
 			ratesHost: RATE_HOST,
 		};
 
@@ -42,17 +45,43 @@ describe('National bank currencies provider', () => {
 					provide: AppConfigurationService,
 					useValue: appConfigurationService,
 				},
+				{
+					provide: HTTP_INTERCEPTORS,
+					useClass: CorrelationIdInteceptor,
+					multi: true,
+				},
 			],
 		});
 
 		injector = getTestBed();
 
 		sut = injector.inject(NationalBankCurrenciesProvider);
+		httpClient = TestBed.inject(HttpClient);
 		httpMock = injector.inject(HttpTestingController);
 	});
 
 	afterEach(() => {
 		httpMock.verify();
+	});
+
+	it('should attach the interceptor', () => {
+		const interceptors: Array<HttpInterceptor> = TestBed.inject(HTTP_INTERCEPTORS);
+		expect(interceptors.some(i => i instanceof CorrelationIdInteceptor)).toBe(true);
+	});
+
+	it('should set correlation id header to request', () => {
+		const url = `${RATE_HOST}/${RATE_API}/period/2022-11-30/2023-12-02`;
+
+		httpClient.get(url).subscribe();
+
+		const mockRequest = httpMock.expectOne(url);
+
+		const correlationIdHeader = mockRequest.request.headers.get('CorrelationId');
+
+		expect(correlationIdHeader).toBeTruthy();
+		expect(Guid.isGuid(correlationIdHeader as string)).toBe(true);
+
+		mockRequest.flush(null);
 	});
 
 	it('should return expected abbreviaion for "getCurrenciesForSpecifiedPeriod" request', (done: DoneFn) => {
@@ -66,7 +95,7 @@ describe('National bank currencies provider', () => {
 			done();
 		});
 
-		const responseMock: RatesGroupEntity[] = [
+		const responseMock: IRatesGroupEntity[] = [
 			{
 				currencyId: 1,
 				name: 'currency for test',
@@ -137,7 +166,7 @@ describe('National bank currencies provider', () => {
 				done();
 			});
 
-		const mockResponse: RatesGroupEntity[] = [
+		const mockResponse: IRatesGroupEntity[] = [
 			{
 				currencyId: 1,
 				name: 'currency for test',
@@ -168,7 +197,7 @@ describe('National bank currencies provider', () => {
 				done();
 			});
 
-		const mockResponse: RatesGroupEntity[] = [
+		const mockResponse: IRatesGroupEntity[] = [
 			{
 				currencyId: 1,
 				name: 'currency for test',

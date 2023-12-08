@@ -6,9 +6,9 @@ import { addMonths } from 'date-fns';
 import { SetActiveCurrency, SetCurrencyDateRange } from './actions/currency-table-options.actions';
 import { ICurrencyTableStateModel } from './models/currency-table-state.model';
 import { RatesGridDefaultOptions } from '../../../constants/rates-grid-default-options';
-import { CurrencyDateRange } from '../../models/currency-rates/currency-date-range';
-import { CurrencyTableItem } from '../../models/currency-rates/currency-table-item';
-import { CurrencyTableOptions } from '../../models/currency-rates/currency-table-options';
+import { ICurrencyDateRange } from '../../models/currency-rates/currency-date-range';
+import { ICurrencyTableItem } from '../../models/currency-rates/currency-table-item';
+import { ICurrencyTableOptions } from '../../models/currency-rates/currency-table-options';
 
 @State<ICurrencyTableStateModel>({
 	name: 'currencyTableState',
@@ -17,13 +17,13 @@ import { CurrencyTableOptions } from '../../models/currency-rates/currency-table
 			selectedItem: {
 				currencyId: RatesGridDefaultOptions.CURRENCY_ID,
 				abbreviation: RatesGridDefaultOptions.CURRENCY_ABBREVIATION,
-			} as CurrencyTableItem,
+			} as ICurrencyTableItem,
 			selectedDateRange: {
 				start: addMonths(new Date(), -RatesGridDefaultOptions.PERIOD_IN_MONTHS_AMMOUNT),
 				end: new Date(),
 				diffInMonths: RatesGridDefaultOptions.PERIOD_IN_MONTHS_AMMOUNT,
-			} as CurrencyDateRange,
-		} as CurrencyTableOptions,
+			} as ICurrencyDateRange,
+		} as ICurrencyTableOptions,
 	},
 	children: [],
 })
@@ -41,9 +41,9 @@ export class CurrencyTableState {
 				selectedItem: {
 					currencyId: id,
 					abbreviation: label,
-				} as CurrencyTableItem,
+				} as ICurrencyTableItem,
 				selectedDateRange: getState().tableOptions.selectedDateRange,
-			} as CurrencyTableOptions,
+			} as ICurrencyTableOptions,
 		});
 	}
 
@@ -61,8 +61,8 @@ export class CurrencyTableState {
 					start: addMonths(currentDate, -amountOfMonths),
 					end: currentDate,
 					diffInMonths: amountOfMonths,
-				} as CurrencyDateRange,
-			} as CurrencyTableOptions,
+				} as ICurrencyDateRange,
+			} as ICurrencyTableOptions,
 		});
 	}
 }

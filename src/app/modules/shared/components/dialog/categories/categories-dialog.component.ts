@@ -11,7 +11,7 @@ import * as _ from 'lodash';
 import { Store } from '@ngxs/store';
 import { map, Observable, startWith, take } from 'rxjs';
 
-import { CategoryModel } from '../../../../../../domain/models/accounting/category.model';
+import { ICategoryModel } from '../../../../../../domain/models/accounting/category.model';
 import { OperationTypes } from '../../../../../../domain/models/accounting/operation-types';
 import { DialogContainer } from '../../../models/dialog-container';
 import { AddCategory } from '../../../store/states/handbooks/actions/category.actions';
@@ -84,7 +84,7 @@ export class CategoriesDialogComponent {
 		const payloadForSave = {
 			operationType: OperationTypes[categoryType as keyof typeof OperationTypes],
 			nameNodes: this.categoryNodes,
-		} as CategoryModel;
+		} as ICategoryModel;
 
 		this.dialogConfiguration
 			.onSubmit(payloadForSave)

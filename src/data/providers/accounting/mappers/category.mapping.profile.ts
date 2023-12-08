@@ -4,11 +4,11 @@ import { MappingPair, Profile } from '@dynamic-mapper/mapper';
 
 import { Guid } from 'typescript-guid';
 
-import { CategoryModel } from '../../../../domain/models/accounting/category.model';
-import { CategoryEntity } from '../entities/operation-category.entity';
+import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
+import { ICategoryEntity } from '../entities/operation-category.entity';
 
 export class DataCategoryProfile extends Profile {
-	static readonly CategoryEntityToDomain = new MappingPair<CategoryEntity, CategoryModel>();
+	static readonly CategoryEntityToDomain = new MappingPair<ICategoryEntity, ICategoryModel>();
 
 	constructor() {
 		super();

@@ -5,7 +5,7 @@ import { CurrencyGridRateModel } from '../../../presentation/currency-rates/mode
 import { DaysRangePayload } from '../../models/dates-range-payload.model';
 import { CurrencyRateGroupModel } from '../../models/rates/currency-rates-group.model';
 
-export interface BankCurrenciesProvider {
+export interface IBankCurrenciesProvider {
 	getCurrenciesForSpecifiedPeriod(payload: DaysRangePayload): Observable<CurrencyRateGroupModel[]>;
 	getTodayCurrencies(): Observable<CurrencyRateGroupModel[]>;
 	getCurrencies(): Observable<CurrencyRateGroupModel[]>;

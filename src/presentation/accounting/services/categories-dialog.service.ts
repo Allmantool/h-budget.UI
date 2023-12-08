@@ -9,7 +9,7 @@ import { CategoriesDialogComponent } from '../../../app/modules/shared/component
 import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
 import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
 import { DefaultCategoriesProvider } from '../../../data/providers/accounting/categories.provider';
-import { CategoryModel } from '../../../domain/models/accounting/category.model';
+import { ICategoryModel } from '../../../domain/models/accounting/category.model';
 
 @Injectable()
 export class CategoriesDialogService {
@@ -21,7 +21,7 @@ export class CategoriesDialogService {
 	public openCategories(): void {
 		const config = new MatDialogConfig<DialogContainer>();
 
-		const onSave = (payloadForSave: CategoryModel) => {
+		const onSave = (payloadForSave: ICategoryModel) => {
 			return this.categoriesProvider.saveCategory(payloadForSave.operationType, payloadForSave.nameNodes).pipe(
 				map(responseResult => responseResult.payload),
 				concatMap(categoryId => {

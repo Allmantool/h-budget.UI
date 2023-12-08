@@ -9,7 +9,7 @@ import { CounterpartiesDialogComponent } from '../../../app/modules/shared/compo
 import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
 import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
 import { DefaultContractorsProvider } from '../../../data/providers/accounting/contractors.provider';
-import { ContractorModel } from '../../../domain/models/accounting/contractor.model.';
+import { IContractorModel } from '../../../domain/models/accounting/contractor.model.';
 
 @Injectable()
 export class CounterpartiesDialogService {
@@ -21,7 +21,7 @@ export class CounterpartiesDialogService {
 	public openCategories(): void {
 		const config = new MatDialogConfig<DialogContainer>();
 
-		const onSave = (payloadForSave: ContractorModel) => {
+		const onSave = (payloadForSave: IContractorModel) => {
 			return this.contractorProvider.saveContractor(payloadForSave.nameNodes).pipe(
 				map(responseResult => responseResult.payload),
 				concatMap(contractorId => {

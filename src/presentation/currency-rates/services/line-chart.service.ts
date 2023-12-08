@@ -14,9 +14,9 @@ import { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 
 import { LineChartTitleService } from './line-chart-title.service';
-import { CurrencyChartOptions } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-option.';
-import { CurrencyChartTitle } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-title';
-import { CurrencyTableOptions } from '../../../app/modules/shared/store/models/currency-rates/currency-table-options';
+import { ICurrencyChartOptions } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-option.';
+import { ICurrencyChartTitle } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-title';
+import { ICurrencyTableOptions } from '../../../app/modules/shared/store/models/currency-rates/currency-table-options';
 import { getCurrencyChartOptions } from '../../../app/modules/shared/store/states/rates/selectors/currency-chart-options.selectors';
 import { getCurrencyTableOptions } from '../../../app/modules/shared/store/states/rates/selectors/currency-table-options.selectors';
 import { CurrencyRateValueModel } from '../../../domain/models/rates/currency-rate-value.model';
@@ -25,19 +25,19 @@ import { LineChartOptions } from '../models/line-chart-options';
 
 @Injectable()
 export class LineChartService {
-	public tableOptionsSignal: Signal<CurrencyTableOptions>;
-	public currencyChartOptionSignal: Signal<CurrencyChartOptions>;
+	public tableOptionsSignal: Signal<ICurrencyTableOptions>;
+	public currencyChartOptionSignal: Signal<ICurrencyChartOptions>;
 
 	@Select(getCurrencyTableOptions)
-	public currencyTableOptions$!: Observable<CurrencyTableOptions>;
+	public currencyTableOptions$!: Observable<ICurrencyTableOptions>;
 
 	@Select(getCurrencyChartOptions)
-	currencyChartOptions$!: Observable<CurrencyChartOptions>;
+	currencyChartOptions$!: Observable<ICurrencyChartOptions>;
 
 	constructor(protected readonly store: Store) {
-		this.tableOptionsSignal = toSignal(this.currencyTableOptions$, { initialValue: {} as CurrencyTableOptions });
+		this.tableOptionsSignal = toSignal(this.currencyTableOptions$, { initialValue: {} as ICurrencyTableOptions });
 		this.currencyChartOptionSignal = toSignal(this.currencyChartOptions$, {
-			initialValue: {} as CurrencyChartOptions,
+			initialValue: {} as ICurrencyChartOptions,
 		});
 	}
 
@@ -46,7 +46,7 @@ export class LineChartService {
 	public getChartOptions(
 		rates: CurrencyRateValueModel[],
 		options: LineChartOptions,
-		onZoomedCallback?: (title: CurrencyChartTitle) => void
+		onZoomedCallback?: (title: ICurrencyChartTitle) => void
 	): ChartOptions {
 		const selectedDateRange = this.tableOptionsSignal().selectedDateRange;
 

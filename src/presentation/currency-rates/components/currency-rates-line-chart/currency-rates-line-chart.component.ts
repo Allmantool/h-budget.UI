@@ -19,7 +19,7 @@ import { ChartComponent } from 'ng-apexcharts';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { CurrencyTableOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-table-options';
+import { ICurrencyTableOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-table-options';
 import { FetchAllCurrencyRates } from '../../../../app/modules/shared/store/states/rates/actions/currency.actions';
 import { getCurrencyTableOptions } from '../../../../app/modules/shared/store/states/rates/selectors/currency-table-options.selectors';
 import { getCurrencyRatesGroupByCurrencyId } from '../../../../app/modules/shared/store/states/rates/selectors/currency.selectors';
@@ -38,13 +38,13 @@ import { LineChartService } from '../../services/line-chart.service';
 export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
 	private readonly destroyRef = inject(DestroyRef);
 
-	public tableOptionsSignal: Signal<CurrencyTableOptions>;
+	public tableOptionsSignal: Signal<ICurrencyTableOptions>;
 
 	@Select(getCurrencyRatesGroupByCurrencyId)
 	public currencyRatesGroupByCurrencyId$!: Observable<(id: number) => CurrencyRateGroupModel>;
 
 	@Select(getCurrencyTableOptions)
-	public currencyTableOptions$!: Observable<CurrencyTableOptions>;
+	public currencyTableOptions$!: Observable<ICurrencyTableOptions>;
 
 	@ViewChild(ChartComponent, { static: false }) chart!: ChartComponent;
 	public chartOptions: Partial<ChartOptions> = {};
@@ -67,7 +67,7 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
 			type: 'area',
 		} as LineChartOptions;
 
-		this.tableOptionsSignal = toSignal(this.currencyTableOptions$, { initialValue: {} as CurrencyTableOptions });
+		this.tableOptionsSignal = toSignal(this.currencyTableOptions$, { initialValue: {} as ICurrencyTableOptions });
 	}
 	public ngAfterViewInit(): void {
 		this.InitializeChart();

@@ -7,7 +7,7 @@ import { nameof } from 'ts-simple-nameof';
 
 import { AddCategory, SetInitialCategories } from './actions/category.actions';
 import { ICategoriesStateModel } from './models/ICategoriesStateModel';
-import { CategoryModel } from '../../../../../../domain/models/accounting/category.model';
+import { ICategoryModel } from '../../../../../../domain/models/accounting/category.model';
 
 @State<ICategoriesStateModel>({
 	name: 'categoriesHandbook',
@@ -26,7 +26,7 @@ export class CategoriesState {
 
 		const orderedCategories = _.orderBy(
 			[...newCategoriesState],
-			nameof<CategoryModel>(op => op.nameNodes),
+			nameof<ICategoryModel>(op => op.nameNodes),
 			['asc']
 		);
 

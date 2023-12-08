@@ -11,7 +11,7 @@ import { DialogOperationTypes } from '../../../app/modules/shared/models/dialog-
 import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
 import { Result } from '../../../core/result';
 import { DefaultPaymentAccountsProvider } from '../../../data/providers/accounting/payment-accounts.provider';
-import { PaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
+import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
 
 @Injectable()
 export class PaymentAccountDialogService {
@@ -23,7 +23,7 @@ export class PaymentAccountDialogService {
 	public openPaymentAccountForSave(): void {
 		const config = new MatDialogConfig<DialogContainer>();
 
-		const onSave = (operationResult: Result<PaymentAccountModel>) => {
+		const onSave = (operationResult: Result<IPaymentAccountModel>) => {
 			if (!operationResult.isSucceeded) {
 				return;
 			}
@@ -59,7 +59,7 @@ export class PaymentAccountDialogService {
 	public openPaymentAccountForUpdate(paymentAccountid: string): void {
 		const config = new MatDialogConfig<DialogContainer>();
 
-		const onUpdate = (operationResult: Result<PaymentAccountModel>) => {
+		const onUpdate = (operationResult: Result<IPaymentAccountModel>) => {
 			if (!operationResult.isSucceeded) {
 				return;
 			}

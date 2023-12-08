@@ -17,7 +17,7 @@ import { SetInitialPaymentAccounts } from '../../../../app/modules/shared/store/
 import { getPaymentAccounts } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
 import { AccountTypes } from '../../../../domain/models/accounting/account-types';
-import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
+import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 
 @Component({
 	selector: 'payment-accounts',
@@ -27,12 +27,12 @@ import { PaymentAccountModel } from '../../../../domain/models/accounting/paymen
 })
 export class PaymentAccountComponent implements OnInit {
 	public isNavigateToOperationsDisabled: boolean = true;
-	public cashAccountsSignal = signal<PaymentAccountModel[]>([]);
-	public debitVirtualAccountsSignal = signal<PaymentAccountModel[]>([]);
-	public creditVirtualAccountsSignal = signal<PaymentAccountModel[]>([]);
+	public cashAccountsSignal = signal<IPaymentAccountModel[]>([]);
+	public debitVirtualAccountsSignal = signal<IPaymentAccountModel[]>([]);
+	public creditVirtualAccountsSignal = signal<IPaymentAccountModel[]>([]);
 
 	@Select(getPaymentAccounts)
-	paymentAccounts$!: Observable<PaymentAccountModel[]>;
+	paymentAccounts$!: Observable<IPaymentAccountModel[]>;
 
 	constructor(
 		private injector: EnvironmentInjector,
@@ -53,15 +53,15 @@ export class PaymentAccountComponent implements OnInit {
 		runInInjectionContext(this.injector, () => {
 			this.paymentAccounts$.pipe(takeUntilDestroyed()).subscribe(accounts => {
 				this.cashAccountsSignal.set(
-					_.filter(accounts, [nameof<PaymentAccountModel>(p => p.type), AccountTypes.WalletCache])
+					_.filter(accounts, [nameof<IPaymentAccountModel>(p => p.type), AccountTypes.WalletCache])
 				);
 
 				this.debitVirtualAccountsSignal.set(
-					_.filter(accounts, [nameof<PaymentAccountModel>(p => p.type), AccountTypes.Virtual])
+					_.filter(accounts, [nameof<IPaymentAccountModel>(p => p.type), AccountTypes.Virtual])
 				);
 
 				this.creditVirtualAccountsSignal.set(
-					_.filter(accounts, [nameof<PaymentAccountModel>(p => p.type), AccountTypes.Loan])
+					_.filter(accounts, [nameof<IPaymentAccountModel>(p => p.type), AccountTypes.Loan])
 				);
 			});
 		});

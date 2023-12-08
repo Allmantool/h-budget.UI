@@ -6,17 +6,17 @@ import { format } from 'date-fns';
 import { Observable } from 'rxjs';
 import { map, retry, take, tap } from 'rxjs/operators';
 
-import { RatesGroupEntity } from './entities/rates-group.entity';
+import { IRatesGroupEntity } from './entities/rates-group.entity';
 import { DataRatesMappingProfile } from './mappers/data-rates-mapping.profiler';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
 import { Result } from '../../../core/result';
 import { DaysRangePayload } from '../../../domain/models/dates-range-payload.model';
 import { CurrencyRateGroupModel } from '../../../domain/models/rates/currency-rates-group.model';
-import { BankCurrenciesProvider } from '../../../domain/providers/rates/bank-currencies.provider';
+import { IBankCurrenciesProvider } from '../../../domain/providers/rates/bank-currencies.provider';
 import { CurrencyGridRateModel } from '../../../presentation/currency-rates/models/currency-grid-rate.model';
 
 @Injectable()
-export class NationalBankCurrenciesProvider implements BankCurrenciesProvider {
+export class NationalBankCurrenciesProvider implements IBankCurrenciesProvider {
 	private hostUrl?: string;
 
 	private apiUrl: string = 'currency-rates';
@@ -35,7 +35,7 @@ export class NationalBankCurrenciesProvider implements BankCurrenciesProvider {
 		// prettier-ignore
 		const parametersSegmentUri = `${format(payload.startDate,'yyyy-MM-dd')}/${format(payload.endDate, 'yyyy-MM-dd')}`;
 
-		return this.http.get<Result<RatesGroupEntity[]>>(`${ratesUrl}/${parametersSegmentUri}`).pipe(
+		return this.http.get<Result<IRatesGroupEntity[]>>(`${ratesUrl}/${parametersSegmentUri}`).pipe(
 			map(
 				responseResult =>
 					this.mapper?.map(DataRatesMappingProfile.RatesGroupEntityToDomain, responseResult.payload)
@@ -57,7 +57,7 @@ export class NationalBankCurrenciesProvider implements BankCurrenciesProvider {
 	}
 
 	public getCurrencies(): Observable<CurrencyRateGroupModel[]> {
-		return this.http.get<Result<RatesGroupEntity[]>>(`${this.hostUrl}/${this.apiUrl}`).pipe(
+		return this.http.get<Result<IRatesGroupEntity[]>>(`${this.hostUrl}/${this.apiUrl}`).pipe(
 			map(
 				responseResult =>
 					this.mapper?.map(DataRatesMappingProfile.RatesGroupEntityToDomain, responseResult.payload)
@@ -68,7 +68,7 @@ export class NationalBankCurrenciesProvider implements BankCurrenciesProvider {
 	}
 
 	public getTodayCurrencies(): Observable<CurrencyRateGroupModel[]> {
-		return this.http.get<Result<RatesGroupEntity[]>>(`${this.hostUrl}/${this.apiUrl}/today`).pipe(
+		return this.http.get<Result<IRatesGroupEntity[]>>(`${this.hostUrl}/${this.apiUrl}/today`).pipe(
 			map(
 				responseResult =>
 					this.mapper?.map(DataRatesMappingProfile.RatesGroupEntityToDomain, responseResult.payload)

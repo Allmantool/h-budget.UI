@@ -5,16 +5,16 @@ import { Guid } from 'typescript-guid';
 
 import format from 'date-fns/format';
 
-import { PaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
-import { PaymentOperationCreateOrUpdateRequest } from '../../../../domain/models/accounting/requests/payment-pperation-create-or-update.request';
-import { PaymentOperationEntity } from '../entities/payment-operation.entity';
+import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
+import { IPaymentOperationCreateOrUpdateRequest } from '../../../../domain/models/accounting/requests/payment-pperation-create-or-update.request';
+import { IPaymentOperationEntity } from '../entities/payment-operation.entity';
 
 export class PaymentOperationsMappingProfile extends Profile {
-	static readonly PaymentOperaionEntityToDomain = new MappingPair<PaymentOperationEntity, PaymentOperationModel>();
+	static readonly PaymentOperaionEntityToDomain = new MappingPair<IPaymentOperationEntity, IPaymentOperationModel>();
 
 	static readonly DomainToPaymentOperationSaveRequest = new MappingPair<
-		PaymentOperationModel,
-		PaymentOperationCreateOrUpdateRequest
+		IPaymentOperationModel,
+		IPaymentOperationCreateOrUpdateRequest
 	>();
 
 	constructor() {

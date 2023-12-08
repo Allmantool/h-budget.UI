@@ -19,9 +19,9 @@ import { getActivePaymentAccountId } from '../../../app/modules/shared/store/sta
 import { getCategoryAsNodesMap } from '../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
 import { getContractorAsNodesMap } from '../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
 import { PaymentOperationsProvider } from '../../../data/providers/accounting/payment-operations.provider';
-import { CategoryModel } from '../../../domain/models/accounting/category.model';
-import { PaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
-import { AccountingGridRecord } from '../models/accounting-grid-record';
+import { ICategoryModel } from '../../../domain/models/accounting/category.model';
+import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
+import { IAccountingGridRecord } from '../models/accounting-grid-record';
 
 @Injectable()
 export class AccountingOperationsService {
@@ -29,14 +29,14 @@ export class AccountingOperationsService {
 	public activePaymentAccountId$!: Observable<string>;
 
 	@Select(getCategoryAsNodesMap)
-	public categoriesMap$!: Observable<Map<string, CategoryModel>>;
+	public categoriesMap$!: Observable<Map<string, ICategoryModel>>;
 
 	@Select(getContractorAsNodesMap)
 	public contractorsMap$!: Observable<Map<string, Guid>>;
 
 	public activePaymentAccountIdSignal: Signal<string>;
 
-	public categoriesMapSignal: Signal<Map<string, CategoryModel>>;
+	public categoriesMapSignal: Signal<Map<string, ICategoryModel>>;
 	public contractorsMapSignal: Signal<Map<string, Guid>>;
 
 	constructor(
@@ -44,7 +44,7 @@ export class AccountingOperationsService {
 		private readonly store: Store
 	) {
 		this.activePaymentAccountIdSignal = toSignal(this.activePaymentAccountId$, { initialValue: '' });
-		this.categoriesMapSignal = toSignal(this.categoriesMap$, { initialValue: new Map<string, CategoryModel>() });
+		this.categoriesMapSignal = toSignal(this.categoriesMap$, { initialValue: new Map<string, ICategoryModel>() });
 		this.contractorsMapSignal = toSignal(this.contractorsMap$, { initialValue: new Map<string, Guid>() });
 	}
 
@@ -70,8 +70,8 @@ export class AccountingOperationsService {
 		);
 	}
 
-	public async addOperationAsync(): Promise<Result<AccountingGridRecord>> {
-		const newRecord: AccountingGridRecord = {
+	public async addOperationAsync(): Promise<Result<IAccountingGridRecord>> {
+		const newRecord: IAccountingGridRecord = {
 			id: Guid.EMPTY,
 			operationDate: new Date(),
 			contractor: '',
@@ -93,8 +93,8 @@ export class AccountingOperationsService {
 		);
 	}
 
-	public async updateOperationAsync(gridRecord: AccountingGridRecord): Promise<Result<boolean>> {
-		const payload: PaymentOperationModel = {
+	public async updateOperationAsync(gridRecord: IAccountingGridRecord): Promise<Result<boolean>> {
+		const payload: IPaymentOperationModel = {
 			key: gridRecord.id,
 			operationDate: gridRecord.operationDate,
 			comment: gridRecord.comment,

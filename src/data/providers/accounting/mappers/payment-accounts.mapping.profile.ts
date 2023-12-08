@@ -3,16 +3,16 @@ import * as _ from 'lodash';
 import { MappingPair, Profile } from '@dynamic-mapper/mapper';
 import { Guid } from 'typescript-guid';
 
-import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
-import { PaymentAccountCreateOrUpdateRequest } from '../../../../domain/models/accounting/requests/payment-account-create-or-update.request';
-import { PaymentAccountEntity } from '../entities/payment-account.entity';
+import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
+import { IPaymentAccountCreateOrUpdateRequest } from '../../../../domain/models/accounting/requests/payment-account-create-or-update.request';
+import { IPaymentAccountEntity } from '../entities/payment-account.entity';
 
 export class PaymentAccountsMappingProfile extends Profile {
-	static readonly PaymentAccountEntityToDomain = new MappingPair<PaymentAccountEntity, PaymentAccountModel>();
+	static readonly PaymentAccountEntityToDomain = new MappingPair<IPaymentAccountEntity, IPaymentAccountModel>();
 
 	static readonly DomainToPaymentAccountCreateRequest = new MappingPair<
-		PaymentAccountModel,
-		PaymentAccountCreateOrUpdateRequest
+		IPaymentAccountModel,
+		IPaymentAccountCreateOrUpdateRequest
 	>();
 
 	constructor() {

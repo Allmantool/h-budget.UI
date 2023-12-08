@@ -1,3 +1,3 @@
-export interface CurrencyChartOptions {
+export interface ICurrencyChartOptions {
 	activeCurrencyTrendTitle: string;
 }

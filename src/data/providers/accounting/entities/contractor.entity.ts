@@ -1,4 +1,4 @@
-export interface ContractorEntity {
+export interface IContractorEntity {
 	key: string;
 	nameNodes: string[];
 }

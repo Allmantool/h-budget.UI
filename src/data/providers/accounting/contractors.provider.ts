@@ -6,15 +6,15 @@ import { map, Observable, retry, take } from 'rxjs';
 
 import { Result } from 'core/result';
 
-import { ContractorEntity } from './entities/contractor.entity';
+import { IContractorEntity } from './entities/contractor.entity';
 import { DataContractorProfile } from './mappers/contractor.mapping.profile';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
-import { ContractorModel } from '../../../domain/models/accounting/contractor.model.';
-import { ContractorCreateRequest } from '../../../domain/models/accounting/requests/contractor-create.request';
-import { ContractorsProvider } from '../../../domain/providers/accounting/contractors.provider';
+import { IContractorModel } from '../../../domain/models/accounting/contractor.model.';
+import { IContractorCreateRequest } from '../../../domain/models/accounting/requests/contractor-create.request';
+import { IContractorsProvider } from '../../../domain/providers/accounting/contractors.provider';
 
 @Injectable()
-export class DefaultContractorsProvider implements ContractorsProvider {
+export class DefaultContractorsProvider implements IContractorsProvider {
 	private accountingHostUrl?: string;
 
 	constructor(
@@ -25,8 +25,8 @@ export class DefaultContractorsProvider implements ContractorsProvider {
 		this.accountingHostUrl = this.appConfigurationService.settings?.accountingHost;
 	}
 
-	public getContractors(): Observable<ContractorModel[]> {
-		return this.http.get<Result<ContractorEntity[]>>(`${this.accountingHostUrl}/contractors`).pipe(
+	public getContractors(): Observable<IContractorModel[]> {
+		return this.http.get<Result<IContractorEntity[]>>(`${this.accountingHostUrl}/contractors`).pipe(
 			map(
 				responseResult =>
 					this.mapper?.map(DataContractorProfile.ContractorEntityToDomain, responseResult.payload)
@@ -36,9 +36,9 @@ export class DefaultContractorsProvider implements ContractorsProvider {
 		);
 	}
 
-	public getContractorById(contractorId: string): Observable<ContractorModel> {
+	public getContractorById(contractorId: string): Observable<IContractorModel> {
 		return this.http
-			.get<Result<ContractorEntity>>(`${this.accountingHostUrl}/contractors/byId/${contractorId}`)
+			.get<Result<IContractorEntity>>(`${this.accountingHostUrl}/contractors/byId/${contractorId}`)
 			.pipe(
 				map(
 					responseResult =>
@@ -50,7 +50,7 @@ export class DefaultContractorsProvider implements ContractorsProvider {
 	}
 
 	public saveContractor(newContractorNamesNodes: string[]): Observable<Result<string>> {
-		const request: ContractorCreateRequest = {
+		const request: IContractorCreateRequest = {
 			nameNodes: newContractorNamesNodes,
 		};
 

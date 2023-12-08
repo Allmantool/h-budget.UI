@@ -7,7 +7,7 @@ import { nameof } from 'ts-simple-nameof';
 
 import { AddCounterParty, SetInitialContractors } from './actions/counterparty.actions';
 import { ICounterpartiesStateModel } from './models/ICounterpartiesStateModel';
-import { ContractorModel } from 'domain/models/accounting/contractor.model.';
+import { IContractorModel } from 'domain/models/accounting/contractor.model.';
 
 @State<ICounterpartiesStateModel>({
 	name: 'counterpartiesHandbook',
@@ -29,7 +29,7 @@ export class CounterpartiesState {
 
 		const orderedContractors = _.orderBy(
 			[...newContractorsState, counterparty],
-			nameof<ContractorModel>(op => op.nameNodes),
+			nameof<IContractorModel>(op => op.nameNodes),
 			['asc']
 		);
 

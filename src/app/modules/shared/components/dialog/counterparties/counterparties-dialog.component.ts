@@ -13,7 +13,7 @@ import * as _ from 'lodash';
 import { Store } from '@ngxs/store';
 import { map, Observable, startWith, take } from 'rxjs';
 
-import { ContractorModel } from '../../../../../../domain/models/accounting/contractor.model.';
+import { IContractorModel } from '../../../../../../domain/models/accounting/contractor.model.';
 import { DialogContainer } from '../../../models/dialog-container';
 import { AddCounterParty } from '../../../store/states/handbooks/actions/counterparty.actions';
 
@@ -77,7 +77,7 @@ export class CounterpartiesDialogComponent {
 		}
 
 		this.dialogConfiguration
-			.onSubmit({ nameNodes: this.partyNodes } as ContractorModel)
+			.onSubmit({ nameNodes: this.partyNodes } as IContractorModel)
 			.pipe(take(1))
 			.subscribe(response => {
 				this.store.dispatch(new AddCounterParty(response));
