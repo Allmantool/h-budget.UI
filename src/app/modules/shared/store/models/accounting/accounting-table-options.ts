@@ -1,5 +1,5 @@
 import { Guid } from 'typescript-guid';
 
-export interface AccountingOperationsTableOptions {
+export interface IAccountingOperationsTableOptions {
 	selectedRecordGuid: Guid;
 }

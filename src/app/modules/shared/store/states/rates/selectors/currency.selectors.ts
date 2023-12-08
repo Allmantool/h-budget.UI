@@ -4,7 +4,7 @@ import { createSelector } from '@ngxs/store';
 
 import { CurrencyRateValueModel } from '../../../../../../../domain/models/rates/currency-rate-value.model';
 import { CurrencyRateGroupModel } from '../../../../../../../domain/models/rates/currency-rates-group.model';
-import { PreviousDayCurrencyRate } from '../../../models/currency-rates/previous-day-currency-rate';
+import { IPreviousDayCurrencyRate } from '../../../models/currency-rates/previous-day-currency-rate';
 import { CurrencyRatesState } from '../currency-rates.state';
 import { ICurrencyRatesStateModel } from '../models/currency-rates-state.model';
 
@@ -25,7 +25,7 @@ export const getCurrencyRatesFromPreviousDay = createSelector([getRates], (rateG
 
 			const previousDayRates = orderedRates[1] ?? orderedRates[0];
 
-			return <PreviousDayCurrencyRate>{
+			return <IPreviousDayCurrencyRate>{
 				currencyId: rg.currencyId,
 				ratePerUnit: previousDayRates?.ratePerUnit,
 				updateDate: previousDayRates?.updateDate,

@@ -1,4 +1,4 @@
-export interface PaymentOperationEntity {
+export interface IPaymentOperationEntity {
 	key: string;
 	operationDay: string;
 	comment: string;

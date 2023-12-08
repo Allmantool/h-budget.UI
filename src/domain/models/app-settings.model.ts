@@ -1,4 +1,4 @@
-export interface AppSettingsModel {
+export interface IAppSettingsModel {
 	ratesHost?: string;
 	accountingHost?: string;
 }

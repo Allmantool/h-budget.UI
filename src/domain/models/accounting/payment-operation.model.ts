@@ -1,6 +1,6 @@
 import { Guid } from 'typescript-guid';
 
-export interface PaymentOperationModel {
+export interface IPaymentOperationModel {
 	key: Guid;
 	operationDate: Date;
 	comment: string;

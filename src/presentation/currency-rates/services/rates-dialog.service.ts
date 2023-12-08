@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialogConfig } from '@angular/material/dialog';
 
 import * as _ from 'lodash';
 
 import { Store } from '@ngxs/store';
-import { Subject, take } from 'rxjs';
+import { Subject } from 'rxjs';
 
 import { DateRangeDialogComponent } from '../../../app/modules/shared/components/dialog/dates-rage/dates-range-dialog.component';
 import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
@@ -33,7 +34,7 @@ export class RatesDialogService {
 
 			this.currencyRatesProvider
 				.getCurrenciesForSpecifiedPeriod(payload)
-				.pipe(take(1))
+				.pipe(takeUntilDestroyed())
 				.subscribe(rateGroups => {
 					this.store.dispatch(new AddCurrencyGroups(rateGroups));
 

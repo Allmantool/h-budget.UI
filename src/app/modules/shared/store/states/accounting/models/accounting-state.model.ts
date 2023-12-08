@@ -1,6 +1,6 @@
-import { AccountingGridRecord } from '../../../../../../../presentation/accounting/models/accounting-grid-record';
+import { IAccountingGridRecord } from '../../../../../../../presentation/accounting/models/accounting-grid-record';
 
 export interface IAccountingOperationsStateModel {
-	operationRecords: AccountingGridRecord[];
+	operationRecords: IAccountingGridRecord[];
 	activeCurrency: string;
 }

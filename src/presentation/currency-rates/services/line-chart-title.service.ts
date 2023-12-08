@@ -1,16 +1,17 @@
 import * as _ from 'lodash';
 
-import { CurrencyChartTitle } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-title';
+import { HexColors } from '../../../app/modules/shared/constants/hex-colors';
+import { ICurrencyChartTitle } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-title';
 
 export class LineChartTitleService {
-	public static calculateTitle(abbreviation: string, rateValuesForPeriod: number[]): CurrencyChartTitle {
+	public static calculateTitle(abbreviation: string, rateValuesForPeriod: number[]): ICurrencyChartTitle {
 		const trend = LineChartTitleService.getPeriodTrendInPercentage(rateValuesForPeriod);
 
 		if (trend > 0) {
 			return {
 				text: `${abbreviation} \u2191 (+${trend} %)`,
 				style: {
-					color: '#32CD32',
+					color: HexColors.GREEN,
 				},
 			};
 		}
@@ -19,7 +20,7 @@ export class LineChartTitleService {
 			return {
 				text: `${abbreviation} \u2193 (${trend} %)`,
 				style: {
-					color: '#FF0000',
+					color: HexColors.RED,
 				},
 			};
 		}
@@ -27,7 +28,7 @@ export class LineChartTitleService {
 		return {
 			text: abbreviation,
 			style: {
-				color: '#000000',
+				color: HexColors.BLACK,
 			},
 		};
 	}

@@ -1,20 +1,20 @@
 import { Guid } from 'typescript-guid';
 
-import { AccountingGridRecord } from '../../../../../../../presentation/accounting/models/accounting-grid-record';
+import { IAccountingGridRecord } from '../../../../../../../presentation/accounting/models/accounting-grid-record';
 
 export class SetInitialPaymentOperations {
 	static readonly type = '[Payment operation] Set initial payment operations';
-	constructor(public paymentOperations: AccountingGridRecord[]) {}
+	constructor(public paymentOperations: IAccountingGridRecord[]) {}
 }
 
 export class Add {
 	static readonly type = '[Payment operation] Add';
-	constructor(public accountingRecord: AccountingGridRecord) {}
+	constructor(public accountingRecord: IAccountingGridRecord) {}
 }
 
 export class AddRange {
 	static readonly type = '[Payment operation] AddRange';
-	constructor(public accountingRecord: AccountingGridRecord[]) {}
+	constructor(public accountingRecord: IAccountingGridRecord[]) {}
 }
 
 export class Delete {
@@ -24,5 +24,5 @@ export class Delete {
 
 export class Edit {
 	static readonly type = '[Payment operation] Edit';
-	constructor(public accountingRecord: AccountingGridRecord) {}
+	constructor(public accountingRecord: IAccountingGridRecord) {}
 }

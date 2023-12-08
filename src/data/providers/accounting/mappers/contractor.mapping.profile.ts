@@ -4,11 +4,11 @@ import { MappingPair, Profile } from '@dynamic-mapper/mapper';
 
 import { Guid } from 'typescript-guid';
 
-import { ContractorModel } from '../../../../domain/models/accounting/contractor.model.';
-import { ContractorEntity } from '../entities/contractor.entity';
+import { IContractorModel } from '../../../../domain/models/accounting/contractor.model.';
+import { IContractorEntity } from '../entities/contractor.entity';
 
 export class DataContractorProfile extends Profile {
-	static readonly ContractorEntityToDomain = new MappingPair<ContractorEntity, ContractorModel>();
+	static readonly ContractorEntityToDomain = new MappingPair<IContractorEntity, IContractorModel>();
 
 	constructor() {
 		super();

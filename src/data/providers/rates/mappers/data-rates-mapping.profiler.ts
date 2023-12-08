@@ -2,15 +2,15 @@ import * as _ from 'lodash';
 
 import { MappingPair, Profile } from '@dynamic-mapper/mapper';
 
-import { RateValueEntity } from '../entities/rate-value.entity';
-import { RatesGroupEntity } from '../entities/rates-group.entity';
+import { IRateValueEntity } from '../entities/rate-value.entity';
+import { IRatesGroupEntity } from '../entities/rates-group.entity';
 import { CurrencyRateValueModel } from 'domain/models/rates/currency-rate-value.model';
 import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group.model';
 
 export class DataRatesMappingProfile extends Profile {
-	static readonly RatesGroupEntityToDomain = new MappingPair<RatesGroupEntity, CurrencyRateGroupModel>();
+	static readonly RatesGroupEntityToDomain = new MappingPair<IRatesGroupEntity, CurrencyRateGroupModel>();
 
-	static readonly RateValueEntityToDomain = new MappingPair<RateValueEntity, CurrencyRateValueModel>();
+	static readonly RateValueEntityToDomain = new MappingPair<IRateValueEntity, CurrencyRateValueModel>();
 
 	constructor() {
 		super();

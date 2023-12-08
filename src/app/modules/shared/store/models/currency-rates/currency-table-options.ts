@@ -1,8 +1,8 @@
-import { CurrencyDateRange } from './currency-date-range';
-import { CurrencyTableItem } from './currency-table-item';
+import { ICurrencyDateRange } from './currency-date-range';
+import { ICurrencyTableItem } from './currency-table-item';
 
-export interface CurrencyTableOptions {
-	selectedItem: CurrencyTableItem;
+export interface ICurrencyTableOptions {
+	selectedItem: ICurrencyTableItem;
 
-	selectedDateRange: CurrencyDateRange;
+	selectedDateRange: ICurrencyDateRange;
 }

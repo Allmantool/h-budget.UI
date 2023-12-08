@@ -9,8 +9,8 @@ import { Select, Store } from '@ngxs/store';
 import { combineLatest, Observable, Subject } from 'rxjs';
 
 import { RatesDialogService } from './../../services/rates-dialog.service';
-import { CurrencyTableOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-table-options';
-import { PreviousDayCurrencyRate } from '../../../../app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
+import { ICurrencyTableOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-table-options';
+import { IPreviousDayCurrencyRate } from '../../../../app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
 import {
 	SetActiveCurrency,
 	SetCurrencyDateRange,
@@ -35,16 +35,16 @@ import { CurrencyRatesGridService } from '../../services/currency-rates-grid.ser
 export class CurrencyRatesGridComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);
 
-	public tableOptionsSignal: Signal<CurrencyTableOptions>;
+	public tableOptionsSignal: Signal<ICurrencyTableOptions>;
 
 	@Select(getRates)
 	public rates$!: Observable<CurrencyRateValueModel[]>;
 
 	@Select(getCurrencyTableOptions)
-	public currencyTableOptions$!: Observable<CurrencyTableOptions>;
+	public currencyTableOptions$!: Observable<ICurrencyTableOptions>;
 
 	@Select(getCurrencyRatesFromPreviousDay)
-	public previousDayRates$!: Observable<PreviousDayCurrencyRate[]>;
+	public previousDayRates$!: Observable<IPreviousDayCurrencyRate[]>;
 
 	public todayCurrencyRateGroups$: Subject<CurrencyRateGroupModel[]> = new Subject<CurrencyRateGroupModel[]>();
 
@@ -58,7 +58,7 @@ export class CurrencyRatesGridComponent implements OnInit {
 		private readonly ratesDialogService: RatesDialogService,
 		private readonly currencyRatesGridService: CurrencyRatesGridService
 	) {
-		this.tableOptionsSignal = toSignal(this.currencyTableOptions$, { initialValue: {} as CurrencyTableOptions });
+		this.tableOptionsSignal = toSignal(this.currencyTableOptions$, { initialValue: {} as ICurrencyTableOptions });
 	}
 
 	async ngOnInit(): Promise<void> {

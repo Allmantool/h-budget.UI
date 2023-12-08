@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
 import { APP_INITIALIZER, inject, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
@@ -14,13 +16,13 @@ import { AppSharedModule } from './../shared/shared.module';
 import { ngxsConfig } from './../shared/store/ngxs.config';
 import { AppBootsrapRoutingModule } from './app-bootsrap-routing.module';
 import { AppRootComponent } from './components/app-root/app-root.component';
+import { IAppSettingsModel } from '../../../domain/models/app-settings.model';
 import { AppCoreModule } from '../core';
 import { CorrelationIdInteceptor } from '../core/interceptors/correlation-id.interceptor';
 import { HttpRequestLoaderInterceptor } from '../core/interceptors/http-request-loader.interceptor';
 import { CustomUIComponentsSharedModule } from '../shared/custom-ui-components.shared.module';
 import { AppConfigurationService } from '../shared/services/app-configuration.service';
 import { CoreAppState } from '../shared/store/states/core-app-root/core-app.state';
-import { AppSettingsModel } from 'domain/models/app-settings.model';
 
 @NgModule({
 	declarations: [AppRootComponent],
@@ -50,7 +52,7 @@ import { AppSettingsModel } from 'domain/models/app-settings.model';
 								.pipe(
 									take(1),
 									tap(appSettings => {
-										appConfigurationService.settings = appSettings as AppSettingsModel;
+										appConfigurationService.settings = appSettings as IAppSettingsModel;
 										console.log(
 											`Prod settings is: ${JSON.stringify(appConfigurationService.settings)}`
 										);
@@ -67,7 +69,7 @@ import { AppSettingsModel } from 'domain/models/app-settings.model';
 								)
 								.subscribe();
 						} else {
-							const appSettings: AppSettingsModel = require('/src/assets/config.json');
+							const appSettings: IAppSettingsModel = require('/src/assets/config.json');
 							appConfigurationService.settings = appSettings;
 
 							resolve(true);

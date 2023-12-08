@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MapperModule } from '@dynamic-mapper/angular';
 import { NgxsModule, Store } from '@ngxs/store';
@@ -19,16 +19,18 @@ import { NationalBankCurrenciesProvider } from '../../../data/providers/rates/na
 import { CurrencyRateValueModel } from '../../../domain/models/rates/currency-rate-value.model';
 import { CurrencyRateGroupModel } from '../../../domain/models/rates/currency-rates-group.model';
 import { CurrencyRatesGridComponent } from '../../../presentation/currency-rates/components/currency-rates-grid/currency-rates-grid.component';
+import { CurrencyRatesModule } from '../../../presentation/currency-rates/currency-rates.module';
 import { PresentationRatesMappingProfile } from '../../../presentation/currency-rates/mappers/presentation-rates-mapping.profiler';
 import { CurrencyRatesGridService } from '../../../presentation/currency-rates/services/currency-rates-grid.service';
 import { RatesDialogService } from '../../../presentation/currency-rates/services/rates-dialog.service';
 
 describe('Currency rates grid conponent', () => {
 	let sut: CurrencyRatesGridComponent;
+	let fixture: ComponentFixture<CurrencyRatesGridComponent>;
 
 	let store: Store;
-	let currencyRateProviderSpy: any;
-	let dialogProviderSpy: any;
+	let currencyRateProviderSpy: jasmine.SpyObj<NationalBankCurrenciesProvider>;
+	let dialogProviderSpy: jasmine.SpyObj<DialogProvider>;
 
 	beforeEach(() => {
 		currencyRateProviderSpy = jasmine.createSpyObj('currencyRatesProvider', {
@@ -51,6 +53,7 @@ describe('Currency rates grid conponent', () => {
 				NgxsModule.forRoot([CurrencyRatesState, CurrencyTableState, CurrencyChartState], ngxsConfig),
 				MapperModule.withProfiles([DataRatesMappingProfile, PresentationRatesMappingProfile]),
 				AppSharedModule,
+				CurrencyRatesModule,
 			],
 			providers: [
 				CurrencyRatesGridComponent,
@@ -62,10 +65,18 @@ describe('Currency rates grid conponent', () => {
 				},
 				{ provide: DialogProvider, useValue: dialogProviderSpy },
 			],
-		}).compileComponents();
+		})
+			.compileComponents()
+			.then(() => {
+				fixture = TestBed.createComponent(CurrencyRatesGridComponent);
+			});
 
-		sut = TestBed.inject(CurrencyRatesGridComponent);
 		store = TestBed.inject(Store);
+		sut = TestBed.inject(CurrencyRatesGridComponent);
+	});
+
+	it('should create the component', () => {
+		expect(fixture.componentInstance).toBeTruthy();
 	});
 
 	it('Should set store with appropriate target currency settings by "masterToggle"', (done: DoneFn) => {

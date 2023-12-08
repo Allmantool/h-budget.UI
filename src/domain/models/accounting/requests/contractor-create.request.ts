@@ -1,3 +1,3 @@
-export interface ContractorCreateRequest {
+export interface IContractorCreateRequest {
 	nameNodes: string[];
 }

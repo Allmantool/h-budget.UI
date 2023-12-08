@@ -9,7 +9,7 @@ import { of } from 'rxjs';
 
 import { AppSharedModule } from '../../../app/modules/shared/shared.module';
 import { CurrencyTrend } from '../../../app/modules/shared/store/models/currency-rates/currency-trend';
-import { PreviousDayCurrencyRate } from '../../../app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
+import { IPreviousDayCurrencyRate } from '../../../app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
 import { ngxsConfig } from '../../../app/modules/shared/store/ngxs.config';
 import { CurrencyChartState } from '../../../app/modules/shared/store/states/rates/currency-chart.state';
 import { CurrencyRatesState } from '../../../app/modules/shared/store/states/rates/currency-rates.state';
@@ -68,7 +68,7 @@ describe('Currency rates grid service', () => {
 	});
 
 	it('Should add expected trend information by "enrichWithTrend"', (done: DoneFn) => {
-		const previousDayRates: PreviousDayCurrencyRate[] = [
+		const previousDayRates: IPreviousDayCurrencyRate[] = [
 			{
 				updateDate: new Date(2023, 11, 5),
 				ratePerUnit: 1.34,
@@ -138,7 +138,7 @@ describe('Currency rates grid service', () => {
 	});
 
 	it('Should add expected rate percentage differencies by "enrichWithTrend"', (done: DoneFn) => {
-		const previousDayRates: PreviousDayCurrencyRate[] = [
+		const previousDayRates: IPreviousDayCurrencyRate[] = [
 			{
 				updateDate: new Date(2023, 11, 5),
 				ratePerUnit: 1.34,

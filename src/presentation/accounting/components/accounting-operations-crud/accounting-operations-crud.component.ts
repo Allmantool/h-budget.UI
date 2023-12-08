@@ -10,7 +10,7 @@ import { filter, take } from 'rxjs/operators';
 import { nameof } from 'ts-simple-nameof';
 import { Guid } from 'typescript-guid';
 
-import { AccountingOperationsTableOptions } from 'app/modules/shared/store/models/accounting/accounting-table-options';
+import { IAccountingOperationsTableOptions } from 'app/modules/shared/store/models/accounting/accounting-table-options';
 
 import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
@@ -23,9 +23,9 @@ import {
 import { getContractorNodes } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
 import { DefaultCategoriesProvider } from '../../../../data/providers/accounting/categories.provider';
 import { DefaultContractorsProvider } from '../../../../data/providers/accounting/contractors.provider';
-import { CategoryModel } from '../../../../domain/models/accounting/category.model';
+import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
 import { OperationTypes } from '../../../../domain/models/accounting/operation-types';
-import { AccountingGridRecord } from '../../models/accounting-grid-record';
+import { IAccountingGridRecord } from '../../models/accounting-grid-record';
 import { AccountingOperationsService } from '../../services/accounting-operations.service';
 import { CategoriesDialogService } from '../../services/categories-dialog.service';
 import { CounterpartiesDialogService } from '../../services/counterparties-dialog.service';
@@ -44,7 +44,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 
 	public categoryNodesSignal: Signal<string[]>;
 
-	public categoriesMapSignal: Signal<Map<string, CategoryModel>>;
+	public categoriesMapSignal: Signal<Map<string, ICategoryModel>>;
 
 	public selectedCategorySignal: Signal<string>;
 
@@ -52,23 +52,23 @@ export class AccountingOperationsCrudComponent implements OnInit {
 
 	public isExpenseSignal: Signal<boolean>;
 
-	public selectedRecordSignal: Signal<AccountingGridRecord>;
+	public selectedRecordSignal: Signal<IAccountingGridRecord>;
 
-	public accountingRecordsSignal: Signal<AccountingGridRecord[]>;
+	public accountingRecordsSignal: Signal<IAccountingGridRecord[]>;
 
 	public crudRecordFg: UntypedFormGroup;
 
 	@Select(getAccountingTableOptions)
-	accountingTableOptions$!: Observable<AccountingOperationsTableOptions>;
+	accountingTableOptions$!: Observable<IAccountingOperationsTableOptions>;
 
 	@Select(getAccountingRecords)
-	accountingRecords$!: Observable<AccountingGridRecord[]>;
+	accountingRecords$!: Observable<IAccountingGridRecord[]>;
 
 	@Select(getCategoryNodes)
 	categoryNodes$!: Observable<string[]>;
 
 	@Select(getCategoryAsNodesMap)
-	categoriesMap$!: Observable<Map<string, CategoryModel>>;
+	categoriesMap$!: Observable<Map<string, ICategoryModel>>;
 
 	@Select(getContractorNodes)
 	counterparties$!: Observable<string[]>;
@@ -96,13 +96,13 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		this.selectedRecordSignal = toSignal(this.crudRecordFg.valueChanges, { initialValue: {} });
 		this.contractorsSignal = toSignal(this.counterparties$, { initialValue: [] });
 		this.categoryNodesSignal = toSignal(this.categoryNodes$, { initialValue: [] });
-		this.categoriesMapSignal = toSignal(this.categoriesMap$, { initialValue: new Map<string, CategoryModel>() });
+		this.categoriesMapSignal = toSignal(this.categoriesMap$, { initialValue: new Map<string, ICategoryModel>() });
 		this.selectedCategorySignal = toSignal(
-			this.crudRecordFg.get(nameof<AccountingGridRecord>(r => r.category))!.valueChanges,
+			this.crudRecordFg.get(nameof<IAccountingGridRecord>(r => r.category))!.valueChanges,
 			{ initialValue: '' }
 		);
 		this.selectedContractorSignal = toSignal(
-			this.crudRecordFg.get(nameof<AccountingGridRecord>(r => r.contractor))!.valueChanges,
+			this.crudRecordFg.get(nameof<IAccountingGridRecord>(r => r.contractor))!.valueChanges,
 			{ initialValue: '' }
 		);
 

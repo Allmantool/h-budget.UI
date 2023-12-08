@@ -10,7 +10,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { RatesGridDefaultOptions } from '../../../app/modules/shared/constants/rates-grid-default-options';
 import { CurrencyTrend } from '../../../app/modules/shared/store/models/currency-rates/currency-trend';
-import { PreviousDayCurrencyRate } from '../../../app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
+import { IPreviousDayCurrencyRate } from '../../../app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
 import { AddCurrencyGroups } from '../../../app/modules/shared/store/states/rates/actions/currency.actions';
 import { NationalBankCurrenciesProvider } from '../../../data/providers/rates/national-bank-currencies.provider';
 import { CurrencyRateGroupModel } from '../../../domain/models/rates/currency-rates-group.model';
@@ -54,7 +54,7 @@ export class CurrencyRatesGridService {
 	}
 
 	public enrichWithTrend(
-		previousDayRates: PreviousDayCurrencyRate[],
+		previousDayRates: IPreviousDayCurrencyRate[],
 		todayRateGroups: CurrencyRateGroupModel[]
 	): MatTableDataSource<CurrencyGridRateModel> {
 		const gridRates: CurrencyGridRateModel[] = this.mapper.map(

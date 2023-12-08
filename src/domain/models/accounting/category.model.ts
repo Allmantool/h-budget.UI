@@ -2,7 +2,7 @@ import { Guid } from 'typescript-guid';
 
 import { OperationTypes } from './operation-types';
 
-export interface CategoryModel {
+export interface ICategoryModel {
 	key: Guid;
 	operationType: OperationTypes;
 	nameNodes: string[];

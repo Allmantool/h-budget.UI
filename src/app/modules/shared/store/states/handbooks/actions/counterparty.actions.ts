@@ -1,11 +1,11 @@
-import { ContractorModel } from 'domain/models/accounting/contractor.model.';
+import { IContractorModel } from 'domain/models/accounting/contractor.model.';
 
 export class AddCounterParty {
 	static readonly type = '[Counterparties handbook] Add';
-	constructor(public counterparty: ContractorModel) {}
+	constructor(public counterparty: IContractorModel) {}
 }
 
 export class SetInitialContractors {
 	static readonly type = '[Counterparties handbook] Set initial contractors';
-	constructor(public contractors: ContractorModel[]) {}
+	constructor(public contractors: IContractorModel[]) {}
 }

@@ -1,4 +1,4 @@
-export interface CategoryEntity {
+export interface ICategoryEntity {
 	key: string;
 	nameNodes: string[];
 	categoryType: number;

@@ -8,7 +8,7 @@ import { nameof } from 'ts-simple-nameof';
 import { AccountingOperationsTableState } from './accounting-operations-table.state';
 import { Add, AddRange, Delete, Edit, SetInitialPaymentOperations } from './actions/payment-operation.actions';
 import { IAccountingOperationsStateModel } from './models/accounting-state.model';
-import { AccountingGridRecord } from '../../../../../../presentation/accounting/models/accounting-grid-record';
+import { IAccountingGridRecord } from '../../../../../../presentation/accounting/models/accounting-grid-record';
 import { CurrencyAbbrevitions } from '../../../constants/rates-abbreviations';
 
 @State<IAccountingOperationsStateModel>({
@@ -37,7 +37,7 @@ export class AccountingOperationsState {
 
 		const records = _.orderBy(
 			[...state.operationRecords, accountingRecord],
-			[nameof<AccountingGridRecord>(r => r.operationDate)],
+			[nameof<IAccountingGridRecord>(r => r.operationDate)],
 			['asc']
 		);
 
@@ -59,7 +59,7 @@ export class AccountingOperationsState {
 		);
 
 		patchState({
-			operationRecords: [..._.orderBy(records, [nameof<AccountingGridRecord>(r => r.operationDate)], ['asc'])],
+			operationRecords: [..._.orderBy(records, [nameof<IAccountingGridRecord>(r => r.operationDate)], ['asc'])],
 		});
 	}
 
@@ -72,7 +72,7 @@ export class AccountingOperationsState {
 		records.splice(updatedItemIndex, 1, accountingRecord);
 
 		patchState({
-			operationRecords: [..._.orderBy(records, [nameof<AccountingGridRecord>(r => r.operationDate)], ['asc'])],
+			operationRecords: [..._.orderBy(records, [nameof<IAccountingGridRecord>(r => r.operationDate)], ['asc'])],
 		});
 	}
 
@@ -84,7 +84,7 @@ export class AccountingOperationsState {
 			.filter(function (record) {
 				return record.id !== accountingGuid;
 			})
-			.sortBy(nameof<AccountingGridRecord>(r => r.operationDate))
+			.sortBy(nameof<IAccountingGridRecord>(r => r.operationDate))
 			.value();
 
 		patchState({

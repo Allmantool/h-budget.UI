@@ -4,12 +4,12 @@ import { Injectable } from '@angular/core';
 import { Mapper } from '@dynamic-mapper/angular';
 import { map, Observable, retry, take } from 'rxjs';
 
-import { PaymentOperationEntity } from './entities/payment-operation.entity';
+import { IPaymentOperationEntity } from './entities/payment-operation.entity';
 import { PaymentOperationsMappingProfile } from './mappers/payment-operations.mapping.profile';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
 import { Result } from '../../../core/result';
-import { PaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
-import { PaymentAccountCreateOrUpdateResponse } from '../../../domain/models/accounting/responses/payment-account-create-or-update.response';
+import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
+import { IPaymentAccountCreateOrUpdateResponse } from '../../../domain/models/accounting/responses/payment-account-create-or-update.response';
 
 @Injectable()
 export class PaymentOperationsProvider {
@@ -24,9 +24,9 @@ export class PaymentOperationsProvider {
 		this.accountingHostUrl = this.appConfigurationService.settings?.accountingHost;
 	}
 
-	public getOperationsForPaymentAccount(paymentAccountId: string): Observable<PaymentOperationModel[]> {
+	public getOperationsForPaymentAccount(paymentAccountId: string): Observable<IPaymentOperationModel[]> {
 		return this.http
-			.get<Result<PaymentOperationEntity[]>>(
+			.get<Result<IPaymentOperationEntity[]>>(
 				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}`
 			)
 			.pipe(
@@ -44,15 +44,15 @@ export class PaymentOperationsProvider {
 
 	public savePaymentOperation(
 		paymentAccountId: string,
-		operationsForSave: PaymentOperationModel
-	): Observable<Result<PaymentAccountCreateOrUpdateResponse>> {
+		operationsForSave: IPaymentOperationModel
+	): Observable<Result<IPaymentAccountCreateOrUpdateResponse>> {
 		const request = this.mapper.map(
 			PaymentOperationsMappingProfile.DomainToPaymentOperationSaveRequest,
 			operationsForSave
 		);
 
 		return this.http
-			.post<Result<PaymentAccountCreateOrUpdateResponse>>(
+			.post<Result<IPaymentAccountCreateOrUpdateResponse>>(
 				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}`,
 				request
 			)
@@ -60,17 +60,17 @@ export class PaymentOperationsProvider {
 	}
 
 	public updatePaymentOperation(
-		operationForUpdate: PaymentOperationModel,
+		operationForUpdate: IPaymentOperationModel,
 		paymentAccountId: string,
 		paymentOperationId: string
-	): Observable<Result<PaymentAccountCreateOrUpdateResponse>> {
+	): Observable<Result<IPaymentAccountCreateOrUpdateResponse>> {
 		const request = this.mapper.map(
 			PaymentOperationsMappingProfile.DomainToPaymentOperationSaveRequest,
 			operationForUpdate
 		);
 
 		return this.http
-			.patch<Result<PaymentAccountCreateOrUpdateResponse>>(
+			.patch<Result<IPaymentAccountCreateOrUpdateResponse>>(
 				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}/${paymentOperationId}`,
 				request
 			)
@@ -80,9 +80,9 @@ export class PaymentOperationsProvider {
 	public removePaymentOperation(
 		paymentAccountId: string,
 		paymentOperationId: string
-	): Observable<Result<PaymentAccountCreateOrUpdateResponse>> {
+	): Observable<Result<IPaymentAccountCreateOrUpdateResponse>> {
 		return this.http
-			.delete<Result<PaymentAccountCreateOrUpdateResponse>>(
+			.delete<Result<IPaymentAccountCreateOrUpdateResponse>>(
 				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}/${paymentOperationId}`
 			)
 			.pipe(retry(3), take(1));

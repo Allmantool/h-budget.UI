@@ -13,6 +13,7 @@ export class CurrencyRateGroupModel {
 			return <CurrencyRateValueModel>{
 				updateDate: !_.isNil(rv.updateDate) ? new Date(rv.updateDate) : rv.updateDate,
 				ratePerUnit: rv.ratePerUnit,
+				officialRate: rv.officialRate,
 			};
 		});
 	}

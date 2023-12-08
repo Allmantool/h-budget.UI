@@ -1,6 +1,6 @@
 import { Guid } from 'typescript-guid';
 
-export interface AccountingGridRecord {
+export interface IAccountingGridRecord {
 	id: Guid;
 	operationDate: Date;
 	contractor: string;

@@ -6,15 +6,15 @@ import { map, Observable, retry, take } from 'rxjs';
 
 import { Result } from 'core/result';
 
-import { CategoryEntity } from './entities/operation-category.entity';
+import { ICategoryEntity } from './entities/operation-category.entity';
 import { DataCategoryProfile } from './mappers/category.mapping.profile';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
-import { CategoryModel } from '../../../domain/models/accounting/category.model';
-import { CategoryCreateRequest } from '../../../domain/models/accounting/requests/category-create.request';
-import { CategoriesProvider } from '../../../domain/providers/accounting/categories.provider';
+import { ICategoryModel } from '../../../domain/models/accounting/category.model';
+import { ICategoryCreateRequest } from '../../../domain/models/accounting/requests/category-create.request';
+import { ICategoriesProvider } from '../../../domain/providers/accounting/categories.provider';
 
 @Injectable()
-export class DefaultCategoriesProvider implements CategoriesProvider {
+export class DefaultCategoriesProvider implements ICategoriesProvider {
 	private accountingHostUrl?: string;
 
 	constructor(
@@ -25,16 +25,16 @@ export class DefaultCategoriesProvider implements CategoriesProvider {
 		this.accountingHostUrl = this.appConfigurationService.settings?.accountingHost;
 	}
 
-	public getCategoriries(): Observable<CategoryModel[]> {
-		return this.http.get<Result<CategoryEntity[]>>(`${this.accountingHostUrl}/categories`).pipe(
+	public getCategoriries(): Observable<ICategoryModel[]> {
+		return this.http.get<Result<ICategoryEntity[]>>(`${this.accountingHostUrl}/categories`).pipe(
 			map(responseResult => this.mapper?.map(DataCategoryProfile.CategoryEntityToDomain, responseResult.payload)),
 			retry(3),
 			take(1)
 		);
 	}
 
-	public getCategoryById(categoryId: string): Observable<CategoryModel> {
-		return this.http.get<Result<CategoryEntity>>(`${this.accountingHostUrl}/categories/byId/${categoryId}`).pipe(
+	public getCategoryById(categoryId: string): Observable<ICategoryModel> {
+		return this.http.get<Result<ICategoryEntity>>(`${this.accountingHostUrl}/categories/byId/${categoryId}`).pipe(
 			map(responseResult => this.mapper?.map(DataCategoryProfile.CategoryEntityToDomain, responseResult.payload)),
 			retry(3),
 			take(1)
@@ -42,7 +42,7 @@ export class DefaultCategoriesProvider implements CategoriesProvider {
 	}
 
 	public saveCategory(operationType: number, newCategoryNamesNodes: string[]): Observable<Result<string>> {
-		const request: CategoryCreateRequest = {
+		const request: ICategoryCreateRequest = {
 			nameNodes: newCategoryNamesNodes,
 			categoryType: operationType,
 		};

@@ -18,7 +18,7 @@ import { BehaviorSubject, combineLatest, Observable, zip } from 'rxjs';
 import { filter, map, switchMap, take } from 'rxjs/operators';
 import { Guid } from 'typescript-guid';
 
-import { AccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
+import { IAccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
 import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
 import { SetInitialPaymentOperations } from '../../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
 import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
@@ -30,11 +30,11 @@ import { getAccountingTableOptions } from '../../../../app/modules/shared/store/
 import { getCategories } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
 import { getContractors } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
 import { PaymentOperationsProvider } from '../../../../data/providers/accounting/payment-operations.provider';
-import { CategoryModel } from '../../../../domain/models/accounting/category.model';
-import { ContractorModel } from '../../../../domain/models/accounting/contractor.model.';
+import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
+import { IContractorModel } from '../../../../domain/models/accounting/contractor.model.';
 import { OperationTypes } from '../../../../domain/models/accounting/operation-types';
-import { PaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
-import { AccountingGridRecord } from '../../models/accounting-grid-record';
+import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
+import { IAccountingGridRecord } from '../../models/accounting-grid-record';
 
 @Component({
 	selector: 'accounting-operarions-grid',
@@ -46,31 +46,31 @@ export class AccountingOperatiosGridComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);
 
 	@Select(getCategories)
-	categories$!: Observable<CategoryModel[]>;
+	categories$!: Observable<ICategoryModel[]>;
 
 	@Select(getContractors)
-	contractors$!: Observable<ContractorModel[]>;
+	contractors$!: Observable<IContractorModel[]>;
 
 	@Select(getAccountingRecords)
-	accountingRecords$!: Observable<AccountingGridRecord[]>;
+	accountingRecords$!: Observable<IAccountingGridRecord[]>;
 
 	@Select(getActivePaymentAccountId)
 	paymentAccountId$!: Observable<string>;
 
 	@Select(getActivePaymentAccount)
-	paymentAccound$!: Observable<PaymentAccountModel>;
+	paymentAccound$!: Observable<IPaymentAccountModel>;
 
 	@Select(getAccountingTableOptions)
-	accountingTableOptions$!: Observable<AccountingOperationsTableOptions>;
+	accountingTableOptions$!: Observable<IAccountingOperationsTableOptions>;
 
-	public paymentAccountSignal: Signal<PaymentAccountModel> = toSignal(this.paymentAccound$, {
-		initialValue: {} as PaymentAccountModel,
+	public paymentAccountSignal: Signal<IPaymentAccountModel> = toSignal(this.paymentAccound$, {
+		initialValue: {} as IPaymentAccountModel,
 	});
 
-	public contractorsSignal: Signal<ContractorModel[]>;
+	public contractorsSignal: Signal<IContractorModel[]>;
 
-	public categoriesSignal: Signal<CategoryModel[]> = toSignal(this.categories$, {
-		initialValue: {} as CategoryModel[],
+	public categoriesSignal: Signal<ICategoryModel[]> = toSignal(this.categories$, {
+		initialValue: {} as ICategoryModel[],
 	});
 
 	public paymentAccountGeneralInfoSignal: Signal<string> = signal('');
@@ -85,7 +85,7 @@ export class AccountingOperatiosGridComponent implements OnInit {
 		'comment',
 	];
 
-	public dataSource$: BehaviorSubject<AccountingGridRecord[]> = new BehaviorSubject<AccountingGridRecord[]>([]);
+	public dataSource$: BehaviorSubject<IAccountingGridRecord[]> = new BehaviorSubject<IAccountingGridRecord[]>([]);
 	public clickedRowGuids = new Set<Guid>();
 
 	constructor(
@@ -94,7 +94,7 @@ export class AccountingOperatiosGridComponent implements OnInit {
 		private readonly store: Store
 	) {
 		this.contractorsSignal = toSignal(this.contractors$, {
-			initialValue: {} as ContractorModel[],
+			initialValue: {} as IContractorModel[],
 		});
 
 		if (_.isNil(this.paymentAccountSignal())) {
@@ -145,7 +145,7 @@ export class AccountingOperatiosGridComponent implements OnInit {
 									income: isIncome ? op.amount : 0,
 									expense: isIncome ? 0 : -op.amount,
 									balance: paymentAccount.balance + accumulatedValue,
-								} as AccountingGridRecord;
+								} as IAccountingGridRecord;
 							})
 						)
 					)
@@ -165,7 +165,7 @@ export class AccountingOperatiosGridComponent implements OnInit {
 		});
 	}
 
-	public selectRow(record: AccountingGridRecord): void {
+	public selectRow(record: IAccountingGridRecord): void {
 		this.store.dispatch(new SetActiveAccountingOperation(record.id));
 	}
 

@@ -1,4 +1,4 @@
-export interface PaymentAccountEntity {
+export interface IPaymentAccountEntity {
 	key: string;
 	type: number;
 	currency: string;

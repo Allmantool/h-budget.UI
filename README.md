@@ -1,10 +1,9 @@
-# DispatcherApp
+# H-bugdet app
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 12.0.2.
+And migrated up to version 17 at the moment of writting
 
-## Development server
-
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+Maing goal is to create home finantial app for private use
 
 ## Code scaffolding
 

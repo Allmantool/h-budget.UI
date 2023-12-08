@@ -2,12 +2,12 @@ import { Observable } from 'rxjs';
 
 import { Result } from 'core/result';
 
-import { ContractorModel } from 'domain/models/accounting/contractor.model.';
+import { IContractorModel } from 'domain/models/accounting/contractor.model.';
 
-export interface ContractorsProvider {
-	getContractors(): Observable<ContractorModel[]>;
+export interface IContractorsProvider {
+	getContractors(): Observable<IContractorModel[]>;
 
-	getContractorById(contractorId: string): Observable<ContractorModel>;
+	getContractorById(contractorId: string): Observable<IContractorModel>;
 
 	saveContractor(newContractorNamesNodes: string[]): Observable<Result<string>>;
 }

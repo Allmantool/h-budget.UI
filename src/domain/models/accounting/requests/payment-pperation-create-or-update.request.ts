@@ -1,4 +1,4 @@
-export interface PaymentOperationCreateOrUpdateRequest {
+export interface IPaymentOperationCreateOrUpdateRequest {
 	amount: number;
 	comment: string;
 	contractorId: string;
