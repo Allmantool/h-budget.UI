@@ -69,10 +69,10 @@
 			"executor": "@angular-devkit/build-angular:dev-server",
 			"configurations": {
 				"production": {
-					"browserTarget": "h-budget:build:production"
+					"buildTarget": "h-budget:build:production"
 				},
 				"development": {
-					"browserTarget": "h-budget:build:development"
+					"buildTarget": "h-budget:build:development"
 				}
 			},
 			"defaultConfiguration": "development"
@@ -80,7 +80,7 @@
 		"extract-i18n": {
 			"executor": "@angular-devkit/build-angular:extract-i18n",
 			"options": {
-				"browserTarget": "h-budget:build"
+				"buildTarget": "h-budget:build"
 			}
 		},
 		"test": {
