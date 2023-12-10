@@ -25,28 +25,26 @@ export class RatesDialogService {
 	public openLoadRatesForPeriod(): void {
 		const config = new MatDialogConfig<DialogContainer>();
 
-		const onGetRatesForPeriod = (payload: DaysRangePayload) => {
-			if (_.isNil(payload)) {
-				return;
-			}
-
-			const ratesAmountForPeriodSubject = new Subject<number>();
-
-			this.currencyRatesProvider
-				.getCurrenciesForSpecifiedPeriod(payload)
-				.pipe(takeUntilDestroyed())
-				.subscribe(rateGroups => {
-					this.store.dispatch(new AddCurrencyGroups(rateGroups));
-
-					ratesAmountForPeriodSubject.next(rateGroups?.length);
-				});
-
-			return ratesAmountForPeriodSubject;
-		};
-
 		config.data = {
 			title: 'Update rates for specify period:',
-			onSubmit: onGetRatesForPeriod,
+			onSubmit: (payload: DaysRangePayload) => {
+				if (_.isNil(payload)) {
+					return;
+				}
+
+				const ratesAmountForPeriodSubject = new Subject<number>();
+
+				this.currencyRatesProvider
+					.getCurrenciesForSpecifiedPeriod(payload)
+					.pipe(takeUntilDestroyed())
+					.subscribe(rateGroups => {
+						this.store.dispatch(new AddCurrencyGroups(rateGroups));
+
+						ratesAmountForPeriodSubject.next(rateGroups?.length);
+					});
+
+				return ratesAmountForPeriodSubject;
+			},
 		} as DialogContainer;
 
 		this.dialogProvider.openDialog(DateRangeDialogComponent, config);
