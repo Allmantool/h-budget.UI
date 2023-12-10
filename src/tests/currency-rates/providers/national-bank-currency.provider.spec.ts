@@ -1,4 +1,4 @@
-import { HTTP_INTERCEPTORS, HttpClient, HttpErrorResponse, HttpInterceptor } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { getTestBed, TestBed } from '@angular/core/testing';
 
@@ -65,8 +65,7 @@ describe('National bank currencies provider', () => {
 	});
 
 	it('should attach the interceptor', () => {
-		const interceptors: Array<HttpInterceptor> = TestBed.inject(HTTP_INTERCEPTORS);
-		expect(interceptors.some(i => i instanceof CorrelationIdInteceptor)).toBe(true);
+		expect(TestBed.inject(HTTP_INTERCEPTORS).some(i => i instanceof CorrelationIdInteceptor)).toBe(true);
 	});
 
 	it('should set correlation id header to request', () => {

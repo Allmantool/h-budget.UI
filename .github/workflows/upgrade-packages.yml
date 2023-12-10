@@ -22,6 +22,7 @@ jobs:
             - name: Check and update packages 🔀
               run: |
                   npx npm-check-updates --upgrade --peer --target minor
+                  ncu --peer -u
                   npm i
 
             - name: Commit and create PR 🔀
