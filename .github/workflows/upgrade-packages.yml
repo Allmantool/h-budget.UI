@@ -6,23 +6,26 @@ on:
 
 jobs:
     upgrade-packages:
-        name: Upgrade packages job
+        name: Daily upgrade packages job
 
         runs-on: ubuntu-latest
-
         steps:
-            - name: Checkout 🛎️
-              uses: actions/checkout@v3
-
-            - name: Set up Node.js ⚙️
-              uses: actions/setup-node@v3
+            - name: Check out code
+              uses: actions/checkout@v4
               with:
-                  node-version: '18.x'
+                  fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
-            - name: Check and update packages 🔀
+            - name: Use Node.js 21.x
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '21'
+                  cache: 'npm'
+                  cache-dependency-path: package-lock.json
+
+            - name: Check and update packages (minor) 🔀
               run: |
+                  npm i
                   npx npm-check-updates --upgrade --peer --target minor
-                  ncu --peer -u
                   npm i
 
             - name: Commit and create PR 🔀
