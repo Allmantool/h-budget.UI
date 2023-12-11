@@ -9,15 +9,18 @@ jobs:
         name: Daily upgrade packages job
 
         runs-on: ubuntu-latest
-
         steps:
-            - name: Checkout 🛎️
+            - name: Check out code
               uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
-            - name: Set up Node.js ⚙️
+            - name: Use Node.js 21.x
               uses: actions/setup-node@v4
               with:
-                  node-version: '21.x'
+                  node-version: '21'
+                  cache: 'npm'
+                  cache-dependency-path: package-lock.json
 
             - name: Check and update packages (minor) 🔀
               run: |
