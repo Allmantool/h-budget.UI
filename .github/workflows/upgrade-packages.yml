@@ -21,6 +21,7 @@ jobs:
 
             - name: Check and update packages (minor) 🔀
               run: |
+                  npm i
                   npx npm-check-updates --upgrade --peer --target minor
                   npm i
 
