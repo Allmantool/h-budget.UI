@@ -13,7 +13,10 @@ import { Guid } from 'typescript-guid';
 import { IAccountingOperationsTableOptions } from 'app/modules/shared/store/models/accounting/accounting-table-options';
 
 import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
-import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
+import {
+	getAccountingTableOptions,
+	getSelectedRecordGuid,
+} from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { SetInitialCategories } from '../../../../app/modules/shared/store/states/handbooks/actions/category.actions';
 import { SetInitialContractors } from '../../../../app/modules/shared/store/states/handbooks/actions/counterparty.actions';
 import {
@@ -39,6 +42,10 @@ import '../../../../domain/extensions/handbookExtensions';
 })
 export class AccountingOperationsCrudComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);
+
+	public selectedRecordGuidSignal: Signal<Guid | null>;
+
+	public isNotReadyForSave: Signal<boolean>;
 
 	public contractorsSignal: Signal<string[]>;
 
@@ -73,6 +80,9 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	@Select(getContractorNodes)
 	counterparties$!: Observable<string[]>;
 
+	@Select(getSelectedRecordGuid)
+	selectedRecordGuid$!: Observable<Guid>;
+
 	constructor(
 		private readonly accountingOperationsService: AccountingOperationsService,
 		private readonly contractorsProvider: DefaultContractorsProvider,
@@ -83,6 +93,12 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		private readonly store: Store
 	) {
 		this.accountingRecordsSignal = toSignal(this.accountingRecords$, { initialValue: [] });
+
+		this.selectedRecordGuidSignal = toSignal(this.selectedRecordGuid$, { initialValue: null });
+
+		this.isNotReadyForSave = computed(
+			() => _.isEmpty(this.accountingRecordsSignal()) || _.isNil(this.selectedRecordGuidSignal())
+		);
 
 		this.crudRecordFg = this.fb.group({
 			id: new UntypedFormControl(),

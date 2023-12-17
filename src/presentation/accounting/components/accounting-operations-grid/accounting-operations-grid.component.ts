@@ -29,7 +29,7 @@ import {
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { getCategories } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
 import { getContractors } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
-import { PaymentOperationsProvider } from '../../../../data/providers/accounting/payment-operations.provider';
+import { PaymensHistoryProvider } from '../../../../data/providers/accounting/payments-history.provider';
 import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
 import { IContractorModel } from '../../../../domain/models/accounting/contractor.model.';
 import { OperationTypes } from '../../../../domain/models/accounting/operation-types';
@@ -89,7 +89,7 @@ export class AccountingOperatiosGridComponent implements OnInit {
 	public clickedRowGuids = new Set<Guid>();
 
 	constructor(
-		private readonly paymentOperationsService: PaymentOperationsProvider,
+		private readonly paymensHistoryProvider: PaymensHistoryProvider,
 		private readonly router: Router,
 		private readonly store: Store
 	) {
@@ -109,42 +109,32 @@ export class AccountingOperatiosGridComponent implements OnInit {
 				}`
 		);
 
-		const getPaymentAccountOperations$ = this.paymentOperationsService.getOperationsForPaymentAccount(
+		const getPaymentAccountOperations$ = this.paymensHistoryProvider.getOperationsHistoryForPaymentAccount(
 			this.paymentAccountSignal().key!.toString()
 		);
 
-		combineLatest([this.categories$, this.contractors$, this.paymentAccound$])
+		combineLatest([this.categories$, this.contractors$])
 			.pipe(
 				filter(([categ, contr]) => !_.isEmpty(categ) && !_.isEmpty(contr)),
-				switchMap(([categories, contractors, paymentAccount]) =>
+				switchMap(([categories, contractors]) =>
 					getPaymentAccountOperations$.pipe(
 						take(1),
 						map(operations =>
-							_.map(operations, function (op, operationIndex) {
-								const targetContractor = _.find(contractors, c => c.key.equals(op.contractorId));
-								const targetCategories = _.find(categories, c => c.key.equals(op.categoryId));
+							_.map(operations, function (op) {
+								const targetContractor = _.find(contractors, c => c.key.equals(op.record.contractorId));
+								const targetCategories = _.find(categories, c => c.key.equals(op.record.categoryId));
 
 								const isIncome = targetCategories?.operationType === OperationTypes.Income;
 
-								const accumulatedValue = _.sumBy(
-									_.slice(operations, 0, operationIndex + 1),
-									function (operation) {
-										return _.find(categories, c => c.key.equals(operation.categoryId))
-											?.operationType === OperationTypes.Income
-											? operation.amount
-											: -operation.amount;
-									}
-								);
-
 								return {
-									id: op.key,
-									operationDate: op.operationDate,
+									id: op.record.key,
+									operationDate: op.record.operationDate,
 									contractor: targetContractor!.nameNodes.parseToTreeAsString(),
 									category: targetCategories!.nameNodes.parseToTreeAsString(),
-									comment: op.comment,
-									income: isIncome ? op.amount : 0,
-									expense: isIncome ? 0 : -op.amount,
-									balance: paymentAccount.balance + accumulatedValue,
+									comment: op.record.comment,
+									income: isIncome ? op.record.amount : 0,
+									expense: isIncome ? 0 : -op.record.amount,
+									balance: op.balance,
 								} as IAccountingGridRecord;
 							})
 						)

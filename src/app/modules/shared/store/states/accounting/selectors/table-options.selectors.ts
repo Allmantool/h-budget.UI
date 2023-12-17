@@ -7,3 +7,8 @@ export const getAccountingTableOptions = createSelector(
 	[AccountingOperationsTableState],
 	(state: IAccountingTableStateModel) => state?.tableOptions
 );
+
+export const getSelectedRecordGuid = createSelector(
+	[AccountingOperationsTableState],
+	(state: IAccountingTableStateModel) => state?.tableOptions?.selectedRecordGuid
+);

@@ -1,3 +1,17 @@
 <div class="custom-button">
-    <button mat-raised-button color="primary">{{ title }}</button>
+	<button
+		mat-button
+		[disabled]="isDisabled"
+		[color]="color"
+		[ngClass]="{
+        'mat-mdc-button mat-mdc-raised-button': type === 'raised',
+        'mat-mdc-fab mat-mdc-button-base mdc-fab--extended mat-mdc-extended-fab': type === 'fab',
+        'mdc-button--outlined mat-mdc-outlined-button': type === 'stroked',
+        'mat-mdc-unelevated-button': type === 'flat',
+        'mat-mdc-menu-item mdc-list-item': type === 'menu',
+        }"
+	>
+		<mat-icon>{{ icon }}</mat-icon>
+		<span>{{ text }}</span>
+	</button>
 </div>

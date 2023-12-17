@@ -25,9 +25,11 @@ import { DefaultContractorsProvider } from '../../data/providers/accounting/cont
 import { DataCategoryProfile } from '../../data/providers/accounting/mappers/category.mapping.profile';
 import { DataContractorProfile } from '../../data/providers/accounting/mappers/contractor.mapping.profile';
 import { PaymentAccountsMappingProfile } from '../../data/providers/accounting/mappers/payment-accounts.mapping.profile';
+import { PaymentHistoryMappingProfile } from '../../data/providers/accounting/mappers/payment-history.mapping.profile';
 import { PaymentOperationsMappingProfile } from '../../data/providers/accounting/mappers/payment-operations.mapping.profile';
 import { DefaultPaymentAccountsProvider } from '../../data/providers/accounting/payment-accounts.provider';
 import { PaymentOperationsProvider } from '../../data/providers/accounting/payment-operations.provider';
+import { PaymensHistoryProvider } from '../../data/providers/accounting/payments-history.provider';
 import {
 	AccountingOperationsCrudComponent,
 	AccountingOperatiosGridComponent,
@@ -59,6 +61,7 @@ import {
 		MapperModule.withProfiles([
 			PaymentAccountsMappingProfile,
 			PaymentOperationsMappingProfile,
+			PaymentHistoryMappingProfile,
 			DataContractorProfile,
 			DataCategoryProfile,
 		]),
@@ -66,6 +69,7 @@ import {
 	providers: [
 		DefaultPaymentAccountsProvider,
 		PaymentOperationsProvider,
+		PaymensHistoryProvider,
 		DefaultContractorsProvider,
 		DefaultCategoriesProvider,
 		CategoriesDialogService,

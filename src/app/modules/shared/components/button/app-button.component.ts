@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
 	selector: 'app-button',
@@ -7,5 +7,11 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppButtonComponent {
-	@Input() public title: string = '';
+	@Input() public text: string = '';
+	@Input() public isDisabled: boolean = false;
+	@Input() public icon: string = '';
+	@Input() public color: 'primary' | 'accent' | 'warn' = 'primary';
+	@Input() public type: 'raised' | 'stroked' | 'flat' | 'fab' | 'menu' = 'raised';
+
+	@Output() onclick: EventEmitter<void> = new EventEmitter<void>();
 }

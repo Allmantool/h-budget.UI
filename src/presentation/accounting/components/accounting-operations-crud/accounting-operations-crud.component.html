@@ -1,7 +1,5 @@
 <div class="crud-content">
-	<form
-		[formGroup]="crudRecordFg"
-	>
+	<form [formGroup]="crudRecordFg">
 		<div class="record-crud-section-title">New record:</div>
 		<div class="date-section">
 			<app-datepicker
@@ -53,7 +51,7 @@
 				<app-form-field
 					formControlName="expense"
 					[fieldType]="'INPUT'"
-					[title]="'Amount(Exponse)::'"
+					[title]="'Amount(Expense)::'"
 				></app-form-field>
 			</div>
 		</ng-container>
@@ -77,17 +75,27 @@
 		</div>
 		<div class="command-buttons">
 			<app-button
+				[isDisabled]="isNotReadyForSave()"
 				(click)="applyChangesAsync()"
-				title="Save"
+                type="fab"
+				text="Apply changes"
+                color="primary"
+                icon="save"
 			></app-button>
 			<app-button
-                [hidden]="false"
+				[hidden]="false"
 				(click)="addRecordAsync()"
-				title="New"
+                type="fab"
+				text="Add new"
+                color="accent"
+                icon="add_circle_outline"
 			></app-button>
 			<app-button
 				(click)="deleteRecordAsync()"
-				title="Delete"
+                type="fab"
+				text="Delete"
+                color="warn"
+                icon="delete_forever"
 			></app-button>
 		</div>
 	</form>
