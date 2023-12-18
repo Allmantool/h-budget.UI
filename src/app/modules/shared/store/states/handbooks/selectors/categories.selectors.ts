@@ -13,5 +13,5 @@ export const getCategoryNodes = createSelector([CategoriesState], (state: ICateg
 
 export const getCategoryAsNodesMap = createSelector(
 	[CategoriesState],
-	(state: ICategoriesStateModel) => new Map(state?.categories.map(c => [c.nameNodes.parseToTreeAsString(), c]))
+	(state: ICategoriesStateModel) => new Map(state?.categories.map(c => [c.nameNodes?.parseToTreeAsString(), c]))
 );

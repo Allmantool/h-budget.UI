@@ -9,6 +9,7 @@ import { Guid } from 'typescript-guid';
 
 import { Result } from 'core/result';
 
+import { PaymentsHistoryService } from './payments-history.service';
 import { SetActiveAccountingOperation } from '../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
 import {
 	Add,
@@ -21,7 +22,7 @@ import { getContractorAsNodesMap } from '../../../app/modules/shared/store/state
 import { PaymentOperationsProvider } from '../../../data/providers/accounting/payment-operations.provider';
 import { ICategoryModel } from '../../../domain/models/accounting/category.model';
 import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
-import { IAccountingGridRecord } from '../models/accounting-grid-record';
+import { IPaymentRepresentationModel } from '../models/operation-record';
 
 @Injectable()
 export class AccountingOperationsService {
@@ -40,6 +41,7 @@ export class AccountingOperationsService {
 	public contractorsMapSignal: Signal<Map<string, Guid>>;
 
 	constructor(
+		private readonly paymentsHistoryService: PaymentsHistoryService,
 		private readonly paymentOperationsProvider: PaymentOperationsProvider,
 		private readonly store: Store
 	) {
@@ -70,47 +72,45 @@ export class AccountingOperationsService {
 		);
 	}
 
-	public async addOperationAsync(): Promise<Result<IAccountingGridRecord>> {
-		const newRecord: IAccountingGridRecord = {
-			id: Guid.EMPTY,
+	public async addOperationAsync(): Promise<Result<IPaymentRepresentationModel>> {
+		const newRecord: IPaymentOperationModel = {
+			paymentAccountId: Guid.parse(this.activePaymentAccountIdSignal()),
+			key: Guid.EMPTY,
 			operationDate: new Date(),
-			contractor: '',
-			category: '',
-			income: 0,
-			expense: 0,
-			balance: 0,
+			contractorId: Guid.EMPTY,
+			categoryId: Guid.EMPTY,
 			comment: '',
+			amount: 0,
 		};
 
-		this.store.dispatch(new SetActiveAccountingOperation(newRecord.id));
+		this.store.dispatch(new SetActiveAccountingOperation(newRecord.key));
 
 		return await firstValueFrom(this.store.dispatch(new Add(newRecord))).then(
 			() =>
 				new Result({
-					payload: newRecord,
+					payload: {
+						key: Guid.EMPTY,
+						operationDate: new Date(),
+						contractor: '',
+						category: '',
+						income: 0,
+						expense: 0,
+						comment: '',
+						balance: 0,
+					},
 					isSucceeded: true,
 				})
 		);
 	}
 
-	public async updateOperationAsync(gridRecord: IAccountingGridRecord): Promise<Result<boolean>> {
-		const payload: IPaymentOperationModel = {
-			key: gridRecord.id,
-			operationDate: gridRecord.operationDate,
-			comment: gridRecord.comment,
-			contractorId: this.contractorsMapSignal().get(gridRecord.contractor)!,
-			categoryId: this.categoriesMapSignal().get(gridRecord.category)!.key,
-			paymentAccountId: Guid.parse(this.activePaymentAccountIdSignal()),
-			amount: gridRecord.expense === 0 ? gridRecord.income : gridRecord.expense,
-		};
-
+	public async updateOperationAsync(payload: IPaymentOperationModel): Promise<Result<boolean>> {
 		switch (payload.key) {
 			case Guid.EMPTY: {
 				const saveResponse = await firstValueFrom(
 					this.paymentOperationsProvider.savePaymentOperation(this.activePaymentAccountIdSignal(), payload)
 				);
 
-				gridRecord.id = Guid.parse(saveResponse.payload.paymentOperationId);
+				payload.key = Guid.parse(saveResponse.payload.paymentOperationId);
 
 				break;
 			}
@@ -123,15 +123,15 @@ export class AccountingOperationsService {
 					)
 				);
 
-				gridRecord.id = Guid.parse(updateResponse.payload.paymentOperationId);
+				payload.key = Guid.parse(updateResponse.payload.paymentOperationId);
 			}
 		}
 
-		return await firstValueFrom(this.store.dispatch(new Edit(gridRecord))).then(
-			() =>
-				new Result({
-					isSucceeded: true,
-				})
-		);
+		return await firstValueFrom(this.store.dispatch(new Edit(payload))).then(() => {
+			this.paymentsHistoryService.refreshPaymentsHistory(this.activePaymentAccountIdSignal(), true);
+			return new Result({
+				isSucceeded: true,
+			});
+		});
 	}
 }

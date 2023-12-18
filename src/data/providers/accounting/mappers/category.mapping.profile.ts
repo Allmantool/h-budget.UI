@@ -1,7 +1,6 @@
 import * as _ from 'lodash';
 
 import { MappingPair, Profile } from '@dynamic-mapper/mapper';
-
 import { Guid } from 'typescript-guid';
 
 import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
