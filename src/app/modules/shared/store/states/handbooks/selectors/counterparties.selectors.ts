@@ -17,5 +17,5 @@ export const getContractorNodes = createSelector([CounterpartiesState], (state: 
 export const getContractorAsNodesMap = createSelector(
 	[CounterpartiesState],
 	(state: ICounterpartiesStateModel) =>
-		new Map(state?.counterparties.map(c => [c.nameNodes?.parseToTreeAsString(), c.key]))
+		new Map(state?.counterparties.map(c => [c.nameNodes?.parseToTreeAsString(), c]))
 );

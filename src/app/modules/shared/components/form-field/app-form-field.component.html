@@ -2,6 +2,7 @@
 	<ng-container *ngSwitchCase="'INPUT'">
 		<ng-container *ngTemplateOutlet="inputNumbers"></ng-container>
 	</ng-container>
+
 	<ng-container *ngSwitchCase="'SELECT'">
 		<ng-container *ngTemplateOutlet="select"></ng-container>
 	</ng-container>
@@ -19,6 +20,7 @@
 		>
 			<mat-label>{{ title }}</mat-label>
 			<input
+				[disabled]="disabled"
 				(click)="clearInput($event)"
 				class="input-value"
 				matInput
@@ -37,6 +39,7 @@
 		<mat-form-field appearance="outline">
 			<mat-label>{{ title }}</mat-label>
 			<mat-select
+				[disabled]="disabled"
 				[value]="defaultValue ?? (data$ | async)"
 				(selectionChange)="updateValue($event)"
 			>
@@ -51,6 +54,7 @@
 		<mat-form-field appearance="outline">
 			<mat-label>{{ title }}</mat-label>
 			<textarea
+				[disabled]="disabled"
 				matInput
 				[value]="data$ | async"
 				(input)="updateValue($event.target)"

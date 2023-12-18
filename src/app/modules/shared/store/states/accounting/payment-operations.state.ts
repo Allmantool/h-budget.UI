@@ -8,7 +8,7 @@ import { nameof } from 'ts-simple-nameof';
 import { AccountingOperationsTableState } from './accounting-operations-table.state';
 import { Add, AddRange, Delete, Edit, SetInitialPaymentOperations } from './actions/payment-operation.actions';
 import { IAccountingOperationsStateModel } from './models/accounting-state.model';
-import { IAccountingGridRecord } from '../../../../../../presentation/accounting/models/accounting-grid-record';
+import { IPaymentRepresentationModel } from '../../../../../../presentation/accounting/models/operation-record';
 import { CurrencyAbbrevitions } from '../../../constants/rates-abbreviations';
 
 @State<IAccountingOperationsStateModel>({
@@ -32,12 +32,15 @@ export class AccountingOperationsState {
 	}
 
 	@Action(Add)
-	add({ getState, patchState }: StateContext<IAccountingOperationsStateModel>, { accountingRecord }: Add): void {
+	add(
+		{ getState, patchState }: StateContext<IAccountingOperationsStateModel>,
+		{ paymentOperation: accountingRecord }: Add
+	): void {
 		const state = getState();
 
 		const records = _.orderBy(
 			[...state.operationRecords, accountingRecord],
-			[nameof<IAccountingGridRecord>(r => r.operationDate)],
+			[nameof<IPaymentRepresentationModel>(r => r.operationDate)],
 			['asc']
 		);
 
@@ -49,7 +52,7 @@ export class AccountingOperationsState {
 	@Action(AddRange)
 	addRange(
 		{ getState, patchState }: StateContext<IAccountingOperationsStateModel>,
-		{ accountingRecord }: AddRange
+		{ paymentOperations: accountingRecord }: AddRange
 	): void {
 		const state = getState();
 
@@ -59,32 +62,42 @@ export class AccountingOperationsState {
 		);
 
 		patchState({
-			operationRecords: [..._.orderBy(records, [nameof<IAccountingGridRecord>(r => r.operationDate)], ['asc'])],
+			operationRecords: [
+				..._.orderBy(records, [nameof<IPaymentRepresentationModel>(r => r.operationDate)], ['asc']),
+			],
 		});
 	}
 
 	@Action(Edit)
-	edit({ getState, patchState }: StateContext<IAccountingOperationsStateModel>, { accountingRecord }: Edit): void {
+	edit(
+		{ getState, patchState }: StateContext<IAccountingOperationsStateModel>,
+		{ paymentOperation: accountingRecord }: Edit
+	): void {
 		const records = [...getState().operationRecords];
 
-		const updatedItemIndex = _.findIndex(records, r => r.id === accountingRecord.id);
+		const updatedItemIndex = _.findIndex(records, r => r.key === accountingRecord.key);
 
 		records.splice(updatedItemIndex, 1, accountingRecord);
 
 		patchState({
-			operationRecords: [..._.orderBy(records, [nameof<IAccountingGridRecord>(r => r.operationDate)], ['asc'])],
+			operationRecords: [
+				..._.orderBy(records, [nameof<IPaymentRepresentationModel>(r => r.operationDate)], ['asc']),
+			],
 		});
 	}
 
 	@Action(Delete)
-	delete({ getState, patchState }: StateContext<IAccountingOperationsStateModel>, { accountingGuid }: Delete): void {
+	delete(
+		{ getState, patchState }: StateContext<IAccountingOperationsStateModel>,
+		{ paymentOperationId: accountingGuid }: Delete
+	): void {
 		const state = getState();
 
 		const orderedRecords = _.chain(state.operationRecords)
 			.filter(function (record) {
-				return record.id !== accountingGuid;
+				return record.key !== accountingGuid;
 			})
-			.sortBy(nameof<IAccountingGridRecord>(r => r.operationDate))
+			.sortBy(nameof<IPaymentRepresentationModel>(r => r.operationDate))
 			.value();
 
 		patchState({

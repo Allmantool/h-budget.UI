@@ -28,8 +28,7 @@ export class AppFormFieldComponent implements ControlValueAccessor {
 	private onTouched!: Function;
 	private onChanged!: (value: FormInput) => {};
 
-	private disabled = false;
-
+	@Input() public disabled: boolean = false;
 	@Input() public fieldType: string = InputTypes.INPUT;
 
 	@Input() public selectOptions: string[] = [];
@@ -55,10 +54,6 @@ export class AppFormFieldComponent implements ControlValueAccessor {
 
 	public registerOnTouched(fn: Function): void {
 		this.onTouched = fn;
-	}
-
-	public setDisabledState(isDisabled: boolean) {
-		this.disabled = isDisabled;
 	}
 
 	public updateValue(event: any) {

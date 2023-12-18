@@ -3,6 +3,7 @@
 		<div class="record-crud-section-title">New record:</div>
 		<div class="date-section">
 			<app-datepicker
+				[disabled]="isNotReadyForSaveSignal()"
 				placeholder="Choose a opeation date"
 				formControlName="operationDate"
 			></app-datepicker>
@@ -13,6 +14,7 @@
 				[fieldType]="'SELECT'"
 				[title]="'Contractor:'"
 				[selectOptions]="contractorsSignal()"
+				[disabled]="isNotReadyForSaveSignal()"
 			></app-form-field>
 
 			<button
@@ -31,6 +33,7 @@
 				[fieldType]="'SELECT'"
 				[title]="'Category:'"
 				[selectOptions]="categoryNodesSignal()"
+				[disabled]="isNotReadyForSaveSignal()"
 			></app-form-field>
 
 			<button
@@ -52,6 +55,7 @@
 					formControlName="expense"
 					[fieldType]="'INPUT'"
 					[title]="'Amount(Expense)::'"
+					[disabled]="isNotReadyForSaveSignal()"
 				></app-form-field>
 			</div>
 		</ng-container>
@@ -62,6 +66,7 @@
 					formControlName="income"
 					[fieldType]="'INPUT'"
 					[title]="'Amount(Income):'"
+					[disabled]="isNotReadyForSaveSignal()"
 				></app-form-field>
 			</div>
 		</ng-template>
@@ -71,31 +76,32 @@
 				formControlName="comment"
 				[fieldType]="'TEXT_AREA'"
 				[title]="'Comments:'"
+				[disabled]="isNotReadyForSaveSignal()"
 			></app-form-field>
 		</div>
 		<div class="command-buttons">
 			<app-button
-				[isDisabled]="isNotReadyForSave()"
+				[isDisabled]="isNotReadyForSaveSignal()"
 				(click)="applyChangesAsync()"
-                type="fab"
+				type="fab"
 				text="Apply changes"
-                color="primary"
-                icon="save"
+				color="primary"
+				icon="save"
 			></app-button>
 			<app-button
 				[hidden]="false"
 				(click)="addRecordAsync()"
-                type="fab"
+				type="fab"
 				text="Add new"
-                color="accent"
-                icon="add_circle_outline"
+				color="accent"
+				icon="add_circle_outline"
 			></app-button>
 			<app-button
 				(click)="deleteRecordAsync()"
-                type="fab"
+				type="fab"
 				text="Delete"
-                color="warn"
-                icon="delete_forever"
+				color="warn"
+				icon="delete_forever"
 			></app-button>
 		</div>
 	</form>

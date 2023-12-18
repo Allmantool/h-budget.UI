@@ -25,7 +25,7 @@ export class DatepickerComponent implements ControlValueAccessor {
 	private onTouched!: Function;
 	private onChanged!: (value: Date | null) => {};
 
-	private disabled = false;
+	@Input() public disabled: boolean = false;
 
 	@Input() public placeholder: string = 'Choose a date';
 
@@ -45,10 +45,6 @@ export class DatepickerComponent implements ControlValueAccessor {
 
 	registerOnTouched(fn: Function): void {
 		this.onTouched = fn;
-	}
-
-	setDisabledState(isDisabled: boolean) {
-		this.disabled = isDisabled;
 	}
 
 	updateValue(event: MatDatepickerInputEvent<Date, string>) {

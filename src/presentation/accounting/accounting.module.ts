@@ -5,10 +5,12 @@ import { NgxsModule } from '@ngxs/store';
 
 import { PaymentAccountComponent } from './components/payment-account/payment-account.component';
 import { PaymentAccountCrudComponent } from './components/payment-account-crud/payment-account-crud.component';
+import { PaymentsHistoryComponent } from './components/payments-history/payments-history.component';
 import { AccountingOperationsService } from './services/accounting-operations.service';
 import { CategoriesDialogService } from './services/categories-dialog.service';
 import { CounterpartiesDialogService } from './services/counterparties-dialog.service';
 import { PaymentAccountDialogService } from './services/payment-account-dialog.service';
+import { PaymentsHistoryService } from './services/payments-history.service';
 import { AppCoreModule } from '../../app/modules/core/core.module';
 import { AngularMaterailSharedModule } from '../../app/modules/shared/angular-material.shared.module';
 import { CustomUIComponentsSharedModule } from '../../app/modules/shared/custom-ui-components.shared.module';
@@ -30,17 +32,13 @@ import { PaymentOperationsMappingProfile } from '../../data/providers/accounting
 import { DefaultPaymentAccountsProvider } from '../../data/providers/accounting/payment-accounts.provider';
 import { PaymentOperationsProvider } from '../../data/providers/accounting/payment-operations.provider';
 import { PaymensHistoryProvider } from '../../data/providers/accounting/payments-history.provider';
-import {
-	AccountingOperationsCrudComponent,
-	AccountingOperatiosGridComponent,
-	AccountingRoutingModule,
-} from '../accounting';
+import { AccountingOperationsCrudComponent, AccountingRoutingModule } from '../accounting';
 
 @NgModule({
 	declarations: [
-		AccountingOperatiosGridComponent,
 		AccountingOperationsCrudComponent,
 		PaymentAccountComponent,
+		PaymentsHistoryComponent,
 		PaymentAccountCrudComponent,
 	],
 	imports: [
@@ -67,6 +65,7 @@ import {
 		]),
 	],
 	providers: [
+		PaymentsHistoryService,
 		DefaultPaymentAccountsProvider,
 		PaymentOperationsProvider,
 		PaymensHistoryProvider,
