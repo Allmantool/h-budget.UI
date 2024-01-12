@@ -25,8 +25,6 @@ export class CounterpartiesState {
 	): void {
 		const newContractorsState = [...getState().counterparties];
 
-		newContractorsState.push(counterparty);
-
 		const orderedContractors = _.orderBy(
 			[...newContractorsState, counterparty],
 			nameof<IContractorModel>(op => op.nameNodes),
