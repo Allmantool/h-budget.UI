@@ -24,10 +24,11 @@ import { RatesDialogService } from '../../../presentation/currency-rates/service
 describe('Rates dialog service', () => {
 	let currencyRateProviderSpy: jasmine.SpyObj<NationalBankCurrenciesProvider>;
 	let dialogProviderSpy: jasmine.SpyObj<DialogProvider>;
+
 	const matDialogSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
 
 	const mockDialogContainer: DialogContainer = {
-		title: 'test-title',
+		title: 'rates date dialog test-title',
 		operationType: DialogOperationTypes.Create,
 		onSubmit: <DaysRangePayload>(payload: DaysRangePayload) => of<DaysRangePayload>(payload),
 	};

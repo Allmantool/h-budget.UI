@@ -62,16 +62,12 @@ export class DefaultPaymentAccountsProvider implements IPaymentAccountsProvider 
 
 	public getPaymentAccountById(paymentAccountId: string): Observable<IPaymentAccountModel> {
 		return this.http
-			.get<Result<IPaymentAccountEntity>>(
-				`${this.accountingHostUrl}/${this.paymentAccountApi}/byId/${paymentAccountId}`
-			)
+			.get<
+				Result<IPaymentAccountEntity>
+			>(`${this.accountingHostUrl}/${this.paymentAccountApi}/byId/${paymentAccountId}`)
 			.pipe(
-				map(
-					responseResult =>
-						this.mapper?.map(
-							PaymentAccountsMappingProfile.PaymentAccountEntityToDomain,
-							responseResult.payload
-						)
+				map(responseResult =>
+					this.mapper?.map(PaymentAccountsMappingProfile.PaymentAccountEntityToDomain, responseResult.payload)
 				),
 				retry(3),
 				take(1)
@@ -82,12 +78,8 @@ export class DefaultPaymentAccountsProvider implements IPaymentAccountsProvider 
 		return this.http
 			.get<Result<IPaymentAccountEntity[]>>(`${this.accountingHostUrl}/${this.paymentAccountApi}`)
 			.pipe(
-				map(
-					responseResult =>
-						this.mapper?.map(
-							PaymentAccountsMappingProfile.PaymentAccountEntityToDomain,
-							responseResult.payload
-						)
+				map(responseResult =>
+					this.mapper?.map(PaymentAccountsMappingProfile.PaymentAccountEntityToDomain, responseResult.payload)
 				),
 				retry(3),
 				take(1)
