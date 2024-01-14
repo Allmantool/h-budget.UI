@@ -9,32 +9,33 @@ import { Guid } from 'typescript-guid';
 
 import { PaymentAccountState } from 'app/modules/shared/store/states/accounting/payment-account.state';
 
-import { AppCoreModule } from '../../../app/modules/core/core.module';
-import { AngularMaterailSharedModule } from '../../../app/modules/shared/angular-material.shared.module';
-import { PaymentAccountDialogComponent } from '../../../app/modules/shared/components/dialog/payment-account/payment-account-dialog.component';
-import { CustomUIComponentsSharedModule } from '../../../app/modules/shared/custom-ui-components.shared.module';
-import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
-import { DialogOperationTypes } from '../../../app/modules/shared/models/dialog-operation-types';
-import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
-import { AppSharedModule } from '../../../app/modules/shared/shared.module';
-import { ngxsConfig } from '../../../app/modules/shared/store/ngxs.config';
-import { Result } from '../../../core/result';
-import { DefaultPaymentAccountsProvider } from '../../../data/providers/accounting/payment-accounts.provider';
-import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
-import { PaymentAccountDialogService } from '../../../presentation/accounting/services/payment-account-dialog.service';
-import { AccountTypes } from 'domain/models/accounting/account-types';
+import { AppCoreModule } from '../../../../../app/modules/core/core.module';
+import { AngularMaterailSharedModule } from '../../../../../app/modules/shared/angular-material.shared.module';
+import { PaymentAccountDialogComponent } from '../../../../../app/modules/shared/components/dialog/payment-account/payment-account-dialog.component';
+import { CustomUIComponentsSharedModule } from '../../../../../app/modules/shared/custom-ui-components.shared.module';
+import { DialogContainer } from '../../../../../app/modules/shared/models/dialog-container';
+import { DialogOperationTypes } from '../../../../../app/modules/shared/models/dialog-operation-types';
+import { DialogProvider } from '../../../../../app/modules/shared/providers/dialog-provider';
+import { AppSharedModule } from '../../../../../app/modules/shared/shared.module';
+import { ngxsConfig } from '../../../../../app/modules/shared/store/ngxs.config';
+import { Result } from '../../../../../core/result';
+import { DefaultPaymentAccountsProvider } from '../../../../../data/providers/accounting/payment-accounts.provider';
+import { AccountTypes } from '../../../../../domain/models/accounting/account-types';
+import { IPaymentAccountModel } from '../../../../../domain/models/accounting/payment-account.model';
+import { DaysRangePayload } from '../../../../../domain/models/dates-range-payload.model';
+import { PaymentAccountDialogService } from '../../../../../presentation/accounting/services/payment-account-dialog.service';
 
 describe('Payment-account-dialog.component', () => {
-	let paymentAccountsProviderSpy: jasmine.SpyObj<DefaultPaymentAccountsProvider>;
-	let dialogProviderSpy: jasmine.SpyObj<DialogProvider>;
-
 	const matDialogSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
 
-	const mockDialogContainer: DialogContainer = {
-		title: 'test-title',
-		operationType: DialogOperationTypes.Create,
-		onSubmit: <DaysRangePayload>(payload: DaysRangePayload) => of<DaysRangePayload>(payload),
+	const mockDialogContainer: DialogContainer<DaysRangePayload, number> = {
+		title: 'Payment account: (Update)  test',
+		operationType: DialogOperationTypes.Update,
+		onSubmit: (payload: DaysRangePayload) => of(1),
 	};
+
+	let paymentAccountsProviderSpy: jasmine.SpyObj<DefaultPaymentAccountsProvider>;
+	let dialogProviderSpy: jasmine.SpyObj<DialogProvider>;
 
 	let sut: PaymentAccountDialogService;
 

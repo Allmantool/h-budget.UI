@@ -21,7 +21,9 @@ export class PaymentAccountDialogService {
 	) {}
 
 	public openPaymentAccountForSave(): void {
-		const config = new MatDialogConfig<DialogContainer>();
+		const config = new MatDialogConfig<
+			DialogContainer<Result<IPaymentAccountModel>, Result<IPaymentAccountModel>>
+		>();
 
 		const onSave = (operationResult: Result<IPaymentAccountModel>) => {
 			if (!operationResult.isSucceeded) {
@@ -49,7 +51,7 @@ export class PaymentAccountDialogService {
 		config.data = {
 			title: 'Payment account: (Add new)',
 			onSubmit: onSave,
-		} as DialogContainer;
+		} as DialogContainer<Result<IPaymentAccountModel>, Result<IPaymentAccountModel>>;
 
 		config.disableClose = true;
 
@@ -57,7 +59,9 @@ export class PaymentAccountDialogService {
 	}
 
 	public openPaymentAccountForUpdate(paymentAccountid: string): void {
-		const config = new MatDialogConfig<DialogContainer>();
+		const config = new MatDialogConfig<
+			DialogContainer<Result<IPaymentAccountModel>, Result<IPaymentAccountModel>>
+		>();
 
 		const onUpdate = (operationResult: Result<IPaymentAccountModel>) => {
 			if (!operationResult.isSucceeded) {
@@ -89,7 +93,7 @@ export class PaymentAccountDialogService {
 			title: 'Payment account: (Update)',
 			operationType: DialogOperationTypes.Update,
 			onSubmit: onUpdate,
-		} as DialogContainer;
+		} as DialogContainer<Result<IPaymentAccountModel>, Result<IPaymentAccountModel>>;
 
 		config.disableClose = true;
 

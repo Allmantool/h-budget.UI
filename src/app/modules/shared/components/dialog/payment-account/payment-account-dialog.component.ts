@@ -31,7 +31,7 @@ import {
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PaymentAccountDialogComponent {
-	private dialogConfiguration: DialogContainer;
+	private dialogConfiguration: DialogContainer<Result<IPaymentAccountModel>, Result<IPaymentAccountModel>>;
 	public isLoadingSignal = signal<boolean>(false);
 	public additionalInfoSignal: Signal<string> = computed(() => {
 		if (_.isEmpty(this.emmiterSignal()) && _.isEmpty(this.descriptionSignal())) {
@@ -94,7 +94,8 @@ export class PaymentAccountDialogComponent {
 		private readonly store: Store,
 		private readonly dialogRef: MatDialogRef<PaymentAccountDialogComponent>,
 		private readonly fb: UntypedFormBuilder,
-		@Inject(MAT_DIALOG_DATA) dialogConfiguration: DialogContainer
+		@Inject(MAT_DIALOG_DATA)
+		dialogConfiguration: DialogContainer<Result<IPaymentAccountModel>, Result<IPaymentAccountModel>>
 	) {
 		this.title = dialogConfiguration.title;
 		this.dialogConfiguration = dialogConfiguration;

@@ -23,7 +23,7 @@ import { AddCategory } from '../../../store/states/handbooks/actions/category.ac
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CategoriesDialogComponent {
-	private dialogConfiguration: DialogContainer;
+	private dialogConfiguration: DialogContainer<ICategoryModel, ICategoryModel>;
 
 	@ViewChild('chipGrid ')
 	chipGrid!: ElementRef<HTMLInputElement>;
@@ -45,7 +45,7 @@ export class CategoriesDialogComponent {
 		private readonly store: Store,
 		private dialogRef: MatDialogRef<CategoriesDialogComponent>,
 		fb: UntypedFormBuilder,
-		@Inject(MAT_DIALOG_DATA) dialogConfiguration: DialogContainer
+		@Inject(MAT_DIALOG_DATA) dialogConfiguration: DialogContainer<ICategoryModel, ICategoryModel>
 	) {
 		this.dialogFg = fb.group({
 			categoryType: new UntypedFormControl(OperationTypes[OperationTypes.Income]),

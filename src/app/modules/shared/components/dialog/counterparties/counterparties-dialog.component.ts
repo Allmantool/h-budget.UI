@@ -24,7 +24,7 @@ import { AddCounterParty } from '../../../store/states/handbooks/actions/counter
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CounterpartiesDialogComponent {
-	private dialogConfiguration: DialogContainer;
+	private dialogConfiguration: DialogContainer<IContractorModel, IContractorModel>;
 
 	@ViewChild('chipGrid ')
 	chipGrid!: ElementRef<HTMLInputElement>;
@@ -46,7 +46,7 @@ export class CounterpartiesDialogComponent {
 		private readonly store: Store,
 		private readonly fb: UntypedFormBuilder,
 		private dialogRef: MatDialogRef<CounterpartiesDialogComponent>,
-		@Inject(MAT_DIALOG_DATA) dialogConfiguration: DialogContainer
+		@Inject(MAT_DIALOG_DATA) dialogConfiguration: DialogContainer<IContractorModel, IContractorModel>
 	) {
 		this.title = dialogConfiguration.title;
 		this.dialogConfiguration = dialogConfiguration;
