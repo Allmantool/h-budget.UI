@@ -19,7 +19,7 @@ export class CounterpartiesDialogService {
 	) {}
 
 	public openCategories(): void {
-		const config = new MatDialogConfig<DialogContainer>();
+		const config = new MatDialogConfig<DialogContainer<IContractorModel, IContractorModel>>();
 
 		const onSave = (payloadForSave: IContractorModel) => {
 			return this.contractorProvider.saveContractor(payloadForSave.nameNodes).pipe(
@@ -33,7 +33,7 @@ export class CounterpartiesDialogService {
 		config.data = {
 			title: 'Counter parties:',
 			onSubmit: onSave,
-		} as DialogContainer;
+		} as DialogContainer<IContractorModel, IContractorModel>;
 
 		config.disableClose = true;
 
