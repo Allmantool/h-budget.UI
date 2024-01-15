@@ -7,44 +7,52 @@ import { NgxsModule } from '@ngxs/store';
 import { of } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
-import { Result } from 'core/result';
-
 import { AppCoreModule } from '../../../../../app/modules/core/core.module';
 import { AngularMaterailSharedModule } from '../../../../../app/modules/shared/angular-material.shared.module';
-import { ContractorsDialogComponent } from '../../../../../app/modules/shared/components/dialog/contractors/contractors-dialog.component';
+import { CategoriesDialogComponent } from '../../../../../app/modules/shared/components/dialog/categories/categories-dialog.component';
 import { CustomUIComponentsSharedModule } from '../../../../../app/modules/shared/custom-ui-components.shared.module';
 import { DialogContainer } from '../../../../../app/modules/shared/models/dialog-container';
 import { DialogProvider } from '../../../../../app/modules/shared/providers/dialog-provider';
 import { AppSharedModule } from '../../../../../app/modules/shared/shared.module';
 import { ngxsConfig } from '../../../../../app/modules/shared/store/ngxs.config';
-import { ContractorsState } from '../../../../../app/modules/shared/store/states/handbooks/contractors.state';
-import { DefaultContractorsProvider } from '../../../../../data/providers/accounting/contractors.provider';
-import { IContractorModel } from '../../../../../domain/models/accounting/contractor.model.';
-import { ContractorsDialogService } from '../../../../../presentation/accounting/services/counterparties-dialog.service';
+import { CategoriesState } from '../../../../../app/modules/shared/store/states/handbooks/categories.state';
+import { Result } from '../../../../../core/result';
+import { DefaultCategoriesProvider } from '../../../../../data/providers/accounting/categories.provider';
+import { ICategoryEntity } from '../../../../../data/providers/accounting/entities/operation-category.entity';
+import { ICategoryModel } from '../../../../../domain/models/accounting/category.model';
+import { OperationTypes } from '../../../../../domain/models/accounting/operation-types';
+import { CategoriesDialogService } from '../../../../../presentation/accounting/services/categories-dialog.service';
 
-describe('Contractors-dialog.component', () => {
+describe('Categories-dialog.component', () => {
 	const matDialogSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
 
-	const mockDialogContainer: DialogContainer<IContractorModel, IContractorModel> = {
-		title: 'Contractor dialog tets',
-		onSubmit: (payload: IContractorModel) => of(payload),
+	const mockDialogContainer: DialogContainer<ICategoryModel, ICategoryModel> = {
+		title: 'Categories dialog test',
+		onSubmit: (payload: ICategoryModel) => of(payload),
 	};
 
-	let contractorsProviderSpy: jasmine.SpyObj<DefaultContractorsProvider>;
+	let categoriesProviderSpy: jasmine.SpyObj<DefaultCategoriesProvider>;
 	let dialogProviderSpy: jasmine.SpyObj<DialogProvider>;
 
-	let sut: ContractorsDialogService;
+	let sut: CategoriesDialogService;
 
 	beforeEach(() => {
 		dialogProviderSpy = jasmine.createSpyObj('dialogProvider', ['openDialog']);
 
-		contractorsProviderSpy = jasmine.createSpyObj('contractorsProvider', {
-			getContractors: () => of<Result<IContractorModel[]>>(),
-			getContractorById: (contractorId: string) =>
-				of<IContractorModel>({
+		categoriesProviderSpy = jasmine.createSpyObj('categoriesProvider', {
+			getCategoriries: () =>
+				of(
+					new Result<ICategoryEntity[]>({
+						payload: [{} as ICategoryEntity],
+					})
+				),
+			getCategoryById: (categoryId: string) =>
+				of<ICategoryModel>({
 					key: Guid.parse(''),
-				} as IContractorModel),
-			saveContractor: (newContractorNamesNodes: string[]) =>
+					operationType: OperationTypes.Expense,
+					nameNodes: [],
+				} as ICategoryModel),
+			saveCategory: (operationType: number, newCategoryNamesNodes: string[]) =>
 				of<Result<string>>(
 					new Result({
 						payload: 'bb6d182f-8b99-4e09-aa24-319b181178e3',
@@ -58,11 +66,11 @@ describe('Contractors-dialog.component', () => {
 				AngularMaterailSharedModule,
 				CustomUIComponentsSharedModule,
 				AppSharedModule,
-				NgxsModule.forRoot([ContractorsState], ngxsConfig),
+				NgxsModule.forRoot([CategoriesState], ngxsConfig),
 			],
 			providers: [
-				ContractorsDialogComponent,
-				ContractorsDialogService,
+				CategoriesDialogComponent,
+				CategoriesDialogService,
 				{
 					provide: MatDialogRef,
 					useValue: matDialogSpy,
@@ -77,19 +85,19 @@ describe('Contractors-dialog.component', () => {
 					useValue: dialogProviderSpy,
 				},
 				{
-					provide: DefaultContractorsProvider,
-					useValue: contractorsProviderSpy,
+					provide: DefaultCategoriesProvider,
+					useValue: categoriesProviderSpy,
 				},
 			],
 		});
 
-		sut = TestBed.inject(ContractorsDialogService);
+		sut = TestBed.inject(CategoriesDialogService);
 	});
 
 	it('"DialogProvider" should be execute at least ones', () => {
 		sut.openCategories();
 
-		const componentUnderTest = TestBed.inject(ContractorsDialogComponent);
+		const componentUnderTest = TestBed.inject(CategoriesDialogComponent);
 
 		componentUnderTest.save();
 
