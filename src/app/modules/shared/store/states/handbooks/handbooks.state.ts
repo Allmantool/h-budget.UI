@@ -3,13 +3,13 @@ import { Injectable } from '@angular/core';
 import { State } from '@ngxs/store';
 
 import { CategoriesState } from './categories.state';
-import { CounterpartiesState } from './counterparties.state';
+import { ContractorsState } from './contractors.state';
 import { IHandbooksStateModel } from './models/IHandbooksStateModel';
 
 @State<IHandbooksStateModel>({
 	name: 'handbooks',
 	defaults: {},
-	children: [CategoriesState, CounterpartiesState],
+	children: [CategoriesState, ContractorsState],
 })
 @Injectable()
 export class HandbbooksState {}

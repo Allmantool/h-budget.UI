@@ -27,7 +27,7 @@ import {
 } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { SetInitialCategories } from '../../../../app/modules/shared/store/states/handbooks/actions/category.actions';
-import { SetInitialContractors } from '../../../../app/modules/shared/store/states/handbooks/actions/counterparty.actions';
+import { SetInitialContractors } from '../../../../app/modules/shared/store/states/handbooks/actions/contractor.actions';
 import { DefaultCategoriesProvider } from '../../../../data/providers/accounting/categories.provider';
 import { DefaultContractorsProvider } from '../../../../data/providers/accounting/contractors.provider';
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';

@@ -5,14 +5,14 @@ import * as _ from 'lodash';
 
 import { concatMap, map } from 'rxjs';
 
-import { CounterpartiesDialogComponent } from '../../../app/modules/shared/components/dialog/counterparties/counterparties-dialog.component';
+import { ContractorsDialogComponent } from '../../../app/modules/shared/components/dialog/contractors/contractors-dialog.component';
 import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
 import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
 import { DefaultContractorsProvider } from '../../../data/providers/accounting/contractors.provider';
 import { IContractorModel } from '../../../domain/models/accounting/contractor.model.';
 
 @Injectable()
-export class CounterpartiesDialogService {
+export class ContractorsDialogService {
 	constructor(
 		private readonly contractorProvider: DefaultContractorsProvider,
 		private readonly dialogProvider: DialogProvider
@@ -37,6 +37,6 @@ export class CounterpartiesDialogService {
 
 		config.disableClose = true;
 
-		this.dialogProvider.openDialog(CounterpartiesDialogComponent, config);
+		this.dialogProvider.openDialog(ContractorsDialogComponent, config);
 	}
 }

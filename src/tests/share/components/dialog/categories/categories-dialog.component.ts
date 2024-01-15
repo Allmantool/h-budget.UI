@@ -27,7 +27,7 @@ describe('Categories-dialog.component', () => {
 	const matDialogSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
 
 	const mockDialogContainer: DialogContainer<ICategoryModel, ICategoryModel> = {
-		title: 'Payment account: (Update)  test',
+		title: 'Categories dialog test',
 		onSubmit: (payload: ICategoryModel) => of(payload),
 	};
 
