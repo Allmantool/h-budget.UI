@@ -14,11 +14,11 @@
 		"experimentalDecorators": true,
 		"moduleResolution": "node",
 		"importHelpers": true,
-		"target": "ES2022",
+		"target": "es6",
 		"module": "es2020",
 		"resolveJsonModule": true,
 		"esModuleInterop": true,
-		"lib": ["es2018", "dom"],
+		"lib": ["ES2022", "dom"],
 		"useDefineForClassFields": false
 	},
 	"include": ["src/**/*"],

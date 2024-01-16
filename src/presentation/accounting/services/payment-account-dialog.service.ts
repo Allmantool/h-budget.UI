@@ -17,23 +17,25 @@ import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-
 export class PaymentAccountDialogService {
 	constructor(
 		private readonly dialogProvider: DialogProvider,
-		private readonly defaultPaymentAccountsProvider: DefaultPaymentAccountsProvider
+		private readonly paymentAccountsProvider: DefaultPaymentAccountsProvider
 	) {}
 
 	public openPaymentAccountForSave(): void {
-		const config = new MatDialogConfig<DialogContainer>();
+		const config = new MatDialogConfig<
+			DialogContainer<Result<IPaymentAccountModel>, Result<IPaymentAccountModel>>
+		>();
 
 		const onSave = (operationResult: Result<IPaymentAccountModel>) => {
 			if (!operationResult.isSucceeded) {
 				return;
 			}
 
-			return this.defaultPaymentAccountsProvider.savePaymentAccount(operationResult.payload).pipe(
+			return this.paymentAccountsProvider.savePaymentAccount(operationResult.payload).pipe(
 				filter(responseResult => responseResult.isSucceeded),
 				map(responseResult => responseResult.payload),
 				tap(newPaymentAccountGuid => console.log(newPaymentAccountGuid)),
 				concatMap(newPaymentAccountGuid => {
-					return this.defaultPaymentAccountsProvider.getPaymentAccountById(newPaymentAccountGuid).pipe(
+					return this.paymentAccountsProvider.getPaymentAccountById(newPaymentAccountGuid).pipe(
 						map(
 							response =>
 								new Result({
@@ -49,7 +51,7 @@ export class PaymentAccountDialogService {
 		config.data = {
 			title: 'Payment account: (Add new)',
 			onSubmit: onSave,
-		} as DialogContainer;
+		} as DialogContainer<Result<IPaymentAccountModel>, Result<IPaymentAccountModel>>;
 
 		config.disableClose = true;
 
@@ -57,7 +59,9 @@ export class PaymentAccountDialogService {
 	}
 
 	public openPaymentAccountForUpdate(paymentAccountid: string): void {
-		const config = new MatDialogConfig<DialogContainer>();
+		const config = new MatDialogConfig<
+			DialogContainer<Result<IPaymentAccountModel>, Result<IPaymentAccountModel>>
+		>();
 
 		const onUpdate = (operationResult: Result<IPaymentAccountModel>) => {
 			if (!operationResult.isSucceeded) {
@@ -68,32 +72,28 @@ export class PaymentAccountDialogService {
 				return;
 			}
 
-			return this.defaultPaymentAccountsProvider
-				.updatePaymentAccount(operationResult.payload, paymentAccountid)
-				.pipe(
-					filter(responseResult => responseResult.isSucceeded),
-					map(responseResult => responseResult.payload),
-					concatMap(updatedPaymentAccountGuid => {
-						return this.defaultPaymentAccountsProvider
-							.getPaymentAccountById(updatedPaymentAccountGuid)
-							.pipe(
-								map(
-									response =>
-										new Result({
-											payload: response,
-											isSucceeded: true,
-										})
-								)
-							);
-					})
-				);
+			return this.paymentAccountsProvider.updatePaymentAccount(operationResult.payload, paymentAccountid).pipe(
+				filter(responseResult => responseResult.isSucceeded),
+				map(responseResult => responseResult.payload),
+				concatMap(updatedPaymentAccountGuid => {
+					return this.paymentAccountsProvider.getPaymentAccountById(updatedPaymentAccountGuid).pipe(
+						map(
+							response =>
+								new Result({
+									payload: response,
+									isSucceeded: true,
+								})
+						)
+					);
+				})
+			);
 		};
 
 		config.data = {
 			title: 'Payment account: (Update)',
 			operationType: DialogOperationTypes.Update,
 			onSubmit: onUpdate,
-		} as DialogContainer;
+		} as DialogContainer<Result<IPaymentAccountModel>, Result<IPaymentAccountModel>>;
 
 		config.disableClose = true;
 

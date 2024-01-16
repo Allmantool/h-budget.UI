@@ -8,7 +8,7 @@ import { PaymentAccountCrudComponent } from './components/payment-account-crud/p
 import { PaymentsHistoryComponent } from './components/payments-history/payments-history.component';
 import { AccountingOperationsService } from './services/accounting-operations.service';
 import { CategoriesDialogService } from './services/categories-dialog.service';
-import { CounterpartiesDialogService } from './services/counterparties-dialog.service';
+import { ContractorsDialogService } from './services/counterparties-dialog.service';
 import { PaymentAccountDialogService } from './services/payment-account-dialog.service';
 import { PaymentsHistoryService } from './services/payments-history.service';
 import { AppCoreModule } from '../../app/modules/core/core.module';
@@ -20,7 +20,7 @@ import { AccountingOperationsTableState } from '../../app/modules/shared/store/s
 import { PaymentAccountState } from '../../app/modules/shared/store/states/accounting/payment-account.state';
 import { AccountingOperationsState } from '../../app/modules/shared/store/states/accounting/payment-operations.state';
 import { CategoriesState } from '../../app/modules/shared/store/states/handbooks/categories.state';
-import { CounterpartiesState } from '../../app/modules/shared/store/states/handbooks/counterparties.state';
+import { ContractorsState } from '../../app/modules/shared/store/states/handbooks/contractors.state';
 import { HandbbooksState } from '../../app/modules/shared/store/states/handbooks/handbooks.state';
 import { DefaultCategoriesProvider } from '../../data/providers/accounting/categories.provider';
 import { DefaultContractorsProvider } from '../../data/providers/accounting/contractors.provider';
@@ -52,7 +52,7 @@ import { AccountingOperationsCrudComponent, AccountingRoutingModule } from '../a
 			AccountingOperationsState,
 			AccountingOperationsTableState,
 			HandbbooksState,
-			CounterpartiesState,
+			ContractorsState,
 			CategoriesState,
 			PaymentAccountState,
 		]),
@@ -72,7 +72,7 @@ import { AccountingOperationsCrudComponent, AccountingRoutingModule } from '../a
 		DefaultContractorsProvider,
 		DefaultCategoriesProvider,
 		CategoriesDialogService,
-		CounterpartiesDialogService,
+		ContractorsDialogService,
 		PaymentAccountDialogService,
 		AccountingOperationsService,
 	],

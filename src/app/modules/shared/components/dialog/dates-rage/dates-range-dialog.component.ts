@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChangeDetectionStrategy, Component, Inject, signal } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -13,7 +15,7 @@ import { DialogContainer } from '../../../../shared/models/dialog-container';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DateRangeDialogComponent {
-	private dialogConfiguration: DialogContainer;
+	private dialogConfiguration: DialogContainer<any, any>;
 	public isLoadingSignal = signal<boolean>(false);
 	public dialogFg: UntypedFormGroup;
 	public title: string;
@@ -21,7 +23,7 @@ export class DateRangeDialogComponent {
 	constructor(
 		private readonly dialogRef: MatDialogRef<DateRangeDialogComponent>,
 		private readonly fb: UntypedFormBuilder,
-		@Inject(MAT_DIALOG_DATA) dialogConfiguration: DialogContainer
+		@Inject(MAT_DIALOG_DATA) dialogConfiguration: DialogContainer<any, any>
 	) {
 		this.dialogFg = this.fb.group({
 			startDate: new UntypedFormControl(new Date()),

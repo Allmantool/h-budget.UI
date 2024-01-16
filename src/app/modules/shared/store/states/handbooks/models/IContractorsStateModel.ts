@@ -1,5 +1,5 @@
 import { IContractorModel } from 'domain/models/accounting/contractor.model.';
 
-export interface ICounterpartiesStateModel {
-	counterparties: IContractorModel[];
+export interface IContractorsStateModel {
+	contractors: IContractorModel[];
 }

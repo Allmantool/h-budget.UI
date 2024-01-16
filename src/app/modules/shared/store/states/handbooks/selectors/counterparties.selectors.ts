@@ -2,20 +2,20 @@ import * as _ from 'lodash';
 
 import { createSelector } from '@ngxs/store';
 
-import { CounterpartiesState } from '../counterparties.state';
-import { ICounterpartiesStateModel } from '../models/ICounterpartiesStateModel';
+import { ContractorsState } from '../contractors.state';
+import { IContractorsStateModel } from '../models/IContractorsStateModel';
 
 export const getContractors = createSelector(
-	[CounterpartiesState],
-	(state: ICounterpartiesStateModel) => state?.counterparties
+	[ContractorsState],
+	(state: IContractorsStateModel) => state?.contractors
 );
 
-export const getContractorNodes = createSelector([CounterpartiesState], (state: ICounterpartiesStateModel) =>
-	_.map(state?.counterparties, i => i.nameNodes?.parseToTreeAsString())
+export const getContractorNodes = createSelector([ContractorsState], (state: IContractorsStateModel) =>
+	_.map(state?.contractors, i => i.nameNodes?.parseToTreeAsString())
 );
 
 export const getContractorAsNodesMap = createSelector(
-	[CounterpartiesState],
-	(state: ICounterpartiesStateModel) =>
-		new Map(state?.counterparties.map(c => [c.nameNodes?.parseToTreeAsString(), c]))
+	[ContractorsState],
+	(state: IContractorsStateModel) =>
+		new Map(state?.contractors.map(c => [c.nameNodes?.parseToTreeAsString(), c]))
 );

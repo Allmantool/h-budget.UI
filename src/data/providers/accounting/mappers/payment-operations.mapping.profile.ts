@@ -1,9 +1,8 @@
 import * as _ from 'lodash';
 
 import { MappingPair, Profile } from '@dynamic-mapper/mapper';
+import { format } from 'date-fns';
 import { Guid } from 'typescript-guid';
-
-import format from 'date-fns/format';
 
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
 import { IPaymentOperationCreateOrUpdateRequest } from '../../../../domain/models/accounting/requests/payment-pperation-create-or-update.request';

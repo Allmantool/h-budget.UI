@@ -15,16 +15,16 @@ import { map, Observable, startWith, take } from 'rxjs';
 
 import { IContractorModel } from '../../../../../../domain/models/accounting/contractor.model.';
 import { DialogContainer } from '../../../models/dialog-container';
-import { AddCounterParty } from '../../../store/states/handbooks/actions/counterparty.actions';
+import { AddCounterParty } from '../../../store/states/handbooks/actions/contractor.actions';
 
 @Component({
-	selector: 'counterparties-dialog',
-	templateUrl: './counterparties-dialog.component.html',
-	styleUrls: ['./counterparties-dialog.component.css'],
+	selector: 'contractors-dialog',
+	templateUrl: './contractors-dialog.component.html',
+	styleUrls: ['./contractors-dialog.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CounterpartiesDialogComponent {
-	private dialogConfiguration: DialogContainer;
+export class ContractorsDialogComponent {
+	private dialogConfiguration: DialogContainer<IContractorModel, IContractorModel>;
 
 	@ViewChild('chipGrid ')
 	chipGrid!: ElementRef<HTMLInputElement>;
@@ -45,8 +45,8 @@ export class CounterpartiesDialogComponent {
 	constructor(
 		private readonly store: Store,
 		private readonly fb: UntypedFormBuilder,
-		private dialogRef: MatDialogRef<CounterpartiesDialogComponent>,
-		@Inject(MAT_DIALOG_DATA) dialogConfiguration: DialogContainer
+		private dialogRef: MatDialogRef<ContractorsDialogComponent>,
+		@Inject(MAT_DIALOG_DATA) dialogConfiguration: DialogContainer<IContractorModel, IContractorModel>
 	) {
 		this.title = dialogConfiguration.title;
 		this.dialogConfiguration = dialogConfiguration;

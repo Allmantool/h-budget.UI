@@ -2,8 +2,8 @@ import { Observable } from 'rxjs';
 
 import { DialogOperationTypes } from './dialog-operation-types';
 
-export class DialogContainer {
+export class DialogContainer<T, U> {
 	title!: string;
-	onSubmit!: <T>(payload: T) => Observable<T>;
 	operationType?: DialogOperationTypes | undefined;
+	onSubmit!: (payload: T) => Observable<U>;
 }

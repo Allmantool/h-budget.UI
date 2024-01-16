@@ -19,7 +19,7 @@ export class CategoriesDialogService {
 	) {}
 
 	public openCategories(): void {
-		const config = new MatDialogConfig<DialogContainer>();
+		const config = new MatDialogConfig<DialogContainer<ICategoryModel, ICategoryModel>>();
 
 		const onSave = (payloadForSave: ICategoryModel) => {
 			return this.categoriesProvider.saveCategory(payloadForSave.operationType, payloadForSave.nameNodes).pipe(
@@ -33,7 +33,7 @@ export class CategoriesDialogService {
 		config.data = {
 			title: 'Budget categories:',
 			onSubmit: onSave,
-		} as DialogContainer;
+		} as DialogContainer<ICategoryModel, ICategoryModel>;
 
 		config.disableClose = true;
 

@@ -27,7 +27,7 @@ import {
 } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { SetInitialCategories } from '../../../../app/modules/shared/store/states/handbooks/actions/category.actions';
-import { SetInitialContractors } from '../../../../app/modules/shared/store/states/handbooks/actions/counterparty.actions';
+import { SetInitialContractors } from '../../../../app/modules/shared/store/states/handbooks/actions/contractor.actions';
 import { DefaultCategoriesProvider } from '../../../../data/providers/accounting/categories.provider';
 import { DefaultContractorsProvider } from '../../../../data/providers/accounting/contractors.provider';
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
@@ -117,10 +117,9 @@ export class PaymentsHistoryComponent implements OnInit {
 					this.store.dispatch(new SetInitialContractors(contractors));
 					this.store.dispatch(new SetInitialCategories(categories));
 
-					return this.paymentsHistoryService.refreshPaymentsHistory(
-						this.activePaymentAccountSignal().key!.toString(),
-						true
-					);
+					const paymentAccountId = this.activePaymentAccountSignal()?.key;
+
+					return this.paymentsHistoryService.refreshPaymentsHistory(paymentAccountId!.toString(), true);
 				})
 			)
 			.pipe(takeUntilDestroyed(this.destroyRef))
@@ -128,7 +127,7 @@ export class PaymentsHistoryComponent implements OnInit {
 
 		this.accountingTableOptions$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(options => {
 			this.clickedRowGuids.clear();
-			this.clickedRowGuids.add(options.selectedRecordGuid);
+			this.clickedRowGuids.add(options?.selectedRecordGuid);
 		});
 
 		this.accountPaymentRecords$

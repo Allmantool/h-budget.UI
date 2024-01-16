@@ -22,10 +22,6 @@ import {
 	getCategoryAsNodesMap,
 	getCategoryNodes,
 } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
-import {
-	getContractorAsNodesMap,
-	getContractorNodes,
-} from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
 import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
 import { IContractorModel } from '../../../../domain/models/accounting/contractor.model.';
 import { OperationTypes } from '../../../../domain/models/accounting/operation-types';
@@ -33,9 +29,13 @@ import { IPaymentOperationModel } from '../../../../domain/models/accounting/pay
 import { IPaymentRepresentationModel } from '../../models/operation-record';
 import { AccountingOperationsService } from '../../services/accounting-operations.service';
 import { CategoriesDialogService } from '../../services/categories-dialog.service';
-import { CounterpartiesDialogService } from '../../services/counterparties-dialog.service';
 import { PaymentsHistoryService } from '../../services/payments-history.service';
 import '../../../../domain/extensions/handbookExtensions';
+import { ContractorsDialogService } from '../../services/counterparties-dialog.service';
+import {
+	getContractorAsNodesMap,
+	getContractorNodes,
+} from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
 
 @Component({
 	selector: 'accounting-crud',
@@ -67,7 +67,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	contractorsMap$!: Observable<Map<string, IContractorModel>>;
 
 	@Select(getContractorNodes)
-	counterparties$!: Observable<string[]>;
+	contractors$!: Observable<string[]>;
 
 	@Select(getSelectedRecordGuid)
 	selectedRecordGuid$!: Observable<Guid>;
@@ -101,7 +101,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		private readonly accountingOperationsService: AccountingOperationsService,
 		private readonly fb: UntypedFormBuilder,
 		private readonly categoriesDialogService: CategoriesDialogService,
-		private readonly counterpartiesDialogService: CounterpartiesDialogService,
+		private readonly contractorsDialogService: ContractorsDialogService,
 		private readonly paymentHistoryService: PaymentsHistoryService
 	) {
 		this.accountingRecordsSignal = toSignal(this.accountingRecords$, { initialValue: [] });
@@ -122,7 +122,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			comment: new UntypedFormControl({ disabled: true }),
 		});
 
-		this.contractorsSignal = toSignal(this.counterparties$, { initialValue: [] });
+		this.contractorsSignal = toSignal(this.contractors$, { initialValue: [] });
 		this.categoryNodesSignal = toSignal(this.categoryNodes$, { initialValue: [] });
 		this.categoriesMapSignal = toSignal(this.categoriesMap$, { initialValue: new Map<string, ICategoryModel>() });
 		this.contractorsMapSignal = toSignal(this.contractorsMap$, {
@@ -220,6 +220,6 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	}
 
 	public addContractor(): void {
-		this.counterpartiesDialogService.openCategories();
+		this.contractorsDialogService.openCategories();
 	}
 }

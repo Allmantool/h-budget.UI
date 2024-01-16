@@ -27,9 +27,8 @@ export class DefaultContractorsProvider implements IContractorsProvider {
 
 	public getContractors(): Observable<IContractorModel[]> {
 		return this.http.get<Result<IContractorEntity[]>>(`${this.accountingHostUrl}/contractors`).pipe(
-			map(
-				responseResult =>
-					this.mapper?.map(DataContractorProfile.ContractorEntityToDomain, responseResult.payload)
+			map(responseResult =>
+				this.mapper?.map(DataContractorProfile.ContractorEntityToDomain, responseResult.payload)
 			),
 			retry(3),
 			take(1)
@@ -40,9 +39,8 @@ export class DefaultContractorsProvider implements IContractorsProvider {
 		return this.http
 			.get<Result<IContractorEntity>>(`${this.accountingHostUrl}/contractors/byId/${contractorId}`)
 			.pipe(
-				map(
-					responseResult =>
-						this.mapper?.map(DataContractorProfile.ContractorEntityToDomain, responseResult.payload)
+				map(responseResult =>
+					this.mapper?.map(DataContractorProfile.ContractorEntityToDomain, responseResult.payload)
 				),
 				retry(3),
 				take(1)
