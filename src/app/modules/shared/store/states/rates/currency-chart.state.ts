@@ -17,8 +17,6 @@ import { ICurrencyChartOptions } from '../../models/currency-rates/currency-char
 })
 @Injectable()
 export class CurrencyChartState {
-	constructor() {}
-
 	@Action(SetActiveCurrencyTrendTitle)
 	SetActiveCurrencyTrendTitle(
 		{ patchState }: StateContext<ICurrencyChartStateModel>,

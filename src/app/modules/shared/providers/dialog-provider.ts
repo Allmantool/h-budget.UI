@@ -2,8 +2,6 @@ import { ComponentType } from '@angular/cdk/portal';
 import { Injectable, TemplateRef } from '@angular/core';
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 
-import * as _ from 'lodash';
-
 @Injectable()
 export class DialogProvider {
 	constructor(public dialog: MatDialog) {}

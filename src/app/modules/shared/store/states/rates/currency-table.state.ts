@@ -29,8 +29,6 @@ import { ICurrencyTableOptions } from '../../models/currency-rates/currency-tabl
 })
 @Injectable()
 export class CurrencyTableState {
-	constructor() {}
-
 	@Action(SetActiveCurrency)
 	setActiveCurrency(
 		{ getState, patchState }: StateContext<ICurrencyTableStateModel>,

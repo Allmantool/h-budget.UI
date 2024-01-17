@@ -3,8 +3,6 @@ import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, Signal 
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatTableDataSource } from '@angular/material/table';
 
-import * as _ from 'lodash';
-
 import { Select, Store } from '@ngxs/store';
 import { combineLatest, Observable, Subject } from 'rxjs';
 
