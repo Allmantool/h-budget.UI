@@ -41,9 +41,9 @@ export class PaymentsHistoryService implements IPaymentsHistoryService {
 		paymentAccountId: string,
 		updateState: boolean = false
 	): Observable<IPaymentRepresentationModel[]> {
-		const operationsHistory = this.paymensHistoryProvider.getOperationsHistoryForPaymentAccount(paymentAccountId);
+		const operationsHistory$ = this.paymensHistoryProvider.getOperationsHistoryForPaymentAccount(paymentAccountId);
 
-		return operationsHistory.pipe(
+		return operationsHistory$.pipe(
 			take(1),
 			map(operations => {
 				if (updateState) {

@@ -4,9 +4,9 @@ import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angul
 
 import * as _ from 'lodash';
 
-import { Select } from '@ngxs/store';
+import { Select, Store } from '@ngxs/store';
 import { combineLatest, firstValueFrom, Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 import { nameof } from 'ts-simple-nameof';
 import { Guid } from 'typescript-guid';
 
@@ -32,6 +32,8 @@ import { CategoriesDialogService } from '../../services/categories-dialog.servic
 import { PaymentsHistoryService } from '../../services/payments-history.service';
 import '../../../../domain/extensions/handbookExtensions';
 import { ContractorsDialogService } from '../../services/counterparties-dialog.service';
+import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
+import { UpdatePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
 import {
 	getContractorAsNodesMap,
 	getContractorNodes,
@@ -98,11 +100,13 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	});
 
 	constructor(
+		private readonly store: Store,
 		private readonly accountingOperationsService: AccountingOperationsService,
 		private readonly fb: UntypedFormBuilder,
 		private readonly categoriesDialogService: CategoriesDialogService,
 		private readonly contractorsDialogService: ContractorsDialogService,
-		private readonly paymentHistoryService: PaymentsHistoryService
+		private readonly paymentHistoryService: PaymentsHistoryService,
+		private readonly paymentAccountsProvider: DefaultPaymentAccountsProvider
 	) {
 		this.accountingRecordsSignal = toSignal(this.accountingRecords$, { initialValue: [] });
 
@@ -192,6 +196,11 @@ export class AccountingOperationsCrudComponent implements OnInit {
 
 	public async applyChangesAsync(): Promise<void> {
 		await this.accountingOperationsService.updateOperationAsync(this.selectedPaymentOperationSignal());
+
+		this.paymentAccountsProvider
+			.getPaymentAccountById(this.activePaymentAccountIdSignal()!.toString())
+			.pipe(take(1))
+			.subscribe(payload => this.store.dispatch(new UpdatePaymentAccount(payload)));
 	}
 
 	public formSync(): void {

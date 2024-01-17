@@ -15,4 +15,11 @@ describe('Accouting operations crud component', () => {
 	let paymentHistoryServiceSpy: PaymentsHistoryService;
 
 	let store: Store;
+
+	beforeEach(() => {});
+
+	it('Should be initialized AccountingOperationsCrudComponent with "ngAfterViewInit"', (done: DoneFn) => {
+		// sut.ngOnInit();
+		done();
+	});
 });
