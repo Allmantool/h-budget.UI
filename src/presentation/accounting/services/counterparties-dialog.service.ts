@@ -18,7 +18,7 @@ export class ContractorsDialogService {
 		private readonly dialogProvider: DialogProvider
 	) {}
 
-	public openCategories(): void {
+	public openContractors(): void {
 		const config = new MatDialogConfig<DialogContainer<IContractorModel, IContractorModel>>();
 
 		const onSave = (payloadForSave: IContractorModel) => {

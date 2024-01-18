@@ -58,7 +58,7 @@ export class PaymentsHistoryService implements IPaymentsHistoryService {
 		);
 	}
 
-	public paymentOperationAsHistoryHistoryRecord(): IPaymentRepresentationModel {
+	public paymentOperationAsHistoryRecord(): IPaymentRepresentationModel {
 		const selectedOperationGuid = this.selectedRecordGuidSignal()!;
 
 		const payload = _.find(this.accountingRecordsSignal(), function (r) {

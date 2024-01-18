@@ -93,7 +93,7 @@ describe('Contractors-dialog.component', () => {
 	});
 
 	it('"DialogProvider" should be execute at least ones', () => {
-		sut.openCategories();
+		sut.openContractors();
 
 		const componentUnderTest = TestBed.inject(ContractorsDialogComponent);
 
