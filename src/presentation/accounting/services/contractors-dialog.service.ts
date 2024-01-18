@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
 
-import * as _ from 'lodash';
-
 import { concatMap, map } from 'rxjs';
 
 import { ContractorsDialogComponent } from '../../../app/modules/shared/components/dialog/contractors/contractors-dialog.component';

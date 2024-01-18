@@ -31,7 +31,7 @@ import { AccountingOperationsService } from '../../services/accounting-operation
 import { CategoriesDialogService } from '../../services/categories-dialog.service';
 import { PaymentsHistoryService } from '../../services/payments-history.service';
 import '../../../../domain/extensions/handbookExtensions';
-import { ContractorsDialogService } from '../../services/counterparties-dialog.service';
+import { ContractorsDialogService } from '../../services/contractors-dialog.service';
 import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
 import {
 	getContractorAsNodesMap,

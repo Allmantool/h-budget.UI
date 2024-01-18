@@ -30,7 +30,7 @@ import { DefaultPaymentAccountsProvider } from '../../../data/providers/accounti
 import { AccountingOperationsCrudComponent } from '../../../presentation/accounting/components/accounting-operations-crud/accounting-operations-crud.component';
 import { AccountingOperationsService } from '../../../presentation/accounting/services/accounting-operations.service';
 import { CategoriesDialogService } from '../../../presentation/accounting/services/categories-dialog.service';
-import { ContractorsDialogService } from '../../../presentation/accounting/services/counterparties-dialog.service';
+import { ContractorsDialogService } from '../../../presentation/accounting/services/contractors-dialog.service';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
 import { AccountTypes } from 'domain/models/accounting/account-types';
 import { IPaymentAccountModel } from 'domain/models/accounting/payment-account.model';

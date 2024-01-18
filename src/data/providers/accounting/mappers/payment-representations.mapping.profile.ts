@@ -56,22 +56,22 @@ export class PaymentRepresentationsMappingProfile extends Profile {
 			},
 			contractor: opt => {
 				opt.preCondition(src => !_.isNil(src.record.contractorId));
-				opt.mapFrom(src => this.getContractorById(src.record.contractorId).nameNodes.parseToTreeAsString());
+				opt.mapFrom(src => this.getRepresenationView(this.getContractorById(src.record.contractorId)));
 			},
 			category: opt => {
 				opt.preCondition(src => !_.isNil(src.record.categoryId));
-				opt.mapFrom(src => this.getCategoryById(src.record.categoryId).nameNodes.parseToTreeAsString());
+				opt.mapFrom(src => this.getRepresenationView(this.getCategoryById(src.record.categoryId)));
 			},
 			comment: opt => {
 				opt.preCondition(src => !_.isNil(src.record.comment));
 				opt.mapFrom(src => src.record.comment);
 			},
 			income: opt => {
-				opt.preCondition(src => !_.isNil(src.record.categoryId));
+				opt.preCondition(src => !_.isNil(this.getCategoryById(src.record.categoryId)));
 				opt.mapFrom(src => (this.isIncomeCategory(src.record.categoryId) ? src.record.amount : 0));
 			},
 			expense: opt => {
-				opt.preCondition(src => !_.isNil(src.record.categoryId));
+				opt.preCondition(src => !_.isNil(this.getCategoryById(src.record.categoryId)));
 				opt.mapFrom(src => (this.isIncomeCategory(src.record.categoryId) ? 0 : -src.record.amount));
 			},
 			balance: opt => {
@@ -91,25 +91,37 @@ export class PaymentRepresentationsMappingProfile extends Profile {
 			},
 			contractor: opt => {
 				opt.preCondition(src => !_.isNil(src.contractorId));
-				opt.mapFrom(src => this.getContractorById(src.contractorId).nameNodes.parseToTreeAsString());
+				opt.mapFrom(src => this.getRepresenationView(this.getContractorById(src.contractorId)));
 			},
 			category: opt => {
 				opt.preCondition(src => !_.isNil(src.categoryId));
-				opt.mapFrom(src => this.getCategoryById(src.categoryId).nameNodes.parseToTreeAsString());
+				opt.mapFrom(src => this.getRepresenationView(this.getCategoryById(src.categoryId)));
 			},
 			comment: opt => {
 				opt.preCondition(src => !_.isNil(src.comment));
 				opt.mapFrom(src => src.comment);
 			},
 			income: opt => {
-				opt.preCondition(src => !_.isNil(src.categoryId));
+				opt.preCondition(src => !_.isNil(this.getCategoryById(src.categoryId)));
 				opt.mapFrom(src => (this.isIncomeCategory(src.categoryId) ? src.amount : 0));
 			},
 			expense: opt => {
-				opt.preCondition(src => !_.isNil(src.categoryId));
+				opt.preCondition(src => !_.isNil(this.getCategoryById(src.categoryId)));
 				opt.mapFrom(src => (this.isIncomeCategory(src.categoryId) ? 0 : -src.amount));
 			},
 		});
+	}
+
+	private getRepresenationView(handbookPaylod: ICategoryModel | IContractorModel): string {
+		if (_.isNil(handbookPaylod)) {
+			return 'N/A';
+		}
+
+		if (_.isNil(handbookPaylod?.nameNodes)) {
+			return handbookPaylod.key.toString();
+		}
+
+		return handbookPaylod.nameNodes.parseToTreeAsString();
 	}
 
 	private getCategoryById(id: Guid): ICategoryModel {

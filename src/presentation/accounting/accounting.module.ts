@@ -8,7 +8,7 @@ import { PaymentAccountCrudComponent } from './components/payment-account-crud/p
 import { PaymentsHistoryComponent } from './components/payments-history/payments-history.component';
 import { AccountingOperationsService } from './services/accounting-operations.service';
 import { CategoriesDialogService } from './services/categories-dialog.service';
-import { ContractorsDialogService } from './services/counterparties-dialog.service';
+import { ContractorsDialogService } from './services/contractors-dialog.service';
 import { PaymentAccountDialogService } from './services/payment-account-dialog.service';
 import { PaymentsHistoryService } from './services/payments-history.service';
 import { AppCoreModule } from '../../app/modules/core/core.module';

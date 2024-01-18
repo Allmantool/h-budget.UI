@@ -2,8 +2,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
-import _ from 'lodash';
-
 import { Mapper } from '@dynamic-mapper/angular';
 import { map, Observable, retry, take } from 'rxjs';
 
