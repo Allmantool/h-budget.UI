@@ -8,7 +8,7 @@ import { PaymentAccountCrudComponent } from './components/payment-account-crud/p
 import { PaymentsHistoryComponent } from './components/payments-history/payments-history.component';
 import { AccountingOperationsService } from './services/accounting-operations.service';
 import { CategoriesDialogService } from './services/categories-dialog.service';
-import { ContractorsDialogService } from './services/counterparties-dialog.service';
+import { ContractorsDialogService } from './services/contractors-dialog.service';
 import { PaymentAccountDialogService } from './services/payment-account-dialog.service';
 import { PaymentsHistoryService } from './services/payments-history.service';
 import { AppCoreModule } from '../../app/modules/core/core.module';
@@ -29,6 +29,7 @@ import { DataContractorProfile } from '../../data/providers/accounting/mappers/c
 import { PaymentAccountsMappingProfile } from '../../data/providers/accounting/mappers/payment-accounts.mapping.profile';
 import { PaymentHistoryMappingProfile } from '../../data/providers/accounting/mappers/payment-history.mapping.profile';
 import { PaymentOperationsMappingProfile } from '../../data/providers/accounting/mappers/payment-operations.mapping.profile';
+import { PaymentRepresentationsMappingProfile } from '../../data/providers/accounting/mappers/payment-representations.mapping.profile';
 import { DefaultPaymentAccountsProvider } from '../../data/providers/accounting/payment-accounts.provider';
 import { PaymentOperationsProvider } from '../../data/providers/accounting/payment-operations.provider';
 import { PaymensHistoryProvider } from '../../data/providers/accounting/payments-history.provider';
@@ -59,6 +60,7 @@ import { AccountingOperationsCrudComponent, AccountingRoutingModule } from '../a
 		MapperModule.withProfiles([
 			PaymentAccountsMappingProfile,
 			PaymentOperationsMappingProfile,
+			PaymentRepresentationsMappingProfile,
 			PaymentHistoryMappingProfile,
 			DataContractorProfile,
 			DataCategoryProfile,

@@ -1,5 +1,3 @@
-import * as _ from 'lodash';
-
 import { NationalBankCurrencyRate } from './national-bank-currency-rate';
 import { CurrencyTrend } from '../../../app/modules/shared/store/models/currency-rates/currency-trend';
 

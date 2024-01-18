@@ -4,14 +4,14 @@ import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angul
 
 import * as _ from 'lodash';
 
-import { Select } from '@ngxs/store';
-import { combineLatest, firstValueFrom, Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
-import { nameof } from 'ts-simple-nameof';
+import { Select, Store } from '@ngxs/store';
+import { combineLatest, Observable } from 'rxjs';
+import { filter, take } from 'rxjs/operators';
 import { Guid } from 'typescript-guid';
 
 import { IAccountingOperationsTableOptions } from 'app/modules/shared/store/models/accounting/accounting-table-options';
 
+import { UpdatePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
 import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import { getActivePaymentAccountId } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import {
@@ -31,7 +31,8 @@ import { AccountingOperationsService } from '../../services/accounting-operation
 import { CategoriesDialogService } from '../../services/categories-dialog.service';
 import { PaymentsHistoryService } from '../../services/payments-history.service';
 import '../../../../domain/extensions/handbookExtensions';
-import { ContractorsDialogService } from '../../services/counterparties-dialog.service';
+import { ContractorsDialogService } from '../../services/contractors-dialog.service';
+import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
 import {
 	getContractorAsNodesMap,
 	getContractorNodes,
@@ -98,11 +99,13 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	});
 
 	constructor(
-		private readonly accountingOperationsService: AccountingOperationsService,
+		private readonly store: Store,
 		private readonly fb: UntypedFormBuilder,
+		private readonly accountingOperationsService: AccountingOperationsService,
 		private readonly categoriesDialogService: CategoriesDialogService,
 		private readonly contractorsDialogService: ContractorsDialogService,
-		private readonly paymentHistoryService: PaymentsHistoryService
+		private readonly paymentHistoryService: PaymentsHistoryService,
+		private readonly paymentAccountsProvider: DefaultPaymentAccountsProvider
 	) {
 		this.accountingRecordsSignal = toSignal(this.accountingRecords$, { initialValue: [] });
 
@@ -128,14 +131,10 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		this.contractorsMapSignal = toSignal(this.contractorsMap$, {
 			initialValue: new Map<string, IContractorModel>(),
 		});
-		this.selectedCategorySignal = toSignal(
-			this.crudRecordFg.get(nameof<IPaymentRepresentationModel>(r => r.category))!.valueChanges,
-			{ initialValue: '' }
-		);
-		this.selectedContractorSignal = toSignal(
-			this.crudRecordFg.get(nameof<IPaymentRepresentationModel>(r => r.contractor))!.valueChanges,
-			{ initialValue: '' }
-		);
+		this.selectedCategorySignal = toSignal(this.crudRecordFg.get('category')!.valueChanges, { initialValue: '' });
+		this.selectedContractorSignal = toSignal(this.crudRecordFg.get('contractor')!.valueChanges, {
+			initialValue: '',
+		});
 
 		this.isExpenseSignal = computed(() => {
 			const selectedCategory = this.categoriesMapSignal().get(this.selectedCategorySignal());
@@ -173,7 +172,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			)
 			.subscribe(() => {
 				if (!_.isNil(this.crudRecordFg)) {
-					const payload = this.paymentHistoryService.paymentOperationAsHistoryHistoryRecord();
+					const payload = this.paymentHistoryService.paymentOperationAsHistoryRecord();
 
 					if (!_.isNil(payload)) {
 						this.crudRecordFg.patchValue({
@@ -192,6 +191,11 @@ export class AccountingOperationsCrudComponent implements OnInit {
 
 	public async applyChangesAsync(): Promise<void> {
 		await this.accountingOperationsService.updateOperationAsync(this.selectedPaymentOperationSignal());
+
+		this.paymentAccountsProvider
+			.getPaymentAccountById(this.activePaymentAccountIdSignal()!.toString())
+			.pipe(take(1))
+			.subscribe(payload => this.store.dispatch(new UpdatePaymentAccount(payload)));
 	}
 
 	public formSync(): void {
@@ -220,6 +224,6 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	}
 
 	public addContractor(): void {
-		this.contractorsDialogService.openCategories();
+		this.contractorsDialogService.openContractors();
 	}
 }

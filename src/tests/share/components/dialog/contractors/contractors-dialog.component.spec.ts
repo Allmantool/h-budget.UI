@@ -21,7 +21,7 @@ import { ContractorsState } from '../../../../../app/modules/shared/store/states
 import { DefaultContractorsProvider } from '../../../../../data/providers/accounting/contractors.provider';
 import { ICategoryEntity } from '../../../../../data/providers/accounting/entities/operation-category.entity';
 import { IContractorModel } from '../../../../../domain/models/accounting/contractor.model.';
-import { ContractorsDialogService } from '../../../../../presentation/accounting/services/counterparties-dialog.service';
+import { ContractorsDialogService } from '../../../../../presentation/accounting/services/contractors-dialog.service';
 
 describe('Contractors-dialog.component', () => {
 	const matDialogSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
@@ -93,7 +93,7 @@ describe('Contractors-dialog.component', () => {
 	});
 
 	it('"DialogProvider" should be execute at least ones', () => {
-		sut.openCategories();
+		sut.openContractors();
 
 		const componentUnderTest = TestBed.inject(ContractorsDialogComponent);
 

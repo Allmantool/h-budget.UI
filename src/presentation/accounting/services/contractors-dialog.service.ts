@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
 
-import * as _ from 'lodash';
-
 import { concatMap, map } from 'rxjs';
 
 import { ContractorsDialogComponent } from '../../../app/modules/shared/components/dialog/contractors/contractors-dialog.component';
@@ -18,7 +16,7 @@ export class ContractorsDialogService {
 		private readonly dialogProvider: DialogProvider
 	) {}
 
-	public openCategories(): void {
+	public openContractors(): void {
 		const config = new MatDialogConfig<DialogContainer<IContractorModel, IContractorModel>>();
 
 		const onSave = (payloadForSave: IContractorModel) => {

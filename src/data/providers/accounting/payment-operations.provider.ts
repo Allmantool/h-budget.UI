@@ -33,10 +33,9 @@ export class PaymentOperationsProvider {
 		);
 
 		return this.http
-			.post<Result<IPaymentAccountCreateOrUpdateResponse>>(
-				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}`,
-				request
-			)
+			.post<
+				Result<IPaymentAccountCreateOrUpdateResponse>
+			>(`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}`, request)
 			.pipe(retry(3), take(1));
 	}
 
@@ -51,10 +50,9 @@ export class PaymentOperationsProvider {
 		);
 
 		return this.http
-			.patch<Result<IPaymentAccountCreateOrUpdateResponse>>(
-				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}/${paymentOperationId}`,
-				request
-			)
+			.patch<
+				Result<IPaymentAccountCreateOrUpdateResponse>
+			>(`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}/${paymentOperationId}`, request)
 			.pipe(retry(3), take(1));
 	}
 
@@ -63,9 +61,9 @@ export class PaymentOperationsProvider {
 		paymentOperationId: string
 	): Observable<Result<IPaymentAccountCreateOrUpdateResponse>> {
 		return this.http
-			.delete<Result<IPaymentAccountCreateOrUpdateResponse>>(
-				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}/${paymentOperationId}`
-			)
+			.delete<
+				Result<IPaymentAccountCreateOrUpdateResponse>
+			>(`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}/${paymentOperationId}`)
 			.pipe(retry(3), take(1));
 	}
 }
