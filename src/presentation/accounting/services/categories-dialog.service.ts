@@ -1,8 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
 
-import * as _ from 'lodash';
-
 import { concatMap, map } from 'rxjs';
 
 import { CategoriesDialogComponent } from '../../../app/modules/shared/components/dialog/categories/categories-dialog.component';

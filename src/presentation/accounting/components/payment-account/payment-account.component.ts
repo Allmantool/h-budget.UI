@@ -1,5 +1,11 @@
-import { ChangeDetectionStrategy, Component, EnvironmentInjector, OnInit, runInInjectionContext } from '@angular/core';
-import { signal } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	EnvironmentInjector,
+	OnInit,
+	runInInjectionContext,
+	signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatSelectionListChange } from '@angular/material/list';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -9,7 +15,6 @@ import * as _ from 'lodash';
 import { Select, Store } from '@ngxs/store';
 import { Observable, retry, take } from 'rxjs';
 import { nameof } from 'ts-simple-nameof';
-
 import { Guid } from 'typescript-guid';
 
 import { SetActivePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
@@ -89,8 +94,6 @@ export class PaymentAccountComponent implements OnInit {
 		this.store.dispatch(new SetActivePaymentAccount(guid.toString()));
 
 		this.isNavigateToOperationsDisabled = false;
-
-		return;
 	}
 
 	public async navigateToOperations(): Promise<void> {
