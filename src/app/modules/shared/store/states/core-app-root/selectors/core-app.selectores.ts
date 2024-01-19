@@ -1,5 +1,3 @@
-import * as _ from 'lodash';
-
 import { createSelector } from '@ngxs/store';
 
 import { CoreAppState } from '../core-app.state';

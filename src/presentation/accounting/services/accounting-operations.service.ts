@@ -52,7 +52,7 @@ export class AccountingOperationsService {
 
 	public async deleteOperationByGuidAsync(operationGuid: Guid): Promise<Result<boolean>> {
 		if (_.isNil(operationGuid)) {
-			new Result({
+			return new Result({
 				isSucceeded: false,
 			});
 		}
@@ -67,7 +67,7 @@ export class AccountingOperationsService {
 		return await firstValueFrom(this.store.dispatch(new Delete(operationGuid))).then(
 			() =>
 				new Result({
-					isSucceeded: true && deleteResponse.isSucceeded,
+					isSucceeded: deleteResponse.isSucceeded,
 				})
 		);
 	}

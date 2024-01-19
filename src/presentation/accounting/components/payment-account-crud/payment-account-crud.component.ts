@@ -46,18 +46,14 @@ export class PaymentAccountCrudComponent {
 	}
 
 	public removePaymentAccount(): void {
-		const paymentAccountGuidForDelete = this.activePaymentAccountGuidSignal()!;
-
 		this.paymentAccountsProvider
-			.removePaymentAccount(paymentAccountGuidForDelete)
+			.removePaymentAccount(this.activePaymentAccountGuidSignal())
 			.pipe(
 				filter(payload => payload.isSucceeded),
 				take(1)
 			)
 			.subscribe(() => {
-				this.store.dispatch(new RemovePaymentAccount(paymentAccountGuidForDelete));
+				this.store.dispatch(new RemovePaymentAccount(this.activePaymentAccountGuidSignal()));
 			});
 	}
-
-	public EditPaymentAccount(): void {}
 }
