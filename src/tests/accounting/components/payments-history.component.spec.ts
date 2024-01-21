@@ -29,6 +29,7 @@ import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-
 import { AccountingRoutingModule } from '../../../presentation/accounting/accounting-routing.module';
 import { PaymentsHistoryComponent } from '../../../presentation/accounting/components/payments-history/payments-history.component';
 import { IPaymentRepresentationModel } from '../../../presentation/accounting/models/operation-record';
+import { HandbooksService } from '../../../presentation/accounting/services/handbooks.service';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
 import { MainDashboardModule } from '../../../presentation/main-dashboard/main-dashboard.module';
 
@@ -95,6 +96,7 @@ describe('Currency rates line chart component', () => {
 				MapperModule.withProfiles([PaymentHistoryMappingProfile, DataContractorProfile, DataCategoryProfile]),
 			],
 			providers: [
+				HandbooksService,
 				PaymentsHistoryComponent,
 				{
 					provide: DefaultContractorsProvider,
