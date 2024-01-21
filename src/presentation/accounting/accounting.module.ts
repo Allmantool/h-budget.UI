@@ -9,6 +9,7 @@ import { PaymentsHistoryComponent } from './components/payments-history/payments
 import { AccountingOperationsService } from './services/accounting-operations.service';
 import { CategoriesDialogService } from './services/categories-dialog.service';
 import { ContractorsDialogService } from './services/contractors-dialog.service';
+import { HandbooksService } from './services/handbooks.service';
 import { PaymentAccountDialogService } from './services/payment-account-dialog.service';
 import { PaymentsHistoryService } from './services/payments-history.service';
 import { AppCoreModule } from '../../app/modules/core/core.module';
@@ -77,6 +78,7 @@ import { AccountingOperationsCrudComponent, AccountingRoutingModule } from '../a
 		ContractorsDialogService,
 		PaymentAccountDialogService,
 		AccountingOperationsService,
+		HandbooksService,
 	],
 	bootstrap: [],
 })
