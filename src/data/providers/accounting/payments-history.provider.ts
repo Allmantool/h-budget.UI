@@ -7,6 +7,7 @@ import { map, Observable, retry, take } from 'rxjs';
 
 import { IPaymentHistoryEntity } from './entities/payment-history.entity';
 import { PaymentHistoryMappingProfile } from './mappers/payment-history.mapping.profile';
+import { ApiRequestOptions } from '../../../app/modules/shared/constants/api-request-options';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
 import { Result } from '../../../core/result';
 import { IPaymentHistoryModel } from '../../../domain/models/accounting/payment-history.model';
@@ -34,7 +35,7 @@ export class PaymensHistoryProvider {
 				map(payload =>
 					this.mapper.map(PaymentHistoryMappingProfile.PaymentOperaionHistoryEntityToDomain, payload)
 				),
-				retry(3),
+				retry(ApiRequestOptions.RETRY_AMOUNT),
 				take(1)
 			);
 	}

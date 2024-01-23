@@ -12,7 +12,7 @@ import { Guid } from 'typescript-guid';
 import { IAccountingOperationsTableOptions } from 'app/modules/shared/store/models/accounting/accounting-table-options';
 
 import { UpdatePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
-import { getAccountingRecords } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
+import { getAccountPayments } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import { getActivePaymentAccountId } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import {
 	getAccountingTableOptions,
@@ -55,7 +55,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	@Select(getAccountingTableOptions)
 	accountingTableOptions$!: Observable<IAccountingOperationsTableOptions>;
 
-	@Select(getAccountingRecords)
+	@Select(getAccountPayments)
 	accountingRecords$!: Observable<IPaymentOperationModel[]>;
 
 	@Select(getCategoryNodes)

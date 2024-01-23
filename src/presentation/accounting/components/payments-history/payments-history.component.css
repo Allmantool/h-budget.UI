@@ -34,7 +34,7 @@ mat-expansion-panel {
 }
 
 .mat-column-contractor {
-	width: 20em;
+	width: 25em;
 }
 
 .mat-column-category {
@@ -56,5 +56,5 @@ mat-expansion-panel {
 }
 
 .mat-column-comment {
-	width: 35em;
+	width: 25em;
 }
