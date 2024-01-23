@@ -9,22 +9,22 @@
 			"trigger": "commit",
 			"branch": "hotfix",
 			"bump": "build",
-            "suffix": "-fix",
+			"suffix": "-fix",
 			"tag": true
 		},
 		{
 			"trigger": "commit",
 			"bump": "minor",
 			"branch": "master",
-            "suffix": "-rc",
+			"suffix": "-rc",
 			"reset": "build",
 			"tag": true
 		},
-        {
+		{
 			"trigger": "commit",
 			"bump": "minor",
 			"branch": "tech",
-            "suffix": "-tech",
+			"suffix": "-tech",
 			"reset": "build",
 			"tag": true
 		},
