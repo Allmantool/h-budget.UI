@@ -50,7 +50,7 @@ export class PaymentAccountComponent implements OnInit {
 	public ngOnInit(): void {
 		this.paymentAccountsProvider
 			.getPaymentAccounts()
-			.pipe(retry(1), take(1))
+			.pipe(take(1))
 			.subscribe(accounts => {
 				this.store.dispatch(new SetInitialPaymentAccounts(accounts));
 			});
