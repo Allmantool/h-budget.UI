@@ -62,7 +62,19 @@ describe('payments history service', () => {
 		store = TestBed.inject(Store);
 		mapper = getTestBed().inject(Mapper);
 
-		store.dispatch(new SetInitialPaymentOperations([]));
+		const operationsPayload = [
+			{
+				key: Guid.parse('12aaf693-7cb7-4ef5-b3b3-d75c07f733af'),
+				paymentAccountId: Guid.parse('0ffda281-a97a-43a6-b83a-9182ad6fabc4'),
+				contractorId: Guid.parse('686c4392-93cd-42e9-a208-d73d528be12a'),
+				categoryId: Guid.parse('6284ba7e-c611-4ad3-acc1-b84fd27894e7'),
+				operationDate: new Date('2024-01-26T03:24:00'),
+				comment: 'test-comment',
+				amount: 1024.2,
+			} as IPaymentOperationModel,
+		];
+
+		store.dispatch(new SetInitialPaymentOperations(operationsPayload));
 	});
 
 	it('Should return selected history operation', (done: DoneFn) => {
