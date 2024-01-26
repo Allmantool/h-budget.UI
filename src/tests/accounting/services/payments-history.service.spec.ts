@@ -8,6 +8,8 @@ import { of } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
 import { ngxsConfig } from '../../../app/modules/shared/store/ngxs.config';
+import { AccountingOperationsTableState } from '../../../app/modules/shared/store/states/accounting/accounting-operations-table.state';
+import { SetInitialPaymentOperations } from '../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
 import { AccountingOperationsState } from '../../../app/modules/shared/store/states/accounting/payment-operations.state';
 import { PaymentRepresentationsMappingProfile } from '../../../data/providers/accounting/mappers/payment-representations.mapping.profile';
 import { PaymensHistoryProvider } from '../../../data/providers/accounting/payments-history.provider';
@@ -45,7 +47,7 @@ describe('payments history service', () => {
 		TestBed.configureTestingModule({
 			imports: [
 				MapperModule.withProfiles([PaymentRepresentationsMappingProfile]),
-				NgxsModule.forRoot([AccountingOperationsState], ngxsConfig),
+				NgxsModule.forRoot([AccountingOperationsState, AccountingOperationsTableState], ngxsConfig),
 			],
 			providers: [
 				PaymentsHistoryService,
@@ -59,6 +61,8 @@ describe('payments history service', () => {
 		sut = TestBed.inject(PaymentsHistoryService);
 		store = TestBed.inject(Store);
 		mapper = getTestBed().inject(Mapper);
+
+		store.dispatch(new SetInitialPaymentOperations([]));
 	});
 
 	it('Should return selected history operation', (done: DoneFn) => {
