@@ -12,6 +12,14 @@
 			"suffix": "-fix",
 			"tag": true
 		},
+        {
+			"trigger": "commit",
+			"bump": "minor",
+			"branch": "test",
+			"suffix": "-test",
+			"reset": "build",
+			"tag": true
+		},
 		{
 			"trigger": "commit",
 			"bump": "minor",
