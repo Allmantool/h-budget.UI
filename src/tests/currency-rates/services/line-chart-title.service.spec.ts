@@ -1,5 +1,6 @@
 import { HexColors } from '../../../app/modules/shared/constants/hex-colors';
 import { LineChartTitleService } from '../../../presentation/currency-rates/services/line-chart-title.service';
+
 describe('LIne chart title service', () => {
 	it('Should return default color if there are no rates"', (done: DoneFn) => {
 		const rateValuesForPeriod: number[] = [];
