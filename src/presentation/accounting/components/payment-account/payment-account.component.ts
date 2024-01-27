@@ -13,12 +13,14 @@ import { ActivatedRoute, Router } from '@angular/router';
 import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
-import { Observable, retry, take } from 'rxjs';
+import { Observable, take } from 'rxjs';
 import { nameof } from 'ts-simple-nameof';
 import { Guid } from 'typescript-guid';
 
-import { SetActivePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
-import { SetInitialPaymentAccounts } from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
+import {
+	SetActivePaymentAccount,
+	SetInitialPaymentAccounts,
+} from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
 import { getPaymentAccounts } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
 import { AccountTypes } from '../../../../domain/models/accounting/account-types';

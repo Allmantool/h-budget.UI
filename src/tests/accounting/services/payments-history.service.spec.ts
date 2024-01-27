@@ -58,9 +58,10 @@ describe('payments history service', () => {
 			],
 		});
 
-		sut = TestBed.inject(PaymentsHistoryService);
 		store = TestBed.inject(Store);
 		mapper = getTestBed().inject(Mapper);
+
+		sut = TestBed.inject(PaymentsHistoryService);
 
 		const operationsPayload = [
 			{
