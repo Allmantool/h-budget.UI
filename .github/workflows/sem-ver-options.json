@@ -9,6 +9,13 @@
 			"trigger": "commit",
 			"branch": "hotfix",
 			"bump": "build",
+			"suffix": "-hotfix",
+			"tag": true
+		},
+        {
+			"trigger": "commit",
+			"branch": "hotfix",
+			"bump": "build",
 			"suffix": "-fix",
 			"tag": true
 		},
