@@ -12,14 +12,14 @@
 			"suffix": "-hotfix",
 			"tag": true
 		},
-        {
+		{
 			"trigger": "commit",
 			"branch": "hotfix",
 			"bump": "build",
 			"suffix": "-fix",
 			"tag": true
 		},
-        {
+		{
 			"trigger": "commit",
 			"bump": "minor",
 			"branch": "test",
