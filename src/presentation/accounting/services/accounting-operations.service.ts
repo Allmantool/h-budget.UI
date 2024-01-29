@@ -128,8 +128,6 @@ export class AccountingOperationsService {
 		}
 
 		return await firstValueFrom(this.store.dispatch(new Edit(payload))).then(() => {
-			this.paymentsHistoryService.refreshPaymentOperationsStore(this.activePaymentAccountIdSignal());
-
 			return new Result({
 				isSucceeded: true,
 			});
