@@ -26,7 +26,7 @@ describe('Line chart service', () => {
 		store = TestBed.inject(Store);
 	});
 
-	it('Should return appropriate ordered serias of currency chart values by "getChartOptions"', (done: DoneFn) => {
+	it('should return appropriate ordered serias of currency chart values by "getChartOptions"', (done: DoneFn) => {
 		const rates: CurrencyRateValueModel[] = [
 			new CurrencyRateValueModel({
 				ratePerUnit: 1.12,
@@ -61,7 +61,7 @@ describe('Line chart service', () => {
 		done();
 	});
 
-	it('Should calculate expected negative chart currency trend title for period by "getChartOptions"', (done: DoneFn) => {
+	it('should calculate expected negative chart currency trend title for period by "getChartOptions"', (done: DoneFn) => {
 		const rates: CurrencyRateValueModel[] = [
 			new CurrencyRateValueModel({
 				ratePerUnit: 1.12,
@@ -94,7 +94,7 @@ describe('Line chart service', () => {
 		done();
 	});
 
-	it('Should calculate expected positive chart currency trend title for period by "getChartOptions"', (done: DoneFn) => {
+	it('should calculate expected positive chart currency trend title for period by "getChartOptions"', (done: DoneFn) => {
 		const rates: CurrencyRateValueModel[] = [
 			new CurrencyRateValueModel({
 				ratePerUnit: 1.12,
@@ -122,7 +122,7 @@ describe('Line chart service', () => {
 		done();
 	});
 
-	it('Should calculate expected no a change for chart currency trend title for period by "getChartOptions"', (done: DoneFn) => {
+	it('should calculate expected no a change for chart currency trend title for period by "getChartOptions"', (done: DoneFn) => {
 		const rates: CurrencyRateValueModel[] = [
 			new CurrencyRateValueModel({
 				ratePerUnit: 1.12,

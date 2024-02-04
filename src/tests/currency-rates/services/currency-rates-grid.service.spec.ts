@@ -67,7 +67,7 @@ describe('Currency rates grid service', () => {
 		store = TestBed.inject(Store);
 	});
 
-	it('Should add expected trend information by "enrichWithTrend"', (done: DoneFn) => {
+	it('should add expected trend information by "enrichWithTrend"', (done: DoneFn) => {
 		const previousDayRates: IPreviousDayCurrencyRate[] = [
 			{
 				updateDate: new Date(2023, 11, 5),
@@ -137,7 +137,7 @@ describe('Currency rates grid service', () => {
 		done();
 	});
 
-	it('Should add expected rate percentage differencies by "enrichWithTrend"', (done: DoneFn) => {
+	it('should add expected rate percentage differencies by "enrichWithTrend"', (done: DoneFn) => {
 		const previousDayRates: IPreviousDayCurrencyRate[] = [
 			{
 				updateDate: new Date(2023, 11, 5),
@@ -207,7 +207,7 @@ describe('Currency rates grid service', () => {
 		done();
 	});
 
-	it('Should put today rates to store during "getTodayCurrenciesAsync"', async () => {
+	it('should put today rates to store during "getTodayCurrenciesAsync"', async () => {
 		await sut.getTodayCurrenciesAsync();
 
 		const currencyRatesState: ICurrencyRatesStateModel = store.selectSnapshot(CurrencyRatesState);
@@ -215,7 +215,7 @@ describe('Currency rates grid service', () => {
 		expect(currencyRatesState.rateGroups.length).toBe(1);
 	});
 
-	it('Should return valid grid table selection by "GetTableSelection"', (done: DoneFn) => {
+	it('should return valid grid table selection by "GetTableSelection"', (done: DoneFn) => {
 		const todayRateGroups: CurrencyRateGroupModel[] = [
 			new CurrencyRateGroupModel({
 				currencyId: 101,
@@ -254,7 +254,7 @@ describe('Currency rates grid service', () => {
 		done();
 	});
 
-	it('Should return expected table source by "GetDataSource"', (done: DoneFn) => {
+	it('should return expected table source by "GetDataSource"', (done: DoneFn) => {
 		const todayRateGroups: CurrencyRateGroupModel[] = [
 			new CurrencyRateGroupModel({
 				currencyId: 101,

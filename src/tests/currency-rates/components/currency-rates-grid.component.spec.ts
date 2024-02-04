@@ -80,7 +80,7 @@ describe('Currency rates grid conponent', () => {
 		expect(fixture.componentInstance).toBeTruthy();
 	});
 
-	it('Should set store with appropriate target currency settings by "masterToggle"', (done: DoneFn) => {
+	it('should set store with appropriate target currency settings by "masterToggle"', (done: DoneFn) => {
 		const currencyIdUnderTest: number = 1;
 		const currencyAbbreviationUnderTest: string = 'test currency';
 
@@ -92,7 +92,7 @@ describe('Currency rates grid conponent', () => {
 		done();
 	});
 
-	it('Should populate today curreny rate groups by "getTodayCurrencyRatesAsync"', async () => {
+	it('should populate today curreny rate groups by "getTodayCurrencyRatesAsync"', async () => {
 		await sut.getTodayCurrencyRatesAsync();
 
 		sut.todayCurrencyRateGroups$.pipe(take(1)).subscribe(rateGroups => {
@@ -100,14 +100,14 @@ describe('Currency rates grid conponent', () => {
 		});
 	});
 
-	it('Should trigger open rates dialog "openGetCurrencyRatesDialog"', () => {
+	it('should trigger open rates dialog "openGetCurrencyRatesDialog"', () => {
 		sut.openGetCurrencyRatesDialog();
 
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
 		expect(dialogProviderSpy.openDialog).toHaveBeenCalled();
 	});
 
-	it('Should go along with expected currency table options by "isSelectedCurrency"', (done: DoneFn) => {
+	it('should go along with expected currency table options by "isSelectedCurrency"', (done: DoneFn) => {
 		const currencyIdUnderTest: number = 3;
 
 		store.dispatch(new SetActiveCurrency(currencyIdUnderTest, ''));
@@ -116,7 +116,7 @@ describe('Currency rates grid conponent', () => {
 		done();
 	});
 
-	it('Should set store with appropriate target currency table settings by "setDateRange"', (done: DoneFn) => {
+	it('should set store with appropriate target currency table settings by "setDateRange"', (done: DoneFn) => {
 		const defaultMonthAmount: number = 7;
 
 		sut.setDateRange(defaultMonthAmount);

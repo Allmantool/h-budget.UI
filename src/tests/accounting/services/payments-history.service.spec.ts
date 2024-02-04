@@ -78,17 +78,17 @@ describe('payments history service', () => {
 		store.dispatch(new SetInitialPaymentOperations(operationsPayload));
 	});
 
-	it('Should return selected history operation', (done: DoneFn) => {
+	it('should return selected history operation', (done: DoneFn) => {
 		const result = sut.paymentOperationAsHistoryRecord();
 		done();
 	});
 
-	it('Should refresh', (done: DoneFn) => {
+	it('should refresh', (done: DoneFn) => {
 		const result = sut.refreshPaymentsHistory('');
 		done();
 	});
 
-	it('Should refresh store', (done: DoneFn) => {
+	it('should refresh store', (done: DoneFn) => {
 		const result = sut.refreshPaymentOperationsStore('');
 		done();
 	});

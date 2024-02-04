@@ -57,7 +57,7 @@ describe('Currency rates line chart component', () => {
 		store = TestBed.inject(Store);
 	});
 
-	it('Should be initialized CurrencyRatesLineChartComponent with "ngAfterViewInit"', (done: DoneFn) => {
+	it('should be initialized CurrencyRatesLineChartComponent with "ngAfterViewInit"', (done: DoneFn) => {
 		const updatedCurrencyRateGroups = new Array({
 			currencyId: 12,
 			rateValues: [
