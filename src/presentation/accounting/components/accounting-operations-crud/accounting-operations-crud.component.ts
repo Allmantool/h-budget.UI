@@ -4,14 +4,12 @@ import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angul
 
 import * as _ from 'lodash';
 
-import { Select, Store } from '@ngxs/store';
+import { Select } from '@ngxs/store';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, take } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 import { Guid } from 'typescript-guid';
 
-import { IAccountingOperationsTableOptions } from 'app/modules/shared/store/models/accounting/accounting-table-options';
-
-import { UpdatePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
+import { IAccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
 import { getAccountPayments } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import { getActivePaymentAccountId } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import {
@@ -32,7 +30,6 @@ import { CategoriesDialogService } from '../../services/categories-dialog.servic
 import { PaymentsHistoryService } from '../../services/payments-history.service';
 import '../../../../domain/extensions/handbookExtensions';
 import { ContractorsDialogService } from '../../services/contractors-dialog.service';
-import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
 import {
 	getContractorAsNodesMap,
 	getContractorNodes,
@@ -74,38 +71,26 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	selectedRecordGuid$!: Observable<Guid>;
 
 	public selectedRecordGuidSignal: Signal<Guid | null>;
-
 	public isNotReadyForSaveSignal: Signal<boolean>;
-
 	public contractorsSignal: Signal<string[]>;
-
 	public categoryNodesSignal: Signal<string[]>;
-
 	public categoriesMapSignal: Signal<Map<string, ICategoryModel>>;
 	public contractorsMapSignal: Signal<Map<string, IContractorModel>>;
-
 	public selectedCategorySignal: Signal<string>;
-
 	public selectedContractorSignal: Signal<string>;
-
 	public isExpenseSignal: Signal<boolean>;
-
-	public selectedPaymentOperationSignal: Signal<IPaymentOperationModel>;
-
+	public selectedPaymentSignal: Signal<IPaymentOperationModel>;
 	public accountingRecordsSignal: Signal<IPaymentOperationModel[]>;
-
 	public activePaymentAccountIdSignal: Signal<Guid | undefined> = toSignal(this.getActivePaymentAccountId$, {
 		initialValue: undefined,
 	});
 
 	constructor(
-		private readonly store: Store,
 		private readonly fb: UntypedFormBuilder,
 		private readonly accountingOperationsService: AccountingOperationsService,
 		private readonly categoriesDialogService: CategoriesDialogService,
 		private readonly contractorsDialogService: ContractorsDialogService,
-		private readonly paymentHistoryService: PaymentsHistoryService,
-		private readonly paymentAccountsProvider: DefaultPaymentAccountsProvider
+		private readonly paymentHistoryService: PaymentsHistoryService
 	) {
 		this.accountingRecordsSignal = toSignal(this.accountingRecords$, { initialValue: [] });
 
@@ -146,15 +131,14 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			initialValue: null,
 		});
 
-		this.selectedPaymentOperationSignal = computed(() => {
+		this.selectedPaymentSignal = computed(() => {
 			const payment = formsCrudSignal();
 			const category = this.categoriesMapSignal().get(payment?.category ?? '');
 			const contractor = this.contractorsMapSignal().get(payment?.contractor ?? '');
-			const paymentAccountId = this.activePaymentAccountIdSignal();
 
 			return {
 				key: payment?.key,
-				paymentAccountId: paymentAccountId,
+				paymentAccountId: this.activePaymentAccountIdSignal(),
 				operationDate: payment?.operationDate,
 				amount: category?.operationType == OperationTypes.Expense ? payment?.expense : payment?.income,
 				categoryId: category?.key,
@@ -190,17 +174,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	}
 
 	public async applyChangesAsync(): Promise<void> {
-		await this.accountingOperationsService.updateOperationAsync(this.selectedPaymentOperationSignal());
-
-		this.paymentAccountsProvider
-			.getPaymentAccountById(this.activePaymentAccountIdSignal()!.toString())
-			.pipe(take(1))
-			.subscribe(payload => this.store.dispatch(new UpdatePaymentAccount(payload)));
-	}
-
-	public formSync(): void {
-		this.crudRecordFg.disable();
-		this.crudRecordFg.get('comment')?.disable();
+		await this.accountingOperationsService.updateOperationAsync(this.selectedPaymentSignal());
 	}
 
 	public async addRecordAsync(): Promise<void> {
@@ -214,7 +188,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	}
 
 	public async deleteRecordAsync(): Promise<void> {
-		const recordGuid = this.selectedPaymentOperationSignal()?.key;
+		const recordGuid = this.selectedPaymentSignal()?.key;
 
 		await this.accountingOperationsService.deleteOperationByGuidAsync(recordGuid);
 	}

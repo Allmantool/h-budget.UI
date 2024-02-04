@@ -12,7 +12,10 @@ import { AccountingOperationsTableState } from '../../../app/modules/shared/stor
 import { SetActivePaymentAccount } from '../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
 import { PaymentAccountState } from '../../../app/modules/shared/store/states/accounting/payment-account.state';
 import { AccountingOperationsState } from '../../../app/modules/shared/store/states/accounting/payment-operations.state';
+import { DefaultPaymentAccountsProvider } from '../../../data/providers/accounting/payment-accounts.provider';
 import { PaymentOperationsProvider } from '../../../data/providers/accounting/payment-operations.provider';
+import { AccountTypes } from '../../../domain/models/accounting/account-types';
+import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
 import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 import { IPaymentAccountCreateOrUpdateResponse } from '../../../domain/models/accounting/responses/payment-account-create-or-update.response';
 import { AccountingOperationsService } from '../../../presentation/accounting/services/accounting-operations.service';
@@ -23,12 +26,24 @@ describe('accounting operations service', () => {
 
 	let paymentsHistoryServiceSpy: PaymentsHistoryService;
 	let paymentOperationsProviderSpy: PaymentOperationsProvider;
+	let paymentAccountsProviderSpy: DefaultPaymentAccountsProvider;
 
 	let store: Store;
 
 	beforeEach(() => {
 		paymentsHistoryServiceSpy = jasmine.createSpyObj('paymentsHistoryService', {
 			refreshPaymentOperationsStore: () => Subscription,
+		});
+
+		paymentAccountsProviderSpy = jasmine.createSpyObj<DefaultPaymentAccountsProvider>('paymentAccountsProvider', {
+			getPaymentAccountById: of({
+				key: Guid.parse('464f061b-23e2-4b9d-af69-dbe1ab2d25e9'),
+				balance: 0.11,
+				currency: 'USD',
+				description: 'test-description',
+				emitter: 'emitter-test',
+				type: AccountTypes.WalletCache,
+			} as IPaymentAccountModel),
 		});
 
 		paymentOperationsProviderSpy = jasmine.createSpyObj('paymentOperationsProvider', {
@@ -78,6 +93,10 @@ describe('accounting operations service', () => {
 					provide: PaymentOperationsProvider,
 					useValue: paymentOperationsProviderSpy,
 				},
+				{
+					provide: DefaultPaymentAccountsProvider,
+					useValue: paymentAccountsProviderSpy,
+				},
 			],
 		});
 
@@ -87,13 +106,13 @@ describe('accounting operations service', () => {
 		store.dispatch(new SetActivePaymentAccount('1c12ec59-8875-45c1-9fb0-e4edcf34a074'));
 	});
 
-	it('Should execute "addOperationAsync" successfully', async () => {
+	it('should execute "addOperationAsync" successfully', async () => {
 		const result = await sut.addOperationAsync();
 
 		expect(result.isSucceeded).toBeTruthy();
 	});
 
-	it('Should execute "deleteOperationByGuidAsync" successfully', async () => {
+	it('should execute "deleteOperationByGuidAsync" successfully', async () => {
 		store.dispatch(new SetActivePaymentAccount('1c12ec59-8875-45c1-9fb0-e4edcf34a074'));
 
 		const operationForDeleteGuid = Guid.parse('b47b8ba6-0b04-4d2c-be79-1a2994410f99');
@@ -103,7 +122,7 @@ describe('accounting operations service', () => {
 		expect(result.isSucceeded).toBeTruthy();
 	});
 
-	it('Should execute "updateOperationAsync" successfully', async () => {
+	it('should execute "updateOperationAsync" successfully', async () => {
 		store.dispatch(new SetActivePaymentAccount('1c12ec59-8875-45c1-9fb0-e4edcf34a074'));
 
 		const payload: IPaymentOperationModel = {

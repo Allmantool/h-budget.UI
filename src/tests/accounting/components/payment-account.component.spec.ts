@@ -65,7 +65,7 @@ describe('Payment account component', () => {
 		sut = TestBed.inject(PaymentAccountComponent);
 	});
 
-	it('Should be initialized PaymentAccountComponent with "ngAfterViewInit"', (done: DoneFn) => {
+	it('should be initialized PaymentAccountComponent with "ngAfterViewInit"', (done: DoneFn) => {
 		store.dispatch(new SetActiveAccountingOperation(Guid.parse('24a07833-5cf5-4885-b09d-32c089fac4dd')));
 		sut.ngOnInit();
 		done();

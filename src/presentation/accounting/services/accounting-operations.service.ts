@@ -4,13 +4,13 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
-import { firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom, Observable, take } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
 import { Result } from 'core/result';
 
-import { PaymentsHistoryService } from './payments-history.service';
 import { SetActiveAccountingOperation } from '../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
+import { UpdatePaymentAccount } from '../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
 import {
 	Add,
 	Delete,
@@ -19,6 +19,7 @@ import {
 import { getActivePaymentAccountId } from '../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { getCategoryAsNodesMap } from '../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
 import { getContractorAsNodesMap } from '../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
+import { DefaultPaymentAccountsProvider } from '../../../data/providers/accounting/payment-accounts.provider';
 import { PaymentOperationsProvider } from '../../../data/providers/accounting/payment-operations.provider';
 import { ICategoryModel } from '../../../domain/models/accounting/category.model';
 import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
@@ -41,7 +42,7 @@ export class AccountingOperationsService {
 	public contractorsMapSignal: Signal<Map<string, Guid>>;
 
 	constructor(
-		private readonly paymentsHistoryService: PaymentsHistoryService,
+		private readonly paymentAccountsProvider: DefaultPaymentAccountsProvider,
 		private readonly paymentOperationsProvider: PaymentOperationsProvider,
 		private readonly store: Store
 	) {
@@ -126,6 +127,11 @@ export class AccountingOperationsService {
 				payload.key = Guid.parse(updateResponse.payload.paymentOperationId);
 			}
 		}
+
+		this.paymentAccountsProvider
+			.getPaymentAccountById(this.activePaymentAccountIdSignal().toString())
+			.pipe(take(1))
+			.subscribe(payload => this.store.dispatch(new UpdatePaymentAccount(payload)));
 
 		return await firstValueFrom(this.store.dispatch(new Edit(payload))).then(() => {
 			return new Result({

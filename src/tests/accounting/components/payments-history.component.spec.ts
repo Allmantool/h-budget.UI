@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { TestBed } from '@angular/core/testing';
-import { Router } from '@angular/router';
 
 import { MapperModule } from '@dynamic-mapper/angular';
 import { NgxsModule, Store } from '@ngxs/store';
@@ -40,7 +39,6 @@ describe('Currency rates line chart component', () => {
 	let categoriesProviderSpy: DefaultCategoriesProvider;
 	let paymentsHistoryServiceSpy: PaymentsHistoryService;
 
-	let router: Router;
 	let store: Store;
 
 	beforeEach(() => {
@@ -128,9 +126,8 @@ describe('Currency rates line chart component', () => {
 		sut = TestBed.inject(PaymentsHistoryComponent);
 	});
 
-	it('Should be initialized PaymentsHistoryComponent with "ngAfterViewInit"', (done: DoneFn) => {
+	it('should be initialized PaymentsHistoryComponent with "ngAfterViewInit"', async () => {
 		store.dispatch(new SetActiveAccountingOperation(Guid.parse('24a07833-5cf5-4885-b09d-32c089fac4dd')));
-		sut.ngOnInit();
-		done();
+		await sut.ngOnInit();
 	});
 });
