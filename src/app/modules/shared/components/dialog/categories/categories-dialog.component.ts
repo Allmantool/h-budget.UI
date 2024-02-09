@@ -25,7 +25,7 @@ import { AddCategory } from '../../../store/states/handbooks/actions/category.ac
 export class CategoriesDialogComponent {
 	private dialogConfiguration: DialogContainer<ICategoryModel, ICategoryModel>;
 
-	@ViewChild('chipGrid ')
+	@ViewChild('chipGrid')
 	chipGrid!: ElementRef<HTMLInputElement>;
 
 	public isLoadingSignal = signal<boolean>(false);
@@ -107,7 +107,6 @@ export class CategoriesDialogComponent {
 		event.chipInput.clear();
 
 		this.categoryCtrl.setValue(null);
-
 		this.isSaveDisabled = _.isEmpty(this.categoryNodes);
 	}
 
