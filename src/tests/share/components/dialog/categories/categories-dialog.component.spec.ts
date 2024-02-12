@@ -2,6 +2,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatChipInput, MatChipInputEvent } from '@angular/material/chips';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { ElementRef } from '@angular/core';
 
 import { NgxsModule } from '@ngxs/store';
 import { of } from 'rxjs';
@@ -23,7 +26,7 @@ import { ICategoryModel } from '../../../../../domain/models/accounting/category
 import { OperationTypes } from '../../../../../domain/models/accounting/operation-types';
 import { CategoriesDialogService } from '../../../../../presentation/accounting/services/categories-dialog.service';
 
-describe('Categories-dialog.component', () => {
+describe('categories-dialog.component', () => {
 	const matDialogSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
 
 	const mockDialogContainer: DialogContainer<ICategoryModel, ICategoryModel> = {
@@ -94,12 +97,77 @@ describe('Categories-dialog.component', () => {
 		sut = TestBed.inject(CategoriesDialogService);
 	});
 
-	it('"DialogProvider" should be execute at least ones', () => {
+	it('"DialogProvider" open dialog should be execute at least ones when call "getCategoryTypes()"', () => {
+		sut.openCategories();
+
+		const componentUnderTest = TestBed.inject(CategoriesDialogComponent);
+
+		componentUnderTest.getCategoryTypes();
+
+		expect(dialogProviderSpy.openDialog).toHaveBeenCalled();
+	});
+
+	it('"DialogProvider" open dialog should be execute at least ones when call "close()"', () => {
+		sut.openCategories();
+
+		const componentUnderTest = TestBed.inject(CategoriesDialogComponent);
+
+		componentUnderTest.close();
+
+		expect(dialogProviderSpy.openDialog).toHaveBeenCalled();
+	});
+
+	it('"DialogProvider" open dialog should be execute at least ones when call "save()"', () => {
 		sut.openCategories();
 
 		const componentUnderTest = TestBed.inject(CategoriesDialogComponent);
 
 		componentUnderTest.save();
+
+		expect(dialogProviderSpy.openDialog).toHaveBeenCalled();
+	});
+
+	it('"DialogProvider" open dialog should be execute at least ones when call "add()"', () => {
+		sut.openCategories();
+
+		const componentUnderTest = TestBed.inject(CategoriesDialogComponent);
+
+		componentUnderTest.add({
+			value: 'input value',
+			chipInput: {
+				clear: () => {},
+			} as MatChipInput,
+		} as MatChipInputEvent);
+
+		expect(dialogProviderSpy.openDialog).toHaveBeenCalled();
+	});
+
+	it('"DialogProvider" open dialog should be execute at least ones when call "remove()"', () => {
+		sut.openCategories();
+
+		const componentUnderTest = TestBed.inject(CategoriesDialogComponent);
+
+		componentUnderTest.remove('note-to-remove');
+
+		expect(dialogProviderSpy.openDialog).toHaveBeenCalled();
+	});
+
+	it('"DialogProvider" open dialog should be execute at least ones when call "selected()"', () => {
+		sut.openCategories();
+
+		const componentUnderTest = TestBed.inject(CategoriesDialogComponent);
+
+		componentUnderTest.chipGrid = {
+			nativeElement: {
+				value: 'grid input value',
+			} as HTMLInputElement,
+		} as ElementRef<HTMLInputElement>;
+
+		componentUnderTest.selected({
+			option: {
+				viewValue: 'test value for category nodes',
+			},
+		} as MatAutocompleteSelectedEvent);
 
 		expect(dialogProviderSpy.openDialog).toHaveBeenCalled();
 	});

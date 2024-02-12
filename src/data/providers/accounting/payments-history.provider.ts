@@ -4,6 +4,7 @@ import { Injectable } from '@angular/core';
 
 import { Mapper } from '@dynamic-mapper/angular';
 import { map, Observable, retry, take } from 'rxjs';
+import { Guid } from 'typescript-guid';
 
 import { IPaymentHistoryEntity } from './entities/payment-history.entity';
 import { PaymentHistoryMappingProfile } from './mappers/payment-history.mapping.profile';
@@ -25,10 +26,10 @@ export class PaymensHistoryProvider {
 		this.accountingHostUrl = this.appConfigurationService.settings?.accountingHost;
 	}
 
-	public getOperationsHistoryForPaymentAccount(paymentAccountId: string): Observable<IPaymentHistoryModel[]> {
+	public getOperationsHistoryForPaymentAccount(paymentAccountId: string | Guid): Observable<IPaymentHistoryModel[]> {
 		return this.http
 			.get<Result<IPaymentHistoryEntity[]>>(
-				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}`
+				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId.toString()}`
 			)
 			.pipe(
 				map(resposneResult => resposneResult.payload),

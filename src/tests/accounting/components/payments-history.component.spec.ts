@@ -28,16 +28,18 @@ import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-
 import { AccountingRoutingModule } from '../../../presentation/accounting/accounting-routing.module';
 import { PaymentsHistoryComponent } from '../../../presentation/accounting/components/payments-history/payments-history.component';
 import { IPaymentRepresentationModel } from '../../../presentation/accounting/models/operation-record';
+import { AccountsService } from '../../../presentation/accounting/services/accounts.service';
 import { HandbooksService } from '../../../presentation/accounting/services/handbooks.service';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
 import { MainDashboardModule } from '../../../presentation/main-dashboard/main-dashboard.module';
 
-describe('Currency rates line chart component', () => {
+describe('payments history component', () => {
 	let sut: PaymentsHistoryComponent;
 
 	let contractorsProviderSpy: DefaultContractorsProvider;
 	let categoriesProviderSpy: DefaultCategoriesProvider;
 	let paymentsHistoryServiceSpy: PaymentsHistoryService;
+	let accountsServiceSpy: AccountsService;
 
 	let store: Store;
 
@@ -75,6 +77,10 @@ describe('Currency rates line chart component', () => {
 			]),
 		});
 
+		accountsServiceSpy = jasmine.createSpyObj('accountsService', {
+			refreshAccounts: undefined,
+		});
+
 		// eslint-disable-next-line @typescript-eslint/no-floating-promises
 		TestBed.configureTestingModule({
 			imports: [
@@ -108,6 +114,10 @@ describe('Currency rates line chart component', () => {
 					provide: PaymentsHistoryService,
 					useValue: paymentsHistoryServiceSpy,
 				},
+				{
+					provide: AccountsService,
+					useValue: accountsServiceSpy,
+				},
 			],
 		}).compileComponents();
 
@@ -126,7 +136,7 @@ describe('Currency rates line chart component', () => {
 		sut = TestBed.inject(PaymentsHistoryComponent);
 	});
 
-	it('should be initialized PaymentsHistoryComponent with "ngAfterViewInit"', async () => {
+	it('should be initialized PaymentsHistoryComponent with "ngOnInit"', async () => {
 		store.dispatch(new SetActiveAccountingOperation(Guid.parse('24a07833-5cf5-4885-b09d-32c089fac4dd')));
 		await sut.ngOnInit();
 	});

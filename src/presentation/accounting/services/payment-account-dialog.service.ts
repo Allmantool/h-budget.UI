@@ -35,7 +35,7 @@ export class PaymentAccountDialogService {
 				map(responseResult => responseResult.payload),
 				tap(newPaymentAccountGuid => console.log(newPaymentAccountGuid)),
 				concatMap(newPaymentAccountGuid => {
-					return this.paymentAccountsProvider.getPaymentAccountById(newPaymentAccountGuid).pipe(
+					return this.paymentAccountsProvider.getById(newPaymentAccountGuid).pipe(
 						map(
 							response =>
 								new Result({
@@ -76,7 +76,7 @@ export class PaymentAccountDialogService {
 				filter(responseResult => responseResult.isSucceeded),
 				map(responseResult => responseResult.payload),
 				concatMap(updatedPaymentAccountGuid => {
-					return this.paymentAccountsProvider.getPaymentAccountById(updatedPaymentAccountGuid).pipe(
+					return this.paymentAccountsProvider.getById(updatedPaymentAccountGuid).pipe(
 						map(
 							response =>
 								new Result({

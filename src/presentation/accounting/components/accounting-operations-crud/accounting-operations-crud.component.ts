@@ -174,7 +174,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	}
 
 	public async applyChangesAsync(): Promise<void> {
-		await this.accountingOperationsService.updateOperationAsync(this.selectedPaymentSignal());
+		await this.accountingOperationsService.updateAsync(this.selectedPaymentSignal());
 	}
 
 	public async addRecordAsync(): Promise<void> {
@@ -184,13 +184,13 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			return;
 		}
 
-		await this.accountingOperationsService.addOperationAsync();
+		await this.accountingOperationsService.addAsync();
 	}
 
 	public async deleteRecordAsync(): Promise<void> {
-		const recordGuid = this.selectedPaymentSignal()?.key;
+		const recordIdForDelete = this.selectedPaymentSignal()?.key;
 
-		await this.accountingOperationsService.deleteOperationByGuidAsync(recordGuid);
+		await this.accountingOperationsService.deleteByIdAsync(recordIdForDelete);
 	}
 
 	public addCategory(): void {

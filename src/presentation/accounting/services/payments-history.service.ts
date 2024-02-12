@@ -61,7 +61,7 @@ export class PaymentsHistoryService implements IPaymentsHistoryService {
 			});
 	}
 
-	public refreshPaymentsHistory(paymentAccountId: string): Observable<IPaymentRepresentationModel[]> {
+	public refreshPaymentsHistory(paymentAccountId: string | Guid): Observable<IPaymentRepresentationModel[]> {
 		const operationsHistory$ = this.paymensHistoryProvider.getOperationsHistoryForPaymentAccount(paymentAccountId);
 
 		return operationsHistory$.pipe(

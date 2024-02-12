@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/unbound-method */
 /* eslint-disable @typescript-eslint/no-floating-promises */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
@@ -39,7 +40,7 @@ import { PaymentsHistoryService } from '../../../presentation/accounting/service
 describe('Accouting operations crud component', () => {
 	let sut: AccountingOperationsCrudComponent;
 
-	let accountingOperationsServiceSpy: AccountingOperationsService;
+	let accountingOperationsServiceSpy: jasmine.SpyObj<AccountingOperationsService>;
 	let categoriesDialogServiceSpy: CategoriesDialogService;
 	let contractorsDialogServiceSpy: jasmine.SpyObj<ContractorsDialogService>;
 	let paymentHistoryServiceSpy: PaymentsHistoryService;
@@ -48,9 +49,10 @@ describe('Accouting operations crud component', () => {
 
 	beforeEach(() => {
 		accountingOperationsServiceSpy = jasmine.createSpyObj('accountingOperationsService', {
-			updateOperationAsync: () => new Promise(() => new Result({ payload: true })),
-			addOperationAsync: () => new Promise(() => new Result({ payload: {} as IPaymentRepresentationModel })),
-			deleteOperationByGuidAsync: () => new Promise(() => new Result({ payload: true })),
+			updateAsync: () => new Promise(() => new Result({ payload: true })),
+			addAsync: () => new Promise(() => new Result({ payload: {} as IPaymentRepresentationModel })),
+			deleteByIdAsync: (_: IPaymentOperationModel): Promise<Result<boolean>> =>
+				new Promise(() => new Result({ payload: true })),
 		});
 
 		categoriesDialogServiceSpy = jasmine.createSpyObj<CategoriesDialogService>('categoriesDialogService', {
@@ -159,13 +161,13 @@ describe('Accouting operations crud component', () => {
 			])
 		);
 		await sut.addRecordAsync().then(() => {
-			expect(accountingOperationsServiceSpy.addOperationAsync).not.toHaveBeenCalled();
+			expect(accountingOperationsServiceSpy.addAsync).not.toHaveBeenCalled();
 		});
 	});
 
 	it('Verify that "addRecordAsync()" has been executed if an brand new record', async () => {
 		await sut.addRecordAsync().then(() => {
-			expect(accountingOperationsServiceSpy.addOperationAsync).toHaveBeenCalled();
+			expect(accountingOperationsServiceSpy.addAsync).toHaveBeenCalled();
 		});
 	});
 
@@ -177,7 +179,7 @@ describe('Accouting operations crud component', () => {
 		} as IPaymentRepresentationModel);
 
 		await sut.deleteRecordAsync().then(() => {
-			expect(accountingOperationsServiceSpy.deleteOperationByGuidAsync).toHaveBeenCalledWith(operationKey);
+			expect(accountingOperationsServiceSpy.deleteByIdAsync).toHaveBeenCalledWith(operationKey);
 		});
 	});
 
