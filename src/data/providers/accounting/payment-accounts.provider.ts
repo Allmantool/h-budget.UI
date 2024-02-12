@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 
 import { Mapper } from '@dynamic-mapper/angular';
 import { filter, map, Observable, retry, take, tap } from 'rxjs';
+import { Guid } from 'typescript-guid';
 
 import { IPaymentAccountEntity } from './entities/payment-account.entity';
 import { PaymentAccountsMappingProfile } from './mappers/payment-accounts.mapping.profile';
@@ -60,11 +61,11 @@ export class DefaultPaymentAccountsProvider implements IPaymentAccountsProvider 
 			.pipe(retry(3), take(1));
 	}
 
-	public getPaymentAccountById(paymentAccountId: string): Observable<IPaymentAccountModel> {
+	public getById(paymentAccountId: string | Guid): Observable<IPaymentAccountModel> {
 		return this.http
 			.get<
 				Result<IPaymentAccountEntity>
-			>(`${this.accountingHostUrl}/${this.paymentAccountApi}/byId/${paymentAccountId}`)
+			>(`${this.accountingHostUrl}/${this.paymentAccountApi}/byId/${paymentAccountId.toString()}`)
 			.pipe(
 				map(responseResult =>
 					this.mapper?.map(PaymentAccountsMappingProfile.PaymentAccountEntityToDomain, responseResult.payload)

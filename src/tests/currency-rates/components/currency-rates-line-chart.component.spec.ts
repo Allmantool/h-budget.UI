@@ -25,10 +25,10 @@ describe('Currency rates line chart component', () => {
 	let sut: CurrencyRatesLineChartComponent;
 
 	let store: Store;
-	let currencyRateProviderSpy: any;
+	let currencyRateProviderSpy: jasmine.SpyObj<NationalBankCurrenciesProvider>;
 
 	beforeEach(() => {
-		currencyRateProviderSpy = jasmine.createSpyObj('currencyRatesProvider', {
+		currencyRateProviderSpy = jasmine.createSpyObj<NationalBankCurrenciesProvider>('currencyRatesProvider', {
 			getTodayCurrencies: of<CurrencyRateGroupModel[]>([
 				new CurrencyRateGroupModel({
 					currencyId: 1,
@@ -38,6 +38,9 @@ describe('Currency rates line chart component', () => {
 					rateValues: [new CurrencyRateValueModel({})],
 				}),
 			]),
+			getCurrencies: undefined,
+			getCurrenciesForSpecifiedPeriod: undefined,
+			saveCurrencies: undefined,
 		});
 
 		// eslint-disable-next-line @typescript-eslint/no-floating-promises

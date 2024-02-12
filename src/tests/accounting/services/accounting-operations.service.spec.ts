@@ -36,7 +36,7 @@ describe('accounting operations service', () => {
 		});
 
 		paymentAccountsProviderSpy = jasmine.createSpyObj<DefaultPaymentAccountsProvider>('paymentAccountsProvider', {
-			getPaymentAccountById: of({
+			getById: of({
 				key: Guid.parse('464f061b-23e2-4b9d-af69-dbe1ab2d25e9'),
 				balance: 0.11,
 				currency: 'USD',
@@ -107,7 +107,7 @@ describe('accounting operations service', () => {
 	});
 
 	it('should execute "addOperationAsync" successfully', async () => {
-		const result = await sut.addOperationAsync();
+		const result = await sut.addAsync();
 
 		expect(result.isSucceeded).toBeTruthy();
 	});
@@ -117,7 +117,7 @@ describe('accounting operations service', () => {
 
 		const operationForDeleteGuid = Guid.parse('b47b8ba6-0b04-4d2c-be79-1a2994410f99');
 
-		const result = await sut.deleteOperationByGuidAsync(operationForDeleteGuid);
+		const result = await sut.deleteByIdAsync(operationForDeleteGuid);
 
 		expect(result.isSucceeded).toBeTruthy();
 	});
@@ -135,7 +135,7 @@ describe('accounting operations service', () => {
 			comment: 'test comments while update',
 		};
 
-		const result = await sut.updateOperationAsync(payload);
+		const result = await sut.updateAsync(payload);
 
 		expect(result.isSucceeded).toBeTruthy();
 	});

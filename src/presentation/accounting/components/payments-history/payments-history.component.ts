@@ -16,7 +16,7 @@ import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { exhaustMap } from 'rxjs/operators';
+import { exhaustMap, tap } from 'rxjs/operators';
 import { Guid } from 'typescript-guid';
 
 import { IAccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
@@ -30,6 +30,7 @@ import { getAccountingTableOptions } from '../../../../app/modules/shared/store/
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
 import { IPaymentRepresentationModel } from '../../models/operation-record';
+import { AccountsService } from '../../services/accounts.service';
 import { HandbooksService } from '../../services/handbooks.service';
 import { PaymentsHistoryService } from '../../services/payments-history.service';
 
@@ -83,11 +84,12 @@ export class PaymentsHistoryComponent implements OnInit, AfterViewInit {
 	constructor(
 		private readonly handbooksService: HandbooksService,
 		private readonly paymentsHistoryService: PaymentsHistoryService,
+		private readonly accountsService: AccountsService,
 		private readonly router: Router,
 		private readonly store: Store
 	) {
 		this.paymentAccountGeneralInfoSignal = computed(
-			() => `${this.activePaymentsAccountSignal()?.key?.toString()}
+			() => `${this.activePaymentAccountIdSignal()?.toString()}
 				${this.activePaymentsAccountSignal().emitter} | ${this.activePaymentsAccountSignal().description}`
 		);
 	}
@@ -114,7 +116,8 @@ export class PaymentsHistoryComponent implements OnInit, AfterViewInit {
 					return this.paymentsHistoryService.refreshPaymentsHistory(
 						this.activePaymentAccountIdSignal()!.toString()
 					);
-				})
+				}),
+				tap(() => this.accountsService.refreshAccounts(this.activePaymentAccountIdSignal()!))
 			)
 			.subscribe(payments => this.dataSource$.next(payments));
 	}
