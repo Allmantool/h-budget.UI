@@ -50,7 +50,7 @@ export class PaymentsHistoryComponent implements OnInit, AfterViewInit {
 	public activePaymentAccound$!: Observable<IPaymentAccountModel>;
 
 	@Select(getActivePaymentAccountId)
-	public getActivePaymentAccountId$!: Observable<Guid | undefined>;
+	public getActivePaymentAccountId$!: Observable<Guid>;
 
 	@Select(getAccountingTableOptions)
 	public accountingTableOptions$!: Observable<IAccountingOperationsTableOptions>;
@@ -59,8 +59,8 @@ export class PaymentsHistoryComponent implements OnInit, AfterViewInit {
 		initialValue: {} as IPaymentAccountModel,
 	});
 
-	public activePaymentAccountIdSignal: Signal<Guid | undefined> = toSignal(this.getActivePaymentAccountId$, {
-		initialValue: undefined,
+	public activePaymentAccountIdSignal: Signal<Guid> = toSignal(this.getActivePaymentAccountId$, {
+		initialValue: Guid.EMPTY,
 	});
 
 	public paymentAccountGeneralInfoSignal: Signal<string> = signal('');
@@ -113,11 +113,9 @@ export class PaymentsHistoryComponent implements OnInit, AfterViewInit {
 			.pipe(
 				takeUntilDestroyed(this.destroyRef),
 				exhaustMap(() => {
-					return this.paymentsHistoryService.refreshPaymentsHistory(
-						this.activePaymentAccountIdSignal()!.toString()
-					);
+					return this.paymentsHistoryService.refreshPaymentsHistory(this.activePaymentAccountIdSignal());
 				}),
-				tap(() => this.accountsService.refreshAccounts(this.activePaymentAccountIdSignal()!))
+				tap(() => this.accountsService.refreshAccounts(this.activePaymentAccountIdSignal()))
 			)
 			.subscribe(payments => this.dataSource$.next(payments));
 	}
