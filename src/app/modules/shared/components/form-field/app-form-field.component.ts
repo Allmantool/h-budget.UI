@@ -44,11 +44,11 @@ export class AppFormFieldComponent implements ControlValueAccessor {
 
 	public data$ = new BehaviorSubject<FormInput>(this.defaultValue ?? undefined);
 
-	public writeValue(value: any): void {
+	public writeValue(value: FormInput): void {
 		this.data$.next(value);
 	}
 
-	public registerOnChange(fn: (value: any) => {}): void {
+	public registerOnChange(fn: (value: FormInput) => {}): void {
 		this.onChanged = fn;
 	}
 
@@ -59,7 +59,7 @@ export class AppFormFieldComponent implements ControlValueAccessor {
 	public updateValue(event: any) {
 		this.data$.next(event.value);
 
-		this.onChanged(this.data$.value);
+		this.onChanged(event.value);
 		this.onTouched();
 
 		this.onDataChanged.emit(this.data$.value);
@@ -67,6 +67,7 @@ export class AppFormFieldComponent implements ControlValueAccessor {
 
 	public clearInput(event: any) {
 		event.target.value = '';
+		this.defaultValue = '';
 	}
 
 	public trackByFn(index: number, item: string): string {
