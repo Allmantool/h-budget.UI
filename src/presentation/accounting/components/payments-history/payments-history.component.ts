@@ -15,7 +15,7 @@ import { Router } from '@angular/router';
 import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, forkJoin, Observable, of } from 'rxjs';
 import { exhaustMap, tap } from 'rxjs/operators';
 import { Guid } from 'typescript-guid';
 
@@ -112,12 +112,16 @@ export class PaymentsHistoryComponent implements OnInit, AfterViewInit {
 		this.accountPayments$
 			.pipe(
 				takeUntilDestroyed(this.destroyRef),
-				exhaustMap(() => {
-					return this.paymentsHistoryService.refreshPaymentsHistory(this.activePaymentAccountIdSignal());
-				}),
-				tap(() => this.accountsService.refreshAccounts(this.activePaymentAccountIdSignal()))
+				exhaustMap(() =>
+					forkJoin({
+						payments: this.paymentsHistoryService.refreshPaymentsHistory(
+							this.activePaymentAccountIdSignal()
+						),
+						balance: of(this.accountsService.refreshAccounts(this.activePaymentAccountIdSignal())),
+					})
+				)
 			)
-			.subscribe(payments => this.dataSource$.next(payments));
+			.subscribe(payload => this.dataSource$.next(payload.payments));
 	}
 
 	public selectRow(record: IPaymentRepresentationModel): void {
@@ -128,4 +132,6 @@ export class PaymentsHistoryComponent implements OnInit, AfterViewInit {
 		this.store.dispatch(new SetActiveAccountingOperation(undefined));
 		await this.router.navigate(['/dashboard/accounting'], { relativeTo: null });
 	}
+
+	public isFuturePayment = (record: IPaymentRepresentationModel): boolean => record.operationDate > new Date();
 }

@@ -17,6 +17,11 @@ mat-expansion-panel {
 .row-is-clicked {
 	font-weight: bold;
 	background-color: gold;
+	opacity: 100% !important;
+}
+
+.future-payment {
+	opacity: 25%;
 }
 
 .mat-mdc-table {

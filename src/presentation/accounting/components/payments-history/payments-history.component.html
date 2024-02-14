@@ -136,6 +136,7 @@
 			mat-row
 			(click)="selectRow(row)"
 			[class.row-is-clicked]="clickedRowGuids.has(row?.key)"
+            [class.future-payment]="isFuturePayment(row)"
 			*matRowDef="let row; columns: displayedColumns;"
 		></tr>
 	</mat-table>
