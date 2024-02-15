@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { TestBed } from '@angular/core/testing';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatChipInput, MatChipInputEvent } from '@angular/material/chips';
-import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { ElementRef } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { MatChipInput, MatChipInputEvent } from '@angular/material/chips';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { NgxsModule } from '@ngxs/store';
 import { of } from 'rxjs';
@@ -49,13 +49,13 @@ describe('categories-dialog.component', () => {
 						payload: [{} as ICategoryEntity],
 					})
 				),
-			getCategoryById: (categoryId: string) =>
+			getCategoryById: () =>
 				of<ICategoryModel>({
 					key: Guid.parse(''),
 					operationType: OperationTypes.Expense,
 					nameNodes: [],
 				} as ICategoryModel),
-			saveCategory: (operationType: number, newCategoryNamesNodes: string[]) =>
+			saveCategory: () =>
 				of<Result<string>>(
 					new Result({
 						payload: 'bb6d182f-8b99-4e09-aa24-319b181178e3',

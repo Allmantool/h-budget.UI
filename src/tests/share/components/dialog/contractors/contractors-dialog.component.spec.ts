@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { ElementRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { MatChipInput, MatChipInputEvent } from '@angular/material/chips';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import { NgxsModule } from '@ngxs/store';
@@ -46,11 +49,11 @@ describe('Contractors-dialog.component', () => {
 						payload: [{} as ICategoryEntity],
 					})
 				),
-			getContractorById: (contractorId: string) =>
+			getContractorById: () =>
 				of<IContractorModel>({
 					key: Guid.parse(''),
 				} as IContractorModel),
-			saveContractor: (newContractorNamesNodes: string[]) =>
+			saveContractor: () =>
 				of<Result<string>>(
 					new Result({
 						payload: 'bb6d182f-8b99-4e09-aa24-319b181178e3',
@@ -98,6 +101,71 @@ describe('Contractors-dialog.component', () => {
 		const componentUnderTest = TestBed.inject(ContractorsDialogComponent);
 
 		componentUnderTest.save();
+
+		expect(dialogProviderSpy.openDialog).toHaveBeenCalled();
+	});
+
+	it('"DialogProvider" open dialog should be execute at least ones when call "close()"', () => {
+		sut.openContractors();
+
+		const componentUnderTest = TestBed.inject(ContractorsDialogComponent);
+
+		componentUnderTest.close();
+
+		expect(dialogProviderSpy.openDialog).toHaveBeenCalled();
+	});
+
+	it('"DialogProvider" open dialog should be execute at least ones when call "save()"', () => {
+		sut.openContractors();
+
+		const componentUnderTest = TestBed.inject(ContractorsDialogComponent);
+
+		componentUnderTest.save();
+
+		expect(dialogProviderSpy.openDialog).toHaveBeenCalled();
+	});
+
+	it('"DialogProvider" open dialog should be execute at least ones when call "add()"', () => {
+		sut.openContractors();
+
+		const componentUnderTest = TestBed.inject(ContractorsDialogComponent);
+
+		componentUnderTest.add({
+			value: 'input value',
+			chipInput: {
+				clear: () => {},
+			} as MatChipInput,
+		} as MatChipInputEvent);
+
+		expect(dialogProviderSpy.openDialog).toHaveBeenCalled();
+	});
+
+	it('"DialogProvider" open dialog should be execute at least ones when call "remove()"', () => {
+		sut.openContractors();
+
+		const componentUnderTest = TestBed.inject(ContractorsDialogComponent);
+
+		componentUnderTest.remove('note-to-remove');
+
+		expect(dialogProviderSpy.openDialog).toHaveBeenCalled();
+	});
+
+	it('"DialogProvider" open dialog should be execute at least ones when call "selected()"', () => {
+		sut.openContractors();
+
+		const componentUnderTest = TestBed.inject(ContractorsDialogComponent);
+
+		componentUnderTest.chipGrid = {
+			nativeElement: {
+				value: 'grid input value',
+			} as HTMLInputElement,
+		} as ElementRef<HTMLInputElement>;
+
+		componentUnderTest.selected({
+			option: {
+				viewValue: 'test value for category nodes',
+			},
+		} as MatAutocompleteSelectedEvent);
 
 		expect(dialogProviderSpy.openDialog).toHaveBeenCalled();
 	});
