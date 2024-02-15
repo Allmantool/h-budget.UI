@@ -7,40 +7,14 @@
 	"rules": [
 		{
 			"trigger": "commit",
-			"branch": "hotfix",
-			"bump": "build",
-			"suffix": "-hotfix",
-			"tag": true
-		},
-		{
-			"trigger": "commit",
-			"branch": "hotfix",
-			"bump": "build",
-			"suffix": "-fix",
-			"tag": true
-		},
-		{
-			"trigger": "commit",
-			"bump": "minor",
-			"branch": "test",
-			"suffix": "-test",
-			"reset": "build",
-			"tag": true
+			"bump": "build"
 		},
 		{
 			"trigger": "commit",
 			"bump": "minor",
 			"branch": "master",
 			"suffix": "-rc",
-			"reset": "build",
-			"tag": true
-		},
-		{
-			"trigger": "commit",
-			"bump": "minor",
-			"branch": "tech",
-			"suffix": "-tech",
-			"reset": "build",
+            "reset":"build",
 			"tag": true
 		},
 		{

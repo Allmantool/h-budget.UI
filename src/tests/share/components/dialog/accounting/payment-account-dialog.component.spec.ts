@@ -31,7 +31,7 @@ describe('Payment-account-dialog.component', () => {
 	const mockDialogContainer: DialogContainer<DaysRangePayload, number> = {
 		title: 'Payment account: (Update)  test',
 		operationType: DialogOperationTypes.Update,
-		onSubmit: (payload: DaysRangePayload) => of(1),
+		onSubmit: () => of(1),
 	};
 
 	let paymentAccountsProviderSpy: jasmine.SpyObj<DefaultPaymentAccountsProvider>;
@@ -43,7 +43,7 @@ describe('Payment-account-dialog.component', () => {
 		dialogProviderSpy = jasmine.createSpyObj('dialogProvider', ['openDialog']);
 
 		paymentAccountsProviderSpy = jasmine.createSpyObj('paymentAccountsProvider', {
-			savePaymentAccount: (newPaymentAccount: IPaymentAccountModel) =>
+			savePaymentAccount: () =>
 				of<Result<string>>(
 					new Result({
 						payload: 'bb6d182f-8b99-4e09-aa24-319b181178e3',
@@ -58,7 +58,7 @@ describe('Payment-account-dialog.component', () => {
 					emitter: 'test-emitter',
 					description: 'test-description-' + paymentAccountId,
 				} as IPaymentAccountModel),
-			updatePaymentAccount: (updatedPaymentAccount: IPaymentAccountModel, accountGuid: string) =>
+			updatePaymentAccount: () =>
 				of<Result<string>>(
 					new Result({
 						payload: 'bb6d182f-8b99-4e09-aa24-319b181178e3',
