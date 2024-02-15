@@ -9,4 +9,5 @@ export interface IPaymentAccountsProvider {
 	getPaymentAccounts(): Observable<IPaymentAccountModel[]>;
 	getById(paymentAccountId: string | Guid): Observable<IPaymentAccountModel>;
 	savePaymentAccount(newPaymentAccount: IPaymentAccountModel): Observable<Result<string>>;
+	updatePaymentAccount(updatedPaymentAccount: IPaymentAccountModel, accountGuid: string): Observable<Result<string>>;
 }
