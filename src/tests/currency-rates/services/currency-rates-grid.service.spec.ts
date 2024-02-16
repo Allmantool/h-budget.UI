@@ -22,7 +22,7 @@ import { CurrencyRateGroupModel } from '../../../domain/models/rates/currency-ra
 import { PresentationRatesMappingProfile } from '../../../presentation/currency-rates/mappers/presentation-rates-mapping.profiler';
 import { CurrencyRatesGridService } from '../../../presentation/currency-rates/services/currency-rates-grid.service';
 
-describe('Currency rates grid service', () => {
+describe('currency rates grid service', () => {
 	let sut: CurrencyRatesGridService;
 
 	let store: Store;

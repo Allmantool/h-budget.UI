@@ -22,7 +22,7 @@ import { CurrencyRateValueModel } from '../../../../../domain/models/rates/curre
 import { CurrencyRateGroupModel } from '../../../../../domain/models/rates/currency-rates-group.model';
 import { RatesDialogService } from '../../../../../presentation/currency-rates/services/rates-dialog.service';
 
-describe('Rates dialog service', () => {
+describe('rates dialog service', () => {
 	let currencyRateProviderSpy: jasmine.SpyObj<NationalBankCurrenciesProvider>;
 	let dialogProviderSpy: jasmine.SpyObj<DialogProvider>;
 
@@ -31,7 +31,7 @@ describe('Rates dialog service', () => {
 	const mockDialogContainer: DialogContainer<DaysRangePayload, number> = {
 		title: 'rates date dialog test-title',
 		operationType: DialogOperationTypes.Create,
-		onSubmit: (payload: DaysRangePayload): Observable<number> => new Subject<number>(),
+		onSubmit: (): Observable<number> => new Subject<number>(),
 	};
 
 	let sut: RatesDialogService;

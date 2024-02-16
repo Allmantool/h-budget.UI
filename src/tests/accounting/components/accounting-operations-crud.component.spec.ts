@@ -37,7 +37,7 @@ import { CategoriesDialogService } from '../../../presentation/accounting/servic
 import { ContractorsDialogService } from '../../../presentation/accounting/services/contractors-dialog.service';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
 
-describe('Accouting operations crud component', () => {
+describe('accouting operations crud component', () => {
 	let sut: AccountingOperationsCrudComponent;
 
 	let accountingOperationsServiceSpy: jasmine.SpyObj<AccountingOperationsService>;

@@ -19,6 +19,7 @@ import { PaymentsHistoryService } from '../../../presentation/accounting/service
 
 describe('payments history service', () => {
 	let sut: PaymentsHistoryService;
+
 	let store: Store;
 	let mapper: Mapper;
 
@@ -83,7 +84,7 @@ describe('payments history service', () => {
 		done();
 	});
 
-	it('should refresh', (done: DoneFn) => {
+	it('should refresh history', (done: DoneFn) => {
 		const result = sut.refreshPaymentsHistory('');
 		done();
 	});

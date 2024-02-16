@@ -17,7 +17,7 @@ import { IAppSettingsModel } from '../../../domain/models/app-settings.model';
 import { DaysRangePayload } from '../../../domain/models/dates-range-payload.model';
 import { CurrencyGridRateModel } from '../../../presentation/currency-rates/models/currency-grid-rate.model';
 
-describe('National bank currencies provider', () => {
+describe('national bank currencies provider', () => {
 	const RATE_HOST: string = 'test-rates-host';
 	const RATE_API: string = 'currency-rates';
 

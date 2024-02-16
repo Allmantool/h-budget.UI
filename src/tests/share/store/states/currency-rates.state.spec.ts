@@ -31,7 +31,7 @@ import { NationalBankCurrenciesProvider } from '../../../../data/providers/rates
 import { CurrencyRateValueModel } from '../../../../domain/models/rates/currency-rate-value.model';
 import { CurrencyRateGroupModel } from '../../../../domain/models/rates/currency-rates-group.model';
 
-describe('Currency rates store', () => {
+describe('currency rates store', () => {
 	let store: Store;
 	let currencyRateProviderSpy: any;
 

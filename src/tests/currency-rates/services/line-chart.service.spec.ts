@@ -12,7 +12,7 @@ import { CurrencyTableState } from '../../../app/modules/shared/store/states/rat
 import { CurrencyRateValueModel } from '../../../domain/models/rates/currency-rate-value.model';
 import { LineChartOptions } from '../../../presentation/currency-rates/models/line-chart-options';
 import { LineChartService } from '../../../presentation/currency-rates/services/line-chart.service';
-describe('Line chart service', () => {
+describe('line chart service', () => {
 	let sut: LineChartService;
 	let store: Store;
 

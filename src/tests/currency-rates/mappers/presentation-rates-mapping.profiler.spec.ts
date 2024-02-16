@@ -10,7 +10,7 @@ import { CurrencyRateGroupModel } from '../../../domain/models/rates/currency-ra
 import { PresentationRatesMappingProfile } from '../../../presentation/currency-rates/mappers/presentation-rates-mapping.profiler';
 import { CurrencyGridRateModel } from '../../../presentation/currency-rates/models/currency-grid-rate.model';
 
-describe('Presentation rates mappings', () => {
+describe('presentation rates mappings', () => {
 	let mapper: Mapper;
 
 	beforeEach(() => {
