@@ -7,7 +7,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 
 import { MainDashboardComponent } from './components/dashboard/main-dashboard.component';
 
-describe('AppComponent', () => {
+describe('main dashboard component', () => {
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
 			imports: [RouterTestingModule],

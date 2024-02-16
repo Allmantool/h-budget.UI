@@ -16,7 +16,7 @@ import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-
 import { AccountingRoutingModule } from '../../../presentation/accounting/accounting-routing.module';
 import { PaymentAccountComponent } from '../../../presentation/accounting/components/payment-account/payment-account.component';
 
-describe('Payment account component', () => {
+describe('payment account component', () => {
 	let sut: PaymentAccountComponent;
 
 	let paymentAccountsProviderSpy: DefaultPaymentAccountsProvider;

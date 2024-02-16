@@ -25,7 +25,7 @@ import { PresentationRatesMappingProfile } from '../../../presentation/currency-
 import { CurrencyRatesGridService } from '../../../presentation/currency-rates/services/currency-rates-grid.service';
 import { RatesDialogService } from '../../../presentation/currency-rates/services/rates-dialog.service';
 
-describe('Currency rates grid conponent', () => {
+describe('currency rates grid conponent', () => {
 	let sut: CurrencyRatesGridComponent;
 	let fixture: ComponentFixture<CurrencyRatesGridComponent>;
 

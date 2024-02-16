@@ -7,6 +7,7 @@ import { Guid } from 'typescript-guid';
 
 import { IPaymentAccountEntity } from './entities/payment-account.entity';
 import { PaymentAccountsMappingProfile } from './mappers/payment-accounts.mapping.profile';
+import { ApiRequestOptions } from '../../../app/modules/shared/constants/api-request-options';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
 import { Result } from '../../../core/result';
 import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
@@ -18,7 +19,7 @@ export class DefaultPaymentAccountsProvider implements IPaymentAccountsProvider 
 	private accountingHostUrl?: string;
 
 	constructor(
-		private readonly http: HttpClient,
+		private readonly httpClient: HttpClient,
 		private readonly mapper: Mapper,
 		private readonly appConfigurationService: AppConfigurationService
 	) {
@@ -26,12 +27,12 @@ export class DefaultPaymentAccountsProvider implements IPaymentAccountsProvider 
 	}
 
 	public removePaymentAccount(accountGuid: string): Observable<Result<boolean>> {
-		return this.http
+		return this.httpClient
 			.delete<Result<boolean>>(`${this.accountingHostUrl}/${this.paymentAccountApi}/${accountGuid}`)
 			.pipe(
 				filter(responseResult => responseResult.isSucceeded),
 				tap(() => console.log(`The account with guid '${accountGuid}' has been deleted`)),
-				retry(3),
+				retry(ApiRequestOptions.RETRY_AMOUNT),
 				take(1)
 			);
 	}
@@ -42,9 +43,9 @@ export class DefaultPaymentAccountsProvider implements IPaymentAccountsProvider 
 			newPaymentAccount
 		);
 
-		return this.http
+		return this.httpClient
 			.post<Result<string>>(`${this.accountingHostUrl}/${this.paymentAccountApi}`, request)
-			.pipe(retry(3), take(1));
+			.pipe(retry(ApiRequestOptions.RETRY_AMOUNT), take(1));
 	}
 
 	public updatePaymentAccount(
@@ -56,13 +57,13 @@ export class DefaultPaymentAccountsProvider implements IPaymentAccountsProvider 
 			updatedPaymentAccount
 		);
 
-		return this.http
+		return this.httpClient
 			.patch<Result<string>>(`${this.accountingHostUrl}/${this.paymentAccountApi}/${accountGuid}`, request)
-			.pipe(retry(3), take(1));
+			.pipe(retry(ApiRequestOptions.RETRY_AMOUNT), take(1));
 	}
 
 	public getById(paymentAccountId: string | Guid): Observable<IPaymentAccountModel> {
-		return this.http
+		return this.httpClient
 			.get<
 				Result<IPaymentAccountEntity>
 			>(`${this.accountingHostUrl}/${this.paymentAccountApi}/byId/${paymentAccountId.toString()}`)
@@ -70,19 +71,19 @@ export class DefaultPaymentAccountsProvider implements IPaymentAccountsProvider 
 				map(responseResult =>
 					this.mapper?.map(PaymentAccountsMappingProfile.PaymentAccountEntityToDomain, responseResult.payload)
 				),
-				retry(3),
+				retry(ApiRequestOptions.RETRY_AMOUNT),
 				take(1)
 			);
 	}
 
 	public getPaymentAccounts(): Observable<IPaymentAccountModel[]> {
-		return this.http
+		return this.httpClient
 			.get<Result<IPaymentAccountEntity[]>>(`${this.accountingHostUrl}/${this.paymentAccountApi}`)
 			.pipe(
 				map(responseResult =>
 					this.mapper?.map(PaymentAccountsMappingProfile.PaymentAccountEntityToDomain, responseResult.payload)
 				),
-				retry(3),
+				retry(ApiRequestOptions.RETRY_AMOUNT),
 				take(1)
 			);
 	}

@@ -21,7 +21,7 @@ import { CurrencyRateGroupModel } from '../../../domain/models/rates/currency-ra
 import { CurrencyRatesLineChartComponent } from '../../../presentation/currency-rates/components/currency-rates-line-chart/currency-rates-line-chart.component';
 import { LineChartService } from '../../../presentation/currency-rates/services/line-chart.service';
 
-describe('Currency rates line chart component', () => {
+describe('currency rates line chart component', () => {
 	let sut: CurrencyRatesLineChartComponent;
 
 	let store: Store;

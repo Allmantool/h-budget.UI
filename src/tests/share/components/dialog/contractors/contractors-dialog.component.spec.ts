@@ -26,7 +26,7 @@ import { ICategoryEntity } from '../../../../../data/providers/accounting/entiti
 import { IContractorModel } from '../../../../../domain/models/accounting/contractor.model.';
 import { ContractorsDialogService } from '../../../../../presentation/accounting/services/contractors-dialog.service';
 
-describe('Contractors-dialog.component', () => {
+describe('contractors-dialog.component', () => {
 	const matDialogSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
 
 	const mockDialogContainer: DialogContainer<IContractorModel, IContractorModel> = {

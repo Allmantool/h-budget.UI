@@ -25,7 +25,7 @@ import { IPaymentAccountModel } from '../../../../../domain/models/accounting/pa
 import { DaysRangePayload } from '../../../../../domain/models/dates-range-payload.model';
 import { PaymentAccountDialogService } from '../../../../../presentation/accounting/services/payment-account-dialog.service';
 
-describe('Payment-account-dialog.component', () => {
+describe('payment-account-dialog.component', () => {
 	const matDialogSpy = jasmine.createSpyObj('MatDialogRef', ['close']);
 
 	const mockDialogContainer: DialogContainer<DaysRangePayload, number> = {
