@@ -69,7 +69,7 @@ export class PaymentAccountDialogComponent {
 	});
 
 	public currencySignal = toSignal(this.currencyStepFg.get('currencyCtrl')!.valueChanges, {
-		initialValue: this.getCurrencyTypes()[0]!,
+		initialValue: this.getCurrencyTypes()[0],
 	});
 
 	public balanceSignal = toSignal(this.balanceStepFg.get('balanceCtrl')!.valueChanges, {

@@ -5,11 +5,13 @@ import { NgxsModule } from '@ngxs/store';
 
 import { PaymentAccountComponent } from './components/payment-account/payment-account.component';
 import { PaymentAccountCrudComponent } from './components/payment-account-crud/payment-account-crud.component';
+import { PaymentsDashboardComponent } from './components/payments-dashboard/payments-dashboard.component';
 import { PaymentsHistoryComponent } from './components/payments-history/payments-history.component';
 import { AccountingOperationsService } from './services/accounting-operations.service';
 import { AccountsService } from './services/accounts.service';
 import { CategoriesDialogService } from './services/categories-dialog.service';
 import { ContractorsDialogService } from './services/contractors-dialog.service';
+import { CrossAccountsTransferService } from './services/cross-accounts-transfer.dialog.service';
 import { HandbooksService } from './services/handbooks.service';
 import { PaymentAccountDialogService } from './services/payment-account-dialog.service';
 import { PaymentsHistoryService } from './services/payments-history.service';
@@ -42,6 +44,7 @@ import { AccountingOperationsCrudComponent, AccountingRoutingModule } from '../a
 		AccountingOperationsCrudComponent,
 		PaymentAccountComponent,
 		PaymentsHistoryComponent,
+		PaymentsDashboardComponent,
 		PaymentAccountCrudComponent,
 	],
 	imports: [
@@ -79,6 +82,7 @@ import { AccountingOperationsCrudComponent, AccountingRoutingModule } from '../a
 		CategoriesDialogService,
 		ContractorsDialogService,
 		PaymentAccountDialogService,
+		CrossAccountsTransferService,
 		AccountingOperationsService,
 		HandbooksService,
 	],

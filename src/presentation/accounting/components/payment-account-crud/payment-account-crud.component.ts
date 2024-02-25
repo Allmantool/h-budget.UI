@@ -25,7 +25,7 @@ export class PaymentAccountCrudComponent {
 
 	constructor(
 		private readonly store: Store,
-		private readonly paymentAccountService: PaymentAccountDialogService,
+		private readonly paymentAccountDialogService: PaymentAccountDialogService,
 		private readonly paymentAccountsProvider: DefaultPaymentAccountsProvider
 	) {
 		this.activePaymentAccountGuidSignal = toSignal(this.paymentAccountId$, {
@@ -38,11 +38,11 @@ export class PaymentAccountCrudComponent {
 	}
 
 	public createNewPaymentAccount(): void {
-		this.paymentAccountService.openPaymentAccountForSave();
+		this.paymentAccountDialogService.openForSave();
 	}
 
 	public updatePaymentAccount(): void {
-		this.paymentAccountService.openPaymentAccountForUpdate(this.activePaymentAccountGuidSignal());
+		this.paymentAccountDialogService.openForUpdate(this.activePaymentAccountGuidSignal());
 	}
 
 	public removePaymentAccount(): void {

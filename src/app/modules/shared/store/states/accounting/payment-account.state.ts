@@ -15,7 +15,7 @@ import {
 import { IPaymenentAccountStateModel } from './models/payment-account-state.model';
 
 @State<IPaymenentAccountStateModel>({
-	name: 'paymentAccount',
+	name: 'paymentAccounts',
 	defaults: {
 		activeAccountGuid: '',
 		accounts: [],

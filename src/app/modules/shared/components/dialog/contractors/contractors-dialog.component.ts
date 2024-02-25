@@ -26,7 +26,7 @@ import { AddCounterParty } from '../../../store/states/handbooks/actions/contrac
 export class ContractorsDialogComponent {
 	private dialogConfiguration: DialogContainer<IContractorModel, IContractorModel>;
 
-	@ViewChild('chipGrid ')
+	@ViewChild('chipGrid')
 	chipGrid!: ElementRef<HTMLInputElement>;
 
 	public isLoadingSignal = signal<boolean>(false);

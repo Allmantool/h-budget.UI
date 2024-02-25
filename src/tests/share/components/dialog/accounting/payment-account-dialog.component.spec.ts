@@ -101,7 +101,7 @@ describe('payment-account-dialog.component', () => {
 	});
 
 	it('"DialogProvider" should be execute at least ones', () => {
-		sut.openPaymentAccountForSave();
+		sut.openForSave();
 
 		const componentUnderTest = TestBed.inject(PaymentAccountDialogComponent);
 
