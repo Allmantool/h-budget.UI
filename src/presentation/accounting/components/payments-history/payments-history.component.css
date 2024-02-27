@@ -12,6 +12,7 @@ mat-expansion-panel {
 
 .accounting-table {
 	margin-top: 1em;
+	padding-top: 1em;
 }
 
 .row-is-clicked {

@@ -3,30 +3,35 @@
 	<h1 mat-dialog-title>{{ title }}</h1>
 
 	<mat-dialog-content class="dialog-body">
-		<form [formGroup]="dialogFg">
+		<form
+			[formGroup]="dialogFg"
+			class="dialog-form"
+		>
 			<app-form-field
 				formControlName="transferDirections"
 				[fieldType]="'SELECT'"
 				[title]="'Transfer direction:'"
 				[defaultValue]="getTransferDirections()[0]"
 				[selectOptions]="getTransferDirections()"
-                class="form-input-item"
+				class="form-input-item"
 			></app-form-field>
+
 			<app-form-field
 				formControlName="targetAccount"
 				[fieldType]="'SELECT'"
 				[title]="'Target payment account:'"
 				[defaultValue]="paymentAccountTitlesSignal()[0]"
 				[selectOptions]="paymentAccountTitlesSignal()"
-                class="form-input-item"
+				class="form-input-item"
 			></app-form-field>
+
 			<app-form-field
 				formControlName="amount"
 				[fieldType]="'INPUT'"
 				[title]="'Transfer amount:'"
-				[numberInputPrefix]="'$$'"
-                class="form-input-item"
+				class="form-input-item"
 			></app-form-field>
+
 			<!-- -->
 		</form>
 	</mat-dialog-content>

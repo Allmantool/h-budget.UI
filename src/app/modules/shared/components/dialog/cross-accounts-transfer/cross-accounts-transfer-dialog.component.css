@@ -1,8 +1,14 @@
 .dialog-body {
+	width: 50em;
+	height: 16em;
+}
+
+.dialog-form {
 	display: flex;
 	flex-direction: row;
-	width: 60em;
-	height: 16em;
+	flex-wrap: wrap;
+	align-content: space-between;
+	justify-content: space-between;
 }
 
 .form-input-item {
