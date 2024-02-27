@@ -14,7 +14,7 @@
 			"bump": "minor",
 			"branch": "master",
 			"suffix": "-rc",
-            "reset":"build",
+            "reset": ["minor", "build"],
 			"tag": true
 		},
 		{
