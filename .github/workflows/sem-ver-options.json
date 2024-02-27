@@ -1,28 +1,35 @@
 {
-	"scheme": "semantic",
-	"versionFile": "./package.json",
-	"username": "h-budget",
-	"email": "allmantool@gmail.com",
-	"files": ["./package-lock.json"],
-	"rules": [
-		{
-			"trigger": "commit",
-			"bump": "build"
-		},
-		{
-			"trigger": "commit",
-			"bump": "minor",
-			"branch": "master",
-			"suffix": "-rc",
-            "reset":"build",
-			"tag": true
-		},
-		{
-			"trigger": "commit",
-			"bump": "major",
-			"branch": "release",
-			"reset": ["minor", "build"],
-			"tag": true
-		}
-	]
+    "scheme": "semantic",
+    "versionFile": "./package.json",
+    "username": "h-budget",
+    "email": "allmantool@gmail.com",
+    "files": [
+        "./package-lock.json"
+    ],
+    "rules": [
+        {
+            "trigger": "commit",
+            "bump": "minor"
+        },
+        {
+            "trigger": "commit",
+            "bump": "build",
+            "branch": "master",
+            "suffix": "-rc",
+            "reset": [
+                "minor"
+            ],
+            "tag": true
+        },
+        {
+            "trigger": "commit",
+            "bump": "major",
+            "branch": "release",
+            "reset": [
+                "minor",
+                "build"
+            ],
+            "tag": true
+        }
+    ]
 }
