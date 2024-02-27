@@ -16,6 +16,14 @@
 				class="form-input-item"
 			></app-form-field>
 
+			<div class="date-section">
+				<app-datepicker
+					[disabled]="false"
+					placeholder="Choose a opeation date"
+					formControlName="operationDate"
+				></app-datepicker>
+			</div>
+
 			<app-form-field
 				formControlName="targetAccount"
 				[fieldType]="'SELECT'"
