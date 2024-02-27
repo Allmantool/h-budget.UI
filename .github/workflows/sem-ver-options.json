@@ -3,7 +3,9 @@
 	"versionFile": "./package.json",
 	"username": "h-budget",
 	"email": "allmantool@gmail.com",
-	"files": ["./package-lock.json"],
+	"files": [
+		"./package-lock.json"
+	],
 	"rules": [
 		{
 			"trigger": "commit",
@@ -14,14 +16,20 @@
 			"bump": "minor",
 			"branch": "master",
 			"suffix": "-rc",
-            "reset": ["minor", "build"],
+			"reset": [
+				"minor",
+				"build"
+			],
 			"tag": true
 		},
 		{
 			"trigger": "commit",
 			"bump": "major",
 			"branch": "release",
-			"reset": ["minor", "build"],
+			"reset": [
+				"minor",
+				"build"
+			],
 			"tag": true
 		}
 	]
