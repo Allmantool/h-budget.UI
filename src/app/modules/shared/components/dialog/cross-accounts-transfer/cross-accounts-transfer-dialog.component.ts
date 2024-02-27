@@ -13,7 +13,10 @@ import { Result } from '../../../../../../core/result';
 import { MoneyTransferDirections } from '../../../../../../domain/models/accounting/money-transfer-directions';
 import { IPaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';
 import { DialogContainer } from '../../../models/dialog-container';
-import { getPaymentAccounts } from '../../../store/states/accounting/selectors/payment-account.selector';
+import {
+	getActivePaymentAccountId,
+	getPaymentAccounts,
+} from '../../../store/states/accounting/selectors/payment-account.selector';
 
 @Component({
 	selector: 'cross-accounts-transfer-dialog',
@@ -33,8 +36,12 @@ export class CrossAccountsTransferDialogComponent {
 	@Select(getPaymentAccounts)
 	paymentAccounts$!: Observable<IPaymentAccountModel[]>;
 
+	@Select(getActivePaymentAccountId)
+	paymentAccountId$!: Observable<string>;
+
 	public paymentAccountTitlesSignal: Signal<string[]>;
 	public paymentAccountsSignal: Signal<IPaymentAccountModel[]>;
+	public paymentAccountIdSignal: Signal<string>;
 
 	constructor(
 		private fb: UntypedFormBuilder,
@@ -48,8 +55,13 @@ export class CrossAccountsTransferDialogComponent {
 			categoryType: new UntypedFormControl(),
 		});
 		this.paymentAccountsSignal = toSignal(this.paymentAccounts$, { initialValue: [] });
+		this.paymentAccountIdSignal = toSignal(this.paymentAccountId$, { initialValue: '' });
+
 		this.paymentAccountTitlesSignal = computed(() =>
-			_.map(this.paymentAccountsSignal(), x => `${x.emitter} | ${x.description}`)
+			_.chain(this.paymentAccountsSignal())
+				.filter(acc => acc.key?.toString() !== this.paymentAccountIdSignal())
+				.map(acc => `${acc.emitter} | ${acc.description}`)
+				.value()
 		);
 	}
 
