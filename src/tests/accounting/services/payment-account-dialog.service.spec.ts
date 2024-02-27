@@ -44,14 +44,14 @@ describe('payments account dialog service', () => {
 	});
 
 	it('"openPaymentAccountForSave" should execute open dialog', (done: DoneFn) => {
-		sut.openPaymentAccountForSave();
+		sut.openForSave();
 
 		expect(dialogProviderSpy.openDialog).toHaveBeenCalled();
 		done();
 	});
 
 	it('"openPaymentAccountForUpdate" should should execute open dialog', (done: DoneFn) => {
-		sut.openPaymentAccountForUpdate('test payment account id');
+		sut.openForUpdate('test payment account id');
 
 		expect(dialogProviderSpy.openDialog).toHaveBeenCalled();
 		done();

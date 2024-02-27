@@ -1,0 +1,25 @@
+<mat-accordion class="account-note">
+	<mat-expansion-panel hideToggle>
+		<mat-expansion-panel-header (click)="navigateToPaymentAccountsAsync()">
+			<mat-panel-title>
+				<span>{{paymentAccountGeneralInfoSignal()}}</span>
+			</mat-panel-title>
+			<mat-panel-description>
+				Total Sum: {{activePaymentsAccountSignal().balance}} [{{activePaymentsAccountSignal().currency}}]
+			</mat-panel-description>
+		</mat-expansion-panel-header>
+	</mat-expansion-panel>
+</mat-accordion>
+
+<div class="money-transfer">
+	<app-button
+		[hidden]="false"
+		(click)="moneyTransfer()"
+		type="fab"
+		text="Money transfer"
+		color="primary"
+		icon="send_money"
+	></app-button>
+</div>
+
+<payments-history></payments-history>

@@ -3,7 +3,7 @@ import { MatDialogConfig } from '@angular/material/dialog';
 
 import * as _ from 'lodash';
 
-import { concatMap, filter, map, tap } from 'rxjs';
+import { concatMap, filter, map, of, tap } from 'rxjs';
 
 import { PaymentAccountDialogComponent } from '../../../app/modules/shared/components/dialog/payment-account/payment-account-dialog.component';
 import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
@@ -20,14 +20,16 @@ export class PaymentAccountDialogService {
 		private readonly paymentAccountsProvider: DefaultPaymentAccountsProvider
 	) {}
 
-	public openPaymentAccountForSave(): void {
+	public openForSave(): void {
 		const config = new MatDialogConfig<
 			DialogContainer<Result<IPaymentAccountModel>, Result<IPaymentAccountModel>>
 		>();
 
 		const onSave = (operationResult: Result<IPaymentAccountModel>) => {
 			if (!operationResult.isSucceeded) {
-				return;
+				return of({
+					isSucceeded: false,
+				} as Result<IPaymentAccountModel>);
 			}
 
 			return this.paymentAccountsProvider.savePaymentAccount(operationResult.payload).pipe(
@@ -51,14 +53,14 @@ export class PaymentAccountDialogService {
 		config.data = {
 			title: 'Payment account: (Add new)',
 			onSubmit: onSave,
-		} as DialogContainer<Result<IPaymentAccountModel>, Result<IPaymentAccountModel>>;
+		};
 
 		config.disableClose = true;
 
 		this.dialogProvider.openDialog(PaymentAccountDialogComponent, config);
 	}
 
-	public openPaymentAccountForUpdate(paymentAccountid: string): void {
+	public openForUpdate(paymentAccountid: string): void {
 		const config = new MatDialogConfig<
 			DialogContainer<Result<IPaymentAccountModel>, Result<IPaymentAccountModel>>
 		>();

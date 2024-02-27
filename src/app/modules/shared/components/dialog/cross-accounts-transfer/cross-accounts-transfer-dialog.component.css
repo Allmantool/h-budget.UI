@@ -1,0 +1,28 @@
+.dialog-body {
+	width: 50em;
+	height: 16em;
+}
+
+.dialog-form {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	align-content: space-between;
+	justify-content: space-between;
+}
+
+.form-input-item {
+	width: 50%;
+}
+
+.contractors-chip-list {
+	width: 100%;
+}
+
+.dialog-content {
+	z-index: 150;
+}
+
+form {
+	width: 100%;
+}

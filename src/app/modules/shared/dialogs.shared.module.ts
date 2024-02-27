@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { AngularMaterailSharedModule } from './angular-material.shared.module';
 import { CategoriesDialogComponent } from './components/dialog/categories/categories-dialog.component';
 import { ContractorsDialogComponent } from './components/dialog/contractors/contractors-dialog.component';
+import { CrossAccountsTransferDialogComponent } from './components/dialog/cross-accounts-transfer/cross-accounts-transfer-dialog.component';
 import { DateRangeDialogComponent } from './components/dialog/dates-rage/dates-range-dialog.component';
 import { PaymentAccountDialogComponent } from './components/dialog/payment-account/payment-account-dialog.component';
 import { CustomUIComponentsSharedModule } from './custom-ui-components.shared.module';
@@ -15,6 +16,7 @@ const dialogComponents = [
 	CategoriesDialogComponent,
 	PaymentAccountDialogComponent,
 	ContractorsDialogComponent,
+	CrossAccountsTransferDialogComponent,
 ];
 
 @NgModule({

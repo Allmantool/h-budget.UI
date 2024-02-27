@@ -1,0 +1,66 @@
+<!-- eslint-disable prettier/prettier -->
+<div class="dialog-content">
+	<h1 mat-dialog-title>{{ title }}</h1>
+
+	<mat-dialog-content class="dialog-body">
+		<form
+			[formGroup]="dialogFg"
+			class="dialog-form"
+		>
+			<app-form-field
+				formControlName="transferDirections"
+				[fieldType]="'SELECT'"
+				[title]="'Transfer direction:'"
+				[defaultValue]="getTransferDirections()[0]"
+				[selectOptions]="getTransferDirections()"
+				class="form-input-item"
+			></app-form-field>
+
+			<div class="date-section">
+				<app-datepicker
+					[disabled]="false"
+					placeholder="Choose a opeation date"
+					formControlName="operationDate"
+				></app-datepicker>
+			</div>
+
+			<app-form-field
+				formControlName="targetAccount"
+				[fieldType]="'SELECT'"
+				[title]="'Target payment account:'"
+				[defaultValue]="paymentAccountTitlesSignal()[0]"
+				[selectOptions]="paymentAccountTitlesSignal()"
+				class="form-input-item"
+			></app-form-field>
+
+			<app-form-field
+				formControlName="amount"
+				[fieldType]="'INPUT'"
+				[title]="'Transfer amount:'"
+				class="form-input-item"
+			></app-form-field>
+
+			<!-- -->
+		</form>
+	</mat-dialog-content>
+
+	<div mat-dialog-actions>
+		<button
+			mat-raised-button
+			mat-dialog-close
+			(click)="close()"
+		>
+			Close
+		</button>
+		<button
+			mat-raised-button
+			color="primary"
+			[disabled]="isSaveDisabled"
+			(click)="save()"
+		>
+			Send
+		</button>
+	</div>
+</div>
+
+<progress-bar [isLoading]="isLoadingSignal()"></progress-bar>
