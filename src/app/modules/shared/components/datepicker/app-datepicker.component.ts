@@ -35,23 +35,30 @@ export class DatepickerComponent implements ControlValueAccessor {
 
 	public data$: BehaviorSubject<Date | null> = new BehaviorSubject<Date | null>(null);
 
-	writeValue(value: Date | null): void {
+	public writeValue(value: Date | null): void {
 		this.data$.next(value);
 	}
 
-	registerOnChange(fn: (value: any) => {}): void {
+	public registerOnChange(fn: (value: any) => {}): void {
 		this.onChanged = fn;
 	}
 
-	registerOnTouched(fn: Function): void {
+	public registerOnTouched(fn: Function): void {
 		this.onTouched = fn;
 	}
 
-	updateValue(event: MatDatepickerInputEvent<Date, string>) {
-		this.data$.next(event.value);
+	public updateValue(event: MatDatepickerInputEvent<Date, string>) {
+		const dateValue = event.value;
 
-		this.onChanged(this.data$.value);
-		this.onTouched();
+		this.data$.next(dateValue);
+
+		if (this.onChanged) {
+			this.onChanged(this.data$.value);
+		}
+
+		if (this.onTouched) {
+			this.onTouched();
+		}
 
 		this.onDateChanged.emit(this.data$.value);
 	}

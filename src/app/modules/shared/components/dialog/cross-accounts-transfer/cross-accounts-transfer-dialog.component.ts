@@ -7,9 +7,10 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import _ from 'lodash';
 
 import { Select } from '@ngxs/store';
-import { Observable, take } from 'rxjs';
+import { Observable, take, tap } from 'rxjs';
 
 import { Result } from '../../../../../../core/result';
+import { CurrencyExchangeService } from '../../../../../../data/providers/rates/currency-exchange.service';
 import { MoneyTransferDirections } from '../../../../../../domain/models/accounting/money-transfer-directions';
 import { IPaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';
 import { DialogContainer } from '../../../models/dialog-container';
@@ -45,6 +46,7 @@ export class CrossAccountsTransferDialogComponent {
 
 	constructor(
 		private fb: UntypedFormBuilder,
+		private exchangeService: CurrencyExchangeService,
 		private dialogRef: MatDialogRef<CrossAccountsTransferDialogComponent>,
 		@Inject(MAT_DIALOG_DATA)
 		dialogConfiguration: DialogContainer<IPaymentAccountModel[], Result<IPaymentAccountModel[]>>
@@ -56,6 +58,13 @@ export class CrossAccountsTransferDialogComponent {
 		});
 		this.paymentAccountsSignal = toSignal(this.paymentAccounts$, { initialValue: [] });
 		this.paymentAccountIdSignal = toSignal(this.paymentAccountId$, { initialValue: '' });
+
+		this.dialogFg = this.fb.group({
+			transferDirections: new UntypedFormControl(),
+			targetAccount: new UntypedFormControl(),
+			operationDate: new UntypedFormControl(new Date()),
+			amount: new UntypedFormControl(),
+		});
 
 		this.paymentAccountTitlesSignal = computed(() =>
 			_.chain(this.paymentAccountsSignal())
@@ -71,6 +80,18 @@ export class CrossAccountsTransferDialogComponent {
 
 	public close() {
 		this.dialogRef.close();
+	}
+
+	public updateTransferDate(operationDate: Date | null) {
+		this.exchangeService
+			.getExchange({
+				operationDate: operationDate!,
+				originCurrencyId: 431,
+				targetCurrencyId: 132,
+				amount: 11.22,
+			})
+			.pipe(tap(response => console.log(response)))
+			.subscribe();
 	}
 
 	public save(): void {
