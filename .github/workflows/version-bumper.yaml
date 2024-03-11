@@ -2,20 +2,25 @@ name: Manage versions
 
 on:
     push:
-      branches:
-        - master
-        - develop
-        - release
-        - feature/*
-        - test/*
-        - hotfix/*
-        - fix/*
-        - tech/*
-      tags:
-        - "v*"
+        branches:
+            - master
+            - develop
+            - release
+            - feature/*
+            - test/*
+            - hotfix/*
+            - fix/*
+            - tech/*
+        tags:
+            - 'v*'
 
     pull_request:
-      types: [closed]
+        branches:
+            - master
+            - release
+            - feature/*
+            - hotfix/*
+        types: [closed]
 
 env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
