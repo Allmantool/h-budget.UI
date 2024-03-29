@@ -32,7 +32,8 @@ export class CrossAccountsTransferDialogComponent {
 	public readonly separatorKeysCodes: number[] = [ENTER];
 	public isSaveDisabled: boolean = true;
 	public title: string;
-	public dialogFg: UntypedFormGroup;
+	public baseTransferStepFg: UntypedFormGroup;
+	public confirmStepFg: UntypedFormGroup;
 
 	@Select(getPaymentAccounts)
 	paymentAccounts$!: Observable<IPaymentAccountModel[]>;
@@ -53,17 +54,18 @@ export class CrossAccountsTransferDialogComponent {
 	) {
 		this.title = dialogConfiguration.title;
 		this.dialogConfiguration = dialogConfiguration;
-		this.dialogFg = fb.group({
-			categoryType: new UntypedFormControl(),
-		});
 		this.paymentAccountsSignal = toSignal(this.paymentAccounts$, { initialValue: [] });
 		this.paymentAccountIdSignal = toSignal(this.paymentAccountId$, { initialValue: '' });
 
-		this.dialogFg = this.fb.group({
+		this.baseTransferStepFg = this.fb.group({
 			transferDirections: new UntypedFormControl(),
 			targetAccount: new UntypedFormControl(),
 			operationDate: new UntypedFormControl(new Date()),
-			amount: new UntypedFormControl(),
+		});
+
+		this.confirmStepFg = this.fb.group({
+			currencyRate: new UntypedFormControl(),
+			transefAmmount: new UntypedFormControl(),
 		});
 
 		this.paymentAccountTitlesSignal = computed(() =>
@@ -100,7 +102,7 @@ export class CrossAccountsTransferDialogComponent {
 		this.dialogConfiguration
 			.onSubmit({} as IPaymentAccountModel[])
 			.pipe(take(1))
-			.subscribe(response => {
+			.subscribe(() => {
 				this.isLoadingSignal.set(false);
 				this.dialogRef.close();
 			});

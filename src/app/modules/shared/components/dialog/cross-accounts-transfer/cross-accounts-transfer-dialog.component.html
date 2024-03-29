@@ -1,65 +1,103 @@
 <!-- eslint-disable prettier/prettier -->
 <div class="dialog-content">
-	<h1 mat-dialog-title>{{ title }}</h1>
-
+	<h1
+		mat-dialog-title
+		class="transfer-dialog-title"
+	>
+		{{ title }}
+		<span (click)="close()">
+			<mat-icon>close</mat-icon>
+		</span>
+	</h1>
 	<mat-dialog-content class="dialog-body">
-		<form
-			[formGroup]="dialogFg"
-			class="dialog-form"
+		<mat-stepper
+			labelPosition="bottom"
+			[linear]="true"
+			#stepper
 		>
-			<app-form-field
-				formControlName="transferDirections"
-				[fieldType]="'SELECT'"
-				[title]="'Transfer direction:'"
-				[defaultValue]="getTransferDirections()[0]"
-				[selectOptions]="getTransferDirections()"
-				class="form-input-item"
-			></app-form-field>
+			<mat-step [stepControl]="baseTransferStepFg">
+				<form
+					[formGroup]="baseTransferStepFg"
+					class="initial-transfer-dialog-form"
+				>
+					<ng-template matStepLabel>Fill initial transfer details</ng-template>
+					<app-form-field
+						formControlName="transferDirections"
+						[fieldType]="'SELECT'"
+						[title]="'Transfer direction:'"
+						[defaultValue]="getTransferDirections()[0]"
+						[selectOptions]="getTransferDirections()"
+						class="form-input-item"
+					></app-form-field>
 
-			<div class="date-section">
-				<app-datepicker
-					[disabled]="false"
-					placeholder="Choose a opeation date"
-					formControlName="operationDate"
-					(onDateChanged)="updateTransferDate($event)"
-				></app-datepicker>
-			</div>
+					<div class="transfer-date-section">
+						<app-datepicker
+							[disabled]="false"
+							placeholder="Choose a opeation date"
+							formControlName="operationDate"
+							(onDateChanged)="updateTransferDate($event)"
+						></app-datepicker>
+					</div>
 
-			<app-form-field
-				formControlName="targetAccount"
-				[fieldType]="'SELECT'"
-				[title]="'Target payment account:'"
-				[defaultValue]="paymentAccountTitlesSignal()[0]"
-				[selectOptions]="paymentAccountTitlesSignal()"
-				class="form-input-item"
-			></app-form-field>
-
-			<app-form-field
-				formControlName="amount"
-				[fieldType]="'INPUT'"
-				[title]="'Transfer amount:'"
-				class="form-input-item"
-			></app-form-field>
-		</form>
+					<app-form-field
+						formControlName="targetAccount"
+						[fieldType]="'SELECT'"
+						[title]="'Target payment account:'"
+						[defaultValue]="paymentAccountTitlesSignal()[0]"
+						[selectOptions]="paymentAccountTitlesSignal()"
+						class="form-input-item"
+					></app-form-field>
+				</form>
+				<div>
+					<button
+						mat-button
+						matStepperNext
+					>
+						Next
+					</button>
+				</div>
+			</mat-step>
+			<mat-step [stepControl]="confirmStepFg">
+				<ng-template matStepLabel>Confirm transfer</ng-template>
+				<div>
+					<form
+						[formGroup]="confirmStepFg"
+						class="confirm-transfer-dialog-form"
+					>
+						<app-form-field
+							formControlName="currencyRate"
+							[fieldType]="'INPUT'"
+							[title]="'Currency rate:'"
+							class="form-input-item"
+						></app-form-field>
+						<app-form-field
+							formControlName="transefAmmount"
+							[fieldType]="'INPUT'"
+							[title]="'Transfer amount:'"
+							class="form-input-item"
+						></app-form-field>
+					</form>
+                    <div class="transfer-summary">
+                        <span>From account 'X' to account 'Y'</span>
+                        <span>Account 'x' after: 23.3</span>
+                        <span>Account 'Y' after: 923.3</span>
+                    </div>
+					<button
+						mat-button
+						matStepperPrevious
+					>
+						Back
+					</button>
+					<button
+						mat-button
+						(click)="stepper.reset()"
+					>
+						Confrirm transfer
+					</button>
+				</div>
+			</mat-step>
+		</mat-stepper>
 	</mat-dialog-content>
-
-	<div mat-dialog-actions>
-		<button
-			mat-raised-button
-			mat-dialog-close
-			(click)="close()"
-		>
-			Close
-		</button>
-		<button
-			mat-raised-button
-			color="primary"
-			[disabled]="isSaveDisabled"
-			(click)="save()"
-		>
-			Send
-		</button>
-	</div>
 </div>
 
 <progress-bar [isLoading]="isLoadingSignal()"></progress-bar>
