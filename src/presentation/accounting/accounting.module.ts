@@ -38,6 +38,7 @@ import { DefaultPaymentAccountsProvider } from '../../data/providers/accounting/
 import { PaymentOperationsProvider } from '../../data/providers/accounting/payment-operations.provider';
 import { PaymensHistoryProvider } from '../../data/providers/accounting/payments-history.provider';
 import { CurrencyExchangeService } from '../../data/providers/rates/currency-exchange.service';
+import { ExchangeRatesMappingProfile } from '../../data/providers/rates/mappers/exchange-rates-mapping.profile';
 import { AccountingOperationsCrudComponent, AccountingRoutingModule } from '../accounting';
 
 @NgModule({
@@ -70,6 +71,7 @@ import { AccountingOperationsCrudComponent, AccountingRoutingModule } from '../a
 			PaymentHistoryMappingProfile,
 			DataContractorProfile,
 			DataCategoryProfile,
+			ExchangeRatesMappingProfile,
 		]),
 	],
 	providers: [

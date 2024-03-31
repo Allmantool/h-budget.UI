@@ -20,7 +20,7 @@
 					[formGroup]="baseTransferStepFg"
 					class="initial-transfer-dialog-form"
 				>
-					<ng-template matStepLabel>Fill initial transfer details</ng-template>
+					<ng-template matStepLabel>Fill initial transfer details in</ng-template>
 					<app-form-field
 						formControlName="transferDirections"
 						[fieldType]="'SELECT'"
@@ -43,8 +43,8 @@
 						formControlName="targetAccount"
 						[fieldType]="'SELECT'"
 						[title]="'Target payment account:'"
-						[defaultValue]="paymentAccountTitlesSignal()[0]"
-						[selectOptions]="paymentAccountTitlesSignal()"
+						[defaultValue]="targetPaymentAccountTitlesSignal()[0]"
+						[selectOptions]="targetPaymentAccountTitlesSignal()"
 						class="form-input-item"
 					></app-form-field>
 				</form>
@@ -52,6 +52,7 @@
 					<button
 						mat-button
 						matStepperNext
+                        (click)="getMultiplier()"
 					>
 						Next
 					</button>
@@ -78,9 +79,9 @@
 						></app-form-field>
 					</form>
                     <div class="transfer-summary">
-                        <span>From account 'X' to account 'Y'</span>
-                        <span>Account 'x' after: 23.3</span>
-                        <span>Account 'Y' after: 923.3</span>
+                        <span>From 'Techobank | Visa' to 'Turkey bank | debit card'</span>
+                        <span>Sender 'Techobank | Visa' after: 23.3</span>
+                        <span>Reciever 'Turkey bank | debit card' after: 923.3</span>
                     </div>
 					<button
 						mat-button

@@ -8,6 +8,7 @@ import { map, retry, take, tap } from 'rxjs/operators';
 
 import { IRatesGroupEntity } from './entities/rates-group.entity';
 import { DataRatesMappingProfile } from './mappers/data-rates-mapping.profiler';
+import { DateFormats } from '../../../app/modules/shared/constants/date-formats';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
 import { Result } from '../../../core/result';
 import { DaysRangePayload } from '../../../domain/models/dates-range-payload.model';
@@ -33,7 +34,7 @@ export class NationalBankCurrenciesProvider implements IBankCurrenciesProvider {
 		const ratesUrl: string = `${this.hostUrl}/${this.apiUrl}/period`;
 
 		// prettier-ignore
-		const parametersSegmentUri = `${format(payload.startDate,'yyyy-MM-dd')}/${format(payload.endDate, 'yyyy-MM-dd')}`;
+		const parametersSegmentUri = `${format(payload.startDate, DateFormats.ApiRequest)}/${format(payload.endDate, DateFormats.ApiRequest)}`;
 
 		return this.http.get<Result<IRatesGroupEntity[]>>(`${ratesUrl}/${parametersSegmentUri}`).pipe(
 			map(responseResult =>

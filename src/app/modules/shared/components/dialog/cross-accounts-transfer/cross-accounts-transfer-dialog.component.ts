@@ -13,8 +13,10 @@ import { Result } from '../../../../../../core/result';
 import { CurrencyExchangeService } from '../../../../../../data/providers/rates/currency-exchange.service';
 import { MoneyTransferDirections } from '../../../../../../domain/models/accounting/money-transfer-directions';
 import { IPaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';
+import { CurrencyAbbrevitions } from '../../../constants/rates-abbreviations';
 import { DialogContainer } from '../../../models/dialog-container';
 import {
+	getActivePaymentAccount,
 	getActivePaymentAccountId,
 	getPaymentAccounts,
 } from '../../../store/states/accounting/selectors/payment-account.selector';
@@ -32,7 +34,12 @@ export class CrossAccountsTransferDialogComponent {
 	public readonly separatorKeysCodes: number[] = [ENTER];
 	public isSaveDisabled: boolean = true;
 	public title: string;
-	public baseTransferStepFg: UntypedFormGroup;
+	public baseTransferStepFg: UntypedFormGroup = this.fb.group({
+		transferDirections: new UntypedFormControl(),
+		targetAccount: new UntypedFormControl(),
+		operationDate: new UntypedFormControl(new Date()),
+	});
+
 	public confirmStepFg: UntypedFormGroup;
 
 	@Select(getPaymentAccounts)
@@ -41,9 +48,23 @@ export class CrossAccountsTransferDialogComponent {
 	@Select(getActivePaymentAccountId)
 	paymentAccountId$!: Observable<string>;
 
-	public paymentAccountTitlesSignal: Signal<string[]>;
+	@Select(getActivePaymentAccount)
+	activePaymentAccount$!: Observable<IPaymentAccountModel>;
+
+	public targetPaymentAccountTitlesSignal: Signal<string[]>;
 	public paymentAccountsSignal: Signal<IPaymentAccountModel[]>;
 	public paymentAccountIdSignal: Signal<string>;
+	public activePaymentAccountSignal: Signal<IPaymentAccountModel>;
+
+	public operationDateSignal: Signal<Date> = toSignal(this.baseTransferStepFg.get('operationDate')!.valueChanges, {
+		initialValue: null,
+	});
+
+	public targetAccountSignal: Signal<string> = toSignal(this.baseTransferStepFg.get('targetAccount')!.valueChanges, {
+		initialValue: null,
+	});
+
+	public transferDirectionsSignal: Signal<string>;
 
 	constructor(
 		private fb: UntypedFormBuilder,
@@ -56,11 +77,8 @@ export class CrossAccountsTransferDialogComponent {
 		this.dialogConfiguration = dialogConfiguration;
 		this.paymentAccountsSignal = toSignal(this.paymentAccounts$, { initialValue: [] });
 		this.paymentAccountIdSignal = toSignal(this.paymentAccountId$, { initialValue: '' });
-
-		this.baseTransferStepFg = this.fb.group({
-			transferDirections: new UntypedFormControl(),
-			targetAccount: new UntypedFormControl(),
-			operationDate: new UntypedFormControl(new Date()),
+		this.activePaymentAccountSignal = toSignal(this.activePaymentAccount$, {
+			initialValue: {} as IPaymentAccountModel,
 		});
 
 		this.confirmStepFg = this.fb.group({
@@ -68,12 +86,16 @@ export class CrossAccountsTransferDialogComponent {
 			transefAmmount: new UntypedFormControl(),
 		});
 
-		this.paymentAccountTitlesSignal = computed(() =>
+		this.targetPaymentAccountTitlesSignal = computed(() =>
 			_.chain(this.paymentAccountsSignal())
 				.filter(acc => acc.key?.toString() !== this.paymentAccountIdSignal())
 				.map(acc => `${acc.emitter} | ${acc.description}`)
 				.value()
 		);
+
+		this.transferDirectionsSignal = toSignal(this.baseTransferStepFg.get('targetAccount')!.valueChanges, {
+			initialValue: this.targetPaymentAccountTitlesSignal()[0],
+		});
 	}
 
 	public getTransferDirections(): string[] {
@@ -88,12 +110,25 @@ export class CrossAccountsTransferDialogComponent {
 		this.exchangeService
 			.getExchange({
 				operationDate: operationDate!,
-				originCurrencyId: 431,
-				targetCurrencyId: 132,
+				originCurrency: this.activePaymentAccountSignal().currency,
+				targetCurrency: CurrencyAbbrevitions.USD,
 				amount: 11.22,
 			})
 			.pipe(tap(response => console.log(response)))
 			.subscribe();
+	}
+
+	public getMultiplier(): void {
+		this.exchangeService
+			.getExchangeMultiplier({
+				originCurrency: this.activePaymentAccountSignal().currency,
+				targetCurrency: _.isNil(this.targetAccountSignal())
+					? this.targetPaymentAccountTitlesSignal()[0]
+					: this.targetAccountSignal(),
+				operationDate: this.operationDateSignal(),
+			})
+			.pipe(take(1))
+			.subscribe(multiplier => console.log(multiplier));
 	}
 
 	public save(): void {
