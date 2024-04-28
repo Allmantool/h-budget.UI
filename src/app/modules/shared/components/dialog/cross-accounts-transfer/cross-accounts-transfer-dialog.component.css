@@ -40,6 +40,10 @@
 	z-index: 150;
 }
 
+.confirm-transfer-buttons {
+	padding-top: 1.8em;
+}
+
 form {
 	width: 100%;
 }

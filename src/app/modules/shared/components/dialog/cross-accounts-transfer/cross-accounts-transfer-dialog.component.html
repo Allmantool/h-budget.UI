@@ -32,7 +32,7 @@
 
 					<div class="transfer-date-section">
 						<app-datepicker
-                            formControlName="operationDate"
+							formControlName="operationDate"
 							[disabled]="false"
 							placeholder="Choose a opeation date"
 							(onDateChanged)="updateTransferDate($event)"
@@ -52,7 +52,7 @@
 					<button
 						mat-button
 						matStepperNext
-                        (click)="getMultiplier()"
+						(click)="getMultiplier()"
 					>
 						Next
 					</button>
@@ -78,23 +78,23 @@
 							class="form-input-item"
 						></app-form-field>
 					</form>
-                    <div class="transfer-summary">
-                        <span>From 'Techobank | Visa' to 'Turkey bank | debit card'</span>
-                        <span>Sender 'Techobank | Visa' after: 23.3</span>
-                        <span>Reciever 'Turkey bank | debit card' after: 923.3</span>
-                    </div>
-					<button
-						mat-button
-						matStepperPrevious
-					>
-						Back
-					</button>
-					<button
-						mat-button
-						(click)="stepper.reset()"
-					>
-						Confrirm transfer
-					</button>
+					<div class="transfer-summary">
+						<span *ngFor="let item of this.transferSummarySignal()">{{item}}</span>
+					</div>
+					<div class="confirm-transfer-buttons">
+						<button
+							mat-button
+							matStepperPrevious
+						>
+							Back
+						</button>
+						<button
+							mat-button
+							(click)="stepper.reset()"
+						>
+							Confrirm transfer
+						</button>
+					</div>
 				</div>
 			</mat-step>
 		</mat-stepper>

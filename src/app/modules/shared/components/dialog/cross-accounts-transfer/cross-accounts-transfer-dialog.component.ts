@@ -61,9 +61,17 @@ export class CrossAccountsTransferDialogComponent {
 
 	public targetPaymentAccountOptionSignal: Signal<SelectDropdownOptions>;
 
+	public transferAmmountSignal: Signal<number>;
+
+	public currencyRateSignal: Signal<number>;
+
 	public transferDirectionsSignal: Signal<string>;
 
+	public transferSummarySignal: Signal<string[]>;
+
 	public operationDateSignal: Signal<Date>;
+
+	public inSenderSignal: Signal<boolean>;
 
 	constructor(
 		private fb: UntypedFormBuilder,
@@ -85,6 +93,8 @@ export class CrossAccountsTransferDialogComponent {
 			transefAmmount: new UntypedFormControl(),
 		});
 
+		this.inSenderSignal = computed(() => this.transferDirectionsSignal() === 'In');
+
 		this.targetPaymentAccountTitlesSignal = computed(() =>
 			_.chain(this.paymentAccountsSignal())
 				.filter(acc => acc.key?.toString() !== this.paymentAccountIdSignal())
@@ -104,6 +114,18 @@ export class CrossAccountsTransferDialogComponent {
 				.value()
 		);
 
+		this.transferSummarySignal = computed(() => {
+			const originPaymentAccountInfo = `'${this.activePaymentAccountSignal().description}' after: '${_.round(this.activePaymentAccountSignal().balance - this.transferAmmountSignal(), 3)}' ('${this.activePaymentAccountSignal().currency}')`;
+			const targetPaymentAccountInfo = `'${this.targetPaymentAccountSignal().description}' after: '${_.round(this.targetPaymentAccountSignal().balance + this.currencyRateSignal() * this.transferAmmountSignal(), 3)}' ('${this.targetPaymentAccountSignal().currency}')`;
+
+			return [
+				`Convertion from '${this.activePaymentAccountSignal().currency}' to '${this.targetPaymentAccountSignal().currency}'`,
+				`Sender ${this.inSenderSignal() ? originPaymentAccountInfo : targetPaymentAccountInfo}`,
+				`Reciever ${this.inSenderSignal() ? targetPaymentAccountInfo : originPaymentAccountInfo}`,
+				``,
+			];
+		});
+
 		this.transferDirectionsSignal = toSignal(this.baseTransferStepFg.get('transferDirections')!.valueChanges, {
 			initialValue: this.getTransferDirections()[0],
 		});
@@ -114,6 +136,14 @@ export class CrossAccountsTransferDialogComponent {
 
 		this.targetPaymentAccountOptionSignal = toSignal(this.baseTransferStepFg.get('targetAccount')!.valueChanges, {
 			initialValue: this.targetPaymentAccountTitlesSignal()[0],
+		});
+
+		this.transferAmmountSignal = toSignal(this.confirmStepFg.get('transefAmmount')!.valueChanges, {
+			initialValue: 0,
+		});
+
+		this.currencyRateSignal = toSignal(this.confirmStepFg.get('currencyRate')!.valueChanges, {
+			initialValue: 0,
 		});
 	}
 
@@ -140,12 +170,16 @@ export class CrossAccountsTransferDialogComponent {
 	public getMultiplier(): void {
 		this.exchangeService
 			.getExchangeMultiplier({
-				originCurrency: this.activePaymentAccountSignal().currency,
-				targetCurrency: this.targetPaymentAccountSignal().currency,
+				originCurrency: this.inSenderSignal()
+					? this.activePaymentAccountSignal().currency
+					: this.targetPaymentAccountSignal().currency,
+				targetCurrency: this.inSenderSignal()
+					? this.targetPaymentAccountSignal().currency
+					: this.activePaymentAccountSignal().currency,
 				operationDate: this.operationDateSignal(),
 			})
 			.pipe(take(1))
-			.subscribe(multiplier => console.log(multiplier));
+			.subscribe(response => this.confirmStepFg.patchValue({ currencyRate: response.payload }));
 	}
 
 	public save(): void {
