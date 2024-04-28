@@ -32,9 +32,9 @@
 
 					<div class="transfer-date-section">
 						<app-datepicker
+                            formControlName="operationDate"
 							[disabled]="false"
 							placeholder="Choose a opeation date"
-							formControlName="operationDate"
 							(onDateChanged)="updateTransferDate($event)"
 						></app-datepicker>
 					</div>

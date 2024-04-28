@@ -1,1 +1,3 @@
-export type FormInput = string | number | undefined;
+import { SelectDropdownOptions } from '../models/select-dropdown-options';
+
+export type FormInput = string | number | SelectDropdownOptions | undefined;

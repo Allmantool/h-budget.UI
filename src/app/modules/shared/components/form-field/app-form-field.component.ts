@@ -3,12 +3,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/ban-types */
 
-import { ChangeDetectionStrategy, Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, forwardRef, Input, OnInit, Output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+
+import _ from 'lodash';
 
 import { BehaviorSubject } from 'rxjs';
 
 import { InputTypes } from '../../models/input-types';
+import { SelectDropdownOptions } from '../../models/select-dropdown-options';
 import { FormInput } from '../../types/form-input.type';
 
 @Component({
@@ -24,28 +27,57 @@ import { FormInput } from '../../types/form-input.type';
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppFormFieldComponent implements ControlValueAccessor {
+export class AppFormFieldComponent implements ControlValueAccessor, OnInit {
 	private onTouched!: Function;
 	private onChanged!: (value: FormInput) => {};
 
 	@Input() public disabled: boolean = false;
 	@Input() public fieldType: string = InputTypes.INPUT;
 
-	@Input() public selectOptions: string[] = [];
+	@Input() public selectOptions: string[] | SelectDropdownOptions[] | undefined;
 
 	@Input() public title: string = '';
 
 	@Input() public numberInputPrefix: string = '';
 
-	@Input() public defaultValue: FormInput = undefined;
+	@Input() public defaultValue: FormInput;
 
 	// eslint-disable-next-line @angular-eslint/no-output-on-prefix
-	@Output() public onDataChanged = new EventEmitter<string | number | undefined>();
+	@Output() public onDataChanged = new EventEmitter<FormInput>();
 
-	public data$ = new BehaviorSubject<FormInput>(this.defaultValue ?? undefined);
+	public data$ = new BehaviorSubject<FormInput>(undefined);
+
+	public dropdownOptions$ = new BehaviorSubject<SelectDropdownOptions[]>([]);
+
+	ngOnInit(): void {
+		if (_.isNil(this.selectOptions)) {
+			return;
+		}
+
+		if (typeof this.selectOptions[0] === 'object') {
+			this.dropdownOptions$.next(this.selectOptions as SelectDropdownOptions[]);
+			this.data$.next((this.defaultValue as SelectDropdownOptions).value);
+			return;
+		}
+
+		this.dropdownOptions$.next(
+			_.map(
+				this.selectOptions,
+				opt => new SelectDropdownOptions({ decription: opt as string, value: opt as string })
+			)
+		);
+
+		this.data$.next(this.defaultValue);
+	}
 
 	public writeValue(value: FormInput): void {
+		if (_.isNil(value)) {
+			return;
+		}
+
 		this.data$.next(value);
+
+		this.onDataChanged.emit(value);
 	}
 
 	public registerOnChange(fn: (value: FormInput) => {}): void {
@@ -70,7 +102,7 @@ export class AppFormFieldComponent implements ControlValueAccessor {
 		this.defaultValue = '';
 	}
 
-	public trackByFn(index: number, item: string): string {
+	public trackByFn(index: number, item: SelectDropdownOptions): SelectDropdownOptions {
 		return item; // Replace with a unique identifier for each item
 	}
 }

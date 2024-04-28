@@ -1,5 +1,15 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { ENTER } from '@angular/cdk/keycodes';
-import { ChangeDetectionStrategy, Component, computed, Inject, signal, Signal } from '@angular/core';
+import {
+	AfterViewInit,
+	ChangeDetectionStrategy,
+	Component,
+	computed,
+	Inject,
+	OnInit,
+	signal,
+	Signal,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -15,6 +25,7 @@ import { MoneyTransferDirections } from '../../../../../../domain/models/account
 import { IPaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';
 import { CurrencyAbbrevitions } from '../../../constants/rates-abbreviations';
 import { DialogContainer } from '../../../models/dialog-container';
+import { SelectDropdownOptions } from '../../../models/select-dropdown-options';
 import {
 	getActivePaymentAccount,
 	getActivePaymentAccountId,
@@ -51,20 +62,16 @@ export class CrossAccountsTransferDialogComponent {
 	@Select(getActivePaymentAccount)
 	activePaymentAccount$!: Observable<IPaymentAccountModel>;
 
-	public targetPaymentAccountTitlesSignal: Signal<string[]>;
+	public targetPaymentAccountTitlesSignal: Signal<SelectDropdownOptions[]>;
 	public paymentAccountsSignal: Signal<IPaymentAccountModel[]>;
 	public paymentAccountIdSignal: Signal<string>;
 	public activePaymentAccountSignal: Signal<IPaymentAccountModel>;
 
-	public operationDateSignal: Signal<Date> = toSignal(this.baseTransferStepFg.get('operationDate')!.valueChanges, {
-		initialValue: null,
-	});
-
-	public targetAccountSignal: Signal<string> = toSignal(this.baseTransferStepFg.get('targetAccount')!.valueChanges, {
-		initialValue: null,
-	});
+	public targetAccountSignal: Signal<string>;
 
 	public transferDirectionsSignal: Signal<string>;
+
+	public operationDateSignal: Signal<Date>;
 
 	constructor(
 		private fb: UntypedFormBuilder,
@@ -89,12 +96,26 @@ export class CrossAccountsTransferDialogComponent {
 		this.targetPaymentAccountTitlesSignal = computed(() =>
 			_.chain(this.paymentAccountsSignal())
 				.filter(acc => acc.key?.toString() !== this.paymentAccountIdSignal())
-				.map(acc => `${acc.emitter} | ${acc.description}`)
+				.map(
+					acc =>
+						new SelectDropdownOptions({
+							decription: `${acc.emitter} | ${acc.description}`,
+							value: acc.key?.toString(),
+						})
+				)
 				.value()
 		);
 
-		this.transferDirectionsSignal = toSignal(this.baseTransferStepFg.get('targetAccount')!.valueChanges, {
-			initialValue: this.targetPaymentAccountTitlesSignal()[0],
+		this.transferDirectionsSignal = toSignal(this.baseTransferStepFg.get('transferDirections')!.valueChanges, {
+			initialValue: this.getTransferDirections()[0],
+		});
+
+		this.operationDateSignal = toSignal(this.baseTransferStepFg.get('operationDate')!.valueChanges, {
+			initialValue: this.baseTransferStepFg.get('operationDate')!.value,
+		});
+
+		this.targetAccountSignal = toSignal(this.baseTransferStepFg.get('targetAccount')!.valueChanges, {
+			initialValue: this.baseTransferStepFg.get('targetAccount')!.value,
 		});
 	}
 
@@ -122,9 +143,7 @@ export class CrossAccountsTransferDialogComponent {
 		this.exchangeService
 			.getExchangeMultiplier({
 				originCurrency: this.activePaymentAccountSignal().currency,
-				targetCurrency: _.isNil(this.targetAccountSignal())
-					? this.targetPaymentAccountTitlesSignal()[0]
-					: this.targetAccountSignal(),
+				targetCurrency: '',
 				operationDate: this.operationDateSignal(),
 			})
 			.pipe(take(1))

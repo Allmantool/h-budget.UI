@@ -2,7 +2,7 @@
 /* eslint-disable @angular-eslint/no-output-on-prefix */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ChangeDetectionStrategy, Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, forwardRef, Input, OnInit, Output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 
@@ -21,7 +21,7 @@ import { BehaviorSubject } from 'rxjs';
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DatepickerComponent implements ControlValueAccessor {
+export class DatepickerComponent implements ControlValueAccessor, OnInit {
 	private onTouched!: Function;
 	private onChanged!: (value: Date | null) => {};
 
@@ -31,9 +31,15 @@ export class DatepickerComponent implements ControlValueAccessor {
 
 	@Input() public dateFormat: string = 'MM/DD/YYYY';
 
+	@Input() public defaultValue: Date = new Date();
+
 	@Output() public onDateChanged = new EventEmitter<Date | null>();
 
 	public data$: BehaviorSubject<Date | null> = new BehaviorSubject<Date | null>(null);
+
+	ngOnInit(): void {
+		this.data$.next(this.defaultValue);
+	}
 
 	public writeValue(value: Date | null): void {
 		this.data$.next(value);
