@@ -89,12 +89,13 @@ export class AppFormFieldComponent implements ControlValueAccessor, OnInit {
 	}
 
 	public updateValue(event: any) {
+		const selectedOption = _.find(this.dropdownOptions$.value, opt => opt.value === event.value);
 		this.data$.next(event.value);
 
-		this.onChanged(event.value);
+		this.onChanged(selectedOption);
 		this.onTouched();
 
-		this.onDataChanged.emit(this.data$.value);
+		this.onDataChanged.emit(selectedOption);
 	}
 
 	public clearInput(event: any) {

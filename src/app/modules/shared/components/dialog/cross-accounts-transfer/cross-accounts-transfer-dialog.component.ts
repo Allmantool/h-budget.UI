@@ -1,15 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { ENTER } from '@angular/cdk/keycodes';
-import {
-	AfterViewInit,
-	ChangeDetectionStrategy,
-	Component,
-	computed,
-	Inject,
-	OnInit,
-	signal,
-	Signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, Inject, signal, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
@@ -66,8 +57,9 @@ export class CrossAccountsTransferDialogComponent {
 	public paymentAccountsSignal: Signal<IPaymentAccountModel[]>;
 	public paymentAccountIdSignal: Signal<string>;
 	public activePaymentAccountSignal: Signal<IPaymentAccountModel>;
+	public targetPaymentAccountSignal: Signal<IPaymentAccountModel>;
 
-	public targetAccountSignal: Signal<SelectDropdownOptions>;
+	public targetPaymentAccountOptionSignal: Signal<SelectDropdownOptions>;
 
 	public transferDirectionsSignal: Signal<string>;
 
@@ -100,9 +92,15 @@ export class CrossAccountsTransferDialogComponent {
 					acc =>
 						new SelectDropdownOptions({
 							decription: `${acc.emitter} | ${acc.description}`,
-							value: acc.currency,
+							value: acc.key?.toString(),
 						})
 				)
+				.value()
+		);
+
+		this.targetPaymentAccountSignal = computed(() =>
+			_.chain(this.paymentAccountsSignal())
+				.find(acc => acc.key?.toString() === this.targetPaymentAccountOptionSignal().value)
 				.value()
 		);
 
@@ -114,7 +112,7 @@ export class CrossAccountsTransferDialogComponent {
 			initialValue: this.baseTransferStepFg.get('operationDate')!.value,
 		});
 
-		this.targetAccountSignal = toSignal(this.baseTransferStepFg.get('targetAccount')!.valueChanges, {
+		this.targetPaymentAccountOptionSignal = toSignal(this.baseTransferStepFg.get('targetAccount')!.valueChanges, {
 			initialValue: this.targetPaymentAccountTitlesSignal()[0],
 		});
 	}
@@ -143,7 +141,7 @@ export class CrossAccountsTransferDialogComponent {
 		this.exchangeService
 			.getExchangeMultiplier({
 				originCurrency: this.activePaymentAccountSignal().currency,
-				targetCurrency: this.targetAccountSignal().value,
+				targetCurrency: this.targetPaymentAccountSignal().currency,
 				operationDate: this.operationDateSignal(),
 			})
 			.pipe(take(1))
