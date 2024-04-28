@@ -50,7 +50,7 @@
         "eslint-import-resolver-typescript": "^3.6.1",
         "eslint-plugin-import": "^2.29.1",
         "flag-icons": "^7.2.1",
-        "immer": "^10.0.4",
+        "immer": "^10.1.1",
         "lodash": "^4.17.21",
         "material-design-icons": "^3.0.1",
         "ng-apexcharts": "^1.10.0",
