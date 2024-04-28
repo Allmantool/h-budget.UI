@@ -67,7 +67,7 @@ export class CrossAccountsTransferDialogComponent {
 	public paymentAccountIdSignal: Signal<string>;
 	public activePaymentAccountSignal: Signal<IPaymentAccountModel>;
 
-	public targetAccountSignal: Signal<string>;
+	public targetAccountSignal: Signal<SelectDropdownOptions>;
 
 	public transferDirectionsSignal: Signal<string>;
 
@@ -100,7 +100,7 @@ export class CrossAccountsTransferDialogComponent {
 					acc =>
 						new SelectDropdownOptions({
 							decription: `${acc.emitter} | ${acc.description}`,
-							value: acc.key?.toString(),
+							value: acc.currency,
 						})
 				)
 				.value()
@@ -115,7 +115,7 @@ export class CrossAccountsTransferDialogComponent {
 		});
 
 		this.targetAccountSignal = toSignal(this.baseTransferStepFg.get('targetAccount')!.valueChanges, {
-			initialValue: this.baseTransferStepFg.get('targetAccount')!.value,
+			initialValue: this.targetPaymentAccountTitlesSignal()[0],
 		});
 	}
 
@@ -143,7 +143,7 @@ export class CrossAccountsTransferDialogComponent {
 		this.exchangeService
 			.getExchangeMultiplier({
 				originCurrency: this.activePaymentAccountSignal().currency,
-				targetCurrency: '',
+				targetCurrency: this.targetAccountSignal().value,
 				operationDate: this.operationDateSignal(),
 			})
 			.pipe(take(1))
