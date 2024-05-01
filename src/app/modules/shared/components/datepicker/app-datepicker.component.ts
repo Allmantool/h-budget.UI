@@ -2,7 +2,7 @@
 /* eslint-disable @angular-eslint/no-output-on-prefix */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { ChangeDetectionStrategy, Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, forwardRef, Input, OnInit, Output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
 
@@ -21,7 +21,7 @@ import { BehaviorSubject } from 'rxjs';
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DatepickerComponent implements ControlValueAccessor {
+export class DatepickerComponent implements ControlValueAccessor, OnInit {
 	private onTouched!: Function;
 	private onChanged!: (value: Date | null) => {};
 
@@ -31,27 +31,40 @@ export class DatepickerComponent implements ControlValueAccessor {
 
 	@Input() public dateFormat: string = 'MM/DD/YYYY';
 
+	@Input() public defaultValue: Date = new Date();
+
 	@Output() public onDateChanged = new EventEmitter<Date | null>();
 
 	public data$: BehaviorSubject<Date | null> = new BehaviorSubject<Date | null>(null);
 
-	writeValue(value: Date | null): void {
+	ngOnInit(): void {
+		this.data$.next(this.defaultValue);
+	}
+
+	public writeValue(value: Date | null): void {
 		this.data$.next(value);
 	}
 
-	registerOnChange(fn: (value: any) => {}): void {
+	public registerOnChange(fn: (value: any) => {}): void {
 		this.onChanged = fn;
 	}
 
-	registerOnTouched(fn: Function): void {
+	public registerOnTouched(fn: Function): void {
 		this.onTouched = fn;
 	}
 
-	updateValue(event: MatDatepickerInputEvent<Date, string>) {
-		this.data$.next(event.value);
+	public updateValue(event: MatDatepickerInputEvent<Date, string>) {
+		const dateValue = event.value;
 
-		this.onChanged(this.data$.value);
-		this.onTouched();
+		this.data$.next(dateValue);
+
+		if (this.onChanged) {
+			this.onChanged(this.data$.value);
+		}
+
+		if (this.onTouched) {
+			this.onTouched();
+		}
 
 		this.onDateChanged.emit(this.data$.value);
 	}

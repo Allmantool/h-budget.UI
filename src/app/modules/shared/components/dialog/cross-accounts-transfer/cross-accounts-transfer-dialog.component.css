@@ -1,14 +1,31 @@
 .dialog-body {
-	width: 50em;
-	height: 16em;
+	width: 33em;
+	height: 29em;
 }
 
-.dialog-form {
+.transfer-dialog-title {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: flex-end;
+}
+
+.initial-transfer-dialog-form {
+	padding-top: 1em;
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
 	align-content: space-between;
 	justify-content: space-between;
+}
+
+.transfer-summary {
+	display: flex;
+	flex-direction: column;
+}
+
+.confirm-transfer-dialog-form {
+	padding-top: 1em;
 }
 
 .form-input-item {
@@ -21,6 +38,10 @@
 
 .dialog-content {
 	z-index: 150;
+}
+
+.confirm-transfer-buttons {
+	padding-top: 1.8em;
 }
 
 form {

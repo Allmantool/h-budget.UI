@@ -4,6 +4,7 @@ import { MappingPair, Profile } from '@dynamic-mapper/mapper';
 import { format } from 'date-fns';
 import { Guid } from 'typescript-guid';
 
+import { DateFormats } from '../../../../app/modules/shared/constants/date-formats';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
 import { IPaymentOperationCreateOrUpdateRequest } from '../../../../domain/models/accounting/requests/payment-pperation-create-or-update.request';
 import { IPaymentOperationEntity } from '../entities/payment-operation.entity';
@@ -34,7 +35,7 @@ export class PaymentOperationsMappingProfile extends Profile {
 			},
 			operationDate: opt => {
 				opt.preCondition(src => !_.isNil(src.operationDate));
-				opt.mapFrom(src => format(src.operationDate, 'yyyy-MM-dd'));
+				opt.mapFrom(src => format(src.operationDate, DateFormats.ApiRequest));
 			},
 			categoryId: opt => {
 				opt.preCondition(src => !_.isNil(src.categoryId));
