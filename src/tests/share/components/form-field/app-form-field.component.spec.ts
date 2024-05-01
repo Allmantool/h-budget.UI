@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 
+import { SelectDropdownOptions } from 'app/modules/shared/models/select-dropdown-options';
+
 import { AppFormFieldComponent } from '../../../../app/modules/shared/components/form-field/app-form-field.component';
 import { FormInput } from '../../../../app/modules/shared/types/form-input.type';
 
@@ -85,6 +87,6 @@ describe('app-form-field component', () => {
 	});
 
 	it('"trackByFn" should', () => {
-		sut.trackByFn(1, 'item-1');
+		sut.trackByFn(1, new SelectDropdownOptions({}));
 	});
 });
