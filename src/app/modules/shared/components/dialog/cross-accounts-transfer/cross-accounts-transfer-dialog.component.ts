@@ -65,7 +65,7 @@ export class CrossAccountsTransferDialogComponent {
 
 	public currencyRateSignal: Signal<number>;
 
-	public transferDirectionsSignal: Signal<string>;
+	public transferDirectionsOptionSignal: Signal<SelectDropdownOptions>;
 
 	public transferSummarySignal: Signal<string[]>;
 
@@ -93,7 +93,7 @@ export class CrossAccountsTransferDialogComponent {
 			transefAmmount: new UntypedFormControl(),
 		});
 
-		this.inSenderSignal = computed(() => this.transferDirectionsSignal() === 'In');
+		this.inSenderSignal = computed(() => this.transferDirectionsOptionSignal().value === 'In');
 
 		this.targetPaymentAccountTitlesSignal = computed(() =>
 			_.chain(this.paymentAccountsSignal())
@@ -115,20 +115,27 @@ export class CrossAccountsTransferDialogComponent {
 		);
 
 		this.transferSummarySignal = computed(() => {
+			const transferDirection = this.inSenderSignal()
+				? `Convertion from '${this.activePaymentAccountSignal().currency}' to '${this.targetPaymentAccountSignal().currency}'`
+				: `Convertion from '${this.targetPaymentAccountSignal().currency}' to '${this.activePaymentAccountSignal().currency}'`;
+
 			const originPaymentAccountInfo = `'${this.activePaymentAccountSignal().description}' after: '${_.round(this.activePaymentAccountSignal().balance - this.transferAmmountSignal(), 3)}' ('${this.activePaymentAccountSignal().currency}')`;
 			const targetPaymentAccountInfo = `'${this.targetPaymentAccountSignal().description}' after: '${_.round(this.targetPaymentAccountSignal().balance + this.currencyRateSignal() * this.transferAmmountSignal(), 3)}' ('${this.targetPaymentAccountSignal().currency}')`;
 
 			return [
-				`Convertion from '${this.activePaymentAccountSignal().currency}' to '${this.targetPaymentAccountSignal().currency}'`,
+				transferDirection,
+				``,
 				`Sender ${this.inSenderSignal() ? originPaymentAccountInfo : targetPaymentAccountInfo}`,
 				`Reciever ${this.inSenderSignal() ? targetPaymentAccountInfo : originPaymentAccountInfo}`,
-				``,
 			];
 		});
 
-		this.transferDirectionsSignal = toSignal(this.baseTransferStepFg.get('transferDirections')!.valueChanges, {
-			initialValue: this.getTransferDirections()[0],
-		});
+		this.transferDirectionsOptionSignal = toSignal(
+			this.baseTransferStepFg.get('transferDirections')!.valueChanges,
+			{
+				initialValue: this.getTransferDirections()[0],
+			}
+		);
 
 		this.operationDateSignal = toSignal(this.baseTransferStepFg.get('operationDate')!.valueChanges, {
 			initialValue: this.baseTransferStepFg.get('operationDate')!.value,
@@ -147,8 +154,11 @@ export class CrossAccountsTransferDialogComponent {
 		});
 	}
 
-	public getTransferDirections(): string[] {
-		return Object.keys(MoneyTransferDirections).filter(v => isNaN(Number(v)));
+	public getTransferDirections(): SelectDropdownOptions[] {
+		return _.map(
+			Object.keys(MoneyTransferDirections).filter(v => isNaN(Number(v))),
+			i => new SelectDropdownOptions({ value: i, decription: i })
+		);
 	}
 
 	public close() {
