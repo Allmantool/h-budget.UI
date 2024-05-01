@@ -119,8 +119,11 @@ export class CrossAccountsTransferDialogComponent {
 				? `Convertion from '${this.activePaymentAccountSignal().currency}' to '${this.targetPaymentAccountSignal().currency}'`
 				: `Convertion from '${this.targetPaymentAccountSignal().currency}' to '${this.activePaymentAccountSignal().currency}'`;
 
-			const originPaymentAccountInfo = `'${this.activePaymentAccountSignal().description}' after: '${_.round(this.activePaymentAccountSignal().balance - this.transferAmmountSignal(), 3)}' ('${this.activePaymentAccountSignal().currency}')`;
-			const targetPaymentAccountInfo = `'${this.targetPaymentAccountSignal().description}' after: '${_.round(this.targetPaymentAccountSignal().balance + this.currencyRateSignal() * this.transferAmmountSignal(), 3)}' ('${this.targetPaymentAccountSignal().currency}')`;
+			const originPaymentAccountInfo = `'${this.activePaymentAccountSignal().emitter} | ${this.activePaymentAccountSignal().description}'
+				after: '${_.round(this.activePaymentAccountSignal().balance - this.transferAmmountSignal(), 3)}' ('${this.activePaymentAccountSignal().currency}')`;
+
+			const targetPaymentAccountInfo = `'${this.targetPaymentAccountSignal().emitter} | ${this.targetPaymentAccountSignal().description}'
+				after: '${_.round(this.targetPaymentAccountSignal().balance + this.currencyRateSignal() * this.transferAmmountSignal(), 3)}' ('${this.targetPaymentAccountSignal().currency}')`;
 
 			return [
 				transferDirection,
