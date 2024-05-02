@@ -13,7 +13,7 @@ RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.d
 RUN dpkg -i google-chrome-stable_current_amd64.deb; apt-get -fy install
 ENV CHROME_BIN=/usr/bin/google-chrome
 
-RUN npm run build-prod --if-present
+RUN npm run build-prod --if-present --verbose
 
 FROM nginx:alpine3.18 as publish
 COPY nginx.conf /etc/nginx/nginx.conf
