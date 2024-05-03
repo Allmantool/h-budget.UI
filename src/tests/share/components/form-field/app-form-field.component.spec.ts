@@ -77,13 +77,16 @@ describe('app-form-field component', () => {
 	});
 
 	it('"clearInput" should clear value', () => {
+		sut.registerOnChange((_: FormInput) => 'test');
+		sut.registerOnTouched(() => {});
+
 		sut.clearInput({
 			target: {
 				value: 'test-value',
 			},
 		});
 
-		expect(sut.defaultValue).toBe('');
+		expect(sut.defaultValue).toBe(undefined);
 	});
 
 	it('"trackByFn" should', () => {
