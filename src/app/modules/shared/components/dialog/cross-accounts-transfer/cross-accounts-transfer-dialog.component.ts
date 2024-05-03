@@ -122,12 +122,14 @@ export class CrossAccountsTransferDialogComponent {
 			const originPaymentAccountInfo = `'${this.activePaymentAccountSignal().emitter} | ${this.activePaymentAccountSignal().description}'
 				after: '${_.round(this.activePaymentAccountSignal().balance - this.transferAmmountSignal(), 3)}' ('${this.activePaymentAccountSignal().currency}')`;
 
+			const targetCurrencyTransferAmmount = _.round(this.currencyRateSignal() * this.transferAmmountSignal(), 3);
+
 			const targetPaymentAccountInfo = `'${this.targetPaymentAccountSignal().emitter} | ${this.targetPaymentAccountSignal().description}'
-				after: '${_.round(this.targetPaymentAccountSignal().balance + this.currencyRateSignal() * this.transferAmmountSignal(), 3)}' ('${this.targetPaymentAccountSignal().currency}')`;
+				after: '${_.round(this.targetPaymentAccountSignal().balance + targetCurrencyTransferAmmount, 3)}' ('${this.targetPaymentAccountSignal().currency}')`;
 
 			return [
 				transferDirection,
-				``,
+				`Transfer amount ${targetCurrencyTransferAmmount} ('${this.targetPaymentAccountSignal().currency}')`,
 				`Sender ${this.inSenderSignal() ? originPaymentAccountInfo : targetPaymentAccountInfo}`,
 				`Reciever ${this.inSenderSignal() ? targetPaymentAccountInfo : originPaymentAccountInfo}`,
 			];

@@ -10,6 +10,7 @@ import _ from 'lodash';
 
 import { BehaviorSubject } from 'rxjs';
 
+import { DefaultInputTypeValuesFactory } from '../../factories/default-type-values.factory';
 import { InputTypes } from '../../models/input-types';
 import { SelectDropdownOptions } from '../../models/select-dropdown-options';
 import { FormInput } from '../../types/form-input.type';
@@ -70,6 +71,8 @@ export class AppFormFieldComponent implements ControlValueAccessor, OnInit {
 		this.data$.next(this.defaultValue);
 	}
 
+	constructor(private readonly inputTypeValuesFactory: DefaultInputTypeValuesFactory) {}
+
 	public writeValue(value: FormInput): void {
 		if (_.isNil(value)) {
 			return;
@@ -101,8 +104,15 @@ export class AppFormFieldComponent implements ControlValueAccessor, OnInit {
 	}
 
 	public clearInput(event: any) {
-		event.target.value = '';
-		this.defaultValue = '';
+		const cleanUpdefaultValue = this.inputTypeValuesFactory.GetDefault(event.target.type);
+
+		event.target.value = cleanUpdefaultValue;
+		this.defaultValue = cleanUpdefaultValue;
+
+		this.onChanged(cleanUpdefaultValue);
+		this.onTouched();
+
+		this.onDataChanged.emit(cleanUpdefaultValue);
 	}
 
 	public trackByFn(index: number, item: SelectDropdownOptions): SelectDropdownOptions {
