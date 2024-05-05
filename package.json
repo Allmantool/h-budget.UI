@@ -82,7 +82,7 @@
         "@nx/workspace": "18.3.4",
         "@schematics/angular": "^17.3.6",
         "@types/jasmine": "~5.1.4",
-        "@types/lodash": "^4.17.0",
+        "@types/lodash": "^4.17.1",
         "@types/node": "^20.12.8",
         "@types/uuid": "^9.0.8",
         "@typescript-eslint/eslint-plugin": "^7.8.0",
