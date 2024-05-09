@@ -9,9 +9,11 @@ import _ from 'lodash';
 
 import { Select } from '@ngxs/store';
 import { Observable, take, tap } from 'rxjs';
+import { Guid } from 'typescript-guid';
 
 import { Result } from '../../../../../../core/result';
 import { CurrencyExchangeService } from '../../../../../../data/providers/rates/currency-exchange.service';
+import { ICrossAccountsTransferModel } from '../../../../../../domain/models/accounting/cross-accounts-transfer.model';
 import { MoneyTransferDirections } from '../../../../../../domain/models/accounting/money-transfer-directions';
 import { IPaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';
 import { CurrencyAbbrevitions } from '../../../constants/rates-abbreviations';
@@ -30,7 +32,7 @@ import {
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CrossAccountsTransferDialogComponent {
-	private dialogConfiguration: DialogContainer<IPaymentAccountModel[], Result<IPaymentAccountModel[]>>;
+	private dialogConfiguration: DialogContainer<ICrossAccountsTransferModel, Result<Guid>>;
 	public isLoadingSignal = signal<boolean>(false);
 
 	public readonly separatorKeysCodes: number[] = [ENTER];
@@ -63,7 +65,7 @@ export class CrossAccountsTransferDialogComponent {
 
 	public transferAmmountSignal: Signal<number>;
 
-	public currencyRateSignal: Signal<number>;
+	public currencyMultiplierSignal: Signal<number>;
 
 	public transferDirectionsOptionSignal: Signal<SelectDropdownOptions>;
 
@@ -78,7 +80,7 @@ export class CrossAccountsTransferDialogComponent {
 		private exchangeService: CurrencyExchangeService,
 		private dialogRef: MatDialogRef<CrossAccountsTransferDialogComponent>,
 		@Inject(MAT_DIALOG_DATA)
-		dialogConfiguration: DialogContainer<IPaymentAccountModel[], Result<IPaymentAccountModel[]>>
+		dialogConfiguration: DialogContainer<ICrossAccountsTransferModel, Result<Guid>>
 	) {
 		this.title = dialogConfiguration.title;
 		this.dialogConfiguration = dialogConfiguration;
@@ -122,7 +124,10 @@ export class CrossAccountsTransferDialogComponent {
 			const originPaymentAccountInfo = `'${this.activePaymentAccountSignal().emitter} | ${this.activePaymentAccountSignal().description}'
 				after: '${_.round(this.activePaymentAccountSignal().balance - this.transferAmmountSignal(), 3)}' ('${this.activePaymentAccountSignal().currency}')`;
 
-			const targetCurrencyTransferAmmount = _.round(this.currencyRateSignal() * this.transferAmmountSignal(), 3);
+			const targetCurrencyTransferAmmount = _.round(
+				this.currencyMultiplierSignal() * this.transferAmmountSignal(),
+				3
+			);
 
 			const targetPaymentAccountInfo = `'${this.targetPaymentAccountSignal().emitter} | ${this.targetPaymentAccountSignal().description}'
 				after: '${_.round(this.targetPaymentAccountSignal().balance + targetCurrencyTransferAmmount, 3)}' ('${this.targetPaymentAccountSignal().currency}')`;
@@ -154,7 +159,7 @@ export class CrossAccountsTransferDialogComponent {
 			initialValue: 0,
 		});
 
-		this.currencyRateSignal = toSignal(this.confirmStepFg.get('currencyRate')!.valueChanges, {
+		this.currencyMultiplierSignal = toSignal(this.confirmStepFg.get('currencyRate')!.valueChanges, {
 			initialValue: 0,
 		});
 	}
@@ -197,11 +202,21 @@ export class CrossAccountsTransferDialogComponent {
 			.subscribe(response => this.confirmStepFg.patchValue({ currencyRate: response.payload }));
 	}
 
-	public save(): void {
+	public applyTransfer(): void {
 		this.isLoadingSignal.set(true);
 
 		this.dialogConfiguration
-			.onSubmit({} as IPaymentAccountModel[])
+			.onSubmit({
+				sender: this.inSenderSignal()
+					? this.activePaymentAccountSignal().key
+					: this.targetPaymentAccountSignal().key,
+				recipient: this.inSenderSignal()
+					? this.targetPaymentAccountSignal().key
+					: this.activePaymentAccountSignal().key,
+				amount: this.transferAmmountSignal(),
+				multiplier: this.currencyMultiplierSignal(),
+				operationAt: this.operationDateSignal(),
+			} as ICrossAccountsTransferModel)
 			.pipe(take(1))
 			.subscribe(() => {
 				this.isLoadingSignal.set(false);
