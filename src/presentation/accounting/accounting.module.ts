@@ -28,6 +28,7 @@ import { ContractorsState } from '../../app/modules/shared/store/states/handbook
 import { HandbbooksState } from '../../app/modules/shared/store/states/handbooks/handbooks.state';
 import { DefaultCategoriesProvider } from '../../data/providers/accounting/categories.provider';
 import { DefaultContractorsProvider } from '../../data/providers/accounting/contractors.provider';
+import { CrossAccountsTransferProvider } from '../../data/providers/accounting/cross-accounts-transfer.provider';
 import { DataCategoryProfile } from '../../data/providers/accounting/mappers/category.mapping.profile';
 import { DataContractorProfile } from '../../data/providers/accounting/mappers/contractor.mapping.profile';
 import { PaymentAccountsMappingProfile } from '../../data/providers/accounting/mappers/payment-accounts.mapping.profile';
@@ -81,6 +82,7 @@ import { AccountingOperationsCrudComponent, AccountingRoutingModule } from '../a
 		PaymentOperationsProvider,
 		PaymensHistoryProvider,
 		DefaultContractorsProvider,
+		CrossAccountsTransferProvider,
 		DefaultCategoriesProvider,
 		CategoriesDialogService,
 		ContractorsDialogService,

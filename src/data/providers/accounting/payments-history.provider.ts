@@ -40,4 +40,19 @@ export class PaymensHistoryProvider {
 				take(1)
 			);
 	}
+
+	public GetHistoryOperationById(paymentAccountId: string | Guid, paymentOperationId: string | Guid): Observable<IPaymentHistoryModel> {
+		return this.http
+			.get<Result<IPaymentHistoryEntity>>(
+				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId.toString()}/byId/${paymentOperationId.toString()}`
+			)
+			.pipe(
+				map(resposneResult => resposneResult.payload),
+				map(payload =>
+					this.mapper.map(PaymentHistoryMappingProfile.PaymentOperaionHistoryEntityToDomain, payload)
+				),
+				retry(ApiRequestOptions.RETRY_AMOUNT),
+				take(1)
+			);
+	}
 }

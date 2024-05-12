@@ -1,9 +1,7 @@
-import { Guid } from 'typescript-guid';
-
 export interface ICrossAccountsTransferRequest {
-	sender: Guid;
-	recipient: Guid;
+	sender: string;
+	recipient: string;
 	amount: number;
 	multiplier: number;
-	operationAt: Date;
+	operationAt: string;
 }

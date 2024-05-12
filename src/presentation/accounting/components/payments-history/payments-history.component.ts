@@ -4,6 +4,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
+import { isFuture } from 'date-fns';
 import { BehaviorSubject, forkJoin, Observable, of } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
 import { Guid } from 'typescript-guid';
@@ -93,5 +94,5 @@ export class PaymentsHistoryComponent implements OnInit, AfterViewInit {
 		this.store.dispatch(new SetActiveAccountingOperation(record.key));
 	}
 
-	public isFuturePayment = (record: IPaymentRepresentationModel): boolean => record.operationDate > new Date();
+	public isFuturePayment = (record: IPaymentRepresentationModel): boolean => isFuture(record.operationDate.getDate());
 }

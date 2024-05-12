@@ -184,7 +184,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			return;
 		}
 
-		await this.accountingOperationsService.addAsync();
+		await this.accountingOperationsService.addNewAsync();
 	}
 
 	public async deleteRecordAsync(): Promise<void> {

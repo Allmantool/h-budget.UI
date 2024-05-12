@@ -70,7 +70,7 @@ export class AccountingOperationsService {
 		);
 	}
 
-	public async addAsync(): Promise<Result<IPaymentRepresentationModel>> {
+	public async addNewAsync(): Promise<Result<IPaymentRepresentationModel>> {
 		const newRecord: IPaymentOperationModel = {
 			paymentAccountId: Guid.parse(this.activePaymentAccountIdSignal()),
 			key: Guid.EMPTY,

@@ -7,18 +7,20 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import _ from 'lodash';
 
-import { Select } from '@ngxs/store';
-import { Observable, take, tap } from 'rxjs';
-import { Guid } from 'typescript-guid';
+import { Select, Store } from '@ngxs/store';
+import { map, Observable, switchMap, take, tap } from 'rxjs';
 
 import { Result } from '../../../../../../core/result';
+import { PaymensHistoryProvider } from '../../../../../../data/providers/accounting/payments-history.provider';
 import { CurrencyExchangeService } from '../../../../../../data/providers/rates/currency-exchange.service';
 import { ICrossAccountsTransferModel } from '../../../../../../domain/models/accounting/cross-accounts-transfer.model';
 import { MoneyTransferDirections } from '../../../../../../domain/models/accounting/money-transfer-directions';
 import { IPaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';
+import { ICrossAccountsTransferResponse } from '../../../../../../domain/models/accounting/responses/cross-accounts-transfer.response';
 import { CurrencyAbbrevitions } from '../../../constants/rates-abbreviations';
 import { DialogContainer } from '../../../models/dialog-container';
 import { SelectDropdownOptions } from '../../../models/select-dropdown-options';
+import { Add } from '../../../store/states/accounting/actions/payment-operation.actions';
 import {
 	getActivePaymentAccount,
 	getActivePaymentAccountId,
@@ -32,7 +34,7 @@ import {
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CrossAccountsTransferDialogComponent {
-	private dialogConfiguration: DialogContainer<ICrossAccountsTransferModel, Result<Guid>>;
+	private dialogConfiguration: DialogContainer<ICrossAccountsTransferModel, Result<ICrossAccountsTransferResponse>>;
 	public isLoadingSignal = signal<boolean>(false);
 
 	public readonly separatorKeysCodes: number[] = [ENTER];
@@ -76,11 +78,13 @@ export class CrossAccountsTransferDialogComponent {
 	public inSenderSignal: Signal<boolean>;
 
 	constructor(
-		private fb: UntypedFormBuilder,
-		private exchangeService: CurrencyExchangeService,
+		private readonly store: Store,
+		private readonly fb: UntypedFormBuilder,
+		private readonly exchangeService: CurrencyExchangeService,
+		private readonly paymentHistoryService: PaymensHistoryProvider,
 		private dialogRef: MatDialogRef<CrossAccountsTransferDialogComponent>,
 		@Inject(MAT_DIALOG_DATA)
-		dialogConfiguration: DialogContainer<ICrossAccountsTransferModel, Result<Guid>>
+		dialogConfiguration: DialogContainer<ICrossAccountsTransferModel, Result<ICrossAccountsTransferResponse>>
 	) {
 		this.title = dialogConfiguration.title;
 		this.dialogConfiguration = dialogConfiguration;
@@ -217,9 +221,21 @@ export class CrossAccountsTransferDialogComponent {
 				multiplier: this.currencyMultiplierSignal(),
 				operationAt: this.operationDateSignal(),
 			} as ICrossAccountsTransferModel)
-			.pipe(take(1))
-			.subscribe(() => {
+			.pipe(
+				take(1),
+				map(resposneResult => resposneResult.payload),
+				switchMap(transferResponse =>
+					this.paymentHistoryService.GetHistoryOperationById(
+						this.activePaymentAccountSignal().key!,
+						transferResponse.paymentOperationId
+					)
+				)
+			)
+			.subscribe(operationHistoryRecord => {
 				this.isLoadingSignal.set(false);
+
+				this.store.dispatch(new Add(operationHistoryRecord.record));
+
 				this.dialogRef.close();
 			});
 	}

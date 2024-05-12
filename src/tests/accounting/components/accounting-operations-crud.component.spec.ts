@@ -161,13 +161,13 @@ describe('accouting operations crud component', () => {
 			])
 		);
 		await sut.addRecordAsync().then(() => {
-			expect(accountingOperationsServiceSpy.addAsync).not.toHaveBeenCalled();
+			expect(accountingOperationsServiceSpy.addNewAsync).not.toHaveBeenCalled();
 		});
 	});
 
 	it('Verify that "addRecordAsync()" has been executed if an brand new record', async () => {
 		await sut.addRecordAsync().then(() => {
-			expect(accountingOperationsServiceSpy.addAsync).toHaveBeenCalled();
+			expect(accountingOperationsServiceSpy.addNewAsync).toHaveBeenCalled();
 		});
 	});
 

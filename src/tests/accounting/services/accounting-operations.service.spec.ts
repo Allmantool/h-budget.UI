@@ -107,7 +107,7 @@ describe('accounting operations service', () => {
 	});
 
 	it('should execute "addOperationAsync" successfully', async () => {
-		const result = await sut.addAsync();
+		const result = await sut.addNewAsync();
 
 		expect(result.isSucceeded).toBeTruthy();
 	});
