@@ -16,7 +16,7 @@ import { HandbbooksState } from '../../../app/modules/shared/store/states/handbo
 import { PaymentRepresentationsMappingProfile } from '../../../data/providers/accounting/mappers/payment-representations.mapping.profile';
 import { ICategoryModel } from '../../../domain/models/accounting/category.model';
 import { IContractorModel } from '../../../domain/models/accounting/contractor.model.';
-import { OperationTypes } from '../../../domain/models/accounting/operation-types';
+import { PaymentOperationTypes } from '../../../domain/models/accounting/operation-types';
 import { IPaymentHistoryModel } from '../../../domain/models/accounting/payment-history.model';
 import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 
@@ -52,7 +52,7 @@ describe('payment-representations-mapping.profile tests', () => {
 			new SetInitialCategories([
 				{
 					key: Guid.parse('3b2a138e-f575-425a-8650-a309480a6ece'),
-					operationType: OperationTypes.Income,
+					operationType: PaymentOperationTypes.Income,
 					nameNodes: ['test_category_node_1', 'test_category_node_2'],
 				} as ICategoryModel,
 			])
@@ -97,7 +97,7 @@ describe('payment-representations-mapping.profile tests', () => {
 			new SetInitialCategories([
 				{
 					key: Guid.parse('7ae67a56-2f85-4db1-b409-bb6e2c61d772'),
-					operationType: OperationTypes.Expense,
+					operationType: PaymentOperationTypes.Expense,
 					nameNodes: ['expense_1', 'test_category_node_2'],
 				} as ICategoryModel,
 			])
@@ -167,7 +167,7 @@ describe('payment-representations-mapping.profile tests', () => {
 			new SetInitialCategories([
 				{
 					key: Guid.parse('3b2a138e-f575-425a-8650-a309480a6ece'),
-					operationType: OperationTypes.Income,
+					operationType: PaymentOperationTypes.Income,
 					nameNodes: ['test_category_node_1', 'test_category_node_2'],
 				} as ICategoryModel,
 			])

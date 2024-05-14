@@ -17,6 +17,7 @@ import { ICrossAccountsTransferModel } from '../../../../../../domain/models/acc
 import { MoneyTransferDirections } from '../../../../../../domain/models/accounting/money-transfer-directions';
 import { IPaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';
 import { ICrossAccountsTransferResponse } from '../../../../../../domain/models/accounting/responses/cross-accounts-transfer.response';
+import { OperationTypes } from '../../../../../../domain/types/operation.types';
 import { CurrencyAbbrevitions } from '../../../constants/rates-abbreviations';
 import { DialogContainer } from '../../../models/dialog-container';
 import { SelectDropdownOptions } from '../../../models/select-dropdown-options';
@@ -234,7 +235,10 @@ export class CrossAccountsTransferDialogComponent {
 			.subscribe(operationHistoryRecord => {
 				this.isLoadingSignal.set(false);
 
-				this.store.dispatch(new Add(operationHistoryRecord.record));
+				const transferOperation = operationHistoryRecord.record;
+				transferOperation.operationType = 'TRANSFER';
+
+				this.store.dispatch(new Add(transferOperation));
 
 				this.dialogRef.close();
 			});

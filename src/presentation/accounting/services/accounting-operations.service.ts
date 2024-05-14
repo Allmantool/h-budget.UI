@@ -79,6 +79,7 @@ export class AccountingOperationsService {
 			categoryId: Guid.EMPTY,
 			comment: '',
 			amount: 0,
+			operationType: 'PAYMENT',
 		};
 
 		this.store.dispatch(new SetActiveAccountingOperation(newRecord.key));

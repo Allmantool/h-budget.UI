@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, Inject, signal, Signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { UntypedFormBuilder } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 
 import * as _ from 'lodash';
@@ -12,9 +12,10 @@ import { Result } from 'core/result';
 
 import { AccountTypes } from '../../../../../../domain/models/accounting/account-types';
 import { IPaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';
-import { CurrencyAbbrevitions } from '../../../constants/rates-abbreviations';
+import { CurrencyAbbrevitions as CurrencyAbbreviations } from '../../../constants/rates-abbreviations';
 import { DialogContainer } from '../../../models/dialog-container';
 import { DialogOperationTypes } from '../../../models/dialog-operation-types';
+import { SelectDropdownOptions } from '../../../models/select-dropdown-options';
 import {
 	AddPaymentAccount,
 	UpdatePaymentAccount,
@@ -47,30 +48,22 @@ export class PaymentAccountDialogComponent {
 
 	public title: string;
 
-	public accountTypeStepFg = this.fb.group({
-		accountTypeCtrl: [''],
-	});
+	public accountTypeStepFg: UntypedFormGroup;
+
+	public currencyStepFg: UntypedFormGroup;
 
 	public additionalInfoStepFg = this.fb.group({
 		descriptionCtrl: [''],
 		emitterCtrl: [''],
 	});
 
-	public currencyStepFg = this.fb.group({
-		currencyCtrl: [''],
-	});
-
 	public balanceStepFg = this.fb.group({
 		balanceCtrl: [0],
 	});
 
-	public accountTypeSignal = toSignal(this.accountTypeStepFg.get('accountTypeCtrl')!.valueChanges, {
-		initialValue: this.getAccountsTypes()[0],
-	});
+	public accountTypeSignal: Signal<SelectDropdownOptions>;
 
-	public currencySignal = toSignal(this.currencyStepFg.get('currencyCtrl')!.valueChanges, {
-		initialValue: this.getCurrencyTypes()[0],
-	});
+	public currencySignal: Signal<SelectDropdownOptions>;
 
 	public balanceSignal = toSignal(this.balanceStepFg.get('balanceCtrl')!.valueChanges, {
 		initialValue: 0,
@@ -99,6 +92,22 @@ export class PaymentAccountDialogComponent {
 	) {
 		this.title = dialogConfiguration.title;
 		this.dialogConfiguration = dialogConfiguration;
+
+		this.accountTypeStepFg = this.fb.group({
+			accountTypeCtrl: [this.getAccountsTypes()[0].value],
+		});
+
+		this.accountTypeSignal = toSignal(this.accountTypeStepFg.get('accountTypeCtrl')!.valueChanges, {
+			initialValue: this.getAccountsTypes()[0],
+		});
+
+		this.currencyStepFg = this.fb.group({
+			currencyCtrl: [this.getCurrencyTypes()[0].value],
+		});
+
+		this.currencySignal = toSignal(this.currencyStepFg.get('currencyCtrl')!.valueChanges, {
+			initialValue: this.getCurrencyTypes()[0],
+		});
 
 		this.paymentAccountId$
 			.pipe(
@@ -130,20 +139,34 @@ export class PaymentAccountDialogComponent {
 		this.dialogRef.close();
 	}
 
-	public getAccountsTypes(): string[] {
-		return Object.keys(AccountTypes).filter(v => isNaN(Number(v)));
+	public getAccountsTypes(): SelectDropdownOptions[] {
+		return _.map(
+			Object.keys(AccountTypes).filter(v => isNaN(Number(v))),
+			type =>
+				new SelectDropdownOptions({
+					decription: type,
+					value: type,
+				})
+		);
 	}
 
-	public getCurrencyTypes(): string[] {
-		return Object.keys(CurrencyAbbrevitions).filter(v => isNaN(Number(v)));
+	public getCurrencyTypes(): SelectDropdownOptions[] {
+		return _.map(
+			Object.keys(CurrencyAbbreviations).filter(v => isNaN(Number(v))),
+			abbreviation =>
+				new SelectDropdownOptions({
+					decription: abbreviation,
+					value: abbreviation,
+				})
+		);
 	}
 
 	public applyChanges(): void {
 		this.isLoadingSignal.set(true);
 
 		const paymentAccountForSave: IPaymentAccountModel = {
-			type: AccountTypes[this.accountTypeSignal()! as keyof typeof AccountTypes],
-			currency: this.currencySignal()! as string,
+			type: AccountTypes[this.accountTypeSignal().value! as keyof typeof AccountTypes],
+			currency: this.currencySignal().value!,
 			balance: this.balanceSignal()! as number,
 			emitter: this.emmiterSignal()! as string,
 			description: this.descriptionSignal()! as string,

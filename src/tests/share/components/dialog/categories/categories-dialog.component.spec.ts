@@ -23,7 +23,7 @@ import { Result } from '../../../../../core/result';
 import { DefaultCategoriesProvider } from '../../../../../data/providers/accounting/categories.provider';
 import { ICategoryEntity } from '../../../../../data/providers/accounting/entities/operation-category.entity';
 import { ICategoryModel } from '../../../../../domain/models/accounting/category.model';
-import { OperationTypes } from '../../../../../domain/models/accounting/operation-types';
+import { PaymentOperationTypes } from '../../../../../domain/models/accounting/operation-types';
 import { CategoriesDialogService } from '../../../../../presentation/accounting/services/categories-dialog.service';
 
 describe('categories-dialog.component', () => {
@@ -52,7 +52,7 @@ describe('categories-dialog.component', () => {
 			getCategoryById: () =>
 				of<ICategoryModel>({
 					key: Guid.parse(''),
-					operationType: OperationTypes.Expense,
+					operationType: PaymentOperationTypes.Expense,
 					nameNodes: [],
 				} as ICategoryModel),
 			saveCategory: () =>

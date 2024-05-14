@@ -12,7 +12,7 @@ import { getCategories } from '../../../../app/modules/shared/store/states/handb
 import { getContractors } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
 import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
 import { IContractorModel } from '../../../../domain/models/accounting/contractor.model.';
-import { OperationTypes } from '../../../../domain/models/accounting/operation-types';
+import { PaymentOperationTypes } from '../../../../domain/models/accounting/operation-types';
 import { IPaymentHistoryModel } from '../../../../domain/models/accounting/payment-history.model';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
 import { IPaymentRepresentationModel } from '../../../../presentation/accounting/models/operation-record';
@@ -133,6 +133,6 @@ export class PaymentRepresentationsMappingProfile extends Profile {
 	}
 
 	private isIncomeCategory(id: Guid): boolean {
-		return this.getCategoryById(id).operationType === OperationTypes.Income;
+		return this.getCategoryById(id).operationType === PaymentOperationTypes.Income;
 	}
 }

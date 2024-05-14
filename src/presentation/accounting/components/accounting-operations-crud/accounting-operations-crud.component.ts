@@ -22,7 +22,7 @@ import {
 } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
 import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
 import { IContractorModel } from '../../../../domain/models/accounting/contractor.model.';
-import { OperationTypes } from '../../../../domain/models/accounting/operation-types';
+import { PaymentOperationTypes } from '../../../../domain/models/accounting/operation-types';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
 import { IPaymentRepresentationModel } from '../../models/operation-record';
 import { AccountingOperationsService } from '../../services/accounting-operations.service';
@@ -124,7 +124,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		this.isExpenseSignal = computed(() => {
 			const selectedCategory = this.categoriesMapSignal().get(this.selectedCategorySignal());
 
-			return selectedCategory?.operationType == OperationTypes.Expense;
+			return selectedCategory?.operationType == PaymentOperationTypes.Expense;
 		});
 
 		const formsCrudSignal = toSignal<IPaymentRepresentationModel>(this.crudRecordFg.valueChanges, {
@@ -140,7 +140,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 				key: payment?.key,
 				paymentAccountId: this.activePaymentAccountIdSignal(),
 				operationDate: payment?.operationDate,
-				amount: category?.operationType == OperationTypes.Expense ? payment?.expense : payment?.income,
+				amount: category?.operationType == PaymentOperationTypes.Expense ? payment?.expense : payment?.income,
 				categoryId: category?.key,
 				contractorId: contractor?.key,
 				comment: payment?.comment,

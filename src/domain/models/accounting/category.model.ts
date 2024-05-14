@@ -1,9 +1,9 @@
 import { Guid } from 'typescript-guid';
 
-import { OperationTypes } from './operation-types';
+import { PaymentOperationTypes } from './operation-types';
 
 export interface ICategoryModel {
 	key: Guid;
-	operationType: OperationTypes;
+	operationType: PaymentOperationTypes;
 	nameNodes: string[];
 }

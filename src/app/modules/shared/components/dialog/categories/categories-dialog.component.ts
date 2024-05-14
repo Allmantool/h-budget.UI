@@ -12,7 +12,7 @@ import { Store } from '@ngxs/store';
 import { map, Observable, startWith, take } from 'rxjs';
 
 import { ICategoryModel } from '../../../../../../domain/models/accounting/category.model';
-import { OperationTypes } from '../../../../../../domain/models/accounting/operation-types';
+import { PaymentOperationTypes } from '../../../../../../domain/models/accounting/operation-types';
 import { DialogContainer } from '../../../models/dialog-container';
 import { AddCategory } from '../../../store/states/handbooks/actions/category.actions';
 
@@ -48,7 +48,7 @@ export class CategoriesDialogComponent {
 		@Inject(MAT_DIALOG_DATA) dialogConfiguration: DialogContainer<ICategoryModel, ICategoryModel>
 	) {
 		this.dialogFg = fb.group({
-			categoryType: new UntypedFormControl(OperationTypes[OperationTypes.Income]),
+			categoryType: new UntypedFormControl(PaymentOperationTypes[PaymentOperationTypes.Income]),
 		});
 
 		this.title = dialogConfiguration.title;
@@ -68,7 +68,7 @@ export class CategoriesDialogComponent {
 	}
 
 	public getCategoryTypes(): string[] {
-		return Object.keys(OperationTypes).filter(v => isNaN(Number(v)));
+		return Object.keys(PaymentOperationTypes).filter(v => isNaN(Number(v)));
 	}
 
 	public save(): void {
@@ -82,7 +82,7 @@ export class CategoriesDialogComponent {
 		const categoryType = this.dialogFg.controls['categoryType'].value as string;
 
 		const payloadForSave = {
-			operationType: OperationTypes[categoryType as keyof typeof OperationTypes],
+			operationType: PaymentOperationTypes[categoryType as keyof typeof PaymentOperationTypes],
 			nameNodes: this.categoryNodes,
 		} as ICategoryModel;
 
