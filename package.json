@@ -61,7 +61,7 @@
         "tslib": "^2.6.2",
         "typescript-guid": "^1.0.3",
         "uuid": "^9.0.1",
-        "zone.js": "^0.14.5"
+        "zone.js": "^0.14.6"
     },
     "devDependencies": {
         "@angular-devkit/build-angular": "^17.3.7",
@@ -82,7 +82,7 @@
         "@nx/workspace": "18.3.5",
         "@schematics/angular": "^17.3.7",
         "@types/jasmine": "~5.1.4",
-        "@types/lodash": "^4.17.3",
+        "@types/lodash": "^4.17.4",
         "@types/node": "^20.12.12",
         "@types/uuid": "^9.0.8",
         "@typescript-eslint/eslint-plugin": "^7.9.0",
