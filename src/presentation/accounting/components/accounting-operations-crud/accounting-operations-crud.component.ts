@@ -5,10 +5,11 @@ import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angul
 import * as _ from 'lodash';
 
 import { Select } from '@ngxs/store';
-import { combineLatest, Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { filter, tap } from 'rxjs/operators';
 import { Guid } from 'typescript-guid';
 
+import { SelectDropdownOptions } from '../../../../app/modules/shared/models/select-dropdown-options';
 import { IAccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
 import { getAccountPayments } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import { getActivePaymentAccountId } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
@@ -56,7 +57,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	accountingRecords$!: Observable<IPaymentOperationModel[]>;
 
 	@Select(getCategoryNodes)
-	categoryNodes$!: Observable<string[]>;
+	categoryNodes$!: BehaviorSubject<string[]>;
 
 	@Select(getCategoryAsNodesMap)
 	categoriesMap$!: Observable<Map<string, ICategoryModel>>;
@@ -65,19 +66,22 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	contractorsMap$!: Observable<Map<string, IContractorModel>>;
 
 	@Select(getContractorNodes)
-	contractors$!: Observable<string[]>;
+	contractorNodes$!: Observable<string[]>;
 
 	@Select(getSelectedRecordGuid)
 	selectedRecordGuid$!: Observable<Guid>;
 
 	public selectedRecordGuidSignal: Signal<Guid | null>;
 	public isNotReadyForSaveSignal: Signal<boolean>;
-	public contractorsSignal: Signal<string[]>;
+
 	public categoryNodesSignal: Signal<string[]>;
+	public contractorNodesSignal: Signal<string[]>;
 	public categoriesMapSignal: Signal<Map<string, ICategoryModel>>;
 	public contractorsMapSignal: Signal<Map<string, IContractorModel>>;
-	public selectedCategorySignal: Signal<string>;
-	public selectedContractorSignal: Signal<string>;
+
+	public selectedCategorySignal: Signal<SelectDropdownOptions>;
+	public selectedContractorSignal: Signal<SelectDropdownOptions>;
+
 	public isExpenseSignal: Signal<boolean>;
 	public selectedPaymentSignal: Signal<IPaymentOperationModel>;
 	public accountingRecordsSignal: Signal<IPaymentOperationModel[]>;
@@ -100,6 +104,14 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			() => _.isEmpty(this.accountingRecordsSignal()) || _.isNil(this.selectedRecordGuidSignal())
 		);
 
+		this.contractorNodesSignal = toSignal(this.contractorNodes$, {
+			initialValue: [],
+		});
+
+		this.categoryNodesSignal = toSignal(this.categoryNodes$, {
+			initialValue: [],
+		});
+
 		this.crudRecordFg = this.fb.group({
 			key: new UntypedFormControl(),
 			operationDate: new UntypedFormControl({ disabled: true }),
@@ -110,8 +122,6 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			comment: new UntypedFormControl({ disabled: true }),
 		});
 
-		this.contractorsSignal = toSignal(this.contractors$, { initialValue: [] });
-		this.categoryNodesSignal = toSignal(this.categoryNodes$, { initialValue: [] });
 		this.categoriesMapSignal = toSignal(this.categoriesMap$, { initialValue: new Map<string, ICategoryModel>() });
 		this.contractorsMapSignal = toSignal(this.contractorsMap$, {
 			initialValue: new Map<string, IContractorModel>(),
@@ -122,7 +132,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		});
 
 		this.isExpenseSignal = computed(() => {
-			const selectedCategory = this.categoriesMapSignal().get(this.selectedCategorySignal());
+			const selectedCategory = this.categoriesMapSignal().get(this.selectedCategorySignal().value!);
 
 			return selectedCategory?.operationType == PaymentOperationTypes.Expense;
 		});
@@ -133,8 +143,8 @@ export class AccountingOperationsCrudComponent implements OnInit {
 
 		this.selectedPaymentSignal = computed(() => {
 			const payment = formsCrudSignal();
-			const category = this.categoriesMapSignal().get(payment?.category ?? '');
-			const contractor = this.contractorsMapSignal().get(payment?.contractor ?? '');
+			const category = this.categoriesMapSignal().get(this.selectedCategorySignal().value ?? '');
+			const contractor = this.contractorsMapSignal().get(this.selectedContractorSignal().value ?? '');
 
 			return {
 				key: payment?.key,
@@ -171,6 +181,28 @@ export class AccountingOperationsCrudComponent implements OnInit {
 					}
 				}
 			});
+	}
+
+	public get getContractorsOptions(): SelectDropdownOptions[] {
+		return _.map(
+			this.contractorNodesSignal(),
+			contractor =>
+				new SelectDropdownOptions({
+					decription: contractor,
+					value: contractor,
+				})
+		);
+	}
+
+	public get getCategoriesOptions(): SelectDropdownOptions[] {
+		return _.map(
+			this.categoryNodesSignal(),
+			category =>
+				new SelectDropdownOptions({
+					decription: category,
+					value: category,
+				})
+		);
 	}
 
 	public async applyChangesAsync(): Promise<void> {

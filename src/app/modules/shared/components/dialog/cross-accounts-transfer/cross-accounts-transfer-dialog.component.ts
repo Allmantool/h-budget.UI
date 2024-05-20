@@ -108,7 +108,7 @@ export class CrossAccountsTransferDialogComponent {
 				.map(
 					acc =>
 						new SelectDropdownOptions({
-							decription: `${acc.emitter} | ${acc.description}`,
+							decription: `[${acc.currency}] ${acc.emitter} | ${acc.description}`,
 							value: acc.key?.toString(),
 						})
 				)
