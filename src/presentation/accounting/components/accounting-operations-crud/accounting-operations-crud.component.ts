@@ -188,7 +188,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			this.contractorNodesSignal(),
 			contractor =>
 				new SelectDropdownOptions({
-					decription: contractor,
+					description: contractor,
 					value: contractor,
 				})
 		);
@@ -199,7 +199,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			this.categoryNodesSignal(),
 			category =>
 				new SelectDropdownOptions({
-					decription: category,
+					description: category,
 					value: category,
 				})
 		);

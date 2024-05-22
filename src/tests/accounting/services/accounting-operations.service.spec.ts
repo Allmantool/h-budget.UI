@@ -9,7 +9,7 @@ import { Result } from 'core/result';
 
 import { ngxsConfig } from '../../../app/modules/shared/store/ngxs.config';
 import { AccountingOperationsTableState } from '../../../app/modules/shared/store/states/accounting/accounting-operations-table.state';
-import { SetActivePaymentAccount } from '../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
+import { SetActivePaymentAccount } from '../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
 import { PaymentAccountState } from '../../../app/modules/shared/store/states/accounting/payment-account.state';
 import { AccountingOperationsState } from '../../../app/modules/shared/store/states/accounting/payment-operations.state';
 import { DefaultPaymentAccountsProvider } from '../../../data/providers/accounting/payment-accounts.provider';

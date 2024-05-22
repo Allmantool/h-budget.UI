@@ -19,7 +19,7 @@ import { SelectDropdownOptions } from '../../../models/select-dropdown-options';
 import {
 	AddPaymentAccount,
 	UpdatePaymentAccount,
-} from '../../../store/states/accounting/actions/payment-acount.actions';
+} from '../../../store/states/accounting/actions/payment-account.actions';
 import {
 	getActivePaymentAccountId,
 	getPaymentAccounts,
@@ -144,7 +144,7 @@ export class PaymentAccountDialogComponent {
 			Object.keys(AccountTypes).filter(v => isNaN(Number(v))),
 			type =>
 				new SelectDropdownOptions({
-					decription: type,
+					description: type,
 					value: type,
 				})
 		);
@@ -155,7 +155,7 @@ export class PaymentAccountDialogComponent {
 			Object.keys(CurrencyAbbreviations).filter(v => isNaN(Number(v))),
 			abbreviation =>
 				new SelectDropdownOptions({
-					decription: abbreviation,
+					description: abbreviation,
 					value: abbreviation,
 				})
 		);

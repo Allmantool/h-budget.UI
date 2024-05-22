@@ -66,7 +66,7 @@ export class AppFormFieldComponent implements ControlValueAccessor {
 		this.dropdownOptions$.next(
 			_.map(
 				dropdownOptions,
-				opt => new SelectDropdownOptions({ decription: opt as string, value: opt as string })
+				opt => new SelectDropdownOptions({ description: opt as string, value: opt as string })
 			)
 		);
 

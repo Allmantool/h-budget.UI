@@ -9,4 +9,5 @@ export interface IPaymentRepresentationModel {
 	expense: number;
 	comment: string;
 	balance: number;
+	operationType: number;
 }

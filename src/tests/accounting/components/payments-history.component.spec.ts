@@ -12,7 +12,7 @@ import { SetActiveAccountingOperation } from '../../../app/modules/shared/store/
 import {
 	SetActivePaymentAccount,
 	SetInitialPaymentAccounts,
-} from '../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
+} from '../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
 import { PaymentAccountState } from '../../../app/modules/shared/store/states/accounting/payment-account.state';
 import { CategoriesState } from '../../../app/modules/shared/store/states/handbooks/categories.state';
 import { ContractorsState } from '../../../app/modules/shared/store/states/handbooks/contractors.state';

@@ -8,6 +8,7 @@ import { DateFormats } from '../../../../app/modules/shared/constants/date-forma
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
 import { IPaymentOperationCreateOrUpdateRequest } from '../../../../domain/models/accounting/requests/payment-pperation-create-or-update.request';
 import { IPaymentOperationEntity } from '../entities/payment-operation.entity';
+import { OperationTypes } from "../../../../domain/types/operation.types";
 
 export class PaymentOperationsMappingProfile extends Profile {
 	static readonly PaymentOperaionEntityToDomain = new MappingPair<IPaymentOperationEntity, IPaymentOperationModel>();
@@ -71,6 +72,10 @@ export class PaymentOperationsMappingProfile extends Profile {
 			operationDate: opt => {
 				opt.preCondition(src => !_.isNil(src.operationDay));
 				opt.mapFrom(src => new Date(src.operationDay));
+			},
+			operationType: opt => {
+				opt.preCondition(src => !_.isNil(src.transactionType));
+				opt.mapFrom(src => src.transactionType as OperationTypes);
 			},
 		});
 	}

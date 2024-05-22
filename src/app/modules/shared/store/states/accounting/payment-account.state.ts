@@ -11,7 +11,7 @@ import {
 	SetActivePaymentAccount,
 	SetInitialPaymentAccounts,
 	UpdatePaymentAccount,
-} from './actions/payment-acount.actions';
+} from './actions/payment-account.actions';
 import { IPaymenentAccountStateModel } from './models/payment-account-state.model';
 
 @State<IPaymenentAccountStateModel>({

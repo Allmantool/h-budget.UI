@@ -5,7 +5,7 @@ import { take } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
 import { IAccountsService } from './interfaces/iaccounts.service';
-import { UpdatePaymentAccount } from '../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
+import { UpdatePaymentAccount } from '../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
 import { DefaultPaymentAccountsProvider } from '../../../data/providers/accounting/payment-accounts.provider';
 
 @Injectable()

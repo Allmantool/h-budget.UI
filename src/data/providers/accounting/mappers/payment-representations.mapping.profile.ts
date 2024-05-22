@@ -15,6 +15,7 @@ import { IContractorModel } from '../../../../domain/models/accounting/contracto
 import { PaymentOperationTypes } from '../../../../domain/models/accounting/operation-types';
 import { IPaymentHistoryModel } from '../../../../domain/models/accounting/payment-history.model';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
+import { OperationTypes } from '../../../../domain/types/operation.types';
 import { IPaymentRepresentationModel } from '../../../../presentation/accounting/models/operation-record';
 
 export class PaymentRepresentationsMappingProfile extends Profile {
@@ -56,23 +57,29 @@ export class PaymentRepresentationsMappingProfile extends Profile {
 			},
 			contractor: opt => {
 				opt.preCondition(src => !_.isNil(src.record.contractorId));
-				opt.mapFrom(src => this.getRepresenationView(this.getContractorById(src.record.contractorId)));
+				opt.mapFrom(src => this.getRepresentationView(this.getContractorById(src.record.contractorId)));
 			},
 			category: opt => {
 				opt.preCondition(src => !_.isNil(src.record.categoryId));
-				opt.mapFrom(src => this.getRepresenationView(this.getCategoryById(src.record.categoryId)));
+				opt.mapFrom(src => this.getRepresentationView(this.getCategoryById(src.record.categoryId)));
 			},
 			comment: opt => {
 				opt.preCondition(src => !_.isNil(src.record.comment));
 				opt.mapFrom(src => src.record.comment);
 			},
 			income: opt => {
-				opt.preCondition(src => !_.isNil(this.getCategoryById(src.record.categoryId)));
-				opt.mapFrom(src => (this.isIncomeCategory(src.record.categoryId) ? src.record.amount : 0));
+				opt.mapFrom(src =>
+					this.calculateAmount(src.record.categoryId, src.record.operationType, src.record.amount) > 0
+						? src.record.amount
+						: 0
+				);
 			},
 			expense: opt => {
-				opt.preCondition(src => !_.isNil(this.getCategoryById(src.record.categoryId)));
-				opt.mapFrom(src => (this.isIncomeCategory(src.record.categoryId) ? 0 : -src.record.amount));
+				opt.mapFrom(src =>
+					this.calculateAmount(src.record.categoryId, src.record.operationType, src.record.amount) < 0
+						? -src.record.amount
+						: 0
+				);
 			},
 			balance: opt => {
 				opt.preCondition(src => !_.isNil(src.balance));
@@ -91,37 +98,39 @@ export class PaymentRepresentationsMappingProfile extends Profile {
 			},
 			contractor: opt => {
 				opt.preCondition(src => !_.isNil(src.contractorId));
-				opt.mapFrom(src => this.getRepresenationView(this.getContractorById(src.contractorId)));
+				opt.mapFrom(src => this.getRepresentationView(this.getContractorById(src.contractorId)));
 			},
 			category: opt => {
 				opt.preCondition(src => !_.isNil(src.categoryId));
-				opt.mapFrom(src => this.getRepresenationView(this.getCategoryById(src.categoryId)));
+				opt.mapFrom(src => this.getRepresentationView(this.getCategoryById(src.categoryId)));
 			},
 			comment: opt => {
 				opt.preCondition(src => !_.isNil(src.comment));
 				opt.mapFrom(src => src.comment);
 			},
 			income: opt => {
-				opt.preCondition(src => !_.isNil(this.getCategoryById(src.categoryId)));
-				opt.mapFrom(src => (this.isIncomeCategory(src.categoryId) ? src.amount : 0));
+				opt.mapFrom(src =>
+					this.calculateAmount(src.categoryId, src.operationType, src.amount) > 0 ? src.amount : 0
+				);
 			},
 			expense: opt => {
-				opt.preCondition(src => !_.isNil(this.getCategoryById(src.categoryId)));
-				opt.mapFrom(src => (this.isIncomeCategory(src.categoryId) ? 0 : -src.amount));
+				opt.mapFrom(src =>
+					this.calculateAmount(src.categoryId, src.operationType, src.amount) < 0 ? -src.amount : 0
+				);
 			},
 		});
 	}
 
-	private getRepresenationView(handbookPaylod: ICategoryModel | IContractorModel): string {
-		if (_.isNil(handbookPaylod)) {
+	private getRepresentationView(handbookPayload: ICategoryModel | IContractorModel): string {
+		if (_.isNil(handbookPayload)) {
 			return 'N/A';
 		}
 
-		if (_.isNil(handbookPaylod?.nameNodes)) {
-			return handbookPaylod.key.toString();
+		if (_.isNil(handbookPayload?.nameNodes)) {
+			return handbookPayload.key.toString();
 		}
 
-		return handbookPaylod.nameNodes.parseToTreeAsString();
+		return handbookPayload.nameNodes.parseToTreeAsString();
 	}
 
 	private getCategoryById(id: Guid): ICategoryModel {
@@ -132,7 +141,11 @@ export class PaymentRepresentationsMappingProfile extends Profile {
 		return _.find(this.contractorsSignal(), c => c.key.equals(id))!;
 	}
 
-	private isIncomeCategory(id: Guid): boolean {
-		return this.getCategoryById(id).operationType === PaymentOperationTypes.Income;
+	private calculateAmount(categoryId: Guid, operationType: OperationTypes, amount: number): number {
+		if (operationType === OperationTypes.Transfer) {
+			return amount;
+		}
+
+		return this.getCategoryById(categoryId).operationType === PaymentOperationTypes.Income ? amount : -amount;
 	}
 }

@@ -32,7 +32,7 @@ export class PaymensHistoryProvider {
 				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId.toString()}`
 			)
 			.pipe(
-				map(resposneResult => resposneResult.payload),
+				map(responseResult => responseResult.payload),
 				map(payload =>
 					this.mapper.map(PaymentHistoryMappingProfile.PaymentOperaionHistoryEntityToDomain, payload)
 				),
@@ -47,7 +47,7 @@ export class PaymensHistoryProvider {
 				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId.toString()}/byId/${paymentOperationId.toString()}`
 			)
 			.pipe(
-				map(resposneResult => resposneResult.payload),
+				map(responseResult => responseResult.payload),
 				map(payload =>
 					this.mapper.map(PaymentHistoryMappingProfile.PaymentOperaionHistoryEntityToDomain, payload)
 				),

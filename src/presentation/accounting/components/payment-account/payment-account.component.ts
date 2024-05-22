@@ -20,7 +20,7 @@ import { Guid } from 'typescript-guid';
 import {
 	SetActivePaymentAccount,
 	SetInitialPaymentAccounts,
-} from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
+} from '../../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
 import { getPaymentAccounts } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
 import { AccountTypes } from '../../../../domain/models/accounting/account-types';

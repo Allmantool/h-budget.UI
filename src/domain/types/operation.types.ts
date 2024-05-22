@@ -1,1 +1,4 @@
-export type OperationTypes = 'TRANSFER' | 'PAYMENT';
+export enum OperationTypes {
+	Payment = 1,
+	Transfer = 2,
+}

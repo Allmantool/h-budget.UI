@@ -108,7 +108,7 @@ export class CrossAccountsTransferDialogComponent {
 				.map(
 					acc =>
 						new SelectDropdownOptions({
-							decription: `[${acc.currency}] ${acc.emitter} | ${acc.description}`,
+							description: `[${acc.currency}] ${acc.emitter} | ${acc.description}`,
 							value: acc.key?.toString(),
 						})
 				)
@@ -172,7 +172,7 @@ export class CrossAccountsTransferDialogComponent {
 	public getTransferDirections(): SelectDropdownOptions[] {
 		return _.map(
 			Object.keys(MoneyTransferDirections).filter(v => isNaN(Number(v))),
-			i => new SelectDropdownOptions({ value: i, decription: i })
+			i => new SelectDropdownOptions({ value: i, description: i })
 		);
 	}
 
@@ -236,7 +236,7 @@ export class CrossAccountsTransferDialogComponent {
 				this.isLoadingSignal.set(false);
 
 				const transferOperation = operationHistoryRecord.record;
-				transferOperation.operationType = 'TRANSFER';
+				transferOperation.operationType = OperationTypes.Transfer;
 
 				this.store.dispatch(new Add(transferOperation));
 
