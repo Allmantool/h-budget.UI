@@ -10,5 +10,5 @@ export interface IPaymentOperationModel {
 	operationDate: Date;
 	comment: string;
 	amount: number;
-	operationType: OperationTypes
+	operationType: OperationTypes;
 }

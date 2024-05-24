@@ -12,4 +12,4 @@ import { IHandbooksStateModel } from './models/IHandbooksStateModel';
 	children: [CategoriesState, ContractorsState],
 })
 @Injectable()
-export class HandbbooksState {}
+export class HandbooksState {}

@@ -16,7 +16,7 @@ import {
 import { PaymentAccountState } from '../../../app/modules/shared/store/states/accounting/payment-account.state';
 import { CategoriesState } from '../../../app/modules/shared/store/states/handbooks/categories.state';
 import { ContractorsState } from '../../../app/modules/shared/store/states/handbooks/contractors.state';
-import { HandbbooksState } from '../../../app/modules/shared/store/states/handbooks/handbooks.state';
+import { HandbooksState } from '../../../app/modules/shared/store/states/handbooks/handbooks.state';
 import { DefaultCategoriesProvider } from '../../../data/providers/accounting/categories.provider';
 import { DefaultContractorsProvider } from '../../../data/providers/accounting/contractors.provider';
 import { DataCategoryProfile } from '../../../data/providers/accounting/mappers/category.mapping.profile';
@@ -88,7 +88,7 @@ describe('payments history component', () => {
 				AccountingRoutingModule,
 				NgxsModule.forRoot(
 					[
-						HandbbooksState,
+						HandbooksState,
 						ContractorsState,
 						CategoriesState,
 						PaymentAccountState,

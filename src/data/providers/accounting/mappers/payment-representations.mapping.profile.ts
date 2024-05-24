@@ -8,11 +8,13 @@ import { Select } from '@ngxs/store';
 import { Observable } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
+import { getActivePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { getCategories } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
 import { getContractors } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
 import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
 import { IContractorModel } from '../../../../domain/models/accounting/contractor.model.';
 import { PaymentOperationTypes } from '../../../../domain/models/accounting/operation-types';
+import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 import { IPaymentHistoryModel } from '../../../../domain/models/accounting/payment-history.model';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
 import { OperationTypes } from '../../../../domain/types/operation.types';
@@ -34,6 +36,13 @@ export class PaymentRepresentationsMappingProfile extends Profile {
 
 	@Select(getContractors)
 	public contractors$!: Observable<IContractorModel[]>;
+
+	@Select(getActivePaymentAccount)
+	public activePaymentAccount$!: Observable<IPaymentAccountModel>;
+
+	public activePaymentsAccountSignal: Signal<IPaymentAccountModel> = toSignal(this.activePaymentAccount$, {
+		initialValue: {} as IPaymentAccountModel,
+	});
 
 	public categoriesSignal: Signal<ICategoryModel[]> = toSignal(this.categories$, {
 		initialValue: {} as ICategoryModel[],

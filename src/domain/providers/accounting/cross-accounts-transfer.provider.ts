@@ -6,4 +6,6 @@ import { ICrossAccountsTransferModel } from '../../models/accounting/cross-accou
 
 export interface ICrossAccountsTransferProvider {
 	applyTransfer(payload: ICrossAccountsTransferModel): Observable<Result<Guid>>;
+
+	deleteById(accountId: Guid, transferOperationId: Guid): Observable<Result<Guid>>;
 }

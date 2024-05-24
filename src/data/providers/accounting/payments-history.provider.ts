@@ -14,7 +14,7 @@ import { Result } from '../../../core/result';
 import { IPaymentHistoryModel } from '../../../domain/models/accounting/payment-history.model';
 
 @Injectable()
-export class PaymensHistoryProvider {
+export class PaymentsHistoryProvider {
 	private paymentOperationsApi: string = 'payments-history';
 	private accountingHostUrl?: string;
 
@@ -34,7 +34,7 @@ export class PaymensHistoryProvider {
 			.pipe(
 				map(responseResult => responseResult.payload),
 				map(payload =>
-					this.mapper.map(PaymentHistoryMappingProfile.PaymentOperaionHistoryEntityToDomain, payload)
+					this.mapper.map(PaymentHistoryMappingProfile.PaymentOperationHistoryEntityToDomain, payload)
 				),
 				retry(ApiRequestOptions.RETRY_AMOUNT),
 				take(1)
@@ -49,7 +49,7 @@ export class PaymensHistoryProvider {
 			.pipe(
 				map(responseResult => responseResult.payload),
 				map(payload =>
-					this.mapper.map(PaymentHistoryMappingProfile.PaymentOperaionHistoryEntityToDomain, payload)
+					this.mapper.map(PaymentHistoryMappingProfile.PaymentOperationHistoryEntityToDomain, payload)
 				),
 				retry(ApiRequestOptions.RETRY_AMOUNT),
 				take(1)

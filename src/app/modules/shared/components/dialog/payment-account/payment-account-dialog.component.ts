@@ -12,7 +12,7 @@ import { Result } from 'core/result';
 
 import { AccountTypes } from '../../../../../../domain/models/accounting/account-types';
 import { IPaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';
-import { CurrencyAbbrevitions as CurrencyAbbreviations } from '../../../constants/rates-abbreviations';
+import { CurrencyAbbreviations } from '../../../constants/rates-abbreviations';
 import { DialogContainer } from '../../../models/dialog-container';
 import { DialogOperationTypes } from '../../../models/dialog-operation-types';
 import { SelectDropdownOptions } from '../../../models/select-dropdown-options';
@@ -35,15 +35,15 @@ export class PaymentAccountDialogComponent {
 	private dialogConfiguration: DialogContainer<Result<IPaymentAccountModel>, Result<IPaymentAccountModel>>;
 	public isLoadingSignal = signal<boolean>(false);
 	public additionalInfoSignal: Signal<string> = computed(() => {
-		if (_.isEmpty(this.emmiterSignal()) && _.isEmpty(this.descriptionSignal())) {
+		if (_.isEmpty(this.emitterSignal()) && _.isEmpty(this.descriptionSignal())) {
 			return `N/A`;
 		}
 
-		if (_.isEmpty(this.descriptionSignal()) || _.isEmpty(this.emmiterSignal())) {
-			return _.trim(`${this.emmiterSignal()} ${this.descriptionSignal()}`);
+		if (_.isEmpty(this.descriptionSignal()) || _.isEmpty(this.emitterSignal())) {
+			return _.trim(`${this.emitterSignal()} ${this.descriptionSignal()}`);
 		}
 
-		return `${this.emmiterSignal()} | ${this.descriptionSignal()}`;
+		return `${this.emitterSignal()} | ${this.descriptionSignal()}`;
 	});
 
 	public title: string;
@@ -69,7 +69,7 @@ export class PaymentAccountDialogComponent {
 		initialValue: 0,
 	});
 
-	public emmiterSignal = toSignal(this.additionalInfoStepFg.get('emitterCtrl')!.valueChanges, {
+	public emitterSignal = toSignal(this.additionalInfoStepFg.get('emitterCtrl')!.valueChanges, {
 		initialValue: '',
 	});
 
@@ -168,7 +168,7 @@ export class PaymentAccountDialogComponent {
 			type: AccountTypes[this.accountTypeSignal().value! as keyof typeof AccountTypes],
 			currency: this.currencySignal().value!,
 			balance: this.balanceSignal()! as number,
-			emitter: this.emmiterSignal()! as string,
+			emitter: this.emitterSignal()! as string,
 			description: this.descriptionSignal()! as string,
 		};
 

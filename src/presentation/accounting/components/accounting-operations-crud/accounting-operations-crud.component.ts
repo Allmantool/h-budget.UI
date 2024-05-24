@@ -5,8 +5,8 @@ import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angul
 import * as _ from 'lodash';
 
 import { Select } from '@ngxs/store';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { filter, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, take } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { Guid } from 'typescript-guid';
 
 import { SelectDropdownOptions } from '../../../../app/modules/shared/models/select-dropdown-options';
@@ -35,6 +35,8 @@ import {
 	getContractorAsNodesMap,
 	getContractorNodes,
 } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
+import { OperationTypes } from 'domain/types/operation.types';
+import { CrossAccountsTransferProvider } from '../../../../data/providers/accounting/cross-accounts-transfer.provider';
 
 @Component({
 	selector: 'accounting-crud',
@@ -94,7 +96,8 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		private readonly accountingOperationsService: AccountingOperationsService,
 		private readonly categoriesDialogService: CategoriesDialogService,
 		private readonly contractorsDialogService: ContractorsDialogService,
-		private readonly paymentHistoryService: PaymentsHistoryService
+		private readonly paymentHistoryService: PaymentsHistoryService,
+		private readonly transferProvider: CrossAccountsTransferProvider
 	) {
 		this.accountingRecordsSignal = toSignal(this.accountingRecords$, { initialValue: [] });
 
@@ -142,18 +145,23 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		});
 
 		this.selectedPaymentSignal = computed(() => {
-			const payment = formsCrudSignal();
+			const paymentRepresentation = formsCrudSignal();
+			const payment = _.find(this.accountingRecordsSignal(), r => r.key === paymentRepresentation?.key);
 			const category = this.categoriesMapSignal().get(this.selectedCategorySignal().value ?? '');
 			const contractor = this.contractorsMapSignal().get(this.selectedContractorSignal().value ?? '');
 
 			return {
-				key: payment?.key,
+				key: paymentRepresentation?.key,
 				paymentAccountId: this.activePaymentAccountIdSignal(),
-				operationDate: payment?.operationDate,
-				amount: category?.operationType == PaymentOperationTypes.Expense ? payment?.expense : payment?.income,
+				operationDate: paymentRepresentation?.operationDate,
+				amount:
+					category?.operationType == PaymentOperationTypes.Expense
+						? paymentRepresentation?.expense
+						: paymentRepresentation?.income,
 				categoryId: category?.key,
 				contractorId: contractor?.key,
-				comment: payment?.comment,
+				comment: paymentRepresentation?.comment,
+				operationType: payment?.operationType,
 			} as IPaymentOperationModel;
 		});
 	}
@@ -177,6 +185,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 							income: payload.income,
 							expense: payload.expense,
 							comment: payload.comment,
+							operationType: payload.operationType,
 						});
 					}
 				}
@@ -221,6 +230,12 @@ export class AccountingOperationsCrudComponent implements OnInit {
 
 	public async deleteRecordAsync(): Promise<void> {
 		const recordIdForDelete = this.selectedPaymentSignal()?.key;
+		const accountId = this.selectedPaymentSignal()?.paymentAccountId;
+		const operationType = this.selectedPaymentSignal().operationType;
+
+		if (operationType == OperationTypes.Transfer) {
+			this.transferProvider.deleteById(accountId, recordIdForDelete).pipe(take(1)).subscribe();
+		}
 
 		await this.accountingOperationsService.deleteByIdAsync(recordIdForDelete);
 	}

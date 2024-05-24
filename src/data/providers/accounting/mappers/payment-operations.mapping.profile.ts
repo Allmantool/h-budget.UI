@@ -6,12 +6,12 @@ import { Guid } from 'typescript-guid';
 
 import { DateFormats } from '../../../../app/modules/shared/constants/date-formats';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
-import { IPaymentOperationCreateOrUpdateRequest } from '../../../../domain/models/accounting/requests/payment-pperation-create-or-update.request';
+import { IPaymentOperationCreateOrUpdateRequest } from '../../../../domain/models/accounting/requests/payment-operation-create-or-update.request';
+import { OperationTypes } from '../../../../domain/types/operation.types';
 import { IPaymentOperationEntity } from '../entities/payment-operation.entity';
-import { OperationTypes } from "../../../../domain/types/operation.types";
 
 export class PaymentOperationsMappingProfile extends Profile {
-	static readonly PaymentOperaionEntityToDomain = new MappingPair<IPaymentOperationEntity, IPaymentOperationModel>();
+	static readonly PaymentOperationEntityToDomain = new MappingPair<IPaymentOperationEntity, IPaymentOperationModel>();
 
 	static readonly DomainToPaymentOperationSaveRequest = new MappingPair<
 		IPaymentOperationModel,
@@ -44,7 +44,7 @@ export class PaymentOperationsMappingProfile extends Profile {
 			},
 		});
 
-		this.createMap(PaymentOperationsMappingProfile.PaymentOperaionEntityToDomain, {
+		this.createMap(PaymentOperationsMappingProfile.PaymentOperationEntityToDomain, {
 			key: opt => {
 				opt.preCondition(src => !_.isNil(src.key));
 				opt.mapFrom(src => Guid.parse(src.key));

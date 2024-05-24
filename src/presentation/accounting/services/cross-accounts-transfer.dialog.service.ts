@@ -13,7 +13,7 @@ import { ICrossAccountsTransferModel } from '../../../domain/models/accounting/c
 @Injectable()
 export class CrossAccountsTransferService {
 	constructor(
-		private readonly contractorProvider: CrossAccountsTransferProvider,
+		private readonly transferProvider: CrossAccountsTransferProvider,
 		private readonly dialogProvider: DialogProvider
 	) {}
 
@@ -21,7 +21,7 @@ export class CrossAccountsTransferService {
 		const config = new MatDialogConfig<DialogContainer<ICrossAccountsTransferModel, Result<Guid>>>();
 
 		const onSave = (crossAccountsTransfer: ICrossAccountsTransferModel) => {
-			return this.contractorProvider.applyTransfer(crossAccountsTransfer);
+			return this.transferProvider.applyTransfer(crossAccountsTransfer);
 		};
 
 		config.data = {

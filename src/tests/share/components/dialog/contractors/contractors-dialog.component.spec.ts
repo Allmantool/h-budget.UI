@@ -13,7 +13,7 @@ import { Guid } from 'typescript-guid';
 import { Result } from 'core/result';
 
 import { AppCoreModule } from '../../../../../app/modules/core/core.module';
-import { AngularMaterailSharedModule } from '../../../../../app/modules/shared/angular-material.shared.module';
+import { AngularMaterialSharedModule } from '../../../../../app/modules/shared/angular-material.shared.module';
 import { ContractorsDialogComponent } from '../../../../../app/modules/shared/components/dialog/contractors/contractors-dialog.component';
 import { CustomUIComponentsSharedModule } from '../../../../../app/modules/shared/custom-ui-components.shared.module';
 import { DialogContainer } from '../../../../../app/modules/shared/models/dialog-container';
@@ -64,7 +64,7 @@ describe('contractors-dialog.component', () => {
 		TestBed.configureTestingModule({
 			imports: [
 				AppCoreModule,
-				AngularMaterailSharedModule,
+				AngularMaterialSharedModule,
 				CustomUIComponentsSharedModule,
 				AppSharedModule,
 				NgxsModule.forRoot([ContractorsState], ngxsConfig),

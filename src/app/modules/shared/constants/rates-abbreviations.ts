@@ -1,4 +1,4 @@
-export class CurrencyAbbrevitions {
+export class CurrencyAbbreviations {
 	public static readonly USD: string = 'USD';
 	public static readonly BYN: string = 'BYN';
 	public static readonly EUR: string = 'EUR';

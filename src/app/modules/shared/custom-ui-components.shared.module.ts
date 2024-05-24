@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 
-import { AngularMaterailSharedModule } from './angular-material.shared.module';
+import { AngularMaterialSharedModule } from './angular-material.shared.module';
 import { AppButtonComponent } from './components/button/app-button.component';
 import { DatepickerComponent } from './components/datepicker/app-datepicker.component';
 import { AppDividerComponent } from './components/divider/app-divider.component';
@@ -22,7 +22,7 @@ const customUIComponents = [
 @NgModule({
 	declarations: [customUIComponents],
 	exports: [customUIComponents],
-	imports: [AppCoreModule, AppSharedModule, AngularMaterailSharedModule],
+	imports: [AppCoreModule, AppSharedModule, AngularMaterialSharedModule],
 	providers: [],
 	bootstrap: [],
 })

@@ -54,4 +54,4 @@ const material = [
 	providers: [],
 	bootstrap: [],
 })
-export class AngularMaterailSharedModule {}
+export class AngularMaterialSharedModule {}

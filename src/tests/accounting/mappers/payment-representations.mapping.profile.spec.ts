@@ -12,7 +12,7 @@ import { IPaymentRepresentationModel } from 'presentation/accounting/models/oper
 
 import { CategoriesState } from '../../../app/modules/shared/store/states/handbooks/categories.state';
 import { ContractorsState } from '../../../app/modules/shared/store/states/handbooks/contractors.state';
-import { HandbbooksState } from '../../../app/modules/shared/store/states/handbooks/handbooks.state';
+import { HandbooksState } from '../../../app/modules/shared/store/states/handbooks/handbooks.state';
 import { PaymentRepresentationsMappingProfile } from '../../../data/providers/accounting/mappers/payment-representations.mapping.profile';
 import { ICategoryModel } from '../../../domain/models/accounting/category.model';
 import { IContractorModel } from '../../../domain/models/accounting/contractor.model.';
@@ -27,7 +27,7 @@ describe('payment-representations-mapping.profile tests', () => {
 	beforeEach(() => {
 		TestBed.configureTestingModule({
 			imports: [
-				NgxsModule.forRoot([HandbbooksState, ContractorsState, CategoriesState]),
+				NgxsModule.forRoot([HandbooksState, ContractorsState, CategoriesState]),
 				MapperModule.withProfiles([PaymentRepresentationsMappingProfile]),
 			],
 			providers: [Mapper],
@@ -47,7 +47,7 @@ describe('payment-representations-mapping.profile tests', () => {
 		);
 	});
 
-	it('should corretly map with "PaymentHistoryToRepresentationModel" mapping pair with up to date handbooks', () => {
+	it('should correctly map with "PaymentHistoryToRepresentationModel" mapping pair with up to date handbooks', () => {
 		store.dispatch(
 			new SetInitialCategories([
 				{
@@ -92,7 +92,7 @@ describe('payment-representations-mapping.profile tests', () => {
 		expect(record.operationDate.toJSON()).toBe(new Date(paymentEntities[0].record.operationDate).toJSON());
 	});
 
-	it('should corretly map with "PaymentHistoryToRepresentationModel" when operation time is an expense', () => {
+	it('should correctly map with "PaymentHistoryToRepresentationModel" when operation time is an expense', () => {
 		store.dispatch(
 			new SetInitialCategories([
 				{
@@ -162,7 +162,7 @@ describe('payment-representations-mapping.profile tests', () => {
 		expect(record.operationDate.toJSON()).toBe(new Date(paymentEntities[0].record.operationDate).toJSON());
 	});
 
-	it('should corretly map with "PaymentOperationToRepresentationModel" mapping pair with up to date handbooks', () => {
+	it('should correctly map with "PaymentOperationToRepresentationModel" mapping pair with up to date handbooks', () => {
 		store.dispatch(
 			new SetInitialCategories([
 				{

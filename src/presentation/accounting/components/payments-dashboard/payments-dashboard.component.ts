@@ -30,9 +30,9 @@ export class PaymentsDashboardComponent implements OnInit {
 	public getActivePaymentAccountId$!: Observable<Guid>;
 
 	@Select(getActivePaymentAccount)
-	public activePaymentAccound$!: Observable<IPaymentAccountModel>;
+	public activePaymentAccount$!: Observable<IPaymentAccountModel>;
 
-	public activePaymentsAccountSignal: Signal<IPaymentAccountModel> = toSignal(this.activePaymentAccound$, {
+	public activePaymentsAccountSignal: Signal<IPaymentAccountModel> = toSignal(this.activePaymentAccount$, {
 		initialValue: {} as IPaymentAccountModel,
 	});
 

@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 
-import { AngularMaterailSharedModule } from './angular-material.shared.module';
+import { AngularMaterialSharedModule } from './angular-material.shared.module';
 import { CategoriesDialogComponent } from './components/dialog/categories/categories-dialog.component';
 import { ContractorsDialogComponent } from './components/dialog/contractors/contractors-dialog.component';
 import { CrossAccountsTransferDialogComponent } from './components/dialog/cross-accounts-transfer/cross-accounts-transfer-dialog.component';
@@ -22,7 +22,7 @@ const dialogComponents = [
 @NgModule({
 	declarations: [dialogComponents],
 	exports: [dialogComponents],
-	imports: [AppCoreModule, AngularMaterailSharedModule, CustomUIComponentsSharedModule, AppSharedModule],
+	imports: [AppCoreModule, AngularMaterialSharedModule, CustomUIComponentsSharedModule, AppSharedModule],
 	schemas: [],
 	providers: [DialogProvider],
 	bootstrap: [],

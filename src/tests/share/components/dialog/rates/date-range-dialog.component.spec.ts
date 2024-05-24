@@ -7,7 +7,7 @@ import { NgxsModule } from '@ngxs/store';
 import { Observable, of, Subject } from 'rxjs';
 
 import { AppCoreModule } from '../../../../../app/modules/core/core.module';
-import { AngularMaterailSharedModule } from '../../../../../app/modules/shared/angular-material.shared.module';
+import { AngularMaterialSharedModule } from '../../../../../app/modules/shared/angular-material.shared.module';
 import { DateRangeDialogComponent } from '../../../../../app/modules/shared/components/dialog/dates-rage/dates-range-dialog.component';
 import { CustomUIComponentsSharedModule } from '../../../../../app/modules/shared/custom-ui-components.shared.module';
 import { DialogContainer } from '../../../../../app/modules/shared/models/dialog-container';
@@ -55,7 +55,7 @@ describe('rates dialog service', () => {
 		TestBed.configureTestingModule({
 			imports: [
 				AppCoreModule,
-				AngularMaterailSharedModule,
+				AngularMaterialSharedModule,
 				CustomUIComponentsSharedModule,
 				AppSharedModule,
 				NgxsModule.forRoot([CurrencyTableState], ngxsConfig),

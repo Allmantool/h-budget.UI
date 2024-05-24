@@ -11,7 +11,7 @@ import { of } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
 import { AppCoreModule } from '../../../../../app/modules/core/core.module';
-import { AngularMaterailSharedModule } from '../../../../../app/modules/shared/angular-material.shared.module';
+import { AngularMaterialSharedModule } from '../../../../../app/modules/shared/angular-material.shared.module';
 import { CategoriesDialogComponent } from '../../../../../app/modules/shared/components/dialog/categories/categories-dialog.component';
 import { CustomUIComponentsSharedModule } from '../../../../../app/modules/shared/custom-ui-components.shared.module';
 import { DialogContainer } from '../../../../../app/modules/shared/models/dialog-container';
@@ -66,7 +66,7 @@ describe('categories-dialog.component', () => {
 		TestBed.configureTestingModule({
 			imports: [
 				AppCoreModule,
-				AngularMaterailSharedModule,
+				AngularMaterialSharedModule,
 				CustomUIComponentsSharedModule,
 				AppSharedModule,
 				NgxsModule.forRoot([CategoriesState], ngxsConfig),

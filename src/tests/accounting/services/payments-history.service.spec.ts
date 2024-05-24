@@ -12,7 +12,7 @@ import { AccountingOperationsTableState } from '../../../app/modules/shared/stor
 import { SetInitialPaymentOperations } from '../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
 import { AccountingOperationsState } from '../../../app/modules/shared/store/states/accounting/payment-operations.state';
 import { PaymentRepresentationsMappingProfile } from '../../../data/providers/accounting/mappers/payment-representations.mapping.profile';
-import { PaymensHistoryProvider } from '../../../data/providers/accounting/payments-history.provider';
+import { PaymentsHistoryProvider } from '../../../data/providers/accounting/payments-history.provider';
 import { IPaymentHistoryModel } from '../../../domain/models/accounting/payment-history.model';
 import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
@@ -23,7 +23,7 @@ describe('payments history service', () => {
 	let store: Store;
 	let mapper: Mapper;
 
-	let paymensHistoryProviderSpy: jasmine.SpyObj<PaymensHistoryProvider>;
+	let paymensHistoryProviderSpy: jasmine.SpyObj<PaymentsHistoryProvider>;
 
 	const payload: IPaymentHistoryModel[] = [
 		{
@@ -53,7 +53,7 @@ describe('payments history service', () => {
 			providers: [
 				PaymentsHistoryService,
 				{
-					provide: PaymensHistoryProvider,
+					provide: PaymentsHistoryProvider,
 					useValue: paymensHistoryProviderSpy,
 				},
 			],
