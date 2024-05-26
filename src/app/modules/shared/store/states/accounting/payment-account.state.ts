@@ -11,10 +11,10 @@ import {
 	SetActivePaymentAccount,
 	SetInitialPaymentAccounts,
 	UpdatePaymentAccount,
-} from './actions/payment-acount.actions';
-import { IPaymenentAccountStateModel } from './models/payment-account-state.model';
+} from './actions/payment-account.actions';
+import { IPaymentAccountStateModel } from './models/payment-account-state.model';
 
-@State<IPaymenentAccountStateModel>({
+@State<IPaymentAccountStateModel>({
 	name: 'paymentAccounts',
 	defaults: {
 		activeAccountGuid: '',
@@ -26,7 +26,7 @@ import { IPaymenentAccountStateModel } from './models/payment-account-state.mode
 export class PaymentAccountState {
 	@Action(SetActivePaymentAccount)
 	setActive(
-		{ patchState }: StateContext<IPaymenentAccountStateModel>,
+		{ patchState }: StateContext<IPaymentAccountStateModel>,
 		{ paymentAccountId }: SetActivePaymentAccount
 	): void {
 		patchState({
@@ -36,7 +36,7 @@ export class PaymentAccountState {
 
 	@Action(RemovePaymentAccount)
 	remove(
-		{ getState, patchState }: StateContext<IPaymenentAccountStateModel>,
+		{ getState, patchState }: StateContext<IPaymentAccountStateModel>,
 		{ paymentAccountId }: RemovePaymentAccount
 	): void {
 		const state = getState();
@@ -52,7 +52,7 @@ export class PaymentAccountState {
 
 	@Action(AddPaymentAccounts)
 	addRange(
-		{ getState, patchState }: StateContext<IPaymenentAccountStateModel>,
+		{ getState, patchState }: StateContext<IPaymentAccountStateModel>,
 		{ paymentAccounts }: AddPaymentAccounts
 	): void {
 		const state = getState();
@@ -64,7 +64,7 @@ export class PaymentAccountState {
 
 	@Action(AddPaymentAccount)
 	add(
-		{ getState, patchState }: StateContext<IPaymenentAccountStateModel>,
+		{ getState, patchState }: StateContext<IPaymentAccountStateModel>,
 		{ paymentAccount }: AddPaymentAccount
 	): void {
 		const state = getState();
@@ -79,7 +79,7 @@ export class PaymentAccountState {
 
 	@Action(UpdatePaymentAccount)
 	update(
-		{ getState, patchState }: StateContext<IPaymenentAccountStateModel>,
+		{ getState, patchState }: StateContext<IPaymentAccountStateModel>,
 		{ paymentAccount }: UpdatePaymentAccount
 	): void {
 		const state = getState();
@@ -99,7 +99,7 @@ export class PaymentAccountState {
 
 	@Action(SetInitialPaymentAccounts)
 	setInitialPaymentAccounts(
-		{ patchState }: StateContext<IPaymenentAccountStateModel>,
+		{ patchState }: StateContext<IPaymentAccountStateModel>,
 		{ paymentAccounts }: AddPaymentAccounts
 	): void {
 		patchState({

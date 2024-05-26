@@ -4,14 +4,14 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { NgApexchartsModule } from 'ng-apexcharts';
 
-import { AngularMaterailSharedModule } from './angular-material.shared.module';
+import { AngularMaterialSharedModule } from './angular-material.shared.module';
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
-import { AccountingCurrencyFormatPipe } from './pipes/accouting-currency.pipe';
-import { CurrencyAbreviationToFlagFormatPipe } from './pipes/currency-abbreviation-to-flag.pipe';
+import { AccountingCurrencyFormatPipe } from './pipes/accounting-currency.pipe';
+import { CurrencyAbbreviationToFlagFormatPipe } from './pipes/currency-abbreviation-to-flag.pipe';
 import { AppCoreModule } from '../core';
 
 @NgModule({
-	declarations: [PageNotFoundComponent, AccountingCurrencyFormatPipe, CurrencyAbreviationToFlagFormatPipe],
+	declarations: [PageNotFoundComponent, AccountingCurrencyFormatPipe, CurrencyAbbreviationToFlagFormatPipe],
 	exports: [
 		CommonModule,
 
@@ -23,9 +23,9 @@ import { AppCoreModule } from '../core';
 		ReactiveFormsModule,
 
 		AccountingCurrencyFormatPipe,
-		CurrencyAbreviationToFlagFormatPipe,
+		CurrencyAbbreviationToFlagFormatPipe,
 	],
-	imports: [AppCoreModule, ReactiveFormsModule, AngularMaterailSharedModule],
+	imports: [AppCoreModule, ReactiveFormsModule, AngularMaterialSharedModule],
 	providers: [],
 	bootstrap: [],
 })

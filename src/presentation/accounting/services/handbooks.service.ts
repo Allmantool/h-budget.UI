@@ -25,7 +25,7 @@ export class HandbooksService {
 		return combineLatest([inquireCategories$, inquireContractors$])
 			.pipe(
 				take(1),
-				filter(([categories, contractors]) => !_.isEmpty(categories) && !_.isEmpty(contractors))
+				filter(([categories, contractors]) => !_.isNil(categories) && !_.isNil(contractors))
 			)
 			.subscribe(([categories, contractors]) => {
 				this.store.dispatch(new SetInitialContractors(contractors));

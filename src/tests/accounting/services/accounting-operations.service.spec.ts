@@ -9,7 +9,7 @@ import { Result } from 'core/result';
 
 import { ngxsConfig } from '../../../app/modules/shared/store/ngxs.config';
 import { AccountingOperationsTableState } from '../../../app/modules/shared/store/states/accounting/accounting-operations-table.state';
-import { SetActivePaymentAccount } from '../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
+import { SetActivePaymentAccount } from '../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
 import { PaymentAccountState } from '../../../app/modules/shared/store/states/accounting/payment-account.state';
 import { AccountingOperationsState } from '../../../app/modules/shared/store/states/accounting/payment-operations.state';
 import { DefaultPaymentAccountsProvider } from '../../../data/providers/accounting/payment-accounts.provider';
@@ -18,6 +18,7 @@ import { AccountTypes } from '../../../domain/models/accounting/account-types';
 import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
 import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 import { IPaymentAccountCreateOrUpdateResponse } from '../../../domain/models/accounting/responses/payment-account-create-or-update.response';
+import { OperationTypes } from '../../../domain/types/operation.types';
 import { AccountingOperationsService } from '../../../presentation/accounting/services/accounting-operations.service';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
 
@@ -107,7 +108,7 @@ describe('accounting operations service', () => {
 	});
 
 	it('should execute "addOperationAsync" successfully', async () => {
-		const result = await sut.addAsync();
+		const result = await sut.addNewAsync();
 
 		expect(result.isSucceeded).toBeTruthy();
 	});
@@ -133,6 +134,7 @@ describe('accounting operations service', () => {
 			paymentAccountId: Guid.parse('1c12ec59-8875-45c1-9fb0-e4edcf34a074'),
 			operationDate: new Date(),
 			comment: 'test comments while update',
+			operationType: OperationTypes.Payment,
 		};
 
 		const result = await sut.updateAsync(payload);

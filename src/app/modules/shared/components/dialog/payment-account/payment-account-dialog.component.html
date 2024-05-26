@@ -16,7 +16,7 @@
 				>
 					<ng-template matStepLabel>
 						Pick out an account type:
-						<span>{{ accountTypeSignal()}}</span>
+						<span>{{ accountTypeSignal().description}}</span>
 					</ng-template>
 					<app-form-field
 						formControlName="accountTypeCtrl"
@@ -43,7 +43,7 @@
 					<ng-template matStepLabel>
 						Pick out a currency type:
 						<span
-							class="abbreviation-flag fi fi-{{currencySignal() | currencyAbbreviationToFlagFormat}}"
+							class="abbreviation-flag fi fi-{{currencySignal().value!| currencyAbbreviationToFlagFormat}}"
 						></span>
 					</ng-template>
 					<app-form-field
@@ -83,7 +83,7 @@
 							formControlName="balanceCtrl"
 							[fieldType]="'INPUT'"
 							[title]="'Balance:'"
-							[numberInputPrefix]="currencySignal()"
+							[numberInputPrefix]="currencySignal().value!"
 						></app-form-field>
 					</div>
 					<div>
@@ -141,12 +141,12 @@
 				<mat-list>
 					<mat-list-item>
 						<mat-icon matListItemIcon>done</mat-icon>
-						Account type: {{accountTypeSignal()}}
+						Account type: {{accountTypeSignal().description}}
 					</mat-list-item>
 					<mat-divider></mat-divider>
 					<mat-list-item>
 						<mat-icon matListItemIcon>done</mat-icon>
-						Initial balance: {{balanceSignal()}} {{currencySignal()}}
+						Initial balance: {{balanceSignal()}} {{currencySignal().description}}
 					</mat-list-item>
 					<mat-divider></mat-divider>
 					<mat-list-item>

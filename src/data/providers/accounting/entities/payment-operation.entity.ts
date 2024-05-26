@@ -6,4 +6,5 @@ export interface IPaymentOperationEntity {
 	categoryId: string;
 	paymentAccountId: string;
 	amount: number;
+	transactionType: number;
 }

@@ -5,10 +5,11 @@ import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angul
 import * as _ from 'lodash';
 
 import { Select } from '@ngxs/store';
-import { combineLatest, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, take } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { Guid } from 'typescript-guid';
 
+import { SelectDropdownOptions } from '../../../../app/modules/shared/models/select-dropdown-options';
 import { IAccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
 import { getAccountPayments } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import { getActivePaymentAccountId } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
@@ -22,7 +23,7 @@ import {
 } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
 import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
 import { IContractorModel } from '../../../../domain/models/accounting/contractor.model.';
-import { OperationTypes } from '../../../../domain/models/accounting/operation-types';
+import { PaymentOperationTypes } from '../../../../domain/models/accounting/operation-types';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
 import { IPaymentRepresentationModel } from '../../models/operation-record';
 import { AccountingOperationsService } from '../../services/accounting-operations.service';
@@ -34,6 +35,8 @@ import {
 	getContractorAsNodesMap,
 	getContractorNodes,
 } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
+import { OperationTypes } from 'domain/types/operation.types';
+import { CrossAccountsTransferProvider } from '../../../../data/providers/accounting/cross-accounts-transfer.provider';
 
 @Component({
 	selector: 'accounting-crud',
@@ -56,7 +59,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	accountingRecords$!: Observable<IPaymentOperationModel[]>;
 
 	@Select(getCategoryNodes)
-	categoryNodes$!: Observable<string[]>;
+	categoryNodes$!: BehaviorSubject<string[]>;
 
 	@Select(getCategoryAsNodesMap)
 	categoriesMap$!: Observable<Map<string, ICategoryModel>>;
@@ -65,19 +68,22 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	contractorsMap$!: Observable<Map<string, IContractorModel>>;
 
 	@Select(getContractorNodes)
-	contractors$!: Observable<string[]>;
+	contractorNodes$!: Observable<string[]>;
 
 	@Select(getSelectedRecordGuid)
 	selectedRecordGuid$!: Observable<Guid>;
 
 	public selectedRecordGuidSignal: Signal<Guid | null>;
 	public isNotReadyForSaveSignal: Signal<boolean>;
-	public contractorsSignal: Signal<string[]>;
+
 	public categoryNodesSignal: Signal<string[]>;
+	public contractorNodesSignal: Signal<string[]>;
 	public categoriesMapSignal: Signal<Map<string, ICategoryModel>>;
 	public contractorsMapSignal: Signal<Map<string, IContractorModel>>;
-	public selectedCategorySignal: Signal<string>;
-	public selectedContractorSignal: Signal<string>;
+
+	public selectedCategorySignal: Signal<SelectDropdownOptions>;
+	public selectedContractorSignal: Signal<SelectDropdownOptions>;
+
 	public isExpenseSignal: Signal<boolean>;
 	public selectedPaymentSignal: Signal<IPaymentOperationModel>;
 	public accountingRecordsSignal: Signal<IPaymentOperationModel[]>;
@@ -90,7 +96,8 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		private readonly accountingOperationsService: AccountingOperationsService,
 		private readonly categoriesDialogService: CategoriesDialogService,
 		private readonly contractorsDialogService: ContractorsDialogService,
-		private readonly paymentHistoryService: PaymentsHistoryService
+		private readonly paymentHistoryService: PaymentsHistoryService,
+		private readonly transferProvider: CrossAccountsTransferProvider
 	) {
 		this.accountingRecordsSignal = toSignal(this.accountingRecords$, { initialValue: [] });
 
@@ -99,6 +106,14 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		this.isNotReadyForSaveSignal = computed(
 			() => _.isEmpty(this.accountingRecordsSignal()) || _.isNil(this.selectedRecordGuidSignal())
 		);
+
+		this.contractorNodesSignal = toSignal(this.contractorNodes$, {
+			initialValue: [],
+		});
+
+		this.categoryNodesSignal = toSignal(this.categoryNodes$, {
+			initialValue: [],
+		});
 
 		this.crudRecordFg = this.fb.group({
 			key: new UntypedFormControl(),
@@ -110,8 +125,6 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			comment: new UntypedFormControl({ disabled: true }),
 		});
 
-		this.contractorsSignal = toSignal(this.contractors$, { initialValue: [] });
-		this.categoryNodesSignal = toSignal(this.categoryNodes$, { initialValue: [] });
 		this.categoriesMapSignal = toSignal(this.categoriesMap$, { initialValue: new Map<string, ICategoryModel>() });
 		this.contractorsMapSignal = toSignal(this.contractorsMap$, {
 			initialValue: new Map<string, IContractorModel>(),
@@ -122,9 +135,9 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		});
 
 		this.isExpenseSignal = computed(() => {
-			const selectedCategory = this.categoriesMapSignal().get(this.selectedCategorySignal());
+			const selectedCategory = this.categoriesMapSignal().get(this.selectedCategorySignal().value!);
 
-			return selectedCategory?.operationType == OperationTypes.Expense;
+			return selectedCategory?.operationType == PaymentOperationTypes.Expense;
 		});
 
 		const formsCrudSignal = toSignal<IPaymentRepresentationModel>(this.crudRecordFg.valueChanges, {
@@ -132,18 +145,23 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		});
 
 		this.selectedPaymentSignal = computed(() => {
-			const payment = formsCrudSignal();
-			const category = this.categoriesMapSignal().get(payment?.category ?? '');
-			const contractor = this.contractorsMapSignal().get(payment?.contractor ?? '');
+			const paymentRepresentation = formsCrudSignal();
+			const payment = _.find(this.accountingRecordsSignal(), r => r.key === paymentRepresentation?.key);
+			const category = this.categoriesMapSignal().get(this.selectedCategorySignal().value ?? '');
+			const contractor = this.contractorsMapSignal().get(this.selectedContractorSignal().value ?? '');
 
 			return {
-				key: payment?.key,
+				key: paymentRepresentation?.key,
 				paymentAccountId: this.activePaymentAccountIdSignal(),
-				operationDate: payment?.operationDate,
-				amount: category?.operationType == OperationTypes.Expense ? payment?.expense : payment?.income,
+				operationDate: paymentRepresentation?.operationDate,
+				amount:
+					category?.operationType == PaymentOperationTypes.Expense
+						? paymentRepresentation?.expense
+						: paymentRepresentation?.income,
 				categoryId: category?.key,
 				contractorId: contractor?.key,
-				comment: payment?.comment,
+				comment: paymentRepresentation?.comment,
+				operationType: payment?.operationType,
 			} as IPaymentOperationModel;
 		});
 	}
@@ -167,10 +185,33 @@ export class AccountingOperationsCrudComponent implements OnInit {
 							income: payload.income,
 							expense: payload.expense,
 							comment: payload.comment,
+							operationType: payload.operationType,
 						});
 					}
 				}
 			});
+	}
+
+	public get getContractorsOptions(): SelectDropdownOptions[] {
+		return _.map(
+			this.contractorNodesSignal(),
+			contractor =>
+				new SelectDropdownOptions({
+					description: contractor,
+					value: contractor,
+				})
+		);
+	}
+
+	public get getCategoriesOptions(): SelectDropdownOptions[] {
+		return _.map(
+			this.categoryNodesSignal(),
+			category =>
+				new SelectDropdownOptions({
+					description: category,
+					value: category,
+				})
+		);
 	}
 
 	public async applyChangesAsync(): Promise<void> {
@@ -184,11 +225,17 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			return;
 		}
 
-		await this.accountingOperationsService.addAsync();
+		await this.accountingOperationsService.addNewAsync();
 	}
 
 	public async deleteRecordAsync(): Promise<void> {
 		const recordIdForDelete = this.selectedPaymentSignal()?.key;
+		const accountId = this.selectedPaymentSignal()?.paymentAccountId;
+		const operationType = this.selectedPaymentSignal().operationType;
+
+		if (operationType == OperationTypes.Transfer) {
+			this.transferProvider.deleteById(accountId, recordIdForDelete).pipe(take(1)).subscribe();
+		}
 
 		await this.accountingOperationsService.deleteByIdAsync(recordIdForDelete);
 	}

@@ -7,7 +7,7 @@ import { IPaymentHistoryModel } from '../../../../domain/models/accounting/payme
 import { IPaymentHistoryEntity } from '../entities/payment-history.entity';
 
 export class PaymentHistoryMappingProfile extends Profile {
-	static readonly PaymentOperaionHistoryEntityToDomain = new MappingPair<
+	static readonly PaymentOperationHistoryEntityToDomain = new MappingPair<
 		IPaymentHistoryEntity,
 		IPaymentHistoryModel
 	>();
@@ -15,14 +15,14 @@ export class PaymentHistoryMappingProfile extends Profile {
 	constructor() {
 		super();
 
-		this.createMap(PaymentHistoryMappingProfile.PaymentOperaionHistoryEntityToDomain, {
+		this.createMap(PaymentHistoryMappingProfile.PaymentOperationHistoryEntityToDomain, {
 			balance: opt => {
 				opt.preCondition(src => !_.isNil(src.balance));
 				opt.mapFrom(src => src.balance);
 			},
 			record: opt => {
 				opt.preCondition(src => !_.isNil(src.record));
-				opt.mapFromUsing(src => src.record, PaymentOperationsMappingProfile.PaymentOperaionEntityToDomain);
+				opt.mapFromUsing(src => src.record, PaymentOperationsMappingProfile.PaymentOperationEntityToDomain);
 			},
 		});
 	}

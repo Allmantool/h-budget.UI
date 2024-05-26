@@ -11,7 +11,7 @@ import { CurrencyRatesGridService } from './services/currency-rates-grid.service
 import { LineChartService } from './services/line-chart.service';
 import { RatesDialogService } from './services/rates-dialog.service';
 import { AppCoreModule } from '../../app/modules/core';
-import { AngularMaterailSharedModule } from '../../app/modules/shared/angular-material.shared.module';
+import { AngularMaterialSharedModule } from '../../app/modules/shared/angular-material.shared.module';
 import { CustomUIComponentsSharedModule } from '../../app/modules/shared/custom-ui-components.shared.module';
 import { DialogsSharedModule } from '../../app/modules/shared/dialogs.shared.module';
 import { AppSharedModule } from '../../app/modules/shared/shared.module';
@@ -30,7 +30,7 @@ import {
 	imports: [
 		AppCoreModule,
 		AppSharedModule,
-		AngularMaterailSharedModule,
+		AngularMaterialSharedModule,
 		CustomUIComponentsSharedModule,
 		DialogsSharedModule,
 		CurrencyRatesRoutingModule,

@@ -1,4 +1,4 @@
-import { CurrencyAbbrevitions } from './rates-abbreviations';
+import { CurrencyAbbreviations } from './rates-abbreviations';
 import { RatesCodes } from './rates-codes';
 
 export class RatesGridDefaultOptions {
@@ -6,5 +6,5 @@ export class RatesGridDefaultOptions {
 	public static readonly RATE_DIFF_PRECISION: number = 2;
 
 	public static readonly CURRENCY_ID: number = RatesCodes.USD;
-	public static readonly CURRENCY_ABBREVIATION: string = CurrencyAbbrevitions.USD;
+	public static readonly CURRENCY_ABBREVIATION: string = CurrencyAbbreviations.USD;
 }

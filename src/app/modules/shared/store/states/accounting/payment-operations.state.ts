@@ -9,12 +9,12 @@ import { AccountingOperationsTableState } from './accounting-operations-table.st
 import { Add, AddRange, Delete, Edit, SetInitialPaymentOperations } from './actions/payment-operation.actions';
 import { IAccountingOperationsStateModel } from './models/accounting-state.model';
 import { IPaymentRepresentationModel } from '../../../../../../presentation/accounting/models/operation-record';
-import { CurrencyAbbrevitions } from '../../../constants/rates-abbreviations';
+import { CurrencyAbbreviations } from '../../../constants/rates-abbreviations';
 
 @State<IAccountingOperationsStateModel>({
 	name: 'accountingOperations',
 	defaults: {
-		activeCurrency: CurrencyAbbrevitions.BYN,
+		activeCurrency: CurrencyAbbreviations.BYN,
 		operationRecords: [],
 	},
 	children: [AccountingOperationsTableState],

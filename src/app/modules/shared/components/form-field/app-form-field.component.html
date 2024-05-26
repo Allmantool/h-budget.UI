@@ -44,7 +44,7 @@
 				(selectionChange)="updateValue($event)"
 			>
 				<ng-container *ngFor="let option of dropdownOptions$ | async; trackBy: trackByFn">
-					<mat-option [value]="option.value">{{ option.decription }}</mat-option>
+					<mat-option [value]="option.value">{{ option.description }}</mat-option>
 				</ng-container>
 			</mat-select>
 		</mat-form-field>

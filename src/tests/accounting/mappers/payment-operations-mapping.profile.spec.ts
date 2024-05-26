@@ -43,7 +43,7 @@ describe('payment-operations-mapping.profile tests', () => {
 			} as IPaymentOperationEntity,
 		];
 
-		const result = mapper.map(PaymentOperationsMappingProfile.PaymentOperaionEntityToDomain, paymentEntities);
+		const result = mapper.map(PaymentOperationsMappingProfile.PaymentOperationEntityToDomain, paymentEntities);
 
 		expect(result.length).toBe(2);
 

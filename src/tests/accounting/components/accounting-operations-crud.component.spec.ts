@@ -12,7 +12,7 @@ import { Guid } from 'typescript-guid';
 import { SetInitialPaymentOperations } from 'app/modules/shared/store/states/accounting/actions/payment-operation.actions';
 
 import { AppCoreModule } from '../../../app/modules/core/core.module';
-import { AngularMaterailSharedModule } from '../../../app/modules/shared/angular-material.shared.module';
+import { AngularMaterialSharedModule } from '../../../app/modules/shared/angular-material.shared.module';
 import { CustomUIComponentsSharedModule } from '../../../app/modules/shared/custom-ui-components.shared.module';
 import { DialogsSharedModule } from '../../../app/modules/shared/dialogs.shared.module';
 import { AppSharedModule } from '../../../app/modules/shared/shared.module';
@@ -23,8 +23,9 @@ import { PaymentAccountState } from '../../../app/modules/shared/store/states/ac
 import { AccountingOperationsState } from '../../../app/modules/shared/store/states/accounting/payment-operations.state';
 import { CategoriesState } from '../../../app/modules/shared/store/states/handbooks/categories.state';
 import { ContractorsState } from '../../../app/modules/shared/store/states/handbooks/contractors.state';
-import { HandbbooksState } from '../../../app/modules/shared/store/states/handbooks/handbooks.state';
+import { HandbooksState } from '../../../app/modules/shared/store/states/handbooks/handbooks.state';
 import { Result } from '../../../core/result';
+import { CrossAccountsTransferProvider } from '../../../data/providers/accounting/cross-accounts-transfer.provider';
 import { DataCategoryProfile } from '../../../data/providers/accounting/mappers/category.mapping.profile';
 import { DataContractorProfile } from '../../../data/providers/accounting/mappers/contractor.mapping.profile';
 import { PaymentHistoryMappingProfile } from '../../../data/providers/accounting/mappers/payment-history.mapping.profile';
@@ -37,20 +38,21 @@ import { CategoriesDialogService } from '../../../presentation/accounting/servic
 import { ContractorsDialogService } from '../../../presentation/accounting/services/contractors-dialog.service';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
 
-describe('accouting operations crud component', () => {
+describe('accounting operations crud component', () => {
 	let sut: AccountingOperationsCrudComponent;
 
 	let accountingOperationsServiceSpy: jasmine.SpyObj<AccountingOperationsService>;
 	let categoriesDialogServiceSpy: CategoriesDialogService;
 	let contractorsDialogServiceSpy: jasmine.SpyObj<ContractorsDialogService>;
 	let paymentHistoryServiceSpy: PaymentsHistoryService;
+	let crossAccountsTransferProviderSpy: CrossAccountsTransferProvider;
 
 	let store: Store;
 
 	beforeEach(() => {
 		accountingOperationsServiceSpy = jasmine.createSpyObj('accountingOperationsService', {
 			updateAsync: () => new Promise(() => new Result({ payload: true })),
-			addAsync: () => new Promise(() => new Result({ payload: {} as IPaymentRepresentationModel })),
+			addNewAsync: () => new Promise(() => new Result({ payload: {} as IPaymentRepresentationModel })),
 			deleteByIdAsync: (_: IPaymentOperationModel): Promise<Result<boolean>> =>
 				new Promise(() => new Result({ payload: true })),
 		});
@@ -61,6 +63,10 @@ describe('accouting operations crud component', () => {
 
 		contractorsDialogServiceSpy = jasmine.createSpyObj('contractorsDialogService', {
 			openContractors: undefined,
+		});
+
+		crossAccountsTransferProviderSpy = jasmine.createSpyObj<CrossAccountsTransferProvider>('transferProvider', {
+			deleteById: undefined,
 		});
 
 		paymentHistoryServiceSpy = jasmine.createSpyObj<PaymentsHistoryService>('paymentHistoryService', {
@@ -79,7 +85,7 @@ describe('accouting operations crud component', () => {
 		TestBed.configureTestingModule({
 			imports: [
 				AppSharedModule,
-				AngularMaterailSharedModule,
+				AngularMaterialSharedModule,
 				CustomUIComponentsSharedModule,
 				AppCoreModule,
 				AccountingRoutingModule,
@@ -88,7 +94,7 @@ describe('accouting operations crud component', () => {
 				ReactiveFormsModule,
 				NgxsModule.forRoot(
 					[
-						HandbbooksState,
+						HandbooksState,
 						ContractorsState,
 						CategoriesState,
 						PaymentAccountState,
@@ -117,6 +123,10 @@ describe('accouting operations crud component', () => {
 				{
 					provide: PaymentsHistoryService,
 					useValue: paymentHistoryServiceSpy,
+				},
+				{
+					provide: CrossAccountsTransferProvider,
+					useValue: crossAccountsTransferProviderSpy,
 				},
 			],
 		}).compileComponents();
@@ -161,13 +171,13 @@ describe('accouting operations crud component', () => {
 			])
 		);
 		await sut.addRecordAsync().then(() => {
-			expect(accountingOperationsServiceSpy.addAsync).not.toHaveBeenCalled();
+			expect(accountingOperationsServiceSpy.addNewAsync).not.toHaveBeenCalled();
 		});
 	});
 
 	it('Verify that "addRecordAsync()" has been executed if an brand new record', async () => {
 		await sut.addRecordAsync().then(() => {
-			expect(accountingOperationsServiceSpy.addAsync).toHaveBeenCalled();
+			expect(accountingOperationsServiceSpy.addNewAsync).toHaveBeenCalled();
 		});
 	});
 

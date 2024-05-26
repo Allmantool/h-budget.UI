@@ -7,7 +7,7 @@ import { IAccountingTableStateModel } from './models/accounting-table-state.mode
 import { IAccountingOperationsTableOptions } from '../../models/accounting/accounting-table-options';
 
 @State<IAccountingTableStateModel>({
-	name: 'accountingOpertaionsTableState',
+	name: 'accountingOperationsTableState',
 	defaults: {
 		tableOptions: {} as IAccountingOperationsTableOptions,
 	},

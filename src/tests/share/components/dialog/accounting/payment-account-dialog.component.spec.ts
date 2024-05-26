@@ -10,7 +10,7 @@ import { Guid } from 'typescript-guid';
 import { PaymentAccountState } from 'app/modules/shared/store/states/accounting/payment-account.state';
 
 import { AppCoreModule } from '../../../../../app/modules/core/core.module';
-import { AngularMaterailSharedModule } from '../../../../../app/modules/shared/angular-material.shared.module';
+import { AngularMaterialSharedModule } from '../../../../../app/modules/shared/angular-material.shared.module';
 import { PaymentAccountDialogComponent } from '../../../../../app/modules/shared/components/dialog/payment-account/payment-account-dialog.component';
 import { CustomUIComponentsSharedModule } from '../../../../../app/modules/shared/custom-ui-components.shared.module';
 import { DialogContainer } from '../../../../../app/modules/shared/models/dialog-container';
@@ -69,7 +69,7 @@ describe('payment-account-dialog.component', () => {
 		TestBed.configureTestingModule({
 			imports: [
 				AppCoreModule,
-				AngularMaterailSharedModule,
+				AngularMaterialSharedModule,
 				CustomUIComponentsSharedModule,
 				AppSharedModule,
 				NgxsModule.forRoot([PaymentAccountState], ngxsConfig),

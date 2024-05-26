@@ -6,7 +6,7 @@ import * as _ from 'lodash';
 import { Select, Store } from '@ngxs/store';
 import { filter, Observable, take } from 'rxjs';
 
-import { RemovePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/actions/payment-acount.actions';
+import { RemovePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
 import { getActivePaymentAccountId } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
 import { PaymentAccountDialogService } from '../../services/payment-account-dialog.service';

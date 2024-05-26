@@ -22,6 +22,7 @@ import { PaymentOperationsProvider } from '../../../data/providers/accounting/pa
 import { ICategoryModel } from '../../../domain/models/accounting/category.model';
 import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 import { IPaymentRepresentationModel } from '../models/operation-record';
+import { OperationTypes } from "../../../domain/types/operation.types";
 
 @Injectable()
 export class AccountingOperationsService {
@@ -70,7 +71,7 @@ export class AccountingOperationsService {
 		);
 	}
 
-	public async addAsync(): Promise<Result<IPaymentRepresentationModel>> {
+	public async addNewAsync(): Promise<Result<IPaymentRepresentationModel>> {
 		const newRecord: IPaymentOperationModel = {
 			paymentAccountId: Guid.parse(this.activePaymentAccountIdSignal()),
 			key: Guid.EMPTY,
@@ -79,6 +80,7 @@ export class AccountingOperationsService {
 			categoryId: Guid.EMPTY,
 			comment: '',
 			amount: 0,
+			operationType: OperationTypes.Payment,
 		};
 
 		this.store.dispatch(new SetActiveAccountingOperation(newRecord.key));
@@ -95,6 +97,7 @@ export class AccountingOperationsService {
 						expense: 0,
 						comment: '',
 						balance: 0,
+						operationType: 1
 					},
 					isSucceeded: true,
 				})

@@ -24,8 +24,8 @@ export class PaymentAccountsMappingProfile extends Profile {
 				opt.mapFrom(src => Guid.parse(src.key));
 			},
 			type: opt => {
-				opt.preCondition(src => !_.isNil(src.type));
-				opt.mapFrom(src => src.type); // should work (should be checked)
+				opt.preCondition(src => !_.isNil(src.accountType));
+				opt.mapFrom(src => src.accountType); // should work (should be checked)
 			},
 			currency: opt => {
 				opt.preCondition(src => !_.isNil(src.currency));
@@ -54,7 +54,7 @@ export class PaymentAccountsMappingProfile extends Profile {
 				opt.preCondition(src => !_.isNil(src.currency));
 				opt.mapFrom(src => src.currency);
 			},
-			balance: opt => {
+			initialBalance: opt => {
 				opt.preCondition(src => !_.isNil(src.balance));
 				opt.mapFrom(src => src.balance);
 			},

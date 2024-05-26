@@ -14,7 +14,7 @@ import { Result } from '../../../core/result';
 import { IPaymentHistoryModel } from '../../../domain/models/accounting/payment-history.model';
 
 @Injectable()
-export class PaymensHistoryProvider {
+export class PaymentsHistoryProvider {
 	private paymentOperationsApi: string = 'payments-history';
 	private accountingHostUrl?: string;
 
@@ -32,9 +32,24 @@ export class PaymensHistoryProvider {
 				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId.toString()}`
 			)
 			.pipe(
-				map(resposneResult => resposneResult.payload),
+				map(responseResult => responseResult.payload),
 				map(payload =>
-					this.mapper.map(PaymentHistoryMappingProfile.PaymentOperaionHistoryEntityToDomain, payload)
+					this.mapper.map(PaymentHistoryMappingProfile.PaymentOperationHistoryEntityToDomain, payload)
+				),
+				retry(ApiRequestOptions.RETRY_AMOUNT),
+				take(1)
+			);
+	}
+
+	public GetHistoryOperationById(paymentAccountId: string | Guid, paymentOperationId: string | Guid): Observable<IPaymentHistoryModel> {
+		return this.http
+			.get<Result<IPaymentHistoryEntity>>(
+				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId.toString()}/byId/${paymentOperationId.toString()}`
+			)
+			.pipe(
+				map(responseResult => responseResult.payload),
+				map(payload =>
+					this.mapper.map(PaymentHistoryMappingProfile.PaymentOperationHistoryEntityToDomain, payload)
 				),
 				retry(ApiRequestOptions.RETRY_AMOUNT),
 				take(1)

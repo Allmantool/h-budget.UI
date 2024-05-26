@@ -13,7 +13,7 @@ import { SetInitialPaymentOperations } from '../../../app/modules/shared/store/s
 import { getAccountPayments } from '../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import { getSelectedRecordGuid } from '../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { PaymentRepresentationsMappingProfile } from '../../../data/providers/accounting/mappers/payment-representations.mapping.profile';
-import { PaymensHistoryProvider } from '../../../data/providers/accounting/payments-history.provider';
+import { PaymentsHistoryProvider } from '../../../data/providers/accounting/payments-history.provider';
 import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 import { IPaymentRepresentationModel } from '../models/operation-record';
 
@@ -43,7 +43,7 @@ export class PaymentsHistoryService implements IPaymentsHistoryService {
 	constructor(
 		private readonly mapper: Mapper,
 		private readonly store: Store,
-		private readonly paymensHistoryProvider: PaymensHistoryProvider
+		private readonly paymensHistoryProvider: PaymentsHistoryProvider
 	) {
 		this.isNewRecordSignal = computed(() => _.some(this.accountPaymentsSignal(), { key: Guid.EMPTY }));
 	}

@@ -13,7 +13,7 @@
 				formControlName="contractor"
 				[fieldType]="'SELECT'"
 				[title]="'Contractor:'"
-				[selectOptions]="contractorsSignal()"
+				[selectOptions]="getContractorsOptions"
 				[disabled]="isNotReadyForSaveSignal()"
 			></app-form-field>
 
@@ -32,7 +32,7 @@
 				formControlName="category"
 				[fieldType]="'SELECT'"
 				[title]="'Category:'"
-				[selectOptions]="categoryNodesSignal()"
+				[selectOptions]="getCategoriesOptions"
 				[disabled]="isNotReadyForSaveSignal()"
 			></app-form-field>
 

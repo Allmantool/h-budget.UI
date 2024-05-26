@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/ban-types */
 
-import { ChangeDetectionStrategy, Component, EventEmitter, forwardRef, Input, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import _ from 'lodash';
@@ -28,14 +28,12 @@ import { FormInput } from '../../types/form-input.type';
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppFormFieldComponent implements ControlValueAccessor, OnInit {
+export class AppFormFieldComponent implements ControlValueAccessor {
 	private onTouched!: Function;
 	private onChanged!: (value: FormInput) => {};
 
 	@Input() public disabled: boolean = false;
 	@Input() public fieldType: string = InputTypes.INPUT;
-
-	@Input() public selectOptions: string[] | SelectDropdownOptions[] | undefined;
 
 	@Input() public title: string = '';
 
@@ -46,30 +44,40 @@ export class AppFormFieldComponent implements ControlValueAccessor, OnInit {
 	// eslint-disable-next-line @angular-eslint/no-output-on-prefix
 	@Output() public onDataChanged = new EventEmitter<FormInput>();
 
-	public data$ = new BehaviorSubject<FormInput>(undefined);
-
-	public dropdownOptions$ = new BehaviorSubject<SelectDropdownOptions[]>([]);
-
-	ngOnInit(): void {
-		if (_.isNil(this.selectOptions)) {
+	@Input() set selectOptions(dropdownOptions: string[] | SelectDropdownOptions[] | null | undefined) {
+		if (_.isNil(dropdownOptions)) {
 			return;
 		}
 
-		if (typeof this.selectOptions[0] === 'object') {
-			this.dropdownOptions$.next(this.selectOptions as SelectDropdownOptions[]);
-			this.data$.next((this.defaultValue as SelectDropdownOptions).value);
+		if (typeof dropdownOptions === 'object') {
+			const dropdownsOptions = dropdownOptions as SelectDropdownOptions[];
+
+			this.dropdownOptions$.next(dropdownsOptions);
+
+			const defaultOption = this.defaultValue as SelectDropdownOptions;
+
+			if (!_.isNil(defaultOption)) {
+				this.data$.next(defaultOption?.value);
+			}
+
 			return;
 		}
 
 		this.dropdownOptions$.next(
 			_.map(
-				this.selectOptions,
-				opt => new SelectDropdownOptions({ decription: opt as string, value: opt as string })
+				dropdownOptions,
+				opt => new SelectDropdownOptions({ description: opt as string, value: opt as string })
 			)
 		);
 
-		this.data$.next(this.defaultValue);
+		if (!_.isNil(this.defaultValue)) {
+			this.data$.next(this.defaultValue);
+		}
 	}
+
+	public data$ = new BehaviorSubject<FormInput>(undefined);
+
+	public dropdownOptions$ = new BehaviorSubject<SelectDropdownOptions[]>([]);
 
 	constructor(private readonly inputTypeValuesFactory: DefaultInputTypeValuesFactory) {}
 
@@ -94,28 +102,30 @@ export class AppFormFieldComponent implements ControlValueAccessor, OnInit {
 	public updateValue(event: any) {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		const valueForUpdate = event.value;
-		const selectedOption = _.find(this.dropdownOptions$.value, opt => opt.value === valueForUpdate);
+		const selectedOption = _.find(this.dropdownOptions$.value, opt => (opt?.value ?? opt) === valueForUpdate);
+		const inputPayload = (selectedOption ?? valueForUpdate) as FormInput;
+
 		this.data$.next(valueForUpdate);
 
-		this.onChanged(selectedOption ?? valueForUpdate);
+		this.onChanged(inputPayload);
 		this.onTouched();
 
-		this.onDataChanged.emit(selectedOption ?? valueForUpdate);
+		this.onDataChanged.emit(inputPayload);
 	}
 
 	public clearInput(event: any) {
-		const cleanUpdefaultValue = this.inputTypeValuesFactory.GetDefault(event.target.type);
+		const cleanDefaultValue = this.inputTypeValuesFactory.GetDefault(event.target.type);
 
-		event.target.value = cleanUpdefaultValue;
-		this.defaultValue = cleanUpdefaultValue;
+		event.target.value = cleanDefaultValue;
+		this.defaultValue = cleanDefaultValue;
 
-		this.onChanged(cleanUpdefaultValue);
+		this.onChanged(cleanDefaultValue);
 		this.onTouched();
 
-		this.onDataChanged.emit(cleanUpdefaultValue);
+		this.onDataChanged.emit(cleanDefaultValue);
 	}
 
-	public trackByFn(index: number, item: SelectDropdownOptions): SelectDropdownOptions {
-		return item; // Replace with a unique identifier for each item
+	public trackByFn(index: number, item: SelectDropdownOptions): string {
+		return item.value! + index; // Replace with a unique identifier for each item
 	}
 }

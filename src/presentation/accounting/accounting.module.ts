@@ -16,7 +16,7 @@ import { HandbooksService } from './services/handbooks.service';
 import { PaymentAccountDialogService } from './services/payment-account-dialog.service';
 import { PaymentsHistoryService } from './services/payments-history.service';
 import { AppCoreModule } from '../../app/modules/core/core.module';
-import { AngularMaterailSharedModule } from '../../app/modules/shared/angular-material.shared.module';
+import { AngularMaterialSharedModule } from '../../app/modules/shared/angular-material.shared.module';
 import { CustomUIComponentsSharedModule } from '../../app/modules/shared/custom-ui-components.shared.module';
 import { DialogsSharedModule } from '../../app/modules/shared/dialogs.shared.module';
 import { AppSharedModule } from '../../app/modules/shared/shared.module';
@@ -25,9 +25,10 @@ import { PaymentAccountState } from '../../app/modules/shared/store/states/accou
 import { AccountingOperationsState } from '../../app/modules/shared/store/states/accounting/payment-operations.state';
 import { CategoriesState } from '../../app/modules/shared/store/states/handbooks/categories.state';
 import { ContractorsState } from '../../app/modules/shared/store/states/handbooks/contractors.state';
-import { HandbbooksState } from '../../app/modules/shared/store/states/handbooks/handbooks.state';
+import { HandbooksState as HandbooksState } from '../../app/modules/shared/store/states/handbooks/handbooks.state';
 import { DefaultCategoriesProvider } from '../../data/providers/accounting/categories.provider';
 import { DefaultContractorsProvider } from '../../data/providers/accounting/contractors.provider';
+import { CrossAccountsTransferProvider } from '../../data/providers/accounting/cross-accounts-transfer.provider';
 import { DataCategoryProfile } from '../../data/providers/accounting/mappers/category.mapping.profile';
 import { DataContractorProfile } from '../../data/providers/accounting/mappers/contractor.mapping.profile';
 import { PaymentAccountsMappingProfile } from '../../data/providers/accounting/mappers/payment-accounts.mapping.profile';
@@ -36,7 +37,7 @@ import { PaymentOperationsMappingProfile } from '../../data/providers/accounting
 import { PaymentRepresentationsMappingProfile } from '../../data/providers/accounting/mappers/payment-representations.mapping.profile';
 import { DefaultPaymentAccountsProvider } from '../../data/providers/accounting/payment-accounts.provider';
 import { PaymentOperationsProvider } from '../../data/providers/accounting/payment-operations.provider';
-import { PaymensHistoryProvider } from '../../data/providers/accounting/payments-history.provider';
+import { PaymentsHistoryProvider } from '../../data/providers/accounting/payments-history.provider';
 import { CurrencyExchangeService } from '../../data/providers/rates/currency-exchange.service';
 import { ExchangeRatesMappingProfile } from '../../data/providers/rates/mappers/exchange-rates-mapping.profile';
 import { AccountingOperationsCrudComponent, AccountingRoutingModule } from '../accounting';
@@ -51,7 +52,7 @@ import { AccountingOperationsCrudComponent, AccountingRoutingModule } from '../a
 	],
 	imports: [
 		AppSharedModule,
-		AngularMaterailSharedModule,
+		AngularMaterialSharedModule,
 		CustomUIComponentsSharedModule,
 		AppCoreModule,
 		AccountingRoutingModule,
@@ -59,7 +60,7 @@ import { AccountingOperationsCrudComponent, AccountingRoutingModule } from '../a
 		NgxsModule.forFeature([
 			AccountingOperationsState,
 			AccountingOperationsTableState,
-			HandbbooksState,
+			HandbooksState,
 			ContractorsState,
 			CategoriesState,
 			PaymentAccountState,
@@ -79,8 +80,9 @@ import { AccountingOperationsCrudComponent, AccountingRoutingModule } from '../a
 		AccountsService,
 		DefaultPaymentAccountsProvider,
 		PaymentOperationsProvider,
-		PaymensHistoryProvider,
+		PaymentsHistoryProvider,
 		DefaultContractorsProvider,
+		CrossAccountsTransferProvider,
 		DefaultCategoriesProvider,
 		CategoriesDialogService,
 		ContractorsDialogService,

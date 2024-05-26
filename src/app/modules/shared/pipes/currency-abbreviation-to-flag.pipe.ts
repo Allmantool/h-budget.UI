@@ -5,7 +5,7 @@ import * as _ from 'lodash';
 @Pipe({
 	name: 'currencyAbbreviationToFlagFormat',
 })
-export class CurrencyAbreviationToFlagFormatPipe implements PipeTransform {
+export class CurrencyAbbreviationToFlagFormatPipe implements PipeTransform {
 	public transform(currencyAbbreviation: string): string {
 		return _.isNil(currencyAbbreviation) ? '' : _.lowerCase(currencyAbbreviation.slice(0, 2));
 	}

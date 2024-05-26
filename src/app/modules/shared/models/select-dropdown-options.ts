@@ -1,10 +1,10 @@
 export class SelectDropdownOptions {
 	constructor(options: Partial<SelectDropdownOptions>) {
 		this.value = options.value;
-		this.decription = options.decription;
+		this.description = options.description;
 	}
 
 	value?: string;
 
-	decription?: string;
+	description?: string;
 }

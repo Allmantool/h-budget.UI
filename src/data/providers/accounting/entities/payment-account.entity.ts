@@ -1,6 +1,6 @@
 export interface IPaymentAccountEntity {
 	key: string;
-	type: number;
+	accountType: number;
 	currency: string;
 	balance: number;
 	agent: string;

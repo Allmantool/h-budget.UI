@@ -1,5 +1,7 @@
 import { Guid } from 'typescript-guid';
 
+import { OperationTypes } from '../../types/operation.types';
+
 export interface IPaymentOperationModel {
 	key: Guid;
 	paymentAccountId: Guid;
@@ -8,4 +10,5 @@ export interface IPaymentOperationModel {
 	operationDate: Date;
 	comment: string;
 	amount: number;
+	operationType: OperationTypes;
 }
