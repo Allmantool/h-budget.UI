@@ -94,6 +94,10 @@ export class PaymentRepresentationsMappingProfile extends Profile {
 				opt.preCondition(src => !_.isNil(src.balance));
 				opt.mapFrom(src => src.balance);
 			},
+			operationType: opt => {
+				opt.preCondition(src => !_.isNil(src.record.operationType));
+				opt.mapFrom(src => src.record.operationType);
+			},
 		});
 
 		this.createMap(PaymentRepresentationsMappingProfile.PaymentOperationToRepresentationModel, {
@@ -116,6 +120,10 @@ export class PaymentRepresentationsMappingProfile extends Profile {
 			comment: opt => {
 				opt.preCondition(src => !_.isNil(src.comment));
 				opt.mapFrom(src => src.comment);
+			},
+			operationType: opt => {
+				opt.preCondition(src => !_.isNil(src.operationType));
+				opt.mapFrom(src => src.operationType);
 			},
 			income: opt => {
 				opt.mapFrom(src =>
@@ -155,6 +163,12 @@ export class PaymentRepresentationsMappingProfile extends Profile {
 			return amount;
 		}
 
-		return this.getCategoryById(categoryId).operationType === PaymentOperationTypes.Income ? amount : -amount;
+		const category = this.getCategoryById(categoryId);
+
+		if (_.isNil(category)) {
+			return 0;
+		}
+
+		return category.operationType === PaymentOperationTypes.Income ? amount : -amount;
 	}
 }

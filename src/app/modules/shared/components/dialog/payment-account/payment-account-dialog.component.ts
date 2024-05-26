@@ -93,12 +93,14 @@ export class PaymentAccountDialogComponent {
 		this.title = dialogConfiguration.title;
 		this.dialogConfiguration = dialogConfiguration;
 
+		const defaultAccount = this.getAccountsTypes()[0];
+
 		this.accountTypeStepFg = this.fb.group({
-			accountTypeCtrl: [this.getAccountsTypes()[0].value],
+			accountTypeCtrl: [defaultAccount.value],
 		});
 
 		this.accountTypeSignal = toSignal(this.accountTypeStepFg.get('accountTypeCtrl')!.valueChanges, {
-			initialValue: this.getAccountsTypes()[0],
+			initialValue: defaultAccount,
 		});
 
 		this.currencyStepFg = this.fb.group({
@@ -164,8 +166,14 @@ export class PaymentAccountDialogComponent {
 	public applyChanges(): void {
 		this.isLoadingSignal.set(true);
 
+		if (_.isNil(this.accountTypeSignal())) {
+			return;
+		}
+
+		const paymentType = AccountTypes[this.accountTypeSignal().value! as keyof typeof AccountTypes];
+
 		const paymentAccountForSave: IPaymentAccountModel = {
-			type: AccountTypes[this.accountTypeSignal().value! as keyof typeof AccountTypes],
+			type: paymentType,
 			currency: this.currencySignal().value!,
 			balance: this.balanceSignal()! as number,
 			emitter: this.emitterSignal()! as string,

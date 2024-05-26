@@ -19,6 +19,7 @@ import { IContractorModel } from '../../../domain/models/accounting/contractor.m
 import { PaymentOperationTypes } from '../../../domain/models/accounting/operation-types';
 import { IPaymentHistoryModel } from '../../../domain/models/accounting/payment-history.model';
 import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
+import { OperationTypes } from '../../../domain/types/operation.types';
 
 describe('payment-representations-mapping.profile tests', () => {
 	let mapper: Mapper;
@@ -130,7 +131,7 @@ describe('payment-representations-mapping.profile tests', () => {
 		expect(record.expense).toBe(-11.45);
 	});
 
-	it('should corretly map with "PaymentHistoryToRepresentationModel" mapping pair without up to date handbooks', () => {
+	it('should correctly map with "PaymentHistoryToRepresentationModel" mapping pair without up to date handbooks', () => {
 		const paymentEntities: IPaymentHistoryModel[] = [
 			{
 				balance: 11.2,
@@ -142,6 +143,7 @@ describe('payment-representations-mapping.profile tests', () => {
 					categoryId: Guid.parse('3b2a138e-f575-425a-8650-a309480a6ece'),
 					operationDate: new Date(2024, 0, 18),
 					comment: 'comments 1',
+					operationType: OperationTypes.Payment,
 				},
 			} as IPaymentHistoryModel,
 		];
@@ -182,6 +184,7 @@ describe('payment-representations-mapping.profile tests', () => {
 				categoryId: Guid.parse('3b2a138e-f575-425a-8650-a309480a6ece'),
 				operationDate: new Date(2024, 0, 18),
 				comment: 'comments 2',
+				operationType: OperationTypes.Payment,
 			} as IPaymentOperationModel,
 		];
 
@@ -201,7 +204,7 @@ describe('payment-representations-mapping.profile tests', () => {
 		expect(record.operationDate.toJSON()).toBe(new Date(paymentEntities[0].operationDate).toJSON());
 	});
 
-	it('should corretly map with "PaymentOperationToRepresentationModel" mapping pair without up to date handbooks', () => {
+	it('should correctly map with "PaymentOperationToRepresentationModel" mapping pair without up to date handbooks', () => {
 		const paymentEntities: IPaymentOperationModel[] = [
 			{
 				paymentAccountId: Guid.EMPTY,
@@ -211,6 +214,7 @@ describe('payment-representations-mapping.profile tests', () => {
 				categoryId: Guid.parse('3b2a138e-f575-425a-8650-a309480a6ece'),
 				operationDate: new Date(2024, 0, 18),
 				comment: 'comments 2',
+				operationType: OperationTypes.Payment,
 			} as IPaymentOperationModel,
 		];
 

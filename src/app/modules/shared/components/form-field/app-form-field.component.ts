@@ -50,9 +50,9 @@ export class AppFormFieldComponent implements ControlValueAccessor {
 		}
 
 		if (typeof dropdownOptions === 'object') {
-			const dropdowsnOptions = dropdownOptions as SelectDropdownOptions[];
+			const dropdownsOptions = dropdownOptions as SelectDropdownOptions[];
 
-			this.dropdownOptions$.next(dropdowsnOptions);
+			this.dropdownOptions$.next(dropdownsOptions);
 
 			const defaultOption = this.defaultValue as SelectDropdownOptions;
 
@@ -114,15 +114,15 @@ export class AppFormFieldComponent implements ControlValueAccessor {
 	}
 
 	public clearInput(event: any) {
-		const cleanUpdefaultValue = this.inputTypeValuesFactory.GetDefault(event.target.type);
+		const cleanDefaultValue = this.inputTypeValuesFactory.GetDefault(event.target.type);
 
-		event.target.value = cleanUpdefaultValue;
-		this.defaultValue = cleanUpdefaultValue;
+		event.target.value = cleanDefaultValue;
+		this.defaultValue = cleanDefaultValue;
 
-		this.onChanged(cleanUpdefaultValue);
+		this.onChanged(cleanDefaultValue);
 		this.onTouched();
 
-		this.onDataChanged.emit(cleanUpdefaultValue);
+		this.onDataChanged.emit(cleanDefaultValue);
 	}
 
 	public trackByFn(index: number, item: SelectDropdownOptions): string {

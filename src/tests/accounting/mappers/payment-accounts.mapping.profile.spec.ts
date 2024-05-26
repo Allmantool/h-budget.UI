@@ -22,7 +22,7 @@ describe('payment-accounts-mapping.profile tests', () => {
 		mapper = getTestBed().inject(Mapper);
 	});
 
-	it('should corretly map with "DomainToPaymentAccountCreateRequest" mapping pair', () => {
+	it('should correctly map with "DomainToPaymentAccountCreateRequest" mapping pair', () => {
 		const paymentAccounts: IPaymentAccountEntity[] = [
 			{
 				key: 'b1e65663-cb80-4db9-8f10-24c245655a2e',
@@ -68,7 +68,7 @@ describe('payment-accounts-mapping.profile tests', () => {
 
 		const result = mapper.map(PaymentAccountsMappingProfile.DomainToPaymentAccountCreateRequest, paymentAccount);
 
-		expect(result.balance).toBe(77.2);
+		expect(result.initialBalance).toBe(77.2);
 		expect(result.currency).toBe('RUS');
 		expect(result.description).toBe('test-description');
 		expect(result.accountType).toBe(1);

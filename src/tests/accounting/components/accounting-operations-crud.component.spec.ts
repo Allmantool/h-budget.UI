@@ -25,6 +25,7 @@ import { CategoriesState } from '../../../app/modules/shared/store/states/handbo
 import { ContractorsState } from '../../../app/modules/shared/store/states/handbooks/contractors.state';
 import { HandbooksState } from '../../../app/modules/shared/store/states/handbooks/handbooks.state';
 import { Result } from '../../../core/result';
+import { CrossAccountsTransferProvider } from '../../../data/providers/accounting/cross-accounts-transfer.provider';
 import { DataCategoryProfile } from '../../../data/providers/accounting/mappers/category.mapping.profile';
 import { DataContractorProfile } from '../../../data/providers/accounting/mappers/contractor.mapping.profile';
 import { PaymentHistoryMappingProfile } from '../../../data/providers/accounting/mappers/payment-history.mapping.profile';
@@ -44,13 +45,14 @@ describe('accounting operations crud component', () => {
 	let categoriesDialogServiceSpy: CategoriesDialogService;
 	let contractorsDialogServiceSpy: jasmine.SpyObj<ContractorsDialogService>;
 	let paymentHistoryServiceSpy: PaymentsHistoryService;
+	let crossAccountsTransferProviderSpy: CrossAccountsTransferProvider;
 
 	let store: Store;
 
 	beforeEach(() => {
 		accountingOperationsServiceSpy = jasmine.createSpyObj('accountingOperationsService', {
 			updateAsync: () => new Promise(() => new Result({ payload: true })),
-			addAsync: () => new Promise(() => new Result({ payload: {} as IPaymentRepresentationModel })),
+			addNewAsync: () => new Promise(() => new Result({ payload: {} as IPaymentRepresentationModel })),
 			deleteByIdAsync: (_: IPaymentOperationModel): Promise<Result<boolean>> =>
 				new Promise(() => new Result({ payload: true })),
 		});
@@ -61,6 +63,10 @@ describe('accounting operations crud component', () => {
 
 		contractorsDialogServiceSpy = jasmine.createSpyObj('contractorsDialogService', {
 			openContractors: undefined,
+		});
+
+		crossAccountsTransferProviderSpy = jasmine.createSpyObj<CrossAccountsTransferProvider>('transferProvider', {
+			deleteById: undefined,
 		});
 
 		paymentHistoryServiceSpy = jasmine.createSpyObj<PaymentsHistoryService>('paymentHistoryService', {
@@ -117,6 +123,10 @@ describe('accounting operations crud component', () => {
 				{
 					provide: PaymentsHistoryService,
 					useValue: paymentHistoryServiceSpy,
+				},
+				{
+					provide: CrossAccountsTransferProvider,
+					useValue: crossAccountsTransferProviderSpy,
 				},
 			],
 		}).compileComponents();
