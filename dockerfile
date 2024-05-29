@@ -16,7 +16,7 @@ ENV CHROME_BIN=/usr/bin/google-chrome
 RUN npm run build-prod --if-present --verbose
 
 FROM nginx:alpine3.18 as publish
-COPY nginx.conf /etc/nginx/nginx.conf
+
 COPY --from=build /app/dist/h-budget /usr/share/nginx/html
 
 EXPOSE 80
