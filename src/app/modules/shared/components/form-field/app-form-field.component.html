@@ -36,7 +36,7 @@
 	</ng-template>
 
 	<ng-template #select>
-		<mat-form-field appearance="outline">
+		<mat-form-field appearance="outline">   
 			<mat-label>{{ title }}</mat-label>
 			<mat-select
 				[disabled]="disabled"
@@ -44,7 +44,7 @@
 				(selectionChange)="updateValue($event)"
 			>
 				<ng-container *ngFor="let option of dropdownOptions$ | async; trackBy: trackByFn">
-					<mat-option [value]="option.value">{{ option.description }}</mat-option>
+					<mat-option [value]="option.value ?? option">{{ option.description ?? option }}</mat-option>
 				</ng-container>
 			</mat-select>
 		</mat-form-field>

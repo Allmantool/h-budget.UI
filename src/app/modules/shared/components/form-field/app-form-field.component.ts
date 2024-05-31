@@ -57,7 +57,7 @@ export class AppFormFieldComponent implements ControlValueAccessor {
 			const defaultOption = this.defaultValue as SelectDropdownOptions;
 
 			if (!_.isNil(defaultOption)) {
-				this.data$.next(defaultOption?.value);
+				this.data$.next(defaultOption?.value ?? defaultOption);
 			}
 
 			return;
