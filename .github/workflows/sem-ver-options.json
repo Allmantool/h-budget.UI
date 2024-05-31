@@ -21,7 +21,6 @@
             "trigger": "pull-request",
             "bump": "build",
             "destBranch": "master",
-            "suffix": "-rc",
             "reset": [
                 "minor"
             ],
