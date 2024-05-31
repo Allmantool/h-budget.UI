@@ -18,9 +18,9 @@
             "tag": true
         },
         {
-            "trigger": "commit",
+            "trigger": "pull-request",
             "bump": "build",
-            "branch": "master",
+            "destBranch": "master",
             "suffix": "-rc",
             "reset": [
                 "minor"
