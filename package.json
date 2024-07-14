@@ -102,9 +102,9 @@
         "npm-run-all": "^4.1.5",
         "nx": "19.4.3",
         "nx-cloud": "19.0.0",
-        "prettier": "^3.3.2",
+        "prettier": "^3.3.3",
         "sonarqube-scanner": "^4.0.1",
-        "stylelint-prettier": "^5.0.0",
+        "stylelint-prettier": "^5.0.1",
         "typescript": "~5.5.3"
     }
 }
