@@ -210,7 +210,7 @@ describe('currency rates grid service', () => {
 	it('should put today rates to store during "getTodayCurrenciesAsync"', async () => {
 		await sut.getTodayCurrenciesAsync();
 
-		const currencyRatesState: ICurrencyRatesStateModel = store.selectSnapshot<ICurrencyRatesStateModel>((state: ICurrencyRatesStateModel) => state);
+		const currencyRatesState: ICurrencyRatesStateModel = store.selectSnapshot((state) => state.currencyState);
 
 		expect(currencyRatesState.rateGroups.length).toBe(1);
 	});
