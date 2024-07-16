@@ -20,6 +20,17 @@
         {
             "trigger": "pull-request",
             "bump": "build",
+            "branch": "master",
+            "destBranch": "master",
+            "reset": [
+                "minor"
+            ],
+            "tag": true
+        },
+        {
+            "trigger": "pull-request-other",
+            "bump": "build",
+            "branch": "master",
             "destBranch": "master",
             "reset": [
                 "minor"

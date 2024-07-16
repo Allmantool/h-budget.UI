@@ -240,10 +240,10 @@ describe('currency rates store', () => {
 	});
 
 	it('it "GetCurrencyRatesByCurrencyId": return a currency group by id', () => {
-		const carrencyGroup = getCurrencyRatesGroupByCurrencyId(
+		const currencyGroup = getCurrencyRatesGroupByCurrencyId(
 			store.selectSnapshot((state: any) => state.currencyState)
 		)(2);
 
-		expect(carrencyGroup.currencyId).toBe(2);
+		expect(currencyGroup.currencyId).toBe(2);
 	});
 });
