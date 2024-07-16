@@ -26,7 +26,7 @@ describe('line chart service', () => {
 		store = TestBed.inject(Store);
 	});
 
-	it('should return appropriate ordered serias of currency chart values by "getChartOptions"', (done: DoneFn) => {
+	it('should return appropriate ordered series of currency chart values by "getChartOptions"', (done: DoneFn) => {
 		const rates: CurrencyRateValueModel[] = [
 			new CurrencyRateValueModel({
 				ratePerUnit: 1.12,

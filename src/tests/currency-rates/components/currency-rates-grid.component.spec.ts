@@ -25,7 +25,7 @@ import { PresentationRatesMappingProfile } from '../../../presentation/currency-
 import { CurrencyRatesGridService } from '../../../presentation/currency-rates/services/currency-rates-grid.service';
 import { RatesDialogService } from '../../../presentation/currency-rates/services/rates-dialog.service';
 
-describe('currency rates grid conponent', () => {
+describe('currency rates grid component', () => {
 	let sut: CurrencyRatesGridComponent;
 	let fixture: ComponentFixture<CurrencyRatesGridComponent>;
 
@@ -85,14 +85,14 @@ describe('currency rates grid conponent', () => {
 		const currencyAbbreviationUnderTest: string = 'test currency';
 
 		sut.masterToggle(currencyIdUnderTest, currencyAbbreviationUnderTest);
-		const tableOptionsStore: ICurrencyTableStateModel = store.selectSnapshot(CurrencyTableState);
+		const tableOptionsStore = store.selectSnapshot<ICurrencyTableStateModel>((state) => state.currencyState.currencyTableState);
 
 		expect(tableOptionsStore.tableOptions.selectedItem.currencyId).toBe(currencyIdUnderTest);
 		expect(tableOptionsStore.tableOptions.selectedItem.abbreviation).toBe(currencyAbbreviationUnderTest);
 		done();
 	});
 
-	it('should populate today curreny rate groups by "getTodayCurrencyRatesAsync"', async () => {
+	it('should populate today currency rate groups by "getTodayCurrencyRatesAsync"', async () => {
 		await sut.getTodayCurrencyRatesAsync();
 
 		sut.todayCurrencyRateGroups$.pipe(take(1)).subscribe(rateGroups => {
@@ -120,7 +120,7 @@ describe('currency rates grid conponent', () => {
 		const defaultMonthAmount: number = 7;
 
 		sut.setDateRange(defaultMonthAmount);
-		const tableOptionsStore: ICurrencyTableStateModel = store.selectSnapshot(CurrencyTableState);
+		const tableOptionsStore: ICurrencyTableStateModel = store.selectSnapshot<ICurrencyTableStateModel>((state) => state.currencyState.currencyTableState);
 
 		expect(tableOptionsStore.tableOptions.selectedDateRange.diffInMonths).toBe(defaultMonthAmount);
 		done();
