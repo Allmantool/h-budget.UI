@@ -1,6 +1,6 @@
 {
     "name": "h-budget",
-    "version": "0.0.39",
+    "version": "0.0.40",
     "scripts": {
         "ng": "ng",
         "start": "nx serve --watch --open",
