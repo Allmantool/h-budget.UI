@@ -1,7 +1,7 @@
 .rates-dashboard-content {
 	display: grid;
 	grid-template-rows: 1fr 1fr;
-	padding: 5em;
+	padding: 1em 1em 1em 0;
 	justify-items: center;
 	align-items: stretch;
 	margin: 0;

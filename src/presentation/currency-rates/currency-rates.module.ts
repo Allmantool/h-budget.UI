@@ -28,16 +28,16 @@ import {
 @NgModule({
 	declarations: [CurrencyRatesDashboardComponent, CurrencyRatesGridComponent, CurrencyRatesLineChartComponent],
 	imports: [
+		CurrencyRatesRoutingModule,
 		AppCoreModule,
 		AppSharedModule,
 		AngularMaterialSharedModule,
 		CustomUIComponentsSharedModule,
 		DialogsSharedModule,
-		CurrencyRatesRoutingModule,
 		NgxsModule.forFeature([CurrencyRatesState, CurrencyTableState, CurrencyChartState]),
 		MapperModule.withProfiles([DataRatesMappingProfile, PresentationRatesMappingProfile]),
 	],
 	providers: [LineChartService, RatesDialogService, NationalBankCurrenciesProvider, CurrencyRatesGridService],
-	bootstrap: [],
+	bootstrap: [CurrencyRatesDashboardComponent],
 })
 export class CurrencyRatesModule {}

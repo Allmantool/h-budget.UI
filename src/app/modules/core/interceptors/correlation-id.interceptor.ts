@@ -13,7 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ApiHeaders } from '../../shared/constants/api-headers';
 
 @Injectable()
-export class CorrelationIdInteceptor implements HttpInterceptor {
+export class CorrelationIdInterceptor implements HttpInterceptor {
 	intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 		if (_.endsWith(req.url, 'config.json')) {
 			return next.handle(req);
@@ -21,10 +21,10 @@ export class CorrelationIdInteceptor implements HttpInterceptor {
 
 		const headersWithCorrelationId = req.headers.set(ApiHeaders.CORRELATION_ID, uuidv4());
 
-		const requestWithCarrelationId = req.clone({
+		const requestWithCorrelationId = req.clone({
 			headers: headersWithCorrelationId,
 		});
 
-		return next.handle(requestWithCarrelationId);
+		return next.handle(requestWithCorrelationId);
 	}
 }

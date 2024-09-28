@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, RouterLink } from '@angular/router';
 
-const coreModules = [CommonModule, RouterOutlet, HttpClientModule];
+const coreModules = [CommonModule, RouterOutlet, RouterLink, HttpClientModule];
 
 @NgModule({
 	declarations: [],

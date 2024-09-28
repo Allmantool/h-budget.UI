@@ -1,0 +1,24 @@
+<!-- Toolbar -->
+<div class="acconting-wrapper">
+	<div class="accounting-layout-content">
+		<div class="accounting-layout-left-sidebar-outlet">
+		</div>
+
+		<div class="accounting-layout-central-outlet">
+			<router-outlet #rootAppOutlet="outlet"></router-outlet>
+		</div>
+
+		<div class="accounting-layout-right_sidebar-outlet">
+			<router-outlet name="right_sidebar"></router-outlet>
+		</div>
+	</div>
+
+	<div
+		*ngIf="isDataLoading$ | async"
+		class="overlay"
+	>
+		<div class="spinner-wrapper">
+			<progress-spinner [isLoading]="!rootAppOutlet.isActivated && (isDataLoading$ | async)"></progress-spinner>
+		</div>
+	</div>
+</div>

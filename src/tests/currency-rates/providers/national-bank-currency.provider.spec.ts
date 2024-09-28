@@ -8,7 +8,7 @@ import { Guid } from 'typescript-guid';
 
 import { IRatesGroupEntity } from 'data/providers/rates/entities/rates-group.entity';
 
-import { CorrelationIdInteceptor } from '../../../app/modules/core/interceptors/correlation-id.interceptor';
+import { CorrelationIdInterceptor } from '../../../app/modules/core/interceptors/correlation-id.interceptor';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
 import { Result } from '../../../core/result';
 import { DataRatesMappingProfile } from '../../../data/providers/rates/mappers/data-rates-mapping.profiler';
@@ -47,7 +47,7 @@ describe('national bank currencies provider', () => {
 				},
 				{
 					provide: HTTP_INTERCEPTORS,
-					useClass: CorrelationIdInteceptor,
+					useClass: CorrelationIdInterceptor,
 					multi: true,
 				},
 			],
@@ -65,7 +65,7 @@ describe('national bank currencies provider', () => {
 	});
 
 	it('should attach the interceptor', () => {
-		expect(TestBed.inject(HTTP_INTERCEPTORS).some(i => i instanceof CorrelationIdInteceptor)).toBe(true);
+		expect(TestBed.inject(HTTP_INTERCEPTORS).some(i => i instanceof CorrelationIdInterceptor)).toBe(true);
 	});
 
 	it('should set correlation id header to request', () => {

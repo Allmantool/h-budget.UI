@@ -12,20 +12,21 @@ import { catchError, of, take, tap } from 'rxjs';
 
 import { environment } from 'environments/environment';
 
-import { AppSharedModule } from './../shared/shared.module';
-import { ngxsConfig } from './../shared/store/ngxs.config';
-import { AppBootsrapRoutingModule } from './app-bootsrap-routing.module';
-import { AppRootComponent } from './components/app-root/app-root.component';
+import { AppSharedModule } from '../shared/shared.module';
+import { ngxsConfig } from '../shared/store/ngxs.config';
+import { BootstrapRoutingModule } from './app-bootstrap-routing.module';
 import { IAppSettingsModel } from '../../../domain/models/app-settings.model';
 import { AppCoreModule } from '../core';
-import { CorrelationIdInteceptor } from '../core/interceptors/correlation-id.interceptor';
+import { CorrelationIdInterceptor } from '../core/interceptors/correlation-id.interceptor';
 import { HttpRequestLoaderInterceptor } from '../core/interceptors/http-request-loader.interceptor';
 import { CustomUIComponentsSharedModule } from '../shared/custom-ui-components.shared.module';
 import { AppConfigurationService } from '../shared/services/app-configuration.service';
-import { CoreAppState } from '../shared/store/states/core-app-root/core-app.state';
+import { CoreAppState } from '../shared/store/states/core/core-app.state';
+import { BaseLayoutComponent } from './components/base-layout/base-layout.component';
+import { AngularMaterialSharedModule } from '../shared/angular-material.shared.module';
 
 @NgModule({
-	declarations: [AppRootComponent],
+	declarations: [BaseLayoutComponent],
 	imports: [
 		NgxsModule.forRoot([CoreAppState], ngxsConfig),
 		NgxsLoggerPluginModule.forRoot(),
@@ -33,8 +34,9 @@ import { CoreAppState } from '../shared/store/states/core-app-root/core-app.stat
 		AppSharedModule,
 		CustomUIComponentsSharedModule,
 		AppCoreModule,
-		AppBootsrapRoutingModule,
+		BootstrapRoutingModule,
 		BrowserModule,
+		AngularMaterialSharedModule,
 		BrowserAnimationsModule,
 	],
 	providers: [
@@ -80,7 +82,7 @@ import { CoreAppState } from '../shared/store/states/core-app-root/core-app.stat
 		},
 		{
 			provide: HTTP_INTERCEPTORS,
-			useClass: CorrelationIdInteceptor,
+			useClass: CorrelationIdInterceptor,
 			multi: true,
 		},
 		{
@@ -89,6 +91,6 @@ import { CoreAppState } from '../shared/store/states/core-app-root/core-app.stat
 			multi: true,
 		},
 	],
-	bootstrap: [AppRootComponent],
+	bootstrap: [BaseLayoutComponent],
 })
-export class AppBootsrapModule {}
+export class AppBootstrapModule {}

@@ -88,7 +88,7 @@ export class PaymentAccountComponent implements OnInit {
 		this.step--;
 	}
 
-	public chooseAcccount(event: MatSelectionListChange): void {
+	public chooseAccount(event: MatSelectionListChange): void {
 		const options = event.options;
 
 		const guid = _.first(options)?.value as Guid;
@@ -102,7 +102,10 @@ export class PaymentAccountComponent implements OnInit {
 		await this.router.navigate(
 			[
 				{
-					outlets: { primary: ['operations'], rightSidebar: ['operations'] },
+					outlets: {
+						primary: ['operations'],
+						right_sidebar: ['operations'],
+					},
 				},
 			],
 			{ relativeTo: this.route }

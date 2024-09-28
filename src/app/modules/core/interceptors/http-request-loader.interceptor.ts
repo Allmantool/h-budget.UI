@@ -10,7 +10,7 @@ import { ApiHeaders } from '../../shared/constants/api-headers';
 import {
 	AddProcessingRequest,
 	RemoveProcessingRequest,
-} from '../../shared/store/states/core-app-root/actions/core-app.actions';
+} from '../../shared/store/states/core/actions/core-app.actions';
 
 @Injectable()
 export class HttpRequestLoaderInterceptor implements HttpInterceptor {
