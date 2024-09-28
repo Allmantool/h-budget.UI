@@ -20,7 +20,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatTableModule } from '@angular/material/table';
-
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatMenuModule } from '@angular/material/menu';
 import { AppCoreModule } from '../core/core.module';
 
 const material = [
@@ -45,6 +46,8 @@ const material = [
 	MatListModule,
 	MatStepperModule,
 	MatDialogModule,
+	MatToolbarModule,
+	MatMenuModule
 ];
 
 @NgModule({

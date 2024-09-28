@@ -1,6 +1,4 @@
-<div>Hello from account</div>
-
-<mat-accordion class="example-headers-align">
+<mat-accordion class="headers-align">
 	<mat-expansion-panel
 		[expanded]="step === 0"
 		(opened)="setStep(0)"
@@ -17,7 +15,7 @@
 		<mat-selection-list
 			#cash
 			[multiple]="false"
-			(selectionChange)="chooseAcccount($event)"
+			(selectionChange)="chooseAccount($event)"
 		>
 			<mat-list-option
 				*ngFor="let paymentAccount of cashAccountsSignal()"
@@ -27,7 +25,7 @@
 					class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
 				></span>
 				{{paymentAccount.emitter }} | {{paymentAccount.description}} | Balance:
-				<span [class]="paymentAccount.balance > 0 ? 'positiveBalance' : 'negativebalance'">
+				<span [class]="paymentAccount.balance > 0 ? 'positive-balance' : 'negative-balance'">
 					{{ paymentAccount.balance }}
 				</span>
 				[{{paymentAccount.currency}}]
@@ -63,7 +61,7 @@
 		<mat-selection-list
 			#virtual
 			[multiple]="false"
-			(selectionChange)="chooseAcccount($event)"
+			(selectionChange)="chooseAccount($event)"
 		>
 			<mat-list-option
 				*ngFor="let paymentAccount of debitVirtualAccountsSignal()"
@@ -73,7 +71,7 @@
 					class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
 				></span>
 				{{paymentAccount.emitter }} | {{paymentAccount.description}} | Balance:
-				<span [class]="paymentAccount.balance > 0 ? 'positiveBalance' : 'negativebalance'">
+				<span [class]="paymentAccount.balance > 0 ? 'positive-balance' : 'negative-balance'">
 					{{ paymentAccount.balance }}
 				</span>
 				[{{paymentAccount.currency}}]
@@ -122,7 +120,7 @@
 		<mat-selection-list
 			#loan
 			[multiple]="false"
-			(selectionChange)="chooseAcccount($event)"
+			(selectionChange)="chooseAccount($event)"
 		>
 			<mat-list-option
 				*ngFor="let paymentAccount of creditVirtualAccountsSignal()"
@@ -132,7 +130,7 @@
 					class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
 				></span>
 				{{paymentAccount.emitter }} | {{paymentAccount.description}} | Balance:
-				<span [class]="paymentAccount.balance > 0 ? 'positiveBalance' : 'negativebalance'">
+				<span [class]="paymentAccount.balance > 0 ? 'positive-balance' : 'negative-balance'">
 					{{ paymentAccount.balance }}
 				</span>
 				[{{paymentAccount.currency}}]

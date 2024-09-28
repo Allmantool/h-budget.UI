@@ -1,0 +1,79 @@
+<div class="wrapper">
+	<div class="layout-content">
+		<div class="dashboard-layout-left-sidebar-outlet">
+			<mat-drawer-container
+				class="dashboard-sidenav-container"
+				autosize
+			>
+				<mat-drawer
+					#drawer
+					class="dashboard-sidenav"
+					mode="side"
+				>
+					@if (showFiller) {
+					    <p>Hidden text</p>
+					}
+					<button
+						(click)="showFiller = !showFiller"
+						mat-raised-button
+					>
+						Toggle extra text menu #1
+					</button>
+					<button
+						(click)="showFiller = !showFiller"
+						mat-raised-button
+					>
+						Toggle extra text menu #1
+					</button>
+				</mat-drawer>
+				<div class="dashboard-sidenav-content-items">
+					<div class="dashboard-sidenav-content">
+						<button
+							type="button"
+							mat-button
+                            (click)="navigateToDashboardAsync()"
+						>
+							Dashboard
+						</button>
+					</div>
+					<div class="dashboard-sidenav-content">
+						<button
+							type="button"
+							mat-button
+                            (click)="navigateToRatesAsync()"
+						>
+							Rates
+						</button>
+					</div>
+					<div class="dashboard-sidenav-content">
+						<button
+							type="button"
+							mat-button
+                            (click)="navigateToAccountingAsync()"
+						>
+							Accounting
+						</button>
+					</div>
+				</div>
+			</mat-drawer-container>
+			<router-outlet name="left_sidebar"></router-outlet>
+		</div>
+
+		<div class="dashboard-layout-central-outlet">
+			<router-outlet #rootAppOutlet="outlet"></router-outlet>
+		</div>
+
+		<div class="dashboard-layout-right_sidebar-outlet">
+			<router-outlet name="right_sidebar"></router-outlet>
+		</div>
+	</div>
+
+	<div
+		*ngIf="isDataLoading$ | async"
+		class="overlay"
+	>
+		<div class="spinner-wrapper">
+			<progress-spinner [isLoading]="!rootAppOutlet.isActivated && (isDataLoading$ | async)"></progress-spinner>
+		</div>
+	</div>
+</div>

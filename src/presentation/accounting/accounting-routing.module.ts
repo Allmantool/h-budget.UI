@@ -12,9 +12,9 @@ const routes: Routes = [
 	{
 		path: 'operations',
 		component: AccountingOperationsCrudComponent,
-		outlet: 'rightSidebar',
+		outlet: 'right_sidebar',
 	},
-	{ path: '', component: PaymentAccountCrudComponent, outlet: 'rightSidebar' },
+	{ path: '', component: PaymentAccountCrudComponent, outlet: 'right_sidebar' },
 ];
 
 @NgModule({
