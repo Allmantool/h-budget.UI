@@ -39,26 +39,23 @@ describe('currency rates store', () => {
 		{
 			currencyId: 1,
 			rateValues: [
-				{
+				new CurrencyRateValueModel({
 					ratePerUnit: 14,
-					currencyTrend: CurrencyTrend.notChanged,
 					updateDate: new Date(2022, 1, 3),
-				} as CurrencyRateValueModel,
-				{
+				}),
+				new CurrencyRateValueModel({
 					ratePerUnit: 16,
-					currencyTrend: CurrencyTrend.notChanged,
 					updateDate: new Date(2022, 1, 4),
-				} as CurrencyRateValueModel,
+				}),
 			],
-		} as CurrencyRateGroupModel,
+		},
 		{
 			currencyId: 2,
 			rateValues: [
-				{
+				new CurrencyRateValueModel({
 					ratePerUnit: 12,
-					currencyTrend: CurrencyTrend.up,
 					updateDate: new Date(2022, 4, 4),
-				} as CurrencyRateValueModel,
+				}),
 			],
 		} as CurrencyRateGroupModel
 	);
@@ -81,7 +78,7 @@ describe('currency rates store', () => {
 		store.dispatch(new AddCurrencyGroups(initialStoreRateGroups));
 	});
 
-	it('it "AddCurrencyGroups": initial setup - expect 2 carrency groups', () => {
+	it('it "AddCurrencyGroups": initial setup - expect 2 currency groups', () => {
 		store
 			.selectOnce(state => state.currencyState.rateGroups)
 			.subscribe(groups => {
@@ -89,20 +86,18 @@ describe('currency rates store', () => {
 			});
 	});
 
-	it('it "AddCurrencyGroups": update existed currency groups - expect still 2 carrency groups', () => {
+	it('it "AddCurrencyGroups": update existed currency groups - expect still 2 currency groups', () => {
 		const updatedCurrencyRateGroups = new Array({
 			currencyId: 1,
 			rateValues: [
-				{
+				new CurrencyRateValueModel({
 					ratePerUnit: 17,
-					currencyTrend: CurrencyTrend.up,
 					updateDate: new Date(2022, 1, 3),
-				} as CurrencyRateValueModel,
-				{
+				}),
+				new CurrencyRateValueModel({
 					ratePerUnit: 8,
-					currencyTrend: CurrencyTrend.up,
 					updateDate: new Date(2022, 2, 3),
-				} as CurrencyRateValueModel,
+				}),
 			],
 		} as CurrencyRateGroupModel);
 
@@ -119,16 +114,14 @@ describe('currency rates store', () => {
 		const updatedCurrencyRateGroups = new Array({
 			currencyId: 1,
 			rateValues: [
-				{
+				new CurrencyRateValueModel({
 					ratePerUnit: 17,
-					currencyTrend: CurrencyTrend.up,
 					updateDate: new Date(2022, 1, 3),
-				} as CurrencyRateValueModel,
-				{
+				}),
+				new CurrencyRateValueModel({
 					ratePerUnit: 8,
-					currencyTrend: CurrencyTrend.up,
 					updateDate: new Date(2022, 2, 3),
-				} as CurrencyRateValueModel,
+				}),
 			],
 		} as CurrencyRateGroupModel);
 
@@ -151,16 +144,14 @@ describe('currency rates store', () => {
 		const updatedCurrencyRateGroups = new Array({
 			currencyId: 1,
 			rateValues: [
-				{
+				new CurrencyRateValueModel({
 					ratePerUnit: 17,
-					currencyTrend: CurrencyTrend.up,
 					updateDate: new Date(2022, 1, 3),
-				} as CurrencyRateValueModel,
-				{
+				}),
+				new CurrencyRateValueModel({
 					ratePerUnit: 8,
-					currencyTrend: CurrencyTrend.up,
 					updateDate: new Date(2022, 2, 3),
-				} as CurrencyRateValueModel,
+				}),
 			],
 		} as CurrencyRateGroupModel);
 
@@ -184,12 +175,10 @@ describe('currency rates store', () => {
 			rateValues: [
 				{
 					ratePerUnit: 14,
-					currencyTrend: CurrencyTrend.notChanged,
 					updateDate: new Date(2022, 1, 3),
 				} as CurrencyRateValueModel,
 				{
 					ratePerUnit: 16,
-					currencyTrend: CurrencyTrend.notChanged,
 					updateDate: new Date(2022, 1, 4),
 				} as CurrencyRateValueModel,
 			],
@@ -215,17 +204,14 @@ describe('currency rates store', () => {
 				rateValues: [
 					{
 						ratePerUnit: 14,
-						currencyTrend: CurrencyTrend.notChanged,
 						updateDate: new Date(2022, 1, 1),
 					} as CurrencyRateValueModel,
 					{
 						ratePerUnit: 16,
-						currencyTrend: CurrencyTrend.notChanged,
 						updateDate: new Date(2022, 1, 2),
 					} as CurrencyRateValueModel,
 					{
 						ratePerUnit: 16,
-						currencyTrend: CurrencyTrend.notChanged,
 						updateDate: new Date(2022, 1, 4),
 					} as CurrencyRateValueModel,
 				],
