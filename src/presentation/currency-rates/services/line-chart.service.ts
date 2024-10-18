@@ -58,7 +58,7 @@ export class LineChartService {
 			.filter(r => r.updateDate! >= selectedDateRange.start && r.updateDate! <= selectedDateRange.end)
 			.value();
 
-		const ratesDataPoints = ratesForPeriod.map(d => <DataPoint>[d.updateDate, d.officialRate]);
+		const ratesDataPoints = ratesForPeriod.map(d => <DataPoint>[d.updateDate, d.ratePerUnit]);
 		const downSampleRates = _.map(LTTB(ratesDataPoints, this.maxRatesAmount), d =>
 			new CurrencyRateValueModel().fromDataPoint(<DataPoint>d)
 		);

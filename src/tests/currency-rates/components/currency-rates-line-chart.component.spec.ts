@@ -5,7 +5,6 @@ import { TestBed } from '@angular/core/testing';
 import { NgxsModule, Store } from '@ngxs/store';
 import { of } from 'rxjs';
 
-import { CurrencyTrend } from '../../../app/modules/shared/store/models/currency-rates/currency-trend';
 import { ngxsConfig } from '../../../app/modules/shared/store/ngxs.config';
 import {
 	SetActiveCurrency,
@@ -64,16 +63,14 @@ describe('currency rates line chart component', () => {
 		const updatedCurrencyRateGroups = new Array({
 			currencyId: 12,
 			rateValues: [
-				{
+				new CurrencyRateValueModel({
 					ratePerUnit: 17,
-					currencyTrend: CurrencyTrend.up,
 					updateDate: new Date(2022, 1, 3),
-				} as CurrencyRateValueModel,
-				{
+				}),
+				new CurrencyRateValueModel({
 					ratePerUnit: 8,
-					currencyTrend: CurrencyTrend.up,
 					updateDate: new Date(2022, 2, 3),
-				} as CurrencyRateValueModel,
+				}),
 			],
 		} as CurrencyRateGroupModel);
 
