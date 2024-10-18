@@ -1,11 +1,11 @@
 import { ChartType } from 'ng-apexcharts';
 
 export class LineChartOptions {
-	constructor(opitons: Partial<LineChartOptions>) {
-		this.height = opitons.height;
-		this.width = opitons.width;
-		this.dateFormat = opitons.dateFormat ?? 'dd MMM yy';
-		this.type = opitons.type ?? 'area';
+	constructor(options: Partial<LineChartOptions>) {
+		this.height = options.height;
+		this.width = options.width;
+		this.dateFormat = options.dateFormat ?? 'dd MMM yy';
+		this.type = options.type ?? 'area';
 	}
 
 	dateFormat: string;

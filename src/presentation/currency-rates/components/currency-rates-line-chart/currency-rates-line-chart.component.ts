@@ -58,7 +58,7 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
 
 	constructor(
 		private store: Store,
-		private linechartService: LineChartService
+		private lineChartService: LineChartService
 	) {
 		this.lineChartOptions = {
 			height: this.chartHeight,
@@ -88,7 +88,7 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
 				map(ratesGroup => ratesGroup.rateValues ?? [])
 			)
 			.subscribe(rateValues => {
-				const chartOptions = this.linechartService.getChartOptions(
+				const chartOptions = this.lineChartService.getChartOptions(
 					rateValues,
 					this.lineChartOptions,
 					chartTitle => {
