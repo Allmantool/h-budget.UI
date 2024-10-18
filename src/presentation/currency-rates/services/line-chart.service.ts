@@ -10,6 +10,7 @@ import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
 import { format } from 'date-fns';
+import { LTTB } from 'downsample';
 import { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 
@@ -22,9 +23,11 @@ import { getCurrencyTableOptions } from '../../../app/modules/shared/store/state
 import { CurrencyRateValueModel } from '../../../domain/models/rates/currency-rate-value.model';
 import { ChartOptions } from '../models/chart-options';
 import { LineChartOptions } from '../models/line-chart-options';
+import { DataPoint } from '../types/data-point.type';
 
 @Injectable()
 export class LineChartService {
+	private maxRatesAmount: number = 70;
 	public tableOptionsSignal: Signal<ICurrencyTableOptions>;
 	public currencyChartOptionSignal: Signal<ICurrencyChartOptions>;
 
@@ -55,8 +58,13 @@ export class LineChartService {
 			.filter(r => r.updateDate! >= selectedDateRange.start && r.updateDate! <= selectedDateRange.end)
 			.value();
 
-		const rateValueSeriesData = _.map(ratesForPeriod, r => r.ratePerUnit ?? 0);
-		const rateValueLabels = _.map(ratesForPeriod, r => format(r.updateDate!, options.dateFormat));
+		const ratesDataPoints = ratesForPeriod.map(d => <DataPoint>[d.updateDate, d.officialRate]);
+		const downSampleRates = _.map(LTTB(ratesDataPoints, this.maxRatesAmount), d =>
+			new CurrencyRateValueModel().fromDataPoint(<DataPoint>d)
+		);
+
+		const rateValueSeriesData = _.map(downSampleRates, r => r.ratePerUnit ?? 0);
+		const rateValueLabels = _.map(downSampleRates, r => format(r.updateDate!, options.dateFormat));
 		const defaultTitle = LineChartTitleService.calculateTitle(
 			this.tableOptionsSignal().selectedItem.abbreviation,
 			rateValueSeriesData
@@ -73,8 +81,8 @@ export class LineChartService {
 				id: 'currency-line-chart',
 				events: {
 					zoomed: (chartContext, { xaxis }) => {
-						const dataPyaload: number[] = LineChartService.getRatesFromChartContext(chartContext);
-						const zoomedData = _.slice(dataPyaload, xaxis.min - 1, xaxis.max);
+						const dataPayload: number[] = LineChartService.getRatesFromChartContext(chartContext);
+						const zoomedData = _.slice(dataPayload, xaxis.min - 1, xaxis.max);
 
 						const chartTitle = LineChartTitleService.calculateTitle(
 							this.tableOptionsSignal().selectedItem.abbreviation,
