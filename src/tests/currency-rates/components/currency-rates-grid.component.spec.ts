@@ -28,12 +28,13 @@ import { RatesDialogService } from '../../../presentation/currency-rates/service
 describe('currency rates grid component', () => {
 	let sut: CurrencyRatesGridComponent;
 	let fixture: ComponentFixture<CurrencyRatesGridComponent>;
+	let component: CurrencyRatesGridComponent;
 
 	let store: Store;
 	let currencyRateProviderSpy: jasmine.SpyObj<NationalBankCurrenciesProvider>;
 	let dialogProviderSpy: jasmine.SpyObj<DialogProvider>;
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		currencyRateProviderSpy = jasmine.createSpyObj('currencyRatesProvider', {
 			getTodayCurrencies: of<CurrencyRateGroupModel[]>([
 				new CurrencyRateGroupModel({
@@ -49,7 +50,7 @@ describe('currency rates grid component', () => {
 		dialogProviderSpy = jasmine.createSpyObj('dialogProvider', ['openDialog']);
 
 		// eslint-disable-next-line @typescript-eslint/no-floating-promises
-		TestBed.configureTestingModule({
+		await TestBed.configureTestingModule({
 			imports: [
 				NgxsModule.forRoot([CurrencyRatesState, CurrencyTableState, CurrencyChartState], ngxsConfig),
 				MapperModule.withProfiles([DataRatesMappingProfile, PresentationRatesMappingProfile]),
@@ -70,6 +71,8 @@ describe('currency rates grid component', () => {
 			.compileComponents()
 			.then(() => {
 				fixture = TestBed.createComponent(CurrencyRatesGridComponent);
+				component = fixture.componentInstance;
+				fixture.detectChanges();
 			});
 
 		store = TestBed.inject(Store);
@@ -77,7 +80,7 @@ describe('currency rates grid component', () => {
 	});
 
 	it('should create the component', () => {
-		expect(fixture.componentInstance).toBeTruthy();
+		expect(component).toBeTruthy();
 	});
 
 	it('should set store with appropriate target currency settings by "masterToggle"', (done: DoneFn) => {
