@@ -17,7 +17,7 @@ on:
             - hotfix/*
             - fix/*
             - tech/
-        types: [opened, synchronize, closed]
+        types: [opened, synchronize]
 
 env:
     GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
@@ -28,6 +28,7 @@ env:
 
 jobs:
     check-merged:
+        if: ${{ github.event.action != 'closed' }}
         runs-on: ubuntu-latest
         outputs:
             is_merged: ${{ steps.check.outputs.is_merged }}
