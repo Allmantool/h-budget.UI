@@ -51,9 +51,16 @@ jobs:
         if: ${{ needs.check-merged.outputs.is_merged != 'true' }}
         name: Angular UI
         runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: .
         steps:
-            - name: Checkout & Bump tag version
-              uses: ./.github/workflows/update_semver.yml
+            - name: Check out code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+
+            - uses: ./.github/workflows/update_semver.yml
 
             - name: Use Node.js 22.x
               uses: actions/setup-node@v4
