@@ -26,7 +26,7 @@ describe('payments accounts provider', () => {
 	beforeEach(() => {
 		appConfigurationServiceSpy = jasmine.createSpyObj<AppConfigurationService>('appConfigurationService', {
 			settings: {
-				accountingHost: 'acc-host-test',
+				gatewayHost: 'acc-host-test',
 			} as IAppSettingsModel,
 		});
 

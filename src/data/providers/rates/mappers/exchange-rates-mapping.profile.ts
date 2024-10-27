@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import { DateFormats } from '../../../../app/modules/shared/constants/date-formats';
 import { IRatesExchangeMultiplierRequest } from '../../../../domain/models/rates/requests/rates-exchange-multiplier.request';
 import { IRatesExchangeRequest } from '../../../../domain/models/rates/requests/rates-exchange.request';
-import { RateConvertionModel } from '../../../../presentation/currency-rates/models/rate-convertion.model';
+import { RateConversionModel } from '../../../../presentation/currency-rates/models/rate-conversion.model';
 import { RateExchangeMultiplierModel } from '../../../../presentation/currency-rates/models/rate-multiplier.model';
 
 export class ExchangeRatesMappingProfile extends Profile {
@@ -15,7 +15,7 @@ export class ExchangeRatesMappingProfile extends Profile {
 		IRatesExchangeMultiplierRequest
 	>();
 
-	static readonly RateExchangeModelToRequest = new MappingPair<RateConvertionModel, IRatesExchangeRequest>();
+	static readonly RateExchangeModelToRequest = new MappingPair<RateConversionModel, IRatesExchangeRequest>();
 
 	constructor() {
 		super();

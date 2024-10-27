@@ -23,7 +23,7 @@ export class DefaultPaymentAccountsProvider implements IPaymentAccountsProvider 
 		private readonly mapper: Mapper,
 		private readonly appConfigurationService: AppConfigurationService
 	) {
-		this.accountingHostUrl = this.appConfigurationService.settings?.accountingHost;
+		this.accountingHostUrl = this.appConfigurationService.settings?.gatewayHost;
 	}
 
 	public removePaymentAccount(accountGuid: string): Observable<Result<boolean>> {
