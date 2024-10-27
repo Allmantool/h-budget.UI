@@ -39,6 +39,9 @@ jobs:
             run:
                 working-directory: .
         steps:
+            - name: Bump tag version
+              uses: ./.github/workflows/update_semver.yml
+
             - name: Check out code
               uses: actions/checkout@v4
               with:
