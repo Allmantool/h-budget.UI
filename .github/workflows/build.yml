@@ -27,22 +27,33 @@ env:
     IS_MERGED: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged }}
 
 jobs:
+    check-merged:
+        runs-on: ubuntu-latest
+        outputs:
+            is_merged: ${{ steps.check.outputs.is_merged }}
+        steps:
+            - name: Check if PR is merged
+              id: check
+              run: |
+                  echo "is_merged=false" >> $GITHUB_ENV
+                  if [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.action }}" == "closed" && "${{ github.event.pull_request.merged }}" == "true" ]]; then
+                    echo "is_merged=true" >> $GITHUB_ENV
+                  fi
+              shell: bash
+
     update-tag-version-if_merged:
-        if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged }}
+        needs: check-merged
+        if: ${{ needs.check-merged.outputs.is_merged == 'true' }}
         uses: ./.github/workflows/update_semver.yml
 
     build-ui:
-        if: ${{ !(github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged) }}
+        needs: check-merged
+        if: ${{ needs.check-merged.outputs.is_merged != 'true' }}
         name: Angular UI
         runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: .
         steps:
-            - name: Check out code
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+            - name: Checkout & Bump tag version
+              uses: ./.github/workflows/update_semver.yml
 
             - name: Use Node.js 22.x
               uses: actions/setup-node@v4
@@ -68,9 +79,6 @@ jobs:
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
               run: |
                   npm run sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-
-            - name: Bump tag version
-              uses: ./.github/workflows/update_semver.yml
 
             - name: Enquire last git tag
               id: last_tag
