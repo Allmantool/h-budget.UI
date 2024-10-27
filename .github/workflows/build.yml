@@ -41,7 +41,7 @@ jobs:
                   fi
               shell: bash
 
-    update-tag-version-if_merged:
+    update-tag-version:
         needs: check-merged
         uses: ./.github/workflows/update_semver.yml
 
