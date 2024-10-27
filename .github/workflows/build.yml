@@ -46,7 +46,7 @@ jobs:
         uses: ./.github/workflows/update_semver.yml
 
     build-ui:
-        needs: [check-merged, update-tag-version-if_merged]
+        needs: [check-merged, update-tag-version]
         if: ${{ needs.check-merged.outputs.is_merged != 'true' }}
         name: Angular UI
         runs-on: ubuntu-latest
