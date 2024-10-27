@@ -23,7 +23,7 @@ export class CrossAccountsTransferProvider implements ICrossAccountsTransferProv
 
 		private readonly appConfigurationService: AppConfigurationService
 	) {
-		this.accountingHostUrl = this.appConfigurationService.settings?.accountingHost;
+		this.accountingHostUrl = this.appConfigurationService.settings?.gatewayHost;
 	}
 
 	public applyTransfer(payload: ICrossAccountsTransferModel): Observable<Result<Guid>> {

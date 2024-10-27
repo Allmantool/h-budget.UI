@@ -8,7 +8,7 @@ import { ExchangeRatesMappingProfile } from './mappers/exchange-rates-mapping.pr
 import { ApiRequestOptions } from '../../../app/modules/shared/constants/api-request-options';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
 import { Result } from '../../../core/result';
-import { RateConvertionModel } from '../../../presentation/currency-rates/models/rate-convertion.model';
+import { RateConversionModel } from '../../../presentation/currency-rates/models/rate-conversion.model';
 import { RateExchangeMultiplierModel } from '../../../presentation/currency-rates/models/rate-multiplier.model';
 
 @Injectable()
@@ -22,11 +22,11 @@ export class CurrencyExchangeService {
 		private readonly mapper: Mapper,
 		private readonly appConfigurationService: AppConfigurationService
 	) {
-		this.hostUrl = this.appConfigurationService.settings?.ratesHost;
+		this.hostUrl = this.appConfigurationService.settings?.gatewayHost;
 	}
 
-	public getExchange(convertion: RateConvertionModel): Observable<Result<number>> {
-		const request = this.mapper?.map(ExchangeRatesMappingProfile.RateExchangeModelToRequest, convertion);
+	public getExchange(conversion: RateConversionModel): Observable<Result<number>> {
+		const request = this.mapper?.map(ExchangeRatesMappingProfile.RateExchangeModelToRequest, conversion);
 
 		return this.http
 			.post<Result<number>>(`${this.hostUrl}/${this.apiUrl}`, request)

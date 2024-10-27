@@ -31,7 +31,7 @@ describe('national bank currencies provider', () => {
 		const appConfigurationService = new AppConfigurationService();
 
 		const appSettings: IAppSettingsModel = {
-			ratesHost: RATE_HOST,
+			gatewayHost: RATE_HOST,
 		};
 
 		appConfigurationService.settings = appSettings;

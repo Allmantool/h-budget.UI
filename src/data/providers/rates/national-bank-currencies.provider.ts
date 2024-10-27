@@ -27,7 +27,7 @@ export class NationalBankCurrenciesProvider implements IBankCurrenciesProvider {
 		private readonly mapper: Mapper,
 		private readonly appConfigurationService: AppConfigurationService
 	) {
-		this.hostUrl = this.appConfigurationService.settings?.ratesHost;
+		this.hostUrl = this.appConfigurationService.settings?.gatewayHost;
 	}
 
 	public getCurrenciesForSpecifiedPeriod(payload: DaysRangePayload): Observable<CurrencyRateGroupModel[]> {
