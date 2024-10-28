@@ -1,13 +1,14 @@
 # Stage 1: Build
-FROM node:22-slim AS build
+FROM node:22-alpine AS build
 
 WORKDIR /app
 
 # Copy and install only necessary dependencies first to leverage Docker caching
 COPY package*.json ./
 
+# Set environment variables and install dependencies
 ENV NODE_ENV=production
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev --verbose
 
 # Copy remaining application files
 COPY . .

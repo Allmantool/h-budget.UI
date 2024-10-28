@@ -17,7 +17,6 @@
         "eslint": "eslint --cache --fix --ext .js,.jsx,.ts,.tsx src",
         "eslint:dump": "eslint --print-config ./.eslintrc.json",
         "sonar-scanner": "sonar-scanner",
-        "prepare": "cd .. && husky UI/.husky",
         "clean": "rmdir /s /q node_modules",
         "reinstall": "npm run clean && npm install",
         "rebuild": "npm run clean && npm install && rmdir /s /q dist && npm run build --prod",
@@ -63,7 +62,8 @@
         "tslib": "^2.8.0",
         "typescript-guid": "^1.0.3",
         "uuid": "^11.0.1",
-        "zone.js": "^0.14.10"
+        "zone.js": "^0.14.10",
+        "@nrwl/workspace": "16.7.2"
     },
     "devDependencies": {
         "@angular-devkit/build-angular": "^18.2.10",
@@ -101,7 +101,6 @@
         "karma-sonarqube-reporter": "^1.4.0",
         "lint-staged": "^15.2.10",
         "npm-run-all": "^4.1.5",
-        "nx": "20.0.6",
         "nx-cloud": "19.1.0",
         "prettier": "^3.3.3",
         "sonarqube-scanner": "^4.2.5",
