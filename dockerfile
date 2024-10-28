@@ -8,7 +8,7 @@ COPY package*.json ./
 
 # Set environment variables and install dependencies
 ENV NODE_ENV=production
-RUN npm ci --omit=dev --verbose
+RUN npm i --omit=dev --verbose
 
 # Copy remaining application files
 COPY . .
