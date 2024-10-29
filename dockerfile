@@ -14,13 +14,12 @@ RUN npm i --omit=dev --verbose
 COPY . .
 
 # Install Chrome dependencies and Chrome itself in one layer
-RUN apt-get update && \
-    apt-get install -y wget gnupg && \
-    wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - && \
-    echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list && \
-    apt-get update && \
-    apt-get install -y google-chrome-stable && \
-    rm -rf /var/lib/apt/lists/* /google-chrome-stable_current_amd64.deb
+RUN apk update && \
+    apk add --no-cache wget gnupg && \
+    wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --import - && \
+    echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories && \
+    apk update && \
+    apk add --no-cache chromium
 
 # Set environment variable for Chrome
 ENV CHROME_BIN=/usr/bin/google-chrome
