@@ -1,4 +1,11 @@
 {
+    "cli": {
+        "defaultCollection": "@nrwl/angular",
+        "analytics": false,
+        "logger": {
+            "level": "debug"
+        }
+    },
     "tasksRunnerOptions": {
         "default": {
             "runner": "nx/tasks-runners/default",
@@ -8,8 +15,8 @@
                     "test",
                     "lint"
                 ],
-                "parallel": 3, // Use parallel builds for faster execution
-                "cacheDirectory": ".cache/nx" // Docker-friendly caching directory
+                "parallel": 3,
+                "cacheDirectory": ".cache/nx"
             }
         }
     },
