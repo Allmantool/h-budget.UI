@@ -8,7 +8,7 @@
 		"build": "nx build --verbose",
 		"build-prod": "nx build h-budget --configuration=production --verbose",
 		"watch": "nx build --watch --configuration=development",
-		"test": "nx test --code-coverage",
+		"test": "nx test --code-coverage --verbose",
 		"test-headless-ci-only": "nx test --browsers=ChromiumNoSandbox",
 		"test-headless": "nx test --watch=false --code-coverage --source-map=false --browsers=ChromiumNoSandbox",
 		"lint:fix": "nx lint -- --fix --verbose",
