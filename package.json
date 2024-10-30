@@ -1,6 +1,7 @@
 {
 	"name": "h-budget",
 	"version": "0.5.68",
+	"private": true,
 	"scripts": {
 		"ng": "ng",
 		"start": "nx serve --watch --open",
@@ -17,9 +18,9 @@
 		"eslint": "eslint --cache --fix --ext .js,.jsx,.ts,.tsx src",
 		"eslint:dump": "eslint --print-config ./.eslintrc.json",
 		"sonar-scanner": "sonar-scanner",
-		"clean": "rmdir /s /q node_modules",
+		"clean": "rimraf node_modules",
 		"reinstall": "npm run clean && npm install",
-		"rebuild": "npm run clean && npm install && rmdir /s /q dist && npm run build --prod",
+		"rebuild": "npm run clean && npm install && rimraf dist && npm run build-prod",
 		"build-image": "docker build -t nginx-app-docker-image .",
 		"remove-image": "docker rmi nginx-app-docker-image",
 		"run-container": "docker run --name nginx-app-docker-container -d -p 8080:80 nginx-app-docker-image",
@@ -27,7 +28,6 @@
 		"containerize": "npm run build-image && npm run run-container",
 		"recontainerize": "npm run remove-container && npm run build-image && npm run run-container"
 	},
-	"private": true,
 	"dependencies": {
 		"@angular/animations": "^18.2.9",
 		"@angular/cdk": "^18.2.10",
@@ -43,7 +43,7 @@
 		"@dynamic-mapper/mapper": "^1.10.4",
 		"@ngxs/logger-plugin": "^18.1.4",
 		"@ngxs/store": "^18.1.4",
-		"@nrwl/workspace": "19.8.4",
+		"@nrwl/workspace": "^20.0.6",
 		"apexcharts": "^3.54.1",
 		"date-fns": "^4.1.0",
 		"downsample": "^1.4.0",
@@ -64,7 +64,7 @@
 		"typescript-guid": "^1.0.3",
 		"uuid": "^11.0.2",
 		"zone.js": "^0.14.10",
-        "@nrwl/angular": "^19.8.4"
+		"@nrwl/angular": "^20.0.6"
 	},
 	"devDependencies": {
 		"@angular-devkit/build-angular": "^18.2.10",
@@ -80,10 +80,9 @@
 		"@commitlint/cli": "^19.5.0",
 		"@commitlint/config-conventional": "^19.5.0",
 		"@ngxs/devtools-plugin": "^18.1.4",
-		"@nrwl/angular": "^19.8.4",
-		"@nx/angular": "20.0.6",
-		"@nx/linter": "19.8.8",
-		"@nx/workspace": "20.0.6",
+		"@nx/angular": "^20.0.6",
+		"@nx/linter": "^20.0.6",
+		"@nx/workspace": "^20.0.6",
 		"@schematics/angular": "^18.2.10",
 		"@types/jasmine": "~5.1.4",
 		"@types/lodash": "^4.17.12",
@@ -103,7 +102,7 @@
 		"karma-sonarqube-reporter": "^1.4.0",
 		"lint-staged": "^15.2.10",
 		"npm-run-all": "^4.1.5",
-		"nx": "20.0.6",
+		"nx": "^20.0.6",
 		"nx-cloud": "19.1.0",
 		"prettier": "^3.3.3",
 		"sonarqube-scanner": "^4.2.5",
