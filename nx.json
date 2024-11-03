@@ -1,4 +1,5 @@
 {
+    "defaultProject": "h-budget",
     "cli": {
         "defaultCollection": "@nrwl/angular",
         "analytics": false,
@@ -62,6 +63,21 @@
                 "default",
                 "{workspaceRoot}/.eslintrc.json"
             ]
+        },
+        "serve": {
+            "dependsOn": ["^build"],
+            "options": {
+                "host": "localhost",
+                "port": 4200
+            },
+            "configurations": {
+                "production": {
+                    "buildTarget": "h-budget:build:production"
+                },
+                "development": {
+                    "buildTarget": "h-budget:build:development"
+                }
+            }
         }
     }
 }
