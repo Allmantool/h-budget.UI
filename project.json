@@ -4,7 +4,7 @@
     "projectType": "application",
     "targets": {
         "build": {
-            "executor": "@nrwl/angular:webpack-browser",
+            "executor": "@angular-devkit/build-angular:browser",
             "options": {
                 "outputPath": "dist/h-budget",
                 "main": "src/main.ts",
