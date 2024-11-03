@@ -67,6 +67,8 @@
         "@angular/compiler-cli": "^18.2.10",
         "@commitlint/cli": "^19.5.0",
         "@commitlint/config-conventional": "^19.5.0",
+        "@ngxs/devtools-plugin": "^18.1.4",
+        "@nrwl/angular": "^19.8.4",
         "@nx/angular": "^20.0.7",
         "@nx/linter": "^19.8.4",
         "@nx/workspace": "^20.0.7",
@@ -97,7 +99,6 @@
         "prettier": "^3.3.3",
         "sonarqube-scanner": "^4.2.5",
         "stylelint-prettier": "^5.0.2",
-        "typescript": "~5.5.4",
-        "@ngxs/devtools-plugin": "^18.1.4"
+        "typescript": "~5.5.4"
     }
 }
