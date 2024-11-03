@@ -21,9 +21,6 @@
             }
         }
     },
-    "affected": {
-        "defaultBase": "master"
-    },
     "namedInputs": {
         "sharedGlobals": [],
         "default": [
@@ -65,7 +62,9 @@
             ]
         },
         "serve": {
-            "dependsOn": ["^build"],
+            "dependsOn": [
+                "^build"
+            ],
             "options": {
                 "host": "localhost",
                 "port": 4200
@@ -79,5 +78,7 @@
                 }
             }
         }
-    }
+    },
+    "$schema": "./node_modules/nx/schemas/nx-schema.json",
+    "defaultBase": "master"
 }

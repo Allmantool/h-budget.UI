@@ -70,7 +70,7 @@
             "defaultConfiguration": "development"
         },
         "serve": {
-            "executor": "@nrwl/angular:webpack-dev-server",
+            "executor": "@nrwl/angular:dev-server",
             "options": {
                 "buildTarget": "h-budget:build:development"
             },
