@@ -1,55 +1,84 @@
 {
-  "tasksRunnerOptions": {
-    "default": {
-      "runner": "nx/tasks-runners/default",
-      "options": {
-        "cacheableOperations": [
-          "build",
-          "test",
-          "lint"
+    "defaultProject": "h-budget",
+    "cli": {
+        "defaultCollection": "@nrwl/angular",
+        "analytics": false,
+        "logger": {
+            "level": "debug"
+        }
+    },
+    "tasksRunnerOptions": {
+        "default": {
+            "runner": "nx/tasks-runners/default",
+            "options": {
+                "cacheableOperations": [
+                    "build",
+                    "test",
+                    "lint"
+                ],
+                "parallel": 3,
+                "cacheDirectory": ".cache/nx"
+            }
+        }
+    },
+    "namedInputs": {
+        "sharedGlobals": [],
+        "default": [
+            "{projectRoot}/**/*",
+            "sharedGlobals"
+        ],
+        "production": [
+            "default",
+            "!{projectRoot}/tsconfig.spec.json",
+            "!{projectRoot}/**/*.spec.[jt]s",
+            "!{projectRoot}/karma.conf.js",
+            "!{projectRoot}/.eslintrc.json"
         ]
-      }
-    }
-  },
-  "affected": {
+    },
+    "targetDefaults": {
+        "build": {
+            "dependsOn": [
+                "^build"
+            ],
+            "inputs": [
+                "production",
+                "^production"
+            ],
+            "outputs": [
+                "{options.outputPath}"
+            ]
+        },
+        "test": {
+            "inputs": [
+                "default",
+                "^production",
+                "{workspaceRoot}/karma.conf.js"
+            ]
+        },
+        "lint": {
+            "inputs": [
+                "default",
+                "{workspaceRoot}/.eslintrc.json"
+            ]
+        },
+        "serve": {
+            "dependsOn": [
+                "^build"
+            ],
+            "options": {
+                "host": "localhost",
+                "port": 4200
+            },
+            "configurations": {
+                "production": {
+                    "buildTarget": "h-budget:build:production"
+                },
+                "development": {
+                    "buildTarget": "h-budget:build:development"
+                }
+            }
+        }
+    },
+    "$schema": "./node_modules/nx/schemas/nx-schema.json",
     "defaultBase": "master"
-  },
-  "namedInputs": {
-    "sharedGlobals": [],
-    "default": [
-      "{projectRoot}/**/*",
-      "sharedGlobals"
-    ],
-    "production": [
-      "default",
-      "!{projectRoot}/tsconfig.spec.json",
-      "!{projectRoot}/**/*.spec.[jt]s",
-      "!{projectRoot}/karma.conf.js",
-      "!{projectRoot}/.eslintrc.json"
-    ]
-  },
-  "targetDefaults": {
-    "build": {
-      "dependsOn": [
-        "^build"
-      ],
-      "inputs": [
-        "production",
-        "^production"
-      ]
-    },
-    "test": {
-      "inputs": [
-        "default",
-        "^production",
-        "{workspaceRoot}/karma.conf.js"
-      ]
-    },
-    "lint": {
-      "inputs": [
-        "default",
-        "{workspaceRoot}/.eslintrc.json"
-      ]
-    }
-  }
 }

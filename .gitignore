@@ -113,3 +113,5 @@ reports/*
 
 
 .nx/cache
+.cache/
+.nx/workspace-data

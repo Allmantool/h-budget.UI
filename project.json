@@ -1,21 +1,14 @@
 {
-    "$schema": "node_modules/nx/schemas/project-schema.json",
-    "name": "h-budget",
-    "projectType": "application",
-    "generators": {
-        "@schematics/angular:application": {
-            "strict": true
-        }
-    },
+    "root": ".",
     "sourceRoot": "src",
-    "prefix": "app",
+    "projectType": "application",
     "targets": {
         "build": {
             "executor": "@angular-devkit/build-angular:browser",
             "options": {
                 "outputPath": "dist/h-budget",
-                "index": "src/index.html",
                 "main": "src/main.ts",
+                "index": "src/index.html",
                 "polyfills": "src/polyfills.ts",
                 "tsConfig": "tsconfig.app.json",
                 "allowedCommonJsDependencies": [
@@ -39,6 +32,7 @@
             },
             "configurations": {
                 "production": {
+                    "outputPath": "dist/h-budget",
                     "optimization": true,
                     "outputHashing": "all",
                     "sourceMap": false,
@@ -65,21 +59,21 @@
                     ]
                 },
                 "development": {
-                    "buildOptimizer": false,
+                    "outputPath": "dist/h-budget",
                     "optimization": false,
-                    "vendorChunk": true,
-                    "extractLicenses": false,
                     "sourceMap": true,
-                    "namedChunks": true
+                    "namedChunks": true,
+                    "vendorChunk": true,
+                    "extractLicenses": false
                 }
             },
-            "defaultConfiguration": "development",
-            "outputs": [
-                "{options.outputPath}"
-            ]
+            "defaultConfiguration": "development"
         },
         "serve": {
-            "executor": "@angular-devkit/build-angular:dev-server",
+            "executor": "@nrwl/angular:dev-server",
+            "options": {
+                "buildTarget": "h-budget:build:development"
+            },
             "configurations": {
                 "production": {
                     "buildTarget": "h-budget:build:production"
@@ -90,48 +84,26 @@
             },
             "defaultConfiguration": "development"
         },
-        "extract-i18n": {
-            "executor": "@angular-devkit/build-angular:extract-i18n",
-            "options": {
-                "buildTarget": "h-budget:build"
-            }
-        },
         "test": {
             "executor": "@angular-devkit/build-angular:karma",
             "options": {
                 "main": "src/tests/test.ts",
                 "polyfills": "src/polyfills.ts",
-                "codeCoverage": true,
                 "tsConfig": "tsconfig.spec.json",
                 "karmaConfig": "karma.conf.js",
-                "assets": [
-                    "src/favicon.ico",
-                    "src/assets"
-                ],
                 "styles": [
                     "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
                     "./node_modules/flag-icons/css/flag-icons.min.css",
                     "src/styles/styles.css"
                 ],
-                "scripts": []
-            }
-        },
-        "lint-staged": {
-            "src/**/*.{ts,css,html}": [
-                "npm run prettier:check"
-            ]
-        },
-        "lint": {
-            "executor": "@angular-eslint/builder:lint",
-            "options": {
-                "lintFilePatterns": [
-                    "src/**/*.ts",
-                    "src/**/*.html"
+                "scripts": [
+                    "node_modules/apexcharts/dist/apexcharts.min.js"
+                ],
+                "assets": [
+                    "src/favicon.ico",
+                    "src/assets"
                 ]
-            },
-            "outputs": [
-                "{options.outputFile}"
-            ]
+            }
         }
     }
 }
