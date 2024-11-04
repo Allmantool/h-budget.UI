@@ -7,8 +7,11 @@ WORKDIR /app
 # Copy only package files to leverage Docker cache
 COPY package*.json ./
 
-# Install Nx globally and project dependencies
-RUN npm install -g nx@20.0.8 && npm install --omit=dev --verbose
+RUN npm install -g nx@20.0.8 \
+    && npm install -g @nx/workspace@20.0.8 \
+    && npm install -g nx/angular@20.0.8 \
+    && npm install -g @nrwl/angular@19.8.4 \
+    && npm install --omit=dev --verbose
 
 # Copy the rest of the application files
 COPY . .
