@@ -9,7 +9,7 @@ COPY package*.json ./
 
 RUN npm install -g nx@20.0.8 \
     && npm install -g @nx/workspace@20.0.8 \
-    && npm install -g nx/angular@20.0.8 \
+    && npm install -g @nx/angular@20.0.8 \
     && npm install -g @nrwl/angular@19.8.4 \
     && npm install --omit=dev --verbose
 
