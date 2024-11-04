@@ -30,7 +30,7 @@ import { AngularMaterialSharedModule } from '../shared/angular-material.shared.m
 	imports: [
 		NgxsModule.forRoot([CoreAppState], ngxsConfig),
 		NgxsLoggerPluginModule.forRoot(),
-		NgxsReduxDevtoolsPluginModule.forRoot(),
+		!environment.production ? NgxsReduxDevtoolsPluginModule.forRoot() : [],
 		AppSharedModule,
 		CustomUIComponentsSharedModule,
 		AppCoreModule,
