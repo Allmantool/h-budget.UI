@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install Nx globally and project dependencies
-RUN npm install -g nx@latest && npm install --omit=dev --verbose
+RUN npm install -g nx@20.0.8 && npm install --omit=dev --verbose
 
 # Copy the rest of the application files
 COPY . .
