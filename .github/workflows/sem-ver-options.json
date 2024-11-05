@@ -9,7 +9,8 @@
     "rules": [
         {
             "trigger": "commit",
-            "bump": "minor"
+            "bump": "minor",
+            "tag": true
         },
         {
             "trigger": "commit",
