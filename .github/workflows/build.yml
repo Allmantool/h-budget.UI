@@ -28,7 +28,8 @@ env:
     EVENT_ACTION: ${{ github.event.action }}
     EVENT_PULL_REQUEST_STATE: ${{ github.event.pull_request.state }}
     EVENT_PULL_REQUEST_MERGED: ${{ github.event.pull_request.merged }}
-    IS_MERGED: ${{ github.event_name == 'push' }}
+    BRANCH_REF: ${{ github.ref }}
+    IS_MERGED: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
 
 jobs:
     check-merged:
