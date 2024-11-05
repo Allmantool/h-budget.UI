@@ -28,7 +28,7 @@ env:
     EVENT_ACTION: ${{ github.event.action }}
     EVENT_PULL_REQUEST_STATE: ${{ github.event.pull_request.state }}
     EVENT_PULL_REQUEST_MERGED: ${{ github.event.pull_request.merged }}
-    IS_MERGED: ${{ github.event_name == 'push' && github.event.action == 'closed' }}
+    IS_MERGED: ${{ github.event_name == 'push' }}
 
 jobs:
     check-merged:
