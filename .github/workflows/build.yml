@@ -43,7 +43,7 @@ jobs:
               id: check
               run: |
                   echo "is_merged=false" >> $GITHUB_ENV
-                  if [[ "${{ github.event_name }}" == "push" && "${{ github.base_ref }}" == "refs/heads/master" ]]; then
+                  if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/master" ]]; then
                     echo "is_merged=true" >> $GITHUB_ENV
                   fi
               shell: bash
