@@ -24,7 +24,10 @@ env:
     SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
     DOCKERHUB_USERNAME: ${{secrets.DOCKERHUB_USERNAME}}
     DOCKERHUB_TOKEN: ${{secrets.DOCKERHUB_TOKEN}}
-    IS_MERGED: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged }}
+    EVENT_NAME: ${{ github.event_name }}
+    EVENT_ACTION: ${{ github.event.action }}
+    EVENT_PULL_REQUEST_MERGED: ${{ github.event.pull_request.merged  }}
+    IS_MERGED: ${{ github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == 'true' }}
 
 jobs:
     check-merged:
