@@ -9,23 +9,18 @@
     "rules": [
         {
             "trigger": "commit",
-            "bump": "minor",
+            "bump": "major",
+            "branch": "release",
+            "reset": [
+                "minor",
+                "build"
+            ],
             "tag": true
         },
         {
             "trigger": "commit",
             "bump": "minor",
             "branch": "build-deps-upgrade-npm-packages-automated",
-            "tag": true
-        },
-        {
-            "trigger": "pull-request",
-            "bump": "build",
-            "branch": "master",
-            "destBranch": "master",
-            "reset": [
-                "minor"
-            ],
             "tag": true
         },
         {
@@ -39,13 +34,18 @@
             "tag": true
         },
         {
-            "trigger": "commit",
-            "bump": "major",
-            "branch": "release",
+            "trigger": "pull-request",
+            "bump": "build",
+            "branch": "master",
+            "destBranch": "master",
             "reset": [
-                "minor",
-                "build"
+                "minor"
             ],
+            "tag": true
+        },
+        {
+            "trigger": "commit",
+            "bump": "minor",
             "tag": true
         }
     ]
