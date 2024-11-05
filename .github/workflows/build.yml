@@ -28,7 +28,9 @@ env:
     EVENT_ACTION: ${{ github.event.action }}
     EVENT_PULL_REQUEST_STATE: ${{ github.event.pull_request.state }}
     EVENT_PULL_REQUEST_MERGED: ${{ github.event.pull_request.merged }}
-    IS_MERGED: ${{ github.event_name == 'push' }}
+    BRANCH_REF: ${{ github.ref }}
+    BRANCH_BASE_REF: ${{ github.base_ref }}
+    IS_MERGED: ${{ github.event_name == 'push' && github.ref == 'master' }}
 
 jobs:
     check-merged:
@@ -41,7 +43,7 @@ jobs:
               id: check
               run: |
                   echo "is_merged=false" >> $GITHUB_ENV
-                  if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == "refs/heads/master" ]]; then
+                  if [[ "${{ github.event_name }}" == "push" && "${{ github.base_ref }}" == "master" ]]; then
                     echo "is_merged=true" >> $GITHUB_ENV
                   fi
               shell: bash
