@@ -33,19 +33,12 @@ env:
     IS_MERGED: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
 
 jobs:
-    check-merged:
-        if: ${{ github.event.action != 'closed' }}
-        runs-on: ubuntu-latest
-        outputs:
-            is_merged: ${{ ENV.IS_MERGED }}
-
     update-tag-version:
-        needs: check-merged
         if: ${{ github.event.action != 'closed' }}
         uses: ./.github/workflows/update_semver.yml
 
     build-ui:
-        needs: [check-merged, update-tag-version]
+        needs: [update-tag-version]
         name: Angular UI
         runs-on: ubuntu-latest
         defaults:
