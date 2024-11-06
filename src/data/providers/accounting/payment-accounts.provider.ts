@@ -15,7 +15,7 @@ import { IPaymentAccountsProvider } from '../../../domain/providers/accounting/p
 
 @Injectable()
 export class DefaultPaymentAccountsProvider implements IPaymentAccountsProvider {
-	private paymentAccountApi: string = 'payment-accounts';
+	private paymentAccountApi: string = 'accounting/payment-accounts';
 	private accountingHostUrl?: string;
 
 	constructor(

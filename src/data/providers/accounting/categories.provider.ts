@@ -12,10 +12,12 @@ import { AppConfigurationService } from '../../../app/modules/shared/services/ap
 import { ICategoryModel } from '../../../domain/models/accounting/category.model';
 import { ICategoryCreateRequest } from '../../../domain/models/accounting/requests/category-create.request';
 import { ICategoriesProvider } from '../../../domain/providers/accounting/categories.provider';
+import { ApiRequestOptions } from '../../../app/modules/shared/constants/api-request-options';
 
 @Injectable()
 export class DefaultCategoriesProvider implements ICategoriesProvider {
 	private accountingHostUrl?: string;
+	private paymentCategoriesApi: string = 'accounting/categories';
 
 	constructor(
 		private readonly http: HttpClient,
@@ -26,19 +28,23 @@ export class DefaultCategoriesProvider implements ICategoriesProvider {
 	}
 
 	public getCategoriries(): Observable<ICategoryModel[]> {
-		return this.http.get<Result<ICategoryEntity[]>>(`${this.accountingHostUrl}/categories`).pipe(
+		return this.http.get<Result<ICategoryEntity[]>>(`${this.accountingHostUrl}/${this.paymentCategoriesApi}`).pipe(
 			map(responseResult => this.mapper?.map(DataCategoryProfile.CategoryEntityToDomain, responseResult.payload)),
-			retry(3),
+			retry(ApiRequestOptions.RETRY_AMOUNT),
 			take(1)
 		);
 	}
 
 	public getCategoryById(categoryId: string): Observable<ICategoryModel> {
-		return this.http.get<Result<ICategoryEntity>>(`${this.accountingHostUrl}/categories/byId/${categoryId}`).pipe(
-			map(responseResult => this.mapper?.map(DataCategoryProfile.CategoryEntityToDomain, responseResult.payload)),
-			retry(3),
-			take(1)
-		);
+		return this.http
+			.get<Result<ICategoryEntity>>(`${this.accountingHostUrl}/${this.paymentCategoriesApi}/byId/${categoryId}`)
+			.pipe(
+				map(responseResult =>
+					this.mapper?.map(DataCategoryProfile.CategoryEntityToDomain, responseResult.payload)
+				),
+				retry(ApiRequestOptions.RETRY_AMOUNT),
+				take(1)
+			);
 	}
 
 	public saveCategory(operationType: number, newCategoryNamesNodes: string[]): Observable<Result<string>> {
@@ -47,6 +53,8 @@ export class DefaultCategoriesProvider implements ICategoriesProvider {
 			categoryType: operationType,
 		};
 
-		return this.http.post<Result<string>>(`${this.accountingHostUrl}/categories`, request).pipe(retry(3), take(1));
+		return this.http
+			.post<Result<string>>(`${this.accountingHostUrl}/${this.paymentCategoriesApi}`, request)
+			.pipe(retry(ApiRequestOptions.RETRY_AMOUNT), take(1));
 	}
 }

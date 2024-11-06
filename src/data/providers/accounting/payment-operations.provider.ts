@@ -13,7 +13,7 @@ import { IPaymentAccountCreateOrUpdateResponse } from '../../../domain/models/ac
 
 @Injectable()
 export class PaymentOperationsProvider {
-	private paymentOperationsApi: string = 'payment-operations';
+	private paymentOperationsApi: string = 'accounting/payment-operations';
 	private accountingHostUrl?: string;
 
 	constructor(
