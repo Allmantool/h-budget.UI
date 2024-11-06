@@ -72,7 +72,6 @@
         "serve": {
             "executor": "@nrwl/angular:dev-server",
             "options": {
-                "buildTarget": "h-budget:build:development"
                 "buildTarget": "h-budget:build:development",
                 "ssl": true,
             },
