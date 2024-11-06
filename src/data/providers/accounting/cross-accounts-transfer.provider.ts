@@ -17,6 +17,7 @@ import { ICrossAccountsTransferProvider } from '../../../domain/providers/accoun
 @Injectable()
 export class CrossAccountsTransferProvider implements ICrossAccountsTransferProvider {
 	private accountingHostUrl?: string;
+	private paymentCrossAccountsTransferApi: string = 'accounting/cross-accounts-transfer';
 
 	constructor(
 		private readonly http: HttpClient,
@@ -36,7 +37,7 @@ export class CrossAccountsTransferProvider implements ICrossAccountsTransferProv
 		};
 
 		return this.http
-			.post<Result<Guid>>(`${this.accountingHostUrl}/cross-accounts-transfer`, request)
+			.post<Result<Guid>>(`${this.accountingHostUrl}/${this.paymentCrossAccountsTransferApi}`, request)
 			.pipe(retry(ApiRequestOptions.RETRY_AMOUNT), take(1));
 	}
 
@@ -47,7 +48,7 @@ export class CrossAccountsTransferProvider implements ICrossAccountsTransferProv
 		};
 
 		return this.http
-			.delete<Result<Guid>>(`${this.accountingHostUrl}/cross-accounts-transfer`, {
+			.delete<Result<Guid>>(`${this.accountingHostUrl}/${this.paymentCrossAccountsTransferApi}`, {
 				body: request,
 			})
 			.pipe(retry(ApiRequestOptions.RETRY_AMOUNT), take(1));

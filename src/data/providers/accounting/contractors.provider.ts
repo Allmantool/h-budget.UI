@@ -12,10 +12,12 @@ import { AppConfigurationService } from '../../../app/modules/shared/services/ap
 import { IContractorModel } from '../../../domain/models/accounting/contractor.model.';
 import { IContractorCreateRequest } from '../../../domain/models/accounting/requests/contractor-create.request';
 import { IContractorsProvider } from '../../../domain/providers/accounting/contractors.provider';
+import { ApiRequestOptions } from '../../../app/modules/shared/constants/api-request-options';
 
 @Injectable()
 export class DefaultContractorsProvider implements IContractorsProvider {
 	private accountingHostUrl?: string;
+	private paymentContractorsApi: string = 'accounting/contractors';
 
 	constructor(
 		private readonly http: HttpClient,
@@ -26,23 +28,27 @@ export class DefaultContractorsProvider implements IContractorsProvider {
 	}
 
 	public getContractors(): Observable<IContractorModel[]> {
-		return this.http.get<Result<IContractorEntity[]>>(`${this.accountingHostUrl}/contractors`).pipe(
-			map(responseResult =>
-				this.mapper?.map(DataContractorProfile.ContractorEntityToDomain, responseResult.payload)
-			),
-			retry(3),
-			take(1)
-		);
-	}
-
-	public getContractorById(contractorId: string): Observable<IContractorModel> {
 		return this.http
-			.get<Result<IContractorEntity>>(`${this.accountingHostUrl}/contractors/byId/${contractorId}`)
+			.get<Result<IContractorEntity[]>>(`${this.accountingHostUrl}/${this.paymentContractorsApi}`)
 			.pipe(
 				map(responseResult =>
 					this.mapper?.map(DataContractorProfile.ContractorEntityToDomain, responseResult.payload)
 				),
-				retry(3),
+				retry(ApiRequestOptions.RETRY_AMOUNT),
+				take(1)
+			);
+	}
+
+	public getContractorById(contractorId: string): Observable<IContractorModel> {
+		return this.http
+			.get<
+				Result<IContractorEntity>
+			>(`${this.accountingHostUrl}/${this.paymentContractorsApi}/byId/${contractorId}`)
+			.pipe(
+				map(responseResult =>
+					this.mapper?.map(DataContractorProfile.ContractorEntityToDomain, responseResult.payload)
+				),
+				retry(ApiRequestOptions.RETRY_AMOUNT),
 				take(1)
 			);
 	}
@@ -52,6 +58,8 @@ export class DefaultContractorsProvider implements IContractorsProvider {
 			nameNodes: newContractorNamesNodes,
 		};
 
-		return this.http.post<Result<string>>(`${this.accountingHostUrl}/contractors`, request).pipe(retry(3), take(1));
+		return this.http
+			.post<Result<string>>(`${this.accountingHostUrl}/${this.paymentContractorsApi}`, request)
+			.pipe(retry(ApiRequestOptions.RETRY_AMOUNT), take(1));
 	}
 }

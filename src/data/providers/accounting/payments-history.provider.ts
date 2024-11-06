@@ -15,7 +15,7 @@ import { IPaymentHistoryModel } from '../../../domain/models/accounting/payment-
 
 @Injectable()
 export class PaymentsHistoryProvider {
-	private paymentOperationsApi: string = 'payments-history';
+	private paymentOperationsApi: string = 'accounting/payments-history';
 	private accountingHostUrl?: string;
 
 	constructor(
@@ -28,9 +28,9 @@ export class PaymentsHistoryProvider {
 
 	public getOperationsHistoryForPaymentAccount(paymentAccountId: string | Guid): Observable<IPaymentHistoryModel[]> {
 		return this.http
-			.get<Result<IPaymentHistoryEntity[]>>(
-				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId.toString()}`
-			)
+			.get<
+				Result<IPaymentHistoryEntity[]>
+			>(`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId.toString()}`)
 			.pipe(
 				map(responseResult => responseResult.payload),
 				map(payload =>
@@ -41,11 +41,14 @@ export class PaymentsHistoryProvider {
 			);
 	}
 
-	public GetHistoryOperationById(paymentAccountId: string | Guid, paymentOperationId: string | Guid): Observable<IPaymentHistoryModel> {
+	public GetHistoryOperationById(
+		paymentAccountId: string | Guid,
+		paymentOperationId: string | Guid
+	): Observable<IPaymentHistoryModel> {
 		return this.http
-			.get<Result<IPaymentHistoryEntity>>(
-				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId.toString()}/byId/${paymentOperationId.toString()}`
-			)
+			.get<
+				Result<IPaymentHistoryEntity>
+			>(`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId.toString()}/byId/${paymentOperationId.toString()}`)
 			.pipe(
 				map(responseResult => responseResult.payload),
 				map(payload =>
