@@ -75,7 +75,7 @@ jobs:
 
             - name: Upload & Install UI dependencies
               run: |
-                  npm i
+                  npm ci
 
             - name: Build UI project
               run: |
