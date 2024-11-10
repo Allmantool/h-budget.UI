@@ -1,6 +1,6 @@
 {
     "name": "h-budget",
-    "version": "0.22.68",
+    "version": "0.23.68",
     "private": true,
     "scripts": {
         "ng": "ng",
