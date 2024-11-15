@@ -20,10 +20,10 @@
         "sonar-scanner": "sonar-scanner",
         "clean": "npm prune && rimraf node_modules && rimraf package-lock.json",
         "reinstall": "npm run clean && npm i",
-        "rebuild": "npm run clean && npm i && npm run build",
+        "rebuild": "npm run clean && npm i && npm dedupe && npm run build",
         "rebuild-prod": "npm run clean && npm i --omit=dev && rimraf dist && npm run build-prod",
-        "major-update": "ncu -u",
-        "minor-update": "ncu --peer -u",
+        "major-update": "npm i npm-check-updates && ncu -u",
+        "minor-update": "npm i npm-check-updates && ncu --peer -u",
         "safe-update": "npm run minor-update && npm i && npm update && npm i && npm ci",
         "hard-update": "npm run major-update && npm i && npm update && npm i && npm ci"
     },
