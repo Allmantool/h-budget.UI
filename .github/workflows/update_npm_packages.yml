@@ -24,7 +24,7 @@ jobs:
 
             - name: Check and update packages (minor) 🔀
               run: |
-                  npm run safe-update
+                  npm run minor-update
 
             - name: Commit and create PR 🔀
               uses: peter-evans/create-pull-request@v7
