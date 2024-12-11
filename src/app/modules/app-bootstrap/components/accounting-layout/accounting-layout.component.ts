@@ -14,6 +14,7 @@ import { requestsUnderProcessing } from '../../../shared/store/states/core/selec
 	templateUrl: './accounting-layout.component.html',
 	styleUrls: ['./accounting-layout.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: false
 })
 export class AccountingLayoutComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);

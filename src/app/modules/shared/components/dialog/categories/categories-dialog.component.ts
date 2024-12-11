@@ -21,6 +21,7 @@ import { AddCategory } from '../../../store/states/handbooks/actions/category.ac
 	templateUrl: './categories-dialog.component.html',
 	styleUrls: ['./categories-dialog.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: false
 })
 export class CategoriesDialogComponent {
 	private dialogConfiguration: DialogContainer<ICategoryModel, ICategoryModel>;
