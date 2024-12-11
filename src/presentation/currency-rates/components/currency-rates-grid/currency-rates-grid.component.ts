@@ -29,6 +29,7 @@ import { CurrencyRatesGridService } from '../../services/currency-rates-grid.ser
 	templateUrl: './currency-rates-grid.component.html',
 	styleUrls: ['./currency-rates-grid.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: false
 })
 export class CurrencyRatesGridComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);

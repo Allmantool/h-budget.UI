@@ -6,6 +6,7 @@ import { Title } from '@angular/platform-browser';
 	templateUrl: './currency-rates-dashboard.component.html',
 	styleUrls: ['./currency-rates-dashboard.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: false
 })
 export class CurrencyRatesDashboardComponent implements OnInit {
 	constructor(private readonly title: Title) {}

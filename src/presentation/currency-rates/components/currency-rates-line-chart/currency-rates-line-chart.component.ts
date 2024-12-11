@@ -34,6 +34,7 @@ import { LineChartService } from '../../services/line-chart.service';
 	templateUrl: './currency-rates-line-chart.component.html',
 	styleUrls: ['./currency-rates-line-chart.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: false
 })
 export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
 	private readonly destroyRef = inject(DestroyRef);

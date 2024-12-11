@@ -7,6 +7,7 @@ import { Meta, Title } from '@angular/platform-browser';
 	templateUrl: './main-dashboard.component.html',
 	styleUrls: ['./main-dashboard.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: false
 })
 export class MainDashboardComponent implements OnInit {
 	constructor(

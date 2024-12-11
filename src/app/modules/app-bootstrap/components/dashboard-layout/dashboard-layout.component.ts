@@ -14,6 +14,7 @@ import { requestsUnderProcessing } from '../../../shared/store/states/core/selec
 	templateUrl: './dashboard-layout.component.html',
 	styleUrls: ['./dashboard-layout.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: false
 })
 export class DashboardLayoutComponent implements OnInit {
 	public showFiller = false;

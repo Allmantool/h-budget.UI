@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 	templateUrl: './main-dashboard-cart.component.html',
 	styleUrls: ['./main-dashboard-cart.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: false
 })
 export class MainDashboardCartComponent {
 	@Input() description: string = '';

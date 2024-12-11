@@ -14,6 +14,7 @@ import { requestsUnderProcessing } from '../../../shared/store/states/core/selec
 	templateUrl: './base-layout.component.html',
 	styleUrls: ['./base-layout.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: false
 })
 export class BaseLayoutComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);
