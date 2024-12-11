@@ -5,6 +5,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 	templateUrl: './progress-bar.component.html',
 	styleUrls: ['./progress-bar.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: false
 })
 export class ProgressBarComponent {
 	@Input() isLoading: boolean | null = false;

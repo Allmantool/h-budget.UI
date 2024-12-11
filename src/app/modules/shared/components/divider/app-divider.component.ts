@@ -5,6 +5,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 	templateUrl: './app-divider.component.html',
 	styleUrls: ['./app-divider.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: false
 })
 export class AppDividerComponent {
 	@Input() isVertical = true;

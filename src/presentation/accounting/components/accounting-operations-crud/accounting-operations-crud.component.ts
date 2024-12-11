@@ -43,6 +43,7 @@ import { CrossAccountsTransferProvider } from '../../../../data/providers/accoun
 	templateUrl: './accounting-operations-crud.component.html',
 	styleUrls: ['./accounting-operations-crud.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: false
 })
 export class AccountingOperationsCrudComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);

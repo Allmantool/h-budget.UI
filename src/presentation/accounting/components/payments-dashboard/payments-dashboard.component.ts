@@ -22,6 +22,7 @@ import { IPaymentAccountModel } from '../../../../domain/models/accounting/payme
 	templateUrl: './payments-dashboard.component.html',
 	styleUrls: ['./payments-dashboard.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: false
 })
 export class PaymentsDashboardComponent implements OnInit {
 	public paymentAccountGeneralInfoSignal: Signal<string> = signal('');

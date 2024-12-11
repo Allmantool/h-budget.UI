@@ -27,6 +27,7 @@ import { FormInput } from '../../types/form-input.type';
 		},
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: false
 })
 export class AppFormFieldComponent implements ControlValueAccessor {
 	private onTouched!: Function;

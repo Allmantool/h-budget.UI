@@ -33,6 +33,7 @@ import {
 	templateUrl: './cross-accounts-transfer-dialog.component.html',
 	styleUrls: ['./cross-accounts-transfer-dialog.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: false
 })
 export class CrossAccountsTransferDialogComponent {
 	private dialogConfiguration: DialogContainer<ICrossAccountsTransferModel, Result<ICrossAccountsTransferResponse>>;

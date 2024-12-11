@@ -31,6 +31,7 @@ import { IPaymentAccountModel } from '../../../../domain/models/accounting/payme
 	templateUrl: './payment-account.component.html',
 	styleUrls: ['./payment-account.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: false
 })
 export class PaymentAccountComponent implements OnInit {
 	public isNavigateToOperationsDisabled: boolean = true;
