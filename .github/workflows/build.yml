@@ -1,4 +1,4 @@
-name: Build Application
+name: Build UI Application
 
 on:
     workflow_dispatch:
@@ -34,13 +34,17 @@ env:
 
 jobs:
     update-tag-version:
+        name: Generate semantic version Tag
         if: ${{ github.event.action != 'closed' }}
         uses: ./.github/workflows/update_semver.yml
 
     build-ui:
         needs: [update-tag-version]
-        name: Angular UI
+        name: Build Angular UI
         runs-on: ubuntu-latest
+        outputs:
+            last_tag: ${{ steps.last_tag.outputs.TARGET_TAG }}
+            pr_number: ${{ steps.findPr.outputs.pr }}
         defaults:
             run:
                 working-directory: .
@@ -57,9 +61,13 @@ jobs:
                   cache: 'npm'
                   cache-dependency-path: package-lock.json
 
-            - name: Upload & Install UI dependencies
+            - name: Install UI dependencies
               run: |
                   npm ci
+
+            - name: Lint the codebase
+              run: npm run lint
+              continue-on-error: true
 
             - name: Build UI project
               run: |
@@ -69,13 +77,13 @@ jobs:
               run: |
                   npm run test-headless
 
-            - name: Run sonnarqube
+            - name: Run SonarQube analysis
               env:
                   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
               run: |
                   npm run sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-            - name: Enquire last git tag
+            - name: Enquire last git Tag
               id: last_tag
               shell: bash
               run: |
@@ -91,6 +99,20 @@ jobs:
                   # Can be "open", "closed", or "all".  Defaults to "open".
                   state: open
 
+    build-docker:
+        name: Build and Push Docker Image
+        needs: build-ui
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: .
+
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+
             - name: Build docker image
               env:
                   GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
@@ -98,19 +120,21 @@ jobs:
                   GITHUB_RUN_ID: ${{ github.run_id }}
                   RUN_NUMBER: ${{ github.run_number }}
                   RUN_ATTEMPT: ${{ github.run_attempt }}
-                  PULL_REQUEST_ID: ${{ steps.findPr.outputs.pr }}
+                  PULL_REQUEST_ID: ${{ needs.build-ui.outputs.pr_number }}
                   PULL_REQUEST_SOURCE_BRANCH: ${{ github.ref }}
                   PULL_REQUEST_TARGET_BRANCH: refs/heads/master
                   ACTION: ${{ github.action }}
                   EVENT_NAME: ${{ github.event_name }}
+                  TARGET_TAG: ${{ needs.build-ui.outputs.last_tag }}
+
               shell: bash
               run: |
 
-                  echo "latest tag is ${{ steps.last_tag.outputs.TARGET_TAG }}"
+                  echo "latest tag is ${{ needs.build-ui.outputs.last_tag }}"
 
                   docker build \
-                  --target 'publish' -t "${{ env.DOCKERHUB_USERNAME }}/homebudget-ui:${{ steps.last_tag.outputs.TARGET_TAG }}" \
-                  --build-arg PULL_REQUEST_ID='${{ steps.findPr.outputs.pr }}' \
+                  --target 'publish' -t "${{ env.DOCKERHUB_USERNAME }}/homebudget-ui:${{ needs.build-ui.outputs.last_tag }}" \
+                  --build-arg PULL_REQUEST_ID='${{ needs.build-ui.outputs.pr_number }}' \
                   --build-arg PULL_REQUEST_SOURCE_BRANCH='${{ github.ref }}' \
                   --build-arg PULL_REQUEST_TARGET_BRANCH=refs/heads/master \
                   --build-arg GITHUB_RUN_ID='${{ github.run_id }}' \
@@ -128,4 +152,4 @@ jobs:
               if: ${{ ENV.IS_MERGED == 'true' }}
               shell: bash
               run: |
-                  docker push "${{ secrets.DOCKERHUB_USERNAME }}/homebudget-ui:${{ steps.last_tag.outputs.TARGET_TAG }}"
+                  docker push "${{ secrets.DOCKERHUB_USERNAME }}/homebudget-ui:${{ needs.build-ui.outputs.last_tag }}"

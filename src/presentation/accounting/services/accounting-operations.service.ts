@@ -21,8 +21,8 @@ import { getContractorAsNodesMap } from '../../../app/modules/shared/store/state
 import { PaymentOperationsProvider } from '../../../data/providers/accounting/payment-operations.provider';
 import { ICategoryModel } from '../../../domain/models/accounting/category.model';
 import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
+import { OperationTypes } from '../../../domain/types/operation.types';
 import { IPaymentRepresentationModel } from '../models/operation-record';
-import { OperationTypes } from "../../../domain/types/operation.types";
 
 @Injectable()
 export class AccountingOperationsService {
@@ -97,7 +97,7 @@ export class AccountingOperationsService {
 						expense: 0,
 						comment: '',
 						balance: 0,
-						operationType: 1
+						operationType: 1,
 					},
 					isSucceeded: true,
 				})

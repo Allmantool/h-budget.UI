@@ -8,11 +8,11 @@ import { Result } from 'core/result';
 
 import { ICategoryEntity } from './entities/operation-category.entity';
 import { DataCategoryProfile } from './mappers/category.mapping.profile';
+import { ApiRequestOptions } from '../../../app/modules/shared/constants/api-request-options';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
 import { ICategoryModel } from '../../../domain/models/accounting/category.model';
 import { ICategoryCreateRequest } from '../../../domain/models/accounting/requests/category-create.request';
 import { ICategoriesProvider } from '../../../domain/providers/accounting/categories.provider';
-import { ApiRequestOptions } from '../../../app/modules/shared/constants/api-request-options';
 
 @Injectable()
 export class DefaultCategoriesProvider implements ICategoriesProvider {

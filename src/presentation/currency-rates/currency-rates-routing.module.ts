@@ -3,10 +3,12 @@ import { provideRouter, Routes, withDebugTracing } from '@angular/router';
 
 import { CurrencyRatesDashboardComponent } from '../currency-rates';
 
-const routes: Routes = [{
-	path: '',
-	component: CurrencyRatesDashboardComponent
-}];
+const routes: Routes = [
+	{
+		path: '',
+		component: CurrencyRatesDashboardComponent,
+	},
+];
 
 @NgModule({
 	imports: [],

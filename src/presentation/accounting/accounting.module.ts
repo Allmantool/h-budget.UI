@@ -16,6 +16,7 @@ import { CrossAccountsTransferService } from './services/cross-accounts-transfer
 import { HandbooksService } from './services/handbooks.service';
 import { PaymentAccountDialogService } from './services/payment-account-dialog.service';
 import { PaymentsHistoryService } from './services/payments-history.service';
+import { AccountingLayoutComponent } from '../../app/modules/app-bootstrap/components/accounting-layout/accounting-layout.component';
 import { AppCoreModule } from '../../app/modules/core/core.module';
 import { AngularMaterialSharedModule } from '../../app/modules/shared/angular-material.shared.module';
 import { CustomUIComponentsSharedModule } from '../../app/modules/shared/custom-ui-components.shared.module';
@@ -42,7 +43,6 @@ import { PaymentsHistoryProvider } from '../../data/providers/accounting/payment
 import { CurrencyExchangeService } from '../../data/providers/rates/currency-exchange.service';
 import { ExchangeRatesMappingProfile } from '../../data/providers/rates/mappers/exchange-rates-mapping.profile';
 import { AccountingOperationsCrudComponent, AccountingRoutingModule } from '../accounting';
-import { AccountingLayoutComponent } from '../../app/modules/app-bootstrap/components/accounting-layout/accounting-layout.component';
 
 @NgModule({
 	declarations: [

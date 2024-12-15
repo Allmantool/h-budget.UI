@@ -12,18 +12,18 @@ import { catchError, of, take, tap } from 'rxjs';
 
 import { environment } from 'environments/environment';
 
-import { AppSharedModule } from '../shared/shared.module';
-import { ngxsConfig } from '../shared/store/ngxs.config';
 import { BootstrapRoutingModule } from './app-bootstrap-routing.module';
 import { IAppSettingsModel } from '../../../domain/models/app-settings.model';
 import { AppCoreModule } from '../core';
 import { CorrelationIdInterceptor } from '../core/interceptors/correlation-id.interceptor';
 import { HttpRequestLoaderInterceptor } from '../core/interceptors/http-request-loader.interceptor';
+import { AngularMaterialSharedModule } from '../shared/angular-material.shared.module';
 import { CustomUIComponentsSharedModule } from '../shared/custom-ui-components.shared.module';
 import { AppConfigurationService } from '../shared/services/app-configuration.service';
-import { CoreAppState } from '../shared/store/states/core/core-app.state';
+import { AppSharedModule } from '../shared/shared.module';
 import { BaseLayoutComponent } from './components/base-layout/base-layout.component';
-import { AngularMaterialSharedModule } from '../shared/angular-material.shared.module';
+import { ngxsConfig } from '../shared/store/ngxs.config';
+import { CoreAppState } from '../shared/store/states/core/core-app.state';
 
 @NgModule({
 	declarations: [BaseLayoutComponent],

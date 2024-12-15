@@ -1,7 +1,7 @@
 {
     "defaultProject": "h-budget",
     "cli": {
-        "defaultCollection": "@nrwl/angular",
+        "defaultCollection": "@nx/angular",
         "analytics": false,
         "logger": {
             "level": "debug"

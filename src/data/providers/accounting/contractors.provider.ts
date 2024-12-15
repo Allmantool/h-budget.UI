@@ -8,11 +8,11 @@ import { Result } from 'core/result';
 
 import { IContractorEntity } from './entities/contractor.entity';
 import { DataContractorProfile } from './mappers/contractor.mapping.profile';
+import { ApiRequestOptions } from '../../../app/modules/shared/constants/api-request-options';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
 import { IContractorModel } from '../../../domain/models/accounting/contractor.model.';
 import { IContractorCreateRequest } from '../../../domain/models/accounting/requests/contractor-create.request';
 import { IContractorsProvider } from '../../../domain/providers/accounting/contractors.provider';
-import { ApiRequestOptions } from '../../../app/modules/shared/constants/api-request-options';
 
 @Injectable()
 export class DefaultContractorsProvider implements IContractorsProvider {
