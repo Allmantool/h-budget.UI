@@ -22,10 +22,16 @@ jobs:
                   cache: 'npm'
                   cache-dependency-path: package-lock.json
 
-            - name: Check and update packages (minor) 🔀
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Update packages (minor) 🔀
               run: |
                   npm run minor-update
-                  npm i
+                  npm update
+
+            - name: Reinstall dependencies
+              run: npm ci
 
             - name: Commit and create PR 🔀
               uses: peter-evans/create-pull-request@v7
