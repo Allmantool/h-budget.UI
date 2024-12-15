@@ -88,7 +88,9 @@ describe('currency rates grid component', () => {
 		const currencyAbbreviationUnderTest: string = 'test currency';
 
 		sut.masterToggle(currencyIdUnderTest, currencyAbbreviationUnderTest);
-		const tableOptionsStore = store.selectSnapshot<ICurrencyTableStateModel>((state) => state.currencyState.currencyTableState);
+		const tableOptionsStore = store.selectSnapshot<ICurrencyTableStateModel>(
+			state => state.currencyState.currencyTableState
+		);
 
 		expect(tableOptionsStore.tableOptions.selectedItem.currencyId).toBe(currencyIdUnderTest);
 		expect(tableOptionsStore.tableOptions.selectedItem.abbreviation).toBe(currencyAbbreviationUnderTest);
@@ -123,7 +125,9 @@ describe('currency rates grid component', () => {
 		const defaultMonthAmount: number = 7;
 
 		sut.setDateRange(defaultMonthAmount);
-		const tableOptionsStore: ICurrencyTableStateModel = store.selectSnapshot<ICurrencyTableStateModel>((state) => state.currencyState.currencyTableState);
+		const tableOptionsStore: ICurrencyTableStateModel = store.selectSnapshot<ICurrencyTableStateModel>(
+			state => state.currencyState.currencyTableState
+		);
 
 		expect(tableOptionsStore.tableOptions.selectedDateRange.diffInMonths).toBe(defaultMonthAmount);
 		done();

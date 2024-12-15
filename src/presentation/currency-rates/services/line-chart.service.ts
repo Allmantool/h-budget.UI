@@ -10,9 +10,10 @@ import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
 import { format } from 'date-fns';
-import { LTTB } from 'downsample';
 import { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
+
+import { LTTB } from 'downsample';
 
 import { LineChartTitleService } from './line-chart-title.service';
 import { ICurrencyChartOptions } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-option.';

@@ -1,20 +1,21 @@
 import { NgModule } from '@angular/core';
 import { provideRouter, Routes, withDebugTracing } from '@angular/router';
 
-import { MainDashboardComponent } from './components/dashboard/main-dashboard.component';
 import { AccountingLayoutComponent } from 'app/modules/app-bootstrap/components/accounting-layout/accounting-layout.component';
 import { DashboardLayoutComponent } from 'app/modules/app-bootstrap/components/dashboard-layout/dashboard-layout.component';
+
+import { MainDashboardComponent } from './components/dashboard/main-dashboard.component';
 
 const routes: Routes = [
 	{
 		path: '',
 		component: DashboardLayoutComponent,
 		children: [
-      	{
-			path: '',
-			component: MainDashboardComponent
-		}
-    ]
+			{
+				path: '',
+				component: MainDashboardComponent,
+			},
+		],
 	},
 	{
 		path: 'currency-rates',

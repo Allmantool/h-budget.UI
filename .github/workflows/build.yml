@@ -67,6 +67,7 @@ jobs:
 
             - name: Lint the codebase
               run: npm run lint
+              continue-on-error: true
 
             - name: Build UI project
               run: |

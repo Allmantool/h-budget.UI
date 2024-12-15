@@ -5,10 +5,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgApexchartsModule } from 'ng-apexcharts';
 
 import { AngularMaterialSharedModule } from './angular-material.shared.module';
+import { AppCoreModule } from '../core';
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component';
 import { AccountingCurrencyFormatPipe } from './pipes/accounting-currency.pipe';
 import { CurrencyAbbreviationToFlagFormatPipe } from './pipes/currency-abbreviation-to-flag.pipe';
-import { AppCoreModule } from '../core';
 
 @NgModule({
 	declarations: [PageNotFoundComponent, AccountingCurrencyFormatPipe, CurrencyAbbreviationToFlagFormatPipe],
