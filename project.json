@@ -70,7 +70,7 @@
             "defaultConfiguration": "development"
         },
         "serve": {
-            "executor": "@nrwl/angular:dev-server",
+            "executor": "@nx/angular:dev-server",
             "options": {
                 "buildTarget": "h-budget:build:development",
                 "ssl": true
