@@ -73,7 +73,7 @@
             "executor": "@nrwl/angular:dev-server",
             "options": {
                 "buildTarget": "h-budget:build:development",
-                "ssl": true,
+                "ssl": true
             },
             "configurations": {
                 "production": {
@@ -103,6 +103,15 @@
                 "assets": [
                     "src/favicon.ico",
                     "src/assets"
+                ]
+            }
+        },
+        "lint": {
+            "executor": "@nrwl/linter:eslint",
+            "options": {
+                "lintFilePatterns": [
+                    "src/**/*.ts",
+                    "src/**/*.html"
                 ]
             }
         }

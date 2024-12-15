@@ -1,4 +1,4 @@
-name: Build Application
+name: Build UI Application
 
 on:
     workflow_dispatch:
@@ -34,12 +34,13 @@ env:
 
 jobs:
     update-tag-version:
+        name: Generate semantic version Tag
         if: ${{ github.event.action != 'closed' }}
         uses: ./.github/workflows/update_semver.yml
 
     build-ui:
         needs: [update-tag-version]
-        name: Angular UI
+        name: Build Angular UI
         runs-on: ubuntu-latest
         outputs:
             last_tag: ${{ steps.last_tag.outputs.TARGET_TAG }}
@@ -81,7 +82,7 @@ jobs:
               run: |
                   npm run sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-            - name: Enquire last git tag
+            - name: Enquire last git Tag
               id: last_tag
               shell: bash
               run: |
