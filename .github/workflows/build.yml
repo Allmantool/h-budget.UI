@@ -103,6 +103,9 @@ jobs:
         name: Build and Push Docker Image
         needs: build-ui
         runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: .
 
         steps:
             - name: Build docker image
