@@ -28,7 +28,7 @@ import { DataPoint } from '../types/data-point.type';
 
 @Injectable()
 export class LineChartService {
-	private maxRatesAmount: number = 70;
+	private maxRatesAmount: number = 65;
 	public tableOptionsSignal: Signal<ICurrencyTableOptions>;
 	public currencyChartOptionSignal: Signal<ICurrencyChartOptions>;
 
@@ -105,6 +105,10 @@ export class LineChartService {
 			xaxis: {
 				categories: rateValueLabels,
 			},
+			yaxis: {
+				min: _.min(rateValueSeriesData),
+				max: _.max(rateValueSeriesData)
+			}
 		});
 
 		return this.charOptions$.value;
