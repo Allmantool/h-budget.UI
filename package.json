@@ -48,7 +48,7 @@
     "@nrwl/linter": "^19.8.4",
     "@types/lodash": "^4.17.13",
     "@types/uuid": "^10.0.0",
-    "apexcharts": "^4.2.0",
+    "apexcharts": "^4.3.0",
     "date-fns": "^4.1.0",
     "downsample": "^1.4.0",
     "flag-icons": "^7.2.3",
