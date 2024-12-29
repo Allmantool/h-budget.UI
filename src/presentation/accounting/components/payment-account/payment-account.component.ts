@@ -12,7 +12,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import * as _ from 'lodash';
 
-import { Select, Store } from '@ngxs/store';
+import { Store } from '@ngxs/store';
 import { Observable, take } from 'rxjs';
 import { nameof } from 'ts-simple-nameof';
 import { Guid } from 'typescript-guid';
@@ -25,38 +25,35 @@ import { getPaymentAccounts } from '../../../../app/modules/shared/store/states/
 import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
 import { AccountTypes } from '../../../../domain/models/accounting/account-types';
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
+import { LoaderService } from '../../../../app/modules/shared/services/loader-service';
 
 @Component({
 	selector: 'payment-accounts',
 	templateUrl: './payment-account.component.html',
 	styleUrls: ['./payment-account.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false
+	standalone: false,
 })
 export class PaymentAccountComponent implements OnInit {
 	public isNavigateToOperationsDisabled: boolean = true;
 	public cashAccountsSignal = signal<IPaymentAccountModel[]>([]);
 	public debitVirtualAccountsSignal = signal<IPaymentAccountModel[]>([]);
 	public creditVirtualAccountsSignal = signal<IPaymentAccountModel[]>([]);
-
-	@Select(getPaymentAccounts)
-	paymentAccounts$!: Observable<IPaymentAccountModel[]>;
+	public paymentAccounts$: Observable<IPaymentAccountModel[]> = this.store.select(getPaymentAccounts);
 
 	constructor(
 		private injector: EnvironmentInjector,
 		private readonly paymentAccountsProvider: DefaultPaymentAccountsProvider,
 		private readonly route: ActivatedRoute,
 		private readonly router: Router,
-		private readonly store: Store
+		private readonly store: Store,
+		public readonly loaderService: LoaderService
 	) {}
 
 	public ngOnInit(): void {
-		this.paymentAccountsProvider
-			.getPaymentAccounts()
-			.pipe(take(1))
-			.subscribe(accounts => {
-				this.store.dispatch(new SetInitialPaymentAccounts(accounts));
-			});
+		this.loaderService
+			.withLoader(this.paymentAccountsProvider.getPaymentAccounts())
+			.subscribe(accounts => this.store.dispatch(new SetInitialPaymentAccounts(accounts)).pipe(take(1)));
 
 		runInInjectionContext(this.injector, () => {
 			this.paymentAccounts$.pipe(takeUntilDestroyed()).subscribe(accounts => {

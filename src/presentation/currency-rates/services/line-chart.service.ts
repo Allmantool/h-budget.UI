@@ -25,10 +25,11 @@ import { CurrencyRateValueModel } from '../../../domain/models/rates/currency-ra
 import { ChartOptions } from '../models/chart-options';
 import { LineChartOptions } from '../models/line-chart-options';
 import { DataPoint } from '../types/data-point.type';
+import { RatesGridDefaultOptions } from '../../../app/modules/shared/constants/rates-grid-default-options';
 
 @Injectable()
 export class LineChartService {
-	private maxRatesAmount: number = 65;
+	private maxRatesAmount: number = 60;
 	public tableOptionsSignal: Signal<ICurrencyTableOptions>;
 	public currencyChartOptionSignal: Signal<ICurrencyChartOptions>;
 
@@ -64,7 +65,7 @@ export class LineChartService {
 			new CurrencyRateValueModel().fromDataPoint(<DataPoint>d)
 		);
 
-		const rateValueSeriesData = _.map(downSampleRates, r => r.ratePerUnit ?? 0);
+		const rateValueSeriesData = _.map(downSampleRates, r => _.round(r.ratePerUnit ?? 0, RatesGridDefaultOptions.RATE_DIFF_PRECISION));
 		const rateValueLabels = _.map(downSampleRates, r => format(r.updateDate!, options.dateFormat));
 		const defaultTitle = LineChartTitleService.calculateTitle(
 			this.tableOptionsSignal().selectedItem.abbreviation,
@@ -107,8 +108,8 @@ export class LineChartService {
 			},
 			yaxis: {
 				min: _.min(rateValueSeriesData),
-				max: _.max(rateValueSeriesData)
-			}
+				max: _.max(rateValueSeriesData),
+			},
 		});
 
 		return this.charOptions$.value;

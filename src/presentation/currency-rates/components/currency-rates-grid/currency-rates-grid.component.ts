@@ -23,13 +23,14 @@ import { CurrencyRateGroupModel } from '../../../../domain/models/rates/currency
 import { RatesGridColumnOptions } from '../../constants/rates-grid-options';
 import { CurrencyGridRateModel } from '../../models/currency-grid-rate.model';
 import { CurrencyRatesGridService } from '../../services/currency-rates-grid.service';
+import { LoaderService } from '../../../../app/modules/shared/services/loader-service';
 
 @Component({
 	selector: 'app-currency-rates-grid',
 	templateUrl: './currency-rates-grid.component.html',
 	styleUrls: ['./currency-rates-grid.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false
+	standalone: false,
 })
 export class CurrencyRatesGridComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);
@@ -55,7 +56,8 @@ export class CurrencyRatesGridComponent implements OnInit {
 	constructor(
 		private readonly store: Store,
 		private readonly ratesDialogService: RatesDialogService,
-		private readonly currencyRatesGridService: CurrencyRatesGridService
+		private readonly currencyRatesGridService: CurrencyRatesGridService,
+		public readonly loaderService: LoaderService
 	) {
 		this.tableOptionsSignal = toSignal(this.currencyTableOptions$, { initialValue: {} as ICurrencyTableOptions });
 	}
@@ -75,8 +77,12 @@ export class CurrencyRatesGridComponent implements OnInit {
 		combineLatest([this.previousDayRates$, this.todayCurrencyRateGroups$])
 			.pipe(takeUntilDestroyed(this.destroyRef))
 			.subscribe(([previousDayRates, todayRateGroups]) => {
-				const dataSource = this.currencyRatesGridService.enrichWithTrend(previousDayRates, todayRateGroups);
-				this.todayRatesTableDataSource = dataSource;
+				this.loaderService.withLoader(async () => {
+					this.todayRatesTableDataSource = this.currencyRatesGridService.enrichWithTrend(
+						previousDayRates,
+						todayRateGroups
+					);
+				});
 			});
 
 		await this.getTodayCurrencyRatesAsync();
@@ -87,7 +93,9 @@ export class CurrencyRatesGridComponent implements OnInit {
 	}
 
 	public async getTodayCurrencyRatesAsync(): Promise<void> {
-		this.todayCurrencyRateGroups$.next(await this.currencyRatesGridService.getTodayCurrenciesAsync());
+		await this.loaderService.withLoader(async () => {
+			this.todayCurrencyRateGroups$.next(await this.currencyRatesGridService.getTodayCurrenciesAsync());
+		});
 	}
 
 	public openGetCurrencyRatesDialog(): void {
