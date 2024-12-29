@@ -200,8 +200,8 @@ describe('currency rates grid service', () => {
 
 		const result = sut.enrichWithTrend(previousDayRates, todayRateGroups);
 
-		expect(result.filteredData.find(i => i.currencyId === 101)?.rateDiff).toBe('15.67');
-		expect(result.filteredData.find(i => i.currencyId === 207)?.rateDiff).toBe('-10.45');
+		expect(result.filteredData.find(i => i.currencyId === 101)?.rateDiff).toBe('15.672');
+		expect(result.filteredData.find(i => i.currencyId === 207)?.rateDiff).toBe('-10.448');
 		expect(result.filteredData.find(i => i.currencyId === 312)?.rateDiff).toBe('0');
 
 		done();
