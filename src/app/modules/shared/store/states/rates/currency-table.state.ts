@@ -19,9 +19,9 @@ import { ICurrencyTableOptions } from '../../models/currency-rates/currency-tabl
 				abbreviation: RatesGridDefaultOptions.CURRENCY_ABBREVIATION,
 			} as ICurrencyTableItem,
 			selectedDateRange: {
-				start: addMonths(new Date(), -RatesGridDefaultOptions.PERIOD_IN_MONTHS_AMMOUNT),
+				start: addMonths(new Date(), -RatesGridDefaultOptions.PERIOD_IN_MONTHS_AMOUNT),
 				end: new Date(),
-				diffInMonths: RatesGridDefaultOptions.PERIOD_IN_MONTHS_AMMOUNT,
+				diffInMonths: RatesGridDefaultOptions.PERIOD_IN_MONTHS_AMOUNT,
 			} as ICurrencyDateRange,
 		} as ICurrencyTableOptions,
 	},

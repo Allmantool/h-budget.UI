@@ -2,6 +2,7 @@ import * as _ from 'lodash';
 
 import { HexColors } from '../../../app/modules/shared/constants/hex-colors';
 import { ICurrencyChartTitle } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-title';
+import { RatesGridDefaultOptions } from '../../../app/modules/shared/constants/rates-grid-default-options';
 
 export class LineChartTitleService {
 	public static calculateTitle(abbreviation: string, rateValuesForPeriod: number[]): ICurrencyChartTitle {
@@ -40,6 +41,6 @@ export class LineChartTitleService {
 
 		const diffForThePeriod = _.last(allRates)! - _.first(allRates)!;
 
-		return _.round((diffForThePeriod / _.first(allRates)!) * 100, 3);
+		return _.round((diffForThePeriod / _.first(allRates)!) * 100, RatesGridDefaultOptions.RATE_DIFF_PRECISION);
 	}
 }

@@ -22,6 +22,7 @@ import { CurrencyAbbreviations } from '../../../constants/rates-abbreviations';
 import { DialogContainer } from '../../../models/dialog-container';
 import { SelectDropdownOptions } from '../../../models/select-dropdown-options';
 import { Add } from '../../../store/states/accounting/actions/payment-operation.actions';
+import { RatesGridDefaultOptions } from '../../../constants/rates-grid-default-options';
 import {
 	getActivePaymentAccount,
 	getActivePaymentAccountId,
@@ -128,7 +129,7 @@ export class CrossAccountsTransferDialogComponent {
 				: `Conversion from '${this.targetPaymentAccountSignal().currency}' to '${this.activePaymentAccountSignal().currency}'`;
 
 			const originPaymentAccountInfo = `'${this.activePaymentAccountSignal().emitter} | ${this.activePaymentAccountSignal().description}'
-				after: '${_.round(this.activePaymentAccountSignal().balance - this.transferAmountSignal(), 3)}' ('${this.activePaymentAccountSignal().currency}')`;
+				after: '${_.round(this.activePaymentAccountSignal().balance - this.transferAmountSignal(), RatesGridDefaultOptions.RATE_DIFF_PRECISION)}' ('${this.activePaymentAccountSignal().currency}')`;
 
 			const targetCurrencyTransferAmount = _.round(
 				this.currencyMultiplierSignal() * this.transferAmountSignal(),
@@ -136,7 +137,7 @@ export class CrossAccountsTransferDialogComponent {
 			);
 
 			const targetPaymentAccountInfo = `'${this.targetPaymentAccountSignal().emitter} | ${this.targetPaymentAccountSignal().description}'
-				after: '${_.round(this.targetPaymentAccountSignal().balance + targetCurrencyTransferAmount, 3)}' ('${this.targetPaymentAccountSignal().currency}')`;
+				after: '${_.round(this.targetPaymentAccountSignal().balance + targetCurrencyTransferAmount, RatesGridDefaultOptions.RATE_DIFF_PRECISION)}' ('${this.targetPaymentAccountSignal().currency}')`;
 
 			return [
 				transferDirection,

@@ -18,6 +18,7 @@ import { AppSharedModule } from '../../app/modules/shared/shared.module';
 import { CurrencyChartState } from '../../app/modules/shared/store/states/rates/currency-chart.state';
 import { CurrencyRatesState } from '../../app/modules/shared/store/states/rates/currency-rates.state';
 import { CurrencyTableState } from '../../app/modules/shared/store/states/rates/currency-table.state';
+import { LoaderService } from '../../app/modules/shared/services/loader-service';
 import {
 	CurrencyRatesDashboardComponent,
 	CurrencyRatesGridComponent,
@@ -37,7 +38,13 @@ import {
 		NgxsModule.forFeature([CurrencyRatesState, CurrencyTableState, CurrencyChartState]),
 		MapperModule.withProfiles([DataRatesMappingProfile, PresentationRatesMappingProfile]),
 	],
-	providers: [LineChartService, RatesDialogService, NationalBankCurrenciesProvider, CurrencyRatesGridService],
+	providers: [
+		LineChartService,
+		RatesDialogService,
+		NationalBankCurrenciesProvider,
+		CurrencyRatesGridService,
+		LoaderService,
+	],
 	bootstrap: [CurrencyRatesDashboardComponent],
 })
 export class CurrencyRatesModule {}
