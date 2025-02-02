@@ -14,7 +14,9 @@ export class MainDashboardComponent implements OnInit {
 		private readonly location: Location,
 		private readonly meta: Meta,
 		private readonly title: Title
-	) {}
+	) {
+		throw new Error('This is a test error for Sentry!');
+	}
 
 	ngOnInit(): void {
 		this.title.setTitle(this.browserTitle);
