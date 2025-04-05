@@ -86,7 +86,7 @@
     "@types/node": "^22.14.0",
     "@typescript-eslint/eslint-plugin": "^8.29.0",
     "@typescript-eslint/parser": "^8.29.0",
-    "eslint": "^9.23.0",
+    "eslint": "^9.24.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-import-resolver-alias": "^1.1.2",
     "eslint-import-resolver-typescript": "^4.3.1",
@@ -106,7 +106,7 @@
     "prettier": "^3.5.3",
     "sonarqube-scanner": "^4.3.0",
     "stylelint-prettier": "^5.0.3",
-    "typescript": "~5.8.2"
+    "typescript": "~5.8.3"
   },
   "nx": {}
 }
