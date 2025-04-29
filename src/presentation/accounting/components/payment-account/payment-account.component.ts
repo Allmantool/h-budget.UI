@@ -66,7 +66,10 @@ export class PaymentAccountComponent implements OnInit {
 				);
 
 				this.creditVirtualAccountsSignal.set(
-					_.filter(accounts, [nameof<IPaymentAccountModel>(p => p.type), AccountTypes.Loan])
+					_.filter(accounts, (account: any) =>
+						account[nameof<IPaymentAccountModel>(p => p.type)] === AccountTypes.Loan ||
+						account[nameof<IPaymentAccountModel>(p => p.type)] === AccountTypes.Credit
+					)
 				);
 			});
 		});
