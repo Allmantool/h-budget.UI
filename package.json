@@ -27,7 +27,7 @@
     "major-update": "npm i npm-check-updates && ncu -u",
     "minor-update": "npm i npm-check-updates && ncu --peer -u",
     "soft-update": "npm run rebuild && npm run minor-update && npm i && npm update && npm i && npm ci",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org home-t2h --project accounting-api ./ && sentry-cli sourcemaps upload --org home-t2h --project accounting-api ./"
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org home-t2h --project accounting-api ./ && sentry-cli sourcemaps upload --org home-t2h --project accounting-api ./",
     "hard-update": "npm run rebuild && npm run major-update && npm i && npm update && npm i && npm ci"
   },
   "dependencies": {
