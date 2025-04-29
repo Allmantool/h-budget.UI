@@ -14,7 +14,8 @@ export class MainDashboardComponent implements OnInit {
 		private readonly location: Location,
 		private readonly meta: Meta,
 		private readonly title: Title
-	) {}
+	) {
+	}
 
 	ngOnInit(): void {
 		this.title.setTitle(this.browserTitle);

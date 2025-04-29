@@ -6,7 +6,7 @@
     "ng": "ng",
     "start": "nx serve --watch --open --ssl true --configuration=developments",
     "start-prod": "nx serve --watch --open --port=4300 --configuration=production",
-    "build": "nx build --configuration=development --verbose",
+    "build": "nx build --configuration=development --verbose && npm run sentry:sourcemaps",
     "build-prod": "nx build h-budget --configuration=production --verbose",
     "watch": "nx build --watch --configuration=development",
     "test": "nx test --code-coverage --verbose",
@@ -27,6 +27,7 @@
     "major-update": "npm i npm-check-updates && ncu -u",
     "minor-update": "npm i npm-check-updates && ncu --peer -u",
     "soft-update": "npm run rebuild && npm run minor-update && npm i && npm update && npm i && npm ci",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org home-t2h --project accounting-api ./ && sentry-cli sourcemaps upload --org home-t2h --project accounting-api ./",
     "hard-update": "npm run rebuild && npm run major-update && npm i && npm update && npm i && npm ci"
   },
   "dependencies": {
@@ -46,6 +47,9 @@
     "@ngxs/logger-plugin": "^19.0.0",
     "@ngxs/store": "^19.0.0",
     "@nrwl/linter": "^19.8.4",
+    "@sentry/angular": "^8.53.0",
+    "@sentry/cli": "^2.41.1",
+    "@sentry/tracing": "^7.120.3",
     "@types/lodash": "^4.17.16",
     "@types/uuid": "^10.0.0",
     "apexcharts": "^4.7.0",
