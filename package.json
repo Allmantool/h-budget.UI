@@ -47,7 +47,7 @@
     "@ngxs/logger-plugin": "^19.0.0",
     "@ngxs/store": "^19.0.0",
     "@nrwl/linter": "^19.8.4",
-    "@sentry/angular": "^9.19.0",
+    "@sentry/angular": "^9.20.0",
     "@sentry/cli": "^2.45.0",
     "@sentry/tracing": "^7.120.3",
     "@types/lodash": "^4.17.16",
