@@ -4,7 +4,7 @@
     "projectType": "application",
     "targets": {
         "build": {
-            "executor": "@angular-devkit/build-angular:browser",
+            "executor": "@nx/angular:webpack-browser",
             "options": {
                 "outputPath": "dist/h-budget",
                 "main": "src/main.ts",
@@ -86,7 +86,7 @@
             "defaultConfiguration": "development"
         },
         "test": {
-            "executor": "@angular-devkit/build-angular:karma",
+            "executor": "nx/angular:karma",
             "options": {
                 "main": "src/tests/test.ts",
                 "polyfills": "src/polyfills.ts",
@@ -107,7 +107,7 @@
             }
         },
         "lint": {
-            "executor": "@nrwl/linter:eslint",
+            "executor": "@nx/eslint:lint",
             "options": {
                 "lintFilePatterns": [
                     "src/**/*.ts",

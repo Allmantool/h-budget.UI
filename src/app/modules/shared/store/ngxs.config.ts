@@ -1,4 +1,4 @@
-import { NgxsModuleOptions, NoopNgxsExecutionStrategy } from '@ngxs/store';
+import { NgxsModuleOptions } from '@ngxs/store';
 
 import { environment } from 'environments/environment';
 
@@ -13,7 +13,4 @@ export const ngxsConfig: NgxsModuleOptions = {
 	compatibility: {
 		strictContentSecurityPolicy: true,
 	},
-	// Execution strategy overridden for illustrative purposes
-	// (only do this if you know what you are doing)
-	executionStrategy: NoopNgxsExecutionStrategy,
 };
