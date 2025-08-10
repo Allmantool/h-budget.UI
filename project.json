@@ -86,7 +86,7 @@
             "defaultConfiguration": "development"
         },
         "test": {
-            "executor": "nx/angular:karma",
+            "executor": "@angular-devkit/build-angular:karma",
             "options": {
                 "main": "src/tests/test.ts",
                 "polyfills": "src/polyfills.ts",
