@@ -48,7 +48,7 @@
     "@ngxs/store": "^20.1.0",
     "@nrwl/linter": "^19.8.4",
     "@sentry/angular": "^10.19.0",
-    "@sentry/cli": "^2.56.0",
+    "@sentry/cli": "^2.56.1",
     "@sentry/tracing": "^7.120.4",
     "@types/lodash": "^4.17.20",
     "@types/uuid": "^11.0.0",
