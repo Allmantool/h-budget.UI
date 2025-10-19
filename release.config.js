@@ -1,17 +1,13 @@
 module.exports = {
     branches: [
       // 🟩 Production branch (stable releases)
-      { name: "master", channel: "latest" },
+      { name: "master", channel: "latest", range: "0.x" },
 
       // 🟧 Dedicated release branch (major versions or stable milestones)
       { name: "release", channel: "release" },
 
       // 🟦 Automated dependency update branch
-      { name: "build-deps-upgrade-npm-packages-automated", channel: "deps" },
-
-      // 🟨 Pre-release branches (for testing/staging environments)
-      { name: "stage", prerelease: "stage" },
-      { name: "internal", prerelease: "internal" }
+      { name: "build-deps-upgrade-npm-packages-automated", channel: "deps" }
     ],
 
     plugins: [
@@ -74,7 +70,11 @@ module.exports = {
       [
         "@semantic-release/github",
         {
-          assets: [{ path: "CHANGELOG.md", label: "Changelog" }]
+          assets: [{ path: "CHANGELOG.md", label: "Changelog" }],
+          addReleases: true,  // disable automatic PR comments
+          successComment: false, // disable success comment on PR
+          failComment: false, // disable fail comment
+          addLabels: false // disable labels
         }
       ]
     ]
