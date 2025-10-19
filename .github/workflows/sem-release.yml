@@ -35,5 +35,8 @@ jobs:
 
       - name: Run Semantic Release
         uses: cycjimmy/semantic-release-action@v5
+        with:
+            semantic_version: 23
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HUSKY_SKIP_HOOKS: 1
