@@ -1,1 +1,7 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Skip hooks in CI
+[ "$CI" = "true" ] && exit 0
+
 npx --no-install commitlint --edit "$1"
