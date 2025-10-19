@@ -68,6 +68,7 @@ jobs:
             - name: Push changelog
               uses: ad-m/github-push-action@v0.6.0
               with:
+                  force: true
                   github_token: ${{ secrets.GITHUB_TOKEN }}
 
     build-ui:
