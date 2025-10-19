@@ -27,6 +27,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Sync master
+        if: github.ref == 'refs/heads/master'
+        run: |
+          git fetch origin master
+          git reset --hard origin/master
+
       - name: Run Semantic Release
         uses: cycjimmy/semantic-release-action@v5
         env:
