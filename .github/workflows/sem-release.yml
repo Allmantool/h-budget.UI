@@ -28,14 +28,6 @@ jobs:
         run: npm ci
 
       - name: Run Semantic Release
-        uses: cycjimmy/semantic-release-action@v4
-        with:
-          semantic_version: 23
-          extra_plugins: |
-            @semantic-release/git
-            @semantic-release/changelog
-            @semantic-release/github
-            @semantic-release/commit-analyzer
-            @semantic-release/release-notes-generator
+        uses: cycjimmy/semantic-release-action@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
