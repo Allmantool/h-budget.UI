@@ -32,31 +32,30 @@ export class CurrencyRatesState {
 		const ratesFromTheState = getState().rateGroups;
 
 		const upToDateCurrencyGroups = ratesFromTheState.map(cg => {
-			const addingRates: CurrencyRateValueModel[] =
-				addedRateGroups.find(i => i.currencyId == cg.currencyId)?.rateValues ?? [];
+			const ratesToAdd: CurrencyRateValueModel[] = addedRateGroups.find(i => i.currencyId == cg.currencyId)?.rateValues ?? [];
 
-			const ratesForUpdate = _.differenceWith(addingRates, cg.rateValues!, _.isEqual.bind(this));
+			const ratesForUpdate = _.differenceWith(ratesToAdd, cg.rateValues!, _.isEqual.bind(this));
 
 			if (_.isNil(ratesForUpdate) || _.isEmpty(ratesForUpdate)) {
 				return cg;
 			}
 
-			const notUpdatedOrNewRates = _.filter(
+			const existingUnchangedRates = _.filter(
 				cg.rateValues,
-				cgRate => !_.some(addingRates, addRate => addRate.updateDate === cgRate.updateDate)
+				cgRate => !_.some(ratesToAdd, addRate => addRate.updateDate === cgRate.updateDate)
 			);
 
-			const updatedCarrencyGroup = _.cloneDeep(cg);
+			const updatedCurrencyGroup = _.cloneDeep(cg);
 
-			const upToDateRates = _.concat(notUpdatedOrNewRates, ratesForUpdate);
+			const mergedRateGroups = _.concat(existingUnchangedRates, ratesForUpdate);
 
-			updatedCarrencyGroup.rateValues = _.orderBy(upToDateRates, r => r.updateDate);
+			updatedCurrencyGroup.rateValues = _.orderBy(mergedRateGroups, r => r.updateDate);
 
-			return updatedCarrencyGroup;
+			return updatedCurrencyGroup;
 		});
 
 		patchState({
-			rateGroups: _.isEmpty(upToDateCurrencyGroups) ? addedRateGroups : upToDateCurrencyGroups,
+			rateGroups: upToDateCurrencyGroups.length ? upToDateCurrencyGroups : addedRateGroups,
 		});
 	}
 
