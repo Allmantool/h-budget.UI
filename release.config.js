@@ -43,11 +43,7 @@ module.exports = {
           }
         }
       ],
-
-      // 🧾 Generate detailed release notes
       "@semantic-release/release-notes-generator",
-
-      // 🪵 Update changelog file automatically
       [
         "@semantic-release/changelog",
         {
@@ -55,8 +51,6 @@ module.exports = {
           changelogTitle: "# 📦 Changelog"
         }
       ],
-
-      // 💾 Commit the updated files back to the repository
       [
         "@semantic-release/git",
         {
@@ -65,13 +59,10 @@ module.exports = {
             "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
         }
       ],
-
-      // 🚀 Create a GitHub Release with changelog & assets
       [
         "@semantic-release/github",
         {
           assets: [{ path: "CHANGELOG.md", label: "Changelog" }],
-          addReleases: true,  // disable automatic PR comments
           successComment: false, // disable success comment on PR
           failComment: false, // disable fail comment
           addLabels: false // disable labels
