@@ -35,7 +35,6 @@ jobs:
         name: Generate semantic version Tag
         if: ${{ github.event.action != 'closed' }}
         uses: ./.github/workflows/sem-release.yml
-        # uses: ./.github/workflows/update_semver.yml
 
     generate-changelog:
         name: Generate Changelog
