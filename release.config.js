@@ -10,6 +10,9 @@ module.exports = {
 			'@semantic-release/commit-analyzer',
 			{
 				preset: 'conventionalcommits',
+				presetConfig: {
+					headerPattern: '.*',
+				},
 				releaseRules: [
 					{ type: 'feat', release: 'minor' },
 					{ type: 'fix', release: 'patch' },
@@ -25,6 +28,7 @@ module.exports = {
 					{ scope: 'deps', release: 'minor' },
 					{ breaking: true, release: 'major' },
 				],
+                defaultReleaseType: "patch",
 				parserOpts: {
 					noteKeywords: ['BREAKING CHANGE', 'BREAKING CHANGES'],
 				},
