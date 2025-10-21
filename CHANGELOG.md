@@ -1,3 +1,7 @@
+# 📦 Changelog
+
+# [0.215.0](https://github.com/Allmantool/h-budget.UI/compare/0.214.68...0.215.0) (2025-10-21)
+
 ### Changelog
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
