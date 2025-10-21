@@ -1,6 +1,6 @@
 # 📦 Changelog
 
-# [0.215.0](https://github.com/Allmantool/h-budget.UI/compare/0.214.68...0.215.0) (2025-10-21)
+# [0.215.0](https://github.com/Allmantool/h-budget.UI/compare/0.214.68...0.215.0) (2025-10-20)
 
 ### Changelog
 
