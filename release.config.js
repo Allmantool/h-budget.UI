@@ -3,7 +3,7 @@ module.exports = {
         { name: 'master' },
         { name: 'release', channel: 'release', prerelease: 'rc' },
 	],
-    tagFormat: '${version}.${env.GITHUB_RUN_NUMBER}${nextRelease.channel ? "-" + nextRelease.channel : ""}',
+    tagFormat: '${version}',
 	plugins: [
 		[
 			'@semantic-release/commit-analyzer',
@@ -24,13 +24,13 @@ module.exports = {
 					{ type: 'refactor', release: false },
 					{ type: 'build', release: 'patch' },
 					{ type: 'chore', release: 'patch' },
-					{ scope: 'deps', release: 'minor' },
+					{ scope: 'deps', release: 'patch' },
 					{ breaking: true, release: 'major' },
 				],
                 defaultReleaseType: "patch",
-				parserOpts: {
-					noteKeywords: ['BREAKING CHANGE', 'BREAKING CHANGES'],
-				},
+                parserOpts: {
+                    noteKeywords: ["BREAKING CHANGE", "BREAKING CHANGES"]
+                }
 			},
 		],
 		'@semantic-release/release-notes-generator',
@@ -46,7 +46,7 @@ module.exports = {
 			{
 				assets: ['package.json', 'package-lock.json', 'CHANGELOG.md'],
                 message: [
-                    'chore(release): ${nextRelease.version}.${env.GITHUB_RUN_NUMBER}${env.SEMANTIC_TAG_SUFFIX || ""} [skip ci]',
+                    'chore(release): ${nextRelease.gitTag} [skip ci]\n\n${nextRelease.notes}',
                     '',
                     '🔖 Release notes:',
                     '${nextRelease.notes}',
