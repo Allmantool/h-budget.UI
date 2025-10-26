@@ -5,7 +5,7 @@ on:
     push:
         branches:
             - master
-        tags: ['v*.*.*']
+        tags: ["v*.*.*"]
     pull_request:
         branches:
             - master
@@ -31,49 +31,7 @@ env:
     IS_MERGED: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
 
 jobs:
-    update-tag-version:
-        name: Generate semantic version Tag
-        if: ${{ github.event.action != 'closed' }}
-        uses: ./.github/workflows/sem-release.yml
-
-    generate-changelog:
-        name: Generate Changelog
-        needs: [update-tag-version]
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-                  fetch-tags: true
-
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 22
-
-            - name: Install auto-changelog
-              run: npm install -g auto-changelog
-
-            - name: Generate CHANGELOG.md
-              run: |
-                  auto-changelog -p
-
-            - name: Commit changelog
-              run: |
-                  git config user.name "github-actions"
-                  git config user.email "actions@github.com"
-                  git add CHANGELOG.md
-                  git commit -m "chore: update changelog [skip ci]" || echo "No changes to commit"
-
-            - name: Push changelog
-              uses: ad-m/github-push-action@v0.6.0
-              with:
-                  force: true
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
-
     build-ui:
-        needs: [update-tag-version, generate-changelog]
         name: Build Angular UI
         runs-on: ubuntu-latest
         outputs:
@@ -91,8 +49,8 @@ jobs:
             - name: Use Node.js 22.x
               uses: actions/setup-node@v4
               with:
-                  node-version: '22'
-                  cache: 'npm'
+                  node-version: "22"
+                  cache: "npm"
                   cache-dependency-path: package-lock.json
 
             - name: Install UI dependencies
