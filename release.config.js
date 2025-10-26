@@ -24,6 +24,7 @@ module.exports = {
 					{ type: 'refactor', release: false },
 					{ type: 'build', release: 'patch' },
 					{ type: 'chore', release: 'patch' },
+                    { type: "*", release: "patch" },
 					{ scope: 'deps', release: 'patch' },
 					{ breaking: true, release: 'major' },
 				],
@@ -59,7 +60,7 @@ module.exports = {
 			'@semantic-release/github',
 			{
 				assets: [{ path: 'CHANGELOG.md', label: 'Changelog' }],
-				failComment: false,
+				failComment: true,
 				addLabels: true,
 			},
 		],
