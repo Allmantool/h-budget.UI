@@ -1,85 +1,19 @@
-# 📦 Changelog
-
-# 1.0.0 (2025-10-26)
-
-
-### Bug Fixes
-
-* add tag ([#158](https://github.com/Allmantool/h-budget.UI/issues/158)) ([92cf699](https://github.com/Allmantool/h-budget.UI/commit/92cf699d216127e4878358e1046082cd212da1e8))
-* add y axis ([#365](https://github.com/Allmantool/h-budget.UI/issues/365)) ([09fc87e](https://github.com/Allmantool/h-budget.UI/commit/09fc87e343737749dc9935d3c8f101883551ff39))
-* adjust base layout width and height ([#307](https://github.com/Allmantool/h-budget.UI/issues/307)) ([882866a](https://github.com/Allmantool/h-budget.UI/commit/882866aefa360271ad7d0d28171e3df193e9d0ba))
-* adjust docker hub image name for ui ([f464690](https://github.com/Allmantool/h-budget.UI/commit/f4646906840e47f310943ce25e92d9054587eb7d))
-* apply with for nesting type with mapFromUsing ([08e1b4e](https://github.com/Allmantool/h-budget.UI/commit/08e1b4e33a76a64f448790df6210e9ee45cff846))
-* clean install for npm minor update ([#96](https://github.com/Allmantool/h-budget.UI/issues/96)) ([a492a50](https://github.com/Allmantool/h-budget.UI/commit/a492a50da0302a95aeb5a1b58eaae217d38a74d7))
-* don't send correlation id header for inter config requests ([1d71ed5](https://github.com/Allmantool/h-budget.UI/commit/1d71ed5ca491ce6941ddc4f8e15b3a244c74d866))
-* dropdown should support string array as source ([#237](https://github.com/Allmantool/h-budget.UI/issues/237)) ([28cd217](https://github.com/Allmantool/h-budget.UI/commit/28cd2175261595afa4a89d882c83c0a96f95680e))
-* fix the packages version conflicts ([e56af3d](https://github.com/Allmantool/h-budget.UI/commit/e56af3d628621be18619803f1d7079dce8b6b94f))
-* **M7:** fix multi request during payment history initialization ([#125](https://github.com/Allmantool/h-budget.UI/issues/125)) ([a65e8ff](https://github.com/Allmantool/h-budget.UI/commit/a65e8ffa40f3ce63f20f43da443153b56ecd1630))
-* packages update ([#313](https://github.com/Allmantool/h-budget.UI/issues/313)) ([2333cd0](https://github.com/Allmantool/h-budget.UI/commit/2333cd00f7e4e242840b17cfc4d8f50bc4f0c70a))
-* place-app-config-in-assets ([b2ce7a2](https://github.com/Allmantool/h-budget.UI/commit/b2ce7a23003e5d53b41a0423bce36eb988f3e63e))
-* reduce amount of request during add / update payment operation ([#140](https://github.com/Allmantool/h-budget.UI/issues/140)) ([e33df3e](https://github.com/Allmantool/h-budget.UI/commit/e33df3e986f995ec8d5315a01af8f90d8c27856e))
-* remove suffix during bump for master branch ([#238](https://github.com/Allmantool/h-budget.UI/issues/238)) ([8c0cfc3](https://github.com/Allmantool/h-budget.UI/commit/8c0cfc374d900a59e939f873542bfac62da543d5))
-* reset minor / build version during bump for master ([#173](https://github.com/Allmantool/h-budget.UI/issues/173)) ([ca5df30](https://github.com/Allmantool/h-budget.UI/commit/ca5df30162062478c80683a9dbea2dd8b4f3a81b))
-* resolve package conflicte ([7fcb3b2](https://github.com/Allmantool/h-budget.UI/commit/7fcb3b208ad1a8a60c960152957406eb9c133e05))
-* SemanticReleaseError: Invalid `failComment` option ([b1877c8](https://github.com/Allmantool/h-budget.UI/commit/b1877c84b2b9028680023d85324955c3ad5e1f7c))
-* typo ([#98](https://github.com/Allmantool/h-budget.UI/issues/98)) ([f698dd9](https://github.com/Allmantool/h-budget.UI/commit/f698dd95fa37df0d862dac92e897d7082015ddb7))
-* typo (18.10.2024) ([#312](https://github.com/Allmantool/h-budget.UI/issues/312)) ([cefc4b4](https://github.com/Allmantool/h-budget.UI/commit/cefc4b42286a1f791f4c16762f00b482e7ab7c23))
-* update lock json ([#130](https://github.com/Allmantool/h-budget.UI/issues/130)) ([7ce89ff](https://github.com/Allmantool/h-budget.UI/commit/7ce89fff5732fb23cca50c51473385f17f6a8e68))
-* update package autoupdate ([#348](https://github.com/Allmantool/h-budget.UI/issues/348)) ([13960da](https://github.com/Allmantool/h-budget.UI/commit/13960da74234cd9bc36a5360aced4459ec17dc31))
-* update package lock json ([#123](https://github.com/Allmantool/h-budget.UI/issues/123)) ([4f108aa](https://github.com/Allmantool/h-budget.UI/commit/4f108aaaab8acae58703f34b14cce15de150942b))
-* use dynamic app config loading with require ([c429b60](https://github.com/Allmantool/h-budget.UI/commit/c429b602b5bbadd3f22c23a3bd2c73837f81ae84))
-* valid package json ([3de693f](https://github.com/Allmantool/h-budget.UI/commit/3de693f1cdca4fffe3d8d37e2173bf1137de8f4d))
-
-
-### Features
-
-* add spinner during http request ([6b21f6a](https://github.com/Allmantool/h-budget.UI/commit/6b21f6af476be44d76f000b0b40849af46571997))
-* adjust npm packages auto update ([b23a7cb](https://github.com/Allmantool/h-budget.UI/commit/b23a7cb268d2c923f78ed07d67197e9953952146))
-* bump version only on commit to master ([#79](https://github.com/Allmantool/h-budget.UI/issues/79)) ([d0c73b6](https://github.com/Allmantool/h-budget.UI/commit/d0c73b673c31a16a450a042ad9255fff1adb6c91))
-* fix for rate value entity to domain mapping ([1faf53d](https://github.com/Allmantool/h-budget.UI/commit/1faf53d75bc9f71bdcc548dfffd8e696d5f3bf16))
-* initial commit ([b969c1f](https://github.com/Allmantool/h-budget.UI/commit/b969c1f0dac67547383da82b2e8690b6b050b49a))
-* **M4:** add mock payment account creation ui components ([e09bee0](https://github.com/Allmantool/h-budget.UI/commit/e09bee07a0e3d807c6e19306e238acf67ca29bb1))
-* **M4:** adjust update npm packages script ([38f6f56](https://github.com/Allmantool/h-budget.UI/commit/38f6f56537bfc66be44e17b825ca66a0a088fa50))
-* **M5:** add base api communication for contractors ([a5a0749](https://github.com/Allmantool/h-budget.UI/commit/a5a0749cdd06b367359f228fae18f87fd695fc3b))
-* **M5:** add base category api backend communication ([6f0f3f1](https://github.com/Allmantool/h-budget.UI/commit/6f0f3f19aacf3c0d23c7bd4f090c8d6dbdd5ef57))
-* **M5:** add base payment account update fuctionality ([325f696](https://github.com/Allmantool/h-budget.UI/commit/325f696041d54dc0089425df3f097bdaa88b15b9))
-* **M5:** add base UI implementation for categories api ([ee56f3c](https://github.com/Allmantool/h-budget.UI/commit/ee56f3c124ea76d4f8d2f7d35f6aa143f38a9d2b))
-* **M5:** add end to end get payment accounts flow ([8e67458](https://github.com/Allmantool/h-budget.UI/commit/8e67458b343263fba5841d4f819a3f1324e14c5c))
-* **M5:** add flags to currency grid ([74f5927](https://github.com/Allmantool/h-budget.UI/commit/74f592737e8cc16f94a7ecb245d356b00681eea0))
-* **M5:** add payment account delete functionality ([436190f](https://github.com/Allmantool/h-budget.UI/commit/436190f1a065c6fbc24004e25d38d8d1e3a3ff69))
-* **M5:** add payment account update functionality ([287b3b0](https://github.com/Allmantool/h-budget.UI/commit/287b3b0273d2ffbac8246130a07b55a01d820d06))
-* **M5:** add spinner overflow ([78b6f2d](https://github.com/Allmantool/h-budget.UI/commit/78b6f2debcd5435545ec59f2fbf3f201e78f9eb9))
-* **M5:** adjust create a pyament account functionality ([6b31e51](https://github.com/Allmantool/h-budget.UI/commit/6b31e519d5a729fe1c923c9d6b1b1f3c8053d602))
-* **M5:** base payment acccount save functionality ([7a018c4](https://github.com/Allmantool/h-budget.UI/commit/7a018c40e2962cd6a1a14da04c34d03e75dc4ec4))
-* **M5:** fix prettifier configuration ([8899e49](https://github.com/Allmantool/h-budget.UI/commit/8899e4929d5c51d6711493bfa68778e8b08c61c5))
-* **M5:** payment account appereance adjustment ([14e578d](https://github.com/Allmantool/h-budget.UI/commit/14e578d5e5a32f32ff01b932d5568dcf3278981c))
-* **M5:** self review ([6d56c92](https://github.com/Allmantool/h-budget.UI/commit/6d56c92667c98b625b7e147825834d42abee7e91))
-* **tech:** add correlation id for loading ([12c60d2](https://github.com/Allmantool/h-budget.UI/commit/12c60d25a13531deaeac74e2d541cea0e73578b4))
-* update packages ([#358](https://github.com/Allmantool/h-budget.UI/issues/358)) ([7a0d8d4](https://github.com/Allmantool/h-budget.UI/commit/7a0d8d4143d7ec90c1b04577b8d0a1244a4800a5))
-* use --target minor to update npm packages without breaking change risks ([9ce0ef8](https://github.com/Allmantool/h-budget.UI/commit/9ce0ef829db933f883ebffb339bb4933900552b3))
-
-## [0.215.2](https://github.com/Allmantool/h-budget.UI/compare/0.215.1...0.215.2) (2025-10-26)
-
-
-### Bug Fixes
-
-* SemanticReleaseError: Invalid `failComment` option ([b1877c8](https://github.com/Allmantool/h-budget.UI/commit/b1877c84b2b9028680023d85324955c3ad5e1f7c))
-
-## [0.215.2](https://github.com/Allmantool/h-budget.UI/compare/0.215.1...0.215.2) (2025-10-26)
-
-
-### Bug Fixes
-
-* SemanticReleaseError: Invalid `failComment` option ([b1877c8](https://github.com/Allmantool/h-budget.UI/commit/b1877c84b2b9028680023d85324955c3ad5e1f7c))
-
 ### Changelog
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
 
 Generated by [`auto-changelog`](https://github.com/CookPete/auto-changelog).
 
-#### [0.214.68](https://github.com/Allmantool/h-budget.UI/compare/0.221.1-rc...0.214.68)
+#### [v0.214.68](https://github.com/Allmantool/h-budget.UI/compare/v1.0.0...v0.214.68)
 
+### [v1.0.0](https://github.com/Allmantool/h-budget.UI/compare/0.221.1-rc...v1.0.0)
+
+> 26 October 2025
+
+- chore: self review [`#590`](https://github.com/Allmantool/h-budget.UI/pull/590)
+- chore: stabilization [`#589`](https://github.com/Allmantool/h-budget.UI/pull/589)
+- chore: split git tag generation and build [`#588`](https://github.com/Allmantool/h-budget.UI/pull/588)
+- chore: release [skip ci] [`#587`](https://github.com/Allmantool/h-budget.UI/pull/587)
 - fix: SemanticReleaseError: Invalid `failComment` option [`#586`](https://github.com/Allmantool/h-budget.UI/pull/586)
 - build(deps): Upgrade NPM packages (automated) [`#581`](https://github.com/Allmantool/h-budget.UI/pull/581)
 - Fix/adjust sem ver3 [`#583`](https://github.com/Allmantool/h-budget.UI/pull/583)
@@ -404,9 +338,9 @@ Generated by [`auto-changelog`](https://github.com/CookPete/auto-changelog).
 - build(deps): upgrade NPM packages (automated) [`#171`](https://github.com/Allmantool/h-budget.UI/pull/171)
 - build(deps): upgrade NPM packages (automated) [`#170`](https://github.com/Allmantool/h-budget.UI/pull/170)
 - build(deps): upgrade NPM packages (automated) [`#169`](https://github.com/Allmantool/h-budget.UI/pull/169)
-- tech: update lock file [`921d7a0`](https://github.com/Allmantool/h-budget.UI/commit/921d7a08253c171cfd2ae9327f40a192fe726987)
-- chore: update changelog [skip ci] [`402336d`](https://github.com/Allmantool/h-budget.UI/commit/402336d102462357d93ca869b0d3b3cf1ead4f96)
-- Merge 169d3f8e1740ef803ba5f6df68cca4eca5c251d1 into 5f31ffb694b8e2e53d2099d5005b7fef66034f9c [`039360c`](https://github.com/Allmantool/h-budget.UI/commit/039360c0f29063a14f91c478eef29154c7bded02)
+- chore: update changelog [skip ci] [`93a0c20`](https://github.com/Allmantool/h-budget.UI/commit/93a0c20670772e852febeaa2e8d034c5b2ae8413)
+- chore: update changelog [skip ci] [`933e923`](https://github.com/Allmantool/h-budget.UI/commit/933e923b6d308e54ff8870ab81fd1dcf8e4af1fa)
+- chore(release): 1.0.0 [skip ci] [`75fb1d6`](https://github.com/Allmantool/h-budget.UI/commit/75fb1d6dabd9974aced71a69c9816d2086bf55a2)
 
 #### [0.221.1-rc](https://github.com/Allmantool/h-budget.UI/compare/0.220.1-rc...0.221.1-rc)
 
@@ -442,12 +376,21 @@ Generated by [`auto-changelog`](https://github.com/CookPete/auto-changelog).
 
 > 15 February 2024
 
-#### [0.215.68](https://github.com/Allmantool/h-budget.UI/compare/0.215.2...0.215.68)
+#### [0.215.68](https://github.com/Allmantool/h-budget.UI/compare/0.215.3...0.215.68)
 
 > 19 October 2025
 
 - chore: add force push [`#569`](https://github.com/Allmantool/h-budget.UI/pull/569)
 - "Updated version 0.214.68 -&gt; 0.215.68." [`17f90b9`](https://github.com/Allmantool/h-budget.UI/commit/17f90b98922d793601052c2a8861f99a659425e3)
+
+#### [0.215.3](https://github.com/Allmantool/h-budget.UI/compare/0.215.2...0.215.3)
+
+> 26 October 2025
+
+- chore: release [skip ci] [`#587`](https://github.com/Allmantool/h-budget.UI/pull/587)
+- chore: update changelog [skip ci] [`e95d478`](https://github.com/Allmantool/h-budget.UI/commit/e95d478efd8b3967394d6be70c930fe0de9f47c0)
+- chore(release): 0.215.2 [skip ci] [`9e964cf`](https://github.com/Allmantool/h-budget.UI/commit/9e964cfa757eda2adbe10ff2d0ed33e6d4273be9)
+- chore(release): 0.215.2 [skip ci] [`0a62672`](https://github.com/Allmantool/h-budget.UI/commit/0a62672439799c0cb6b814daec868401233401a5)
 
 #### [0.215.2](https://github.com/Allmantool/h-budget.UI/compare/0.215.1...0.215.2)
 
