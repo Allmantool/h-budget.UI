@@ -60,7 +60,6 @@ module.exports = {
 			'@semantic-release/github',
 			{
 				assets: [{ path: 'CHANGELOG.md', label: 'Changelog' }],
-				failComment: true,
 				addLabels: true,
 			},
 		],
