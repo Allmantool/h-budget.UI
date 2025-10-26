@@ -1,6 +1,17 @@
 name: Build UI Application
 
 on:
+  workflow_call:
+    inputs:
+      last_tag:
+        required: false
+        type: string
+      pr_number:
+        required: false
+        type: string
+      is_merged:
+        required: false
+        type: boolean
   workflow_dispatch:
   push:
     tags: ["v*.*.*"]
