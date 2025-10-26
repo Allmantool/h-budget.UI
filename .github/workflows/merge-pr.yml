@@ -50,3 +50,9 @@ jobs:
         with:
           force: true
           github_token: ${{ env.GITHUB_TOKEN }}
+
+  trigger-build:
+    name: Trigger Build
+    needs: semantic-release
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
