@@ -15,14 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          fetch-tags: true
-
       - name: Run semantic release
-        if: ${{ github.event.action != 'closed' }}
         uses: ./.github/workflows/sem-release.yml
 
   changelog:
