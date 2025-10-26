@@ -1,41 +1,41 @@
 name: Upgrade NPM packages
 
 on:
-    schedule:
-        - cron: '0 0 * * *'
+  schedule:
+    - cron: "0 0 * * *"
 
 jobs:
-    upgrade-packages:
-        name: Daily upgrade packages job
+  upgrade-packages:
+    name: Daily upgrade packages job
 
-        runs-on: ubuntu-latest
-        steps:
-            - name: Check out code
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
 
-            - name: Use Node.js 22.x
-              uses: actions/setup-node@v4
-              with:
-                  node-version: '22'
-                  cache: 'npm'
-                  cache-dependency-path: package-lock.json
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
 
-            - name: Install dependencies
-              run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-            - name: Update packages (minor) 🔀
-              run: |
-                  npm run minor-update
-                  npm update
+      - name: Update packages (minor) 🔀
+        run: |
+          npm run minor-update
+          npm update
 
-            - name: Reinstall dependencies
-              run: npm ci
+      - name: Reinstall dependencies
+        run: npm ci
 
-            - name: Commit and create PR 🔀
-              uses: peter-evans/create-pull-request@v7
-              with:
-                  title: 'build(deps): Upgrade NPM packages (automated)'
-                  branch: 'build-deps-upgrade-npm-packages-automated'
-                  commit-message: 'build(deps): upgrade NPM packages (automated)'
+      - name: Commit and create PR 🔀
+        uses: peter-evans/create-pull-request@v7
+        with:
+          title: "build(deps): Upgrade NPM packages (automated)"
+          branch: "build-deps-upgrade-npm-packages-automated"
+          commit-message: "build(deps): upgrade NPM packages (automated)"

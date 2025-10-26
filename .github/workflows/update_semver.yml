@@ -1,41 +1,41 @@
 name: Update Semver
 
 on:
-    workflow_call:
+  workflow_call:
 
 env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-    bump:
-        runs-on: ubuntu-latest
-        permissions:
-            pull-requests: write
-            issues: write
-            repository-projects: write
-            contents: write
+  bump:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      issues: write
+      repository-projects: write
+      contents: write
 
-        steps:
-            - name: Check out code
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-                  lfs: true
-                  fetch-tags: true
-                  token: ${{ env.GITHUB_TOKEN }}
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+          fetch-tags: true
+          token: ${{ env.GITHUB_TOKEN }}
 
-            - name: Fetch tags
-              run: git fetch --tags --force
+      - name: Fetch tags
+        run: git fetch --tags --force
 
-            - name: Use Node.js 22.x
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "22"
-                  cache: "npm"
-                  cache-dependency-path: package-lock.json
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
 
-            - name: Version Bumper
-              uses: michmich112/version-bumper@1.2.4
-              with:
-                  options-file: "./.github/workflows/sem-ver-options.json"
-                  github-token: ${{ env.GITHUB_TOKEN }}
+      - name: Version Bumper
+        uses: michmich112/version-bumper@1.2.4
+        with:
+          options-file: "./.github/workflows/sem-ver-options.json"
+          github-token: ${{ env.GITHUB_TOKEN }}

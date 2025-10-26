@@ -1,140 +1,99 @@
 name: Build UI Application
 
 on:
-    workflow_dispatch:
-    push:
-        tags: ["v*.*.*"]
+  workflow_dispatch:
+  push:
+    tags: ["v*.*.*"]
 
-    pull_request:
-        branches:
-            - master
-            - developed
-            - feature/*
-            - test/*
-            - hotfix/*
-            - fix/*
-            - tech/
-        types: [opened, synchronize]
+  pull_request:
+    branches:
+      - master
+      - developed
+      - feature/*
+      - test/*
+      - hotfix/*
+      - fix/*
+      - tech/
+    types: [opened, synchronize]
 
 env:
-    GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-    SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
-    DOCKERHUB_USERNAME: ${{secrets.DOCKERHUB_USERNAME}}
-    DOCKERHUB_TOKEN: ${{secrets.DOCKERHUB_TOKEN}}
-    EVENT_NAME: ${{ github.event_name }}
-    EVENT_ACTION: ${{ github.event.action }}
-    EVENT_PULL_REQUEST_STATE: ${{ github.event.pull_request.state }}
-    EVENT_PULL_REQUEST_MERGED: ${{ github.event.pull_request.merged }}
-    BRANCH_REF: ${{ github.ref }}
-    BRANCH_BASE_REF: ${{ github.base_ref }}
-    IS_MERGED: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
+  DOCKERHUB_USERNAME: ${{secrets.DOCKERHUB_USERNAME}}
+  DOCKERHUB_TOKEN: ${{secrets.DOCKERHUB_TOKEN}}
+  EVENT_NAME: ${{ github.event_name }}
+  EVENT_ACTION: ${{ github.event.action }}
+  EVENT_PULL_REQUEST_STATE: ${{ github.event.pull_request.state }}
+  EVENT_PULL_REQUEST_MERGED: ${{ github.event.pull_request.merged }}
+  BRANCH_REF: ${{ github.ref }}
+  BRANCH_BASE_REF: ${{ github.base_ref }}
+  IS_MERGED: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
 
 jobs:
-    build-ui:
-        name: Build Angular UI
-        runs-on: ubuntu-latest
-        outputs:
-            last_tag: ${{ steps.last_tag.outputs.TARGET_TAG }}
-            pr_number: ${{ steps.findPr.outputs.pr }}
-        defaults:
-            run:
-                working-directory: .
-        steps:
-            - name: Check out code
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
+  build-ui:
+    name: Build Angular UI
+    runs-on: ubuntu-latest
+    outputs:
+      last_tag: ${{ steps.last_tag.outputs.TARGET_TAG }}
+      pr_number: ${{ steps.findPr.outputs.pr }}
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-            - name: Use Node.js 22.x
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "22"
-                  cache: "npm"
-                  cache-dependency-path: package-lock.json
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: package-lock.json
 
-            - name: Install UI dependencies
-              run: |
-                  npm ci
+      - name: Install UI dependencies
+        run: |
+          npm ci
 
-            - name: Lint the codebase
-              run: npm run lint
-              continue-on-error: true
+      - name: Lint the codebase
+        run: npm run lint
+        continue-on-error: true
 
-            - name: Build UI project
-              run: |
-                  npm run build-prod --if-present
+      - name: Build UI project
+        run: |
+          npm run build-prod --if-present
 
-            - name: Run UI tests
-              run: |
-                  npm run test-headless
+      - name: Run UI tests
+        run: |
+          npm run test-headless
 
-            - name: Run SonarQube analysis
-              env:
-                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-              run: |
-                  npm run sonar-scanner -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      - name: Run SonarQube analysis
+        env:
+          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
+        run: |
+          npm run sonar-scanner -Dsonar.login=${{ env.SONAR_TOKEN }}
 
-            - name: Enquire last git Tag
-              id: last_tag
-              shell: bash
-              run: |
-                  tag_v=$(git describe --tags $(git rev-list --tags --max-count=1))
-                  tag=$(echo $tag_v | sed 's/v//')
-                  echo "TARGET_TAG=${tag}" >> $GITHUB_OUTPUT
+      - name: Enquire last git Tag
+        id: last_tag
+        shell: bash
+        run: |
+          tag_v=$(git describe --tags $(git rev-list --tags --max-count=1))
+          tag=$(echo $tag_v | sed 's/v//')
+          echo "TARGET_TAG=${tag}" >> $GITHUB_OUTPUT
 
-            - name: Set up 'Find Current Pull Request'
-              uses: jwalton/gh-find-current-pr@v1
-              id: findPr
-              with:
-                  state: open
+      - name: Set up 'Find Current Pull Request'
+        uses: jwalton/gh-find-current-pr@v1
+        id: findPr
+        with:
+          state: open
 
-    build-docker:
-        name: Build and Push Docker Image
-        needs: build-ui
-        runs-on: ubuntu-latest
-        defaults:
-            run:
-                working-directory: .
-        steps:
-            - name: Check out code
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-
-            - name: Build docker image
-              env:
-                  GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
-                  SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
-                  GITHUB_RUN_ID: ${{ github.run_id }}
-                  RUN_NUMBER: ${{ github.run_number }}
-                  RUN_ATTEMPT: ${{ github.run_attempt }}
-                  PULL_REQUEST_ID: ${{ needs.build-ui.outputs.pr_number }}
-                  PULL_REQUEST_SOURCE_BRANCH: ${{ github.ref }}
-                  PULL_REQUEST_TARGET_BRANCH: refs/heads/master
-                  ACTION: ${{ github.action }}
-                  EVENT_NAME: ${{ github.event_name }}
-                  TARGET_TAG: ${{ needs.build-ui.outputs.last_tag }}
-              shell: bash
-              run: |
-                  echo "latest tag is ${{ needs.build-ui.outputs.last_tag }}"
-                  docker build \
-                  --target 'publish' -t "${{ env.DOCKERHUB_USERNAME }}/homebudget-ui:${{ needs.build-ui.outputs.last_tag }}" \
-                  --build-arg PULL_REQUEST_ID='${{ needs.build-ui.outputs.pr_number }}' \
-                  --build-arg PULL_REQUEST_SOURCE_BRANCH='${{ github.ref }}' \
-                  --build-arg PULL_REQUEST_TARGET_BRANCH=refs/heads/master \
-                  --build-arg GITHUB_RUN_ID='${{ github.run_id }}' \
-                  --build-arg SONAR_TOKEN='${{ env.SONAR_TOKEN }}' \
-                  .
-
-            - name: Login to Docker Hub
-              if: ${{ ENV.IS_MERGED == 'true' }}
-              uses: docker/login-action@v2
-              with:
-                  username: ${{ secrets.DOCKERHUB_USERNAME }}
-                  password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-            - name: Push docker image
-              if: ${{ ENV.IS_MERGED == 'true' }}
-              shell: bash
-              run: |
-                  docker push "${{ secrets.DOCKERHUB_USERNAME }}/homebudget-ui:${{ needs.build-ui.outputs.last_tag }}"
+  build-docker:
+    name: Build & Upload docker image and accomplish deployment
+    needs: ["build-ui"]
+    uses: ./.github/workflows/github-deployment.yml
+    with:
+      last_tag: ${{ needs.build-ui.outputs.last_tag }}
+      pr_number: ${{ needs.build-ui.outputs.pr_number }}
+      is_merged: ${{ needs.build-ui.outputs.is_merged }}
+    secrets: inherit
