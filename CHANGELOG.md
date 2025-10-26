@@ -7,6 +7,13 @@
 
 * SemanticReleaseError: Invalid `failComment` option ([b1877c8](https://github.com/Allmantool/h-budget.UI/commit/b1877c84b2b9028680023d85324955c3ad5e1f7c))
 
+## [0.215.2](https://github.com/Allmantool/h-budget.UI/compare/0.215.1...0.215.2) (2025-10-26)
+
+
+### Bug Fixes
+
+* SemanticReleaseError: Invalid `failComment` option ([b1877c8](https://github.com/Allmantool/h-budget.UI/commit/b1877c84b2b9028680023d85324955c3ad5e1f7c))
+
 ### Changelog
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
