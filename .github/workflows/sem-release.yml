@@ -38,4 +38,4 @@ jobs:
         with:
             semantic_version: 23
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
