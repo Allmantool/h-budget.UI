@@ -1,0 +1,87 @@
+name: Deployment on environment (GitHub)
+
+on:
+  workflow_call:
+    inputs:
+      last_tag:
+        required: true
+        type: string
+      pr_number:
+        required: false
+        type: string
+      is_merged:
+        required: true
+        type: boolean
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+jobs:
+  build-docker:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    environment:
+      name: Docker-hub-environment
+      url: https://hub.docker.com/r/${{ env.DOCKERHUB_USERNAME }}/homebudget-ui
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create GitHub Deployment
+        id: deployment
+        uses: peter-evans/create-deployment@v4
+        with:
+          token: ${{ env.GITHUB_TOKEN }}
+          environment: CI
+          description: "Deploying Docker image for tag ${{ inputs.last_tag }}"
+          auto_merge: false
+          transient_environment: false
+          production_environment: true
+
+      - name: Build Docker image
+        run: |
+          echo "Building Docker image for tag: ${{ inputs.last_tag }}"
+          docker build \
+            --target publish \
+            -t "${{ env.DOCKERHUB_USERNAME }}/homebudget-ui:${{ inputs.last_tag }}" \
+            --build-arg PULL_REQUEST_ID="${{ inputs.pr_number }}" \
+            --build-arg PULL_REQUEST_SOURCE_BRANCH="${{ github.ref }}" \
+            --build-arg PULL_REQUEST_TARGET_BRANCH="refs/heads/master" \
+            --build-arg GITHUB_RUN_ID="${{ github.run_id }}" \
+            --build-arg SONAR_TOKEN="${{ env.SONAR_TOKEN }}" \
+            .
+
+      - name: Login to Docker Hub
+        if: ${{ inputs.is_merged == true }}
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKERHUB_USERNAME }}
+          password: ${{ env.DOCKERHUB_TOKEN }}
+
+      - name: Push Docker image
+        if: ${{ inputs.is_merged == true }}
+        run: |
+          echo "Pushing image to Docker Hub..."
+          docker push "${{ env.DOCKERHUB_USERNAME }}/homebudget-ui:${{ inputs.last_tag }}"
+
+      - name: Mark Deployment Success
+        if: success()
+        uses: peter-evans/update-deployment-status@v4
+        with:
+          token: ${{ env.GITHUB_TOKEN }}
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+          state: success
+
+      - name: Mark Deployment Failure
+        if: failure()
+        uses: peter-evans/update-deployment-status@v4
+        with:
+          token: ${{ env.GITHUB_TOKEN }}
+          deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+          state: failure
