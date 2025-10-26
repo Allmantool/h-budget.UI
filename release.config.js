@@ -3,7 +3,7 @@ module.exports = {
         { name: 'master' },
         { name: 'release', channel: 'release', prerelease: 'rc' },
 	],
-    tagFormat: '${version}',
+    tagFormat: 'v${version}',
 	plugins: [
 		[
 			'@semantic-release/commit-analyzer',
