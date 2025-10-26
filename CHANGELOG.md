@@ -1,3 +1,12 @@
+# 📦 Changelog
+
+# [1.1.0](https://github.com/Allmantool/h-budget.UI/compare/v1.0.0...v1.1.0) (2025-10-26)
+
+
+### Features
+
+* add support for github environments ([5c426ea](https://github.com/Allmantool/h-budget.UI/commit/5c426ead82bee21d76200be842ad09ef692c07e3))
+
 ### Changelog
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
