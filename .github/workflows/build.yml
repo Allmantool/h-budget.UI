@@ -32,7 +32,6 @@ env:
 
 jobs:
     build-ui:
-        needs: [update-tag-version, generate-changelog]
         name: Build Angular UI
         runs-on: ubuntu-latest
         outputs:
