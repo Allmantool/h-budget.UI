@@ -36,6 +36,7 @@ jobs:
     outputs:
       last_tag: ${{ steps.last_tag.outputs.TARGET_TAG }}
       pr_number: ${{ steps.findPr.outputs.pr }}
+      is_merged: ${{ env.IS_MERGED }}
     defaults:
       run:
         working-directory: .
