@@ -51,10 +51,32 @@ jobs:
       last_tag: ${{ steps.last_tag.outputs.TARGET_TAG }}
       pr_number: ${{ steps.findPr.outputs.pr }}
       is_merged: ${{ env.IS_MERGED }}
+      should_build_docker: ${{ steps.check_docker_trigger.outputs.should_build_docker }}
     defaults:
       run:
         working-directory: .
     steps:
+      - name: Check Docker build trigger
+        id: check_docker_trigger
+        run: |
+          # Run Docker build for tag pushes (manual tags) AND published releases
+          # Skip for PRs and other events
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "should_build_docker=true" >> $GITHUB_OUTPUT
+            echo "Trigger: Manual tag push"
+          elif [[ "${{ github.event_name }}" == "release" && "${{ github.event.action }}" == "published" ]]; then
+            echo "should_build_docker=true" >> $GITHUB_OUTPUT
+            echo "Trigger: Published release"
+          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "should_build_docker=true" >> $GITHUB_OUTPUT
+            echo "Trigger: Manual workflow dispatch"
+          elif [[ "${{ github.event_name }}" == "workflow_call" ]]; then
+            echo "should_build_docker=true" >> $GITHUB_OUTPUT
+            echo "Trigger: Workflow call"
+          else
+            echo "should_build_docker=false" >> $GITHUB_OUTPUT
+            echo "Trigger: PR or other event - skipping Docker build"
+          fi
       - name: Check out code
         uses: actions/checkout@v4
         with:
@@ -106,10 +128,27 @@ jobs:
   build-docker:
     name: Build & Upload docker image and accomplish deployment
     needs: ["build-ui"]
-    if: ${{ needs.build-ui.outputs.is_merged == 'true' }}
+    if: ${{ needs.build-ui.outputs.should_build_docker == 'true' }}
     uses: ./.github/workflows/github-deployment.yml
     with:
       last_tag: ${{ needs.build-ui.outputs.last_tag }}
       pr_number: ${{ needs.build-ui.outputs.pr_number }}
-      is_merged: ${{ needs.build-ui.outputs.is_merged == 'true' }}
+      is_merged: ${{ needs.build-ui.outputs.should_build_docker == 'true' }}
     secrets: inherit
+
+  skip-docker:
+    name: Skip Docker Build
+    needs: ["build-ui"]
+    if: ${{ always() && needs.build-ui.outputs.should_build_docker != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip Docker build message
+        run: |
+          echo "Skipping Docker build - this is a PR or branch push event."
+          echo "Docker builds only run on:"
+          echo "  - Tag pushes (manual tags)"
+          echo "  - Published releases"
+          echo "  - Manual workflow triggers"
+          echo "Event: ${{ github.event_name }}"
+          echo "Action: ${{ github.event.action }}"
+          echo "Ref: ${{ github.ref }}"
