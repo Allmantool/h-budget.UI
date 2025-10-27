@@ -48,21 +48,9 @@ jobs:
         env:
           NPM_CONFIG_CACHE: ${{ steps.npm-cache-dir.outputs.dir }}
 
-      - name: Sync and cleanup branch
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-
-          git fetch origin --force --tags
-          git reset --hard origin/master
-          git clean -fd
-
-          echo "Current branch: $(git branch --show-current)"
-          echo "HEAD commit: $(git log -1 --oneline)"
-
       - name: Run Semantic Release
         uses: cycjimmy/semantic-release-action@v5
         with:
           semantic_version: 23
         env:
-          GITHUB_TOKEN: ${{ env.GH_PAT }}
+          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
