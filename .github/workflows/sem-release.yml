@@ -53,4 +53,4 @@ jobs:
         with:
           semantic_version: 23
         env:
-          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ env.GH_PAT }}
