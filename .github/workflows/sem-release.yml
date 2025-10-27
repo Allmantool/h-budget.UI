@@ -15,6 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          ref: master
           fetch-depth: 0
           lfs: true
           token: ${{ env.GITHUB_TOKEN }}
