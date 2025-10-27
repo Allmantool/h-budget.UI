@@ -106,6 +106,7 @@ jobs:
   build-docker:
     name: Build & Upload docker image and accomplish deployment
     needs: ["build-ui"]
+    if: ${{ needs.build-ui.outputs.is_merged == 'true' }}
     uses: ./.github/workflows/github-deployment.yml
     with:
       last_tag: ${{ needs.build-ui.outputs.last_tag }}
