@@ -10,6 +10,9 @@ env:
 jobs:
   release:
     runs-on: ubuntu-latest
+    concurrency:
+      group: release-${{ github.ref }}
+      cancel-in-progress: true
 
     steps:
       - name: Checkout
@@ -47,10 +50,15 @@ jobs:
 
       - name: Sync and cleanup branch
         run: |
-          git fetch --all --tags
-          git checkout -B master origin/master
-          git fetch origin --tags -f
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+          git fetch origin --force --tags
           git reset --hard origin/master
+          git clean -fd
+
+          echo "Current branch: $(git branch --show-current)"
+          echo "HEAD commit: $(git log -1 --oneline)"
 
       - name: Run Semantic Release
         uses: cycjimmy/semantic-release-action@v5
