@@ -2,6 +2,8 @@
 
 ## [1.1.6](https://github.com/Allmantool/h-budget.UI/compare/v1.1.5...v1.1.6) (2025-10-27)
 
+## [1.1.6](https://github.com/Allmantool/h-budget.UI/compare/v1.1.5...v1.1.6) (2025-10-27)
+
 ### Changelog
 
 All notable changes to this project will be documented in this file. Dates are displayed in UTC.
