@@ -41,7 +41,7 @@ env:
   EVENT_PULL_REQUEST_MERGED: ${{ github.event.pull_request.merged }}
   BRANCH_REF: ${{ github.ref }}
   BRANCH_BASE_REF: ${{ github.base_ref }}
-  IS_MERGED: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+  IS_MERGED: "${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}"
 
 jobs:
   build-ui:
