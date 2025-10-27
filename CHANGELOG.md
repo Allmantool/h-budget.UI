@@ -1,5 +1,12 @@
 # 📦 Changelog
 
+## [1.1.10](https://github.com/Allmantool/h-budget.UI/compare/v1.1.9...v1.1.10) (2025-10-27)
+
+
+### Miscellaneous Chores
+
+* add generation notes configuration ([d3fdc91](https://github.com/Allmantool/h-budget.UI/commit/d3fdc91f126d513a1447aaded101ed0fa7502e79))
+
 ## [1.1.9](https://github.com/Allmantool/h-budget.UI/compare/v1.1.8...v1.1.9) (2025-10-27)
 
 ## [1.1.8](https://github.com/Allmantool/h-budget.UI/compare/v1.1.7...v1.1.8) (2025-10-27)
