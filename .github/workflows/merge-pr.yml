@@ -1,58 +1,59 @@
 name: Release - Generate Tag and Changelog
 
 on:
-  push:
-    branches:
-      - master
+    push:
+        branches:
+            - master
 
 env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
 jobs:
-  semantic-release:
-    name: Generate Semantic Version and Tag
-    uses: ./.github/workflows/sem-release.yml
-    secrets: inherit
+    semantic-release:
+        name: Generate Semantic Version and Tag
+        uses: ./.github/workflows/sem-release.yml
+        secrets: inherit
 
-  changelog:
-    name: Generate and Commit Changelog
-    needs: semantic-release
-    runs-on: ubuntu-latest
+    changelog:
+        name: Generate and Commit Changelog
+        needs: semantic-release
+        runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          fetch-tags: true
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
+                  fetch-tags: true
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 22
 
-      - name: Install auto-changelog
-        run: npm install -g auto-changelog
+            - name: Install auto-changelog
+              run: npm install -g auto-changelog
 
-      - name: Generate CHANGELOG.md
-        run: auto-changelog -p
+            - name: Generate CHANGELOG.md
+              run: auto-changelog -p
 
-      - name: Commit changelog
-        run: |
-          git config user.name "github-actions"
-          git config user.email "actions@github.com"
-          git add CHANGELOG.md
-          git commit -m "chore: update changelog [skip ci]" || echo "No changes to commit"
+            - name: Commit changelog
+              run: |
+                  git config user.name "github-actions"
+                  git config user.email "actions@github.com"
+                  git add CHANGELOG.md
+                  git commit -m "chore: update changelog [skip ci]" || echo "No changes to commit"
 
-      - name: Push changelog
-        uses: ad-m/github-push-action@v0.6.0
-        with:
-          force: true
-          github_token: ${{ env.GITHUB_TOKEN }}
+            - name: Push changelog
+              uses: ad-m/github-push-action@v0.6.0
+              with:
+                  force: true
+                  github_token: ${{ env.GITHUB_TOKEN }}
 
-  trigger-build:
-    name: Trigger Build
-    needs: semantic-release
-    uses: ./.github/workflows/build.yml
-    secrets: inherit
+# Temp solution, switch to use PAT instead of GITHUB token
+# trigger-build:
+#   name: Trigger Build
+#   needs: semantic-release
+#   uses: ./.github/workflows/build.yml
+#   secrets: inherit
