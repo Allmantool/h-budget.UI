@@ -41,6 +41,7 @@ env:
   EVENT_PULL_REQUEST_MERGED: ${{ github.event.pull_request.merged }}
   BRANCH_REF: ${{ github.ref }}
   BRANCH_BASE_REF: ${{ github.base_ref }}
+  IS_MERGED: "${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}"
 
 jobs:
   build-ui:
@@ -49,7 +50,7 @@ jobs:
     outputs:
       last_tag: ${{ steps.last_tag.outputs.TARGET_TAG }}
       pr_number: ${{ steps.findPr.outputs.pr }}
-      is_merged: ${{ steps.set_is_merged.outputs.IS_MERGED }}
+      is_merged: ${{ env.IS_MERGED }}
     defaults:
       run:
         working-directory: .
@@ -102,15 +103,6 @@ jobs:
         with:
           state: open
 
-      - name: Compute if branch is master push
-        id: set_is_merged
-        run: |
-          if [[ "${GITHUB_EVENT_NAME}" == "push" && "${GITHUB_REF}" == "refs/heads/master" ]]; then
-            echo "IS_MERGED=true" >> $GITHUB_OUTPUT
-          else
-            echo "IS_MERGED=false" >> $GITHUB_OUTPUT
-          fi
-
   build-docker:
     name: Build & Upload docker image and accomplish deployment
     needs: ["build-ui"]
@@ -118,5 +110,5 @@ jobs:
     with:
       last_tag: ${{ needs.build-ui.outputs.last_tag }}
       pr_number: ${{ needs.build-ui.outputs.pr_number }}
-      is_merged: ${{ needs.build-ui.outputs.is_merged }}
+      is_merged: ${{ needs.build-ui.outputs.is_merged == 'true' }}
     secrets: inherit
