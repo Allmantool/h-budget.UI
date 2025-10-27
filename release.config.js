@@ -59,7 +59,7 @@ module.exports = {
 			{
 				assets: [{ path: 'CHANGELOG.md', label: 'Changelog' }],
 				releaseName: '${nextRelease.gitTag}',
-				successComment: false,
+				successCommentCondition: false,
 				failComment: false,
 				releasedLabels: false,
 			},
