@@ -1,5 +1,7 @@
 # 📦 Changelog
 
+## [1.1.5](https://github.com/Allmantool/h-budget.UI/compare/v1.1.4...v1.1.5) (2025-10-27)
+
 ## [1.1.3](https://github.com/Allmantool/h-budget.UI/compare/v1.1.2...v1.1.3) (2025-10-27)
 
 ### Changelog
