@@ -4,7 +4,8 @@ on:
   workflow_call:
 
 env:
-  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  GH_PAT: ${{ secrets.GH_PAT }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   release:
@@ -54,5 +55,4 @@ jobs:
         with:
           semantic_version: 23
         env:
-          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
-          GH_TOKEN: ${{ env.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ env.GH_PAT }}
