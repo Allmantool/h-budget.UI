@@ -1,5 +1,12 @@
 # 📦 Changelog
 
+## [1.1.12](https://github.com/Allmantool/h-budget.UI/compare/v1.1.11...v1.1.12) (2025-10-29)
+
+
+### Build System
+
+* **deps:** upgrade NPM packages (automated) ([ae660ea](https://github.com/Allmantool/h-budget.UI/commit/ae660ea93d7c9b8ff45475d85ce86b4ac6234411))
+
 ## [1.1.11](https://github.com/Allmantool/h-budget.UI/compare/v1.1.10...v1.1.11) (2025-10-28)
 
 
