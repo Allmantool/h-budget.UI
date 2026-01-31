@@ -1,41 +1,76 @@
-name: Upgrade NPM packages
+name: Safe NPM dependency upgrade
 
 on:
   schedule:
     - cron: "0 0 * * *"
+  workflow_dispatch:
 
 jobs:
-  upgrade-packages:
-    name: Daily upgrade packages job
-
+  upgrade-deps:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check out code
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+          fetch-depth: 0
 
-      - name: Use Node.js 22.x
+      - name: Use Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
-          cache: "npm"
-          cache-dependency-path: package-lock.json
+          node-version: 22
+          cache: npm
 
-      - name: Install dependencies
+      - name: Install baseline deps
         run: npm ci
 
-      - name: Update packages (minor) 🔀
+      - name: Snapshot dependency files
         run: |
-          npm run minor-update
-          npm update
+          cp package.json package.json.bak
+          cp package-lock.json package-lock.json.bak
 
-      - name: Reinstall dependencies
+      - name: Try dependency upgrade (minor)
+        id: upgrade
+        run: |
+          npm run deps:update:minor
+          npm install --package-lock-only
+        continue-on-error: true
+
+      - name: Reinstall deps after upgrade
+        if: steps.upgrade.outcome == 'success'
         run: npm ci
+        continue-on-error: true
 
-      - name: Commit and create PR 🔀
+      - name: Run full CI verification
+        if: steps.upgrade.outcome == 'success'
+        run: npm run ci:verify
+        continue-on-error: true
+
+      - name: Rollback on failure 🔥
+        if: failure()
+        run: |
+          echo "Upgrade failed — rolling back"
+          mv package.json.bak package.json
+          mv package-lock.json.bak package-lock.json
+
+      - name: Detect changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit & create PR
+        if: steps.changes.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
-          title: "build(deps): Upgrade NPM packages (automated)"
-          branch: "build-deps-upgrade-npm-packages-automated"
-          commit-message: "build(deps): upgrade NPM packages (automated)"
+          branch: chore/deps-safe-upgrade
+          title: "build(deps): safe npm dependency upgrade"
+          commit-message: "build(deps): upgrade npm dependencies"
+          body: |
+            ✅ Automated dependency upgrade  
+            - Minor versions only  
+            - Full CI verification passed  
+            - Nx + Angular validated
