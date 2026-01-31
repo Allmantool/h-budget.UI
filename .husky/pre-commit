@@ -1,7 +1,10 @@
 #!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
 
 # Skip hooks in CI
 [ "$CI" = "true" ] && exit 0
 
-npx --no-install commitlint --edit "$1"
+# Only run commitlint for UI project
+if git diff --cached --name-only | grep -q '^UI/'; then
+  cd UI
+  npx commitlint --edit "$1"
+fi
