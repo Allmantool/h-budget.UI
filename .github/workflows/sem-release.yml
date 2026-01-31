@@ -44,7 +44,7 @@ jobs:
             ${{ runner.os }}-npm-
 
       - name: Install dependencies
-        run: npm ci --prefer-offline --cache ${{ steps.npm-cache-dir.outputs.dir }}
+        run: npm i --prefer-offline --cache ${{ steps.npm-cache-dir.outputs.dir }}
         env:
           NPM_CONFIG_CACHE: ${{ steps.npm-cache-dir.outputs.dir }}
 
