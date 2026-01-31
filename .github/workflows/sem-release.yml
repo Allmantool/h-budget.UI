@@ -48,6 +48,14 @@ jobs:
         env:
           NPM_CONFIG_CACHE: ${{ steps.npm-cache-dir.outputs.dir }}
 
+      - name: Fix git commit dates
+        run: |
+          # Set proper git config for date handling
+          git config --global user.email "actions@github.com"
+          git config --global user.name "GitHub Actions"
+          # Set date format explicitly
+          git config --global log.date iso-strict
+
       - name: Run Semantic Release
         uses: cycjimmy/semantic-release-action@v5
         with:
