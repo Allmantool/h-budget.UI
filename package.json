@@ -42,7 +42,11 @@
     "ci:build": "npm run lint && npm run test:ci && npm run build:prod",
     "ci:full": "npm run security-check && npm run lint && npm run test:ci && npm run build:prod:deploy",
     "nx:graph": "nx graph",
-    "nx:affected": "nx affected --target=build"
+    "nx:affected": "nx affected --target=build",
+    "deps:check": "npx npm-check-updates --target minor",
+    "deps:update:minor": "npx npm-check-updates --target minor -u",
+    "deps:update:patch": "npx npm-check-updates --target patch -u",
+    "ci:verify": "npm run lint && npm run test:ci && npm run build:prod"
   },
   "dependencies": {
     "@angular/animations": "^20.3.16",
