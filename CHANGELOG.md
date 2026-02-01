@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.28 (2026-02-01)</small>
+
+* Merge pull request #635 from Allmantool/fix/script-for-sonar ([19c5a0aee88c501aedc55789d460ce063efcd17c](https://github.com/Allmantool/h-budget.UI/commit/19c5a0aee88c501aedc55789d460ce063efcd17c)), closes [#635](https://github.com/Allmantool/h-budget.UI/issues/635)
+* fix: adjust sonar ([d8fc6b998f0bc6b6ad38dcc9a127fb7ea0ce875e](https://github.com/Allmantool/h-budget.UI/commit/d8fc6b998f0bc6b6ad38dcc9a127fb7ea0ce875e))
+
 ## <small>1.1.27 (2026-02-01)</small>
 
 * Merge pull request #634 from Allmantool/fxi/adjust-test-ci-cd ([c849fc025ea7f956032612984e13b5f3dc5e6742](https://github.com/Allmantool/h-budget.UI/commit/c849fc025ea7f956032612984e13b5f3dc5e6742)), closes [#634](https://github.com/Allmantool/h-budget.UI/issues/634)
