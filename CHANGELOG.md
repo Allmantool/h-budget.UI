@@ -1,5 +1,24 @@
 # 📦 Changelog
 
+## <small>1.1.26 (2026-02-01)</small>
+
+* Merge branch 'master' of https://github.com/Allmantool/h-budget.UI into fix/adjust-commit-date ([c70164bf541a2cb109987f350a3fe45e79fc2bf7](https://github.com/Allmantool/h-budget.UI/commit/c70164bf541a2cb109987f350a3fe45e79fc2bf7))
+* Merge pull request #627 from Allmantool/tech/upd-packages-31-1-2026 ([8095f6f6ac43605b2136d63c056f925fbd3a3faa](https://github.com/Allmantool/h-budget.UI/commit/8095f6f6ac43605b2136d63c056f925fbd3a3faa)), closes [#627](https://github.com/Allmantool/h-budget.UI/issues/627)
+* Merge pull request #628 from Allmantool/tech/add-safe-update-for-pipeline ([4fd482ed60c9e10a2169eb54b887362b43b27b3e](https://github.com/Allmantool/h-budget.UI/commit/4fd482ed60c9e10a2169eb54b887362b43b27b3e)), closes [#628](https://github.com/Allmantool/h-budget.UI/issues/628)
+* Merge pull request #629 from Allmantool/fix/revert-zone-js-to-15 ([afb9894d658b44072c2cae80a4899ce66bb4e662](https://github.com/Allmantool/h-budget.UI/commit/afb9894d658b44072c2cae80a4899ce66bb4e662)), closes [#629](https://github.com/Allmantool/h-budget.UI/issues/629)
+* Merge pull request #630 from Allmantool/fix/switch-to-use-npm-i ([a61ffa6b9708283e255cd1bc149ca659b7b9196e](https://github.com/Allmantool/h-budget.UI/commit/a61ffa6b9708283e255cd1bc149ca659b7b9196e)), closes [#630](https://github.com/Allmantool/h-budget.UI/issues/630)
+* Merge pull request #631 from Allmantool/fix/add-iso-date-formatting ([7df921fac29d7bb63d071f6e762a321d0f79cb7d](https://github.com/Allmantool/h-budget.UI/commit/7df921fac29d7bb63d071f6e762a321d0f79cb7d)), closes [#631](https://github.com/Allmantool/h-budget.UI/issues/631)
+* Merge pull request #632 from Allmantool/fix/update-node-version ([a76798ddc133e9379fae6634ceb217ae38a88a64](https://github.com/Allmantool/h-budget.UI/commit/a76798ddc133e9379fae6634ceb217ae38a88a64)), closes [#632](https://github.com/Allmantool/h-budget.UI/issues/632)
+* Merge pull request #633 from Allmantool/fix/adjust-commit-date ([cc770fa984a844ee64e5b8d20677f3804114a565](https://github.com/Allmantool/h-budget.UI/commit/cc770fa984a844ee64e5b8d20677f3804114a565)), closes [#633](https://github.com/Allmantool/h-budget.UI/issues/633)
+* fix: format commit date ([3bb9b5b646fcb53bb2697eae63265c984e49d9fb](https://github.com/Allmantool/h-budget.UI/commit/3bb9b5b646fcb53bb2697eae63265c984e49d9fb))
+* fix: revert zone.js version ([9a1d205013b6b5725a90b669e5cebd875e112969](https://github.com/Allmantool/h-budget.UI/commit/9a1d205013b6b5725a90b669e5cebd875e112969))
+* chore: add explicit iso formatting ([087783e4e672f28a416de57163e360abc824d8ae](https://github.com/Allmantool/h-budget.UI/commit/087783e4e672f28a416de57163e360abc824d8ae))
+* chore: self review ([a6f48b8873ee3a0b97bdd6151ae1a9e434a675cf](https://github.com/Allmantool/h-budget.UI/commit/a6f48b8873ee3a0b97bdd6151ae1a9e434a675cf))
+* chore: switch to use npm i ([025e48701dfd9c155b0a1806087fc3b7201e9d7f](https://github.com/Allmantool/h-budget.UI/commit/025e48701dfd9c155b0a1806087fc3b7201e9d7f))
+* chore: update configuration ([ddd318c276451fc91b96891e11d677fc1d62e5c3](https://github.com/Allmantool/h-budget.UI/commit/ddd318c276451fc91b96891e11d677fc1d62e5c3))
+* tech: add safe update for pipeline ([95f3d88bdfdd5965a2488bbe5d25127cd4e23198](https://github.com/Allmantool/h-budget.UI/commit/95f3d88bdfdd5965a2488bbe5d25127cd4e23198))
+* tech: update packages ([2317e1f07760267fa6b2e5df828b821c63f34da5](https://github.com/Allmantool/h-budget.UI/commit/2317e1f07760267fa6b2e5df828b821c63f34da5))
+
 ## [1.1.25](https://github.com/Allmantool/h-budget.UI/compare/v1.1.24...v1.1.25) (2025-11-19)
 
 
