@@ -103,7 +103,7 @@ jobs:
 
       - name: Run UI tests
         run: |
-          npm run test-headless
+          npm run test:ci
 
       - name: Run SonarQube analysis
         env:
