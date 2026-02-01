@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.27 (2026-02-01)</small>
+
+* Merge pull request #634 from Allmantool/fxi/adjust-test-ci-cd ([c849fc025ea7f956032612984e13b5f3dc5e6742](https://github.com/Allmantool/h-budget.UI/commit/c849fc025ea7f956032612984e13b5f3dc5e6742)), closes [#634](https://github.com/Allmantool/h-budget.UI/issues/634)
+* fix: adjust test pipeline ([b6f836390c5857e41c2c89457d24209cd59ff2f0](https://github.com/Allmantool/h-budget.UI/commit/b6f836390c5857e41c2c89457d24209cd59ff2f0))
+
 ## <small>1.1.26 (2026-02-01)</small>
 
 * Merge branch 'master' of https://github.com/Allmantool/h-budget.UI into fix/adjust-commit-date ([c70164bf541a2cb109987f350a3fe45e79fc2bf7](https://github.com/Allmantool/h-budget.UI/commit/c70164bf541a2cb109987f350a3fe45e79fc2bf7))
