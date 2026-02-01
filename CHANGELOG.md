@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.29 (2026-02-01)</small>
+
+* Merge pull request #636 from Allmantool/fix/adjust-dockerfile-npm ([a51fa2e7e53d85289ad958d317ce52facb87cbc7](https://github.com/Allmantool/h-budget.UI/commit/a51fa2e7e53d85289ad958d317ce52facb87cbc7)), closes [#636](https://github.com/Allmantool/h-budget.UI/issues/636)
+* fix: update docker file ([0153915eb244b3035b9943ca3b6a679b80c4127d](https://github.com/Allmantool/h-budget.UI/commit/0153915eb244b3035b9943ca3b6a679b80c4127d))
+
 ## <small>1.1.28 (2026-02-01)</small>
 
 * Merge pull request #635 from Allmantool/fix/script-for-sonar ([19c5a0aee88c501aedc55789d460ce063efcd17c](https://github.com/Allmantool/h-budget.UI/commit/19c5a0aee88c501aedc55789d460ce063efcd17c)), closes [#635](https://github.com/Allmantool/h-budget.UI/issues/635)
