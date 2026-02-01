@@ -109,7 +109,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
         run: |
-          npm run sonar-scanner -Dsonar.login=${{ env.SONAR_TOKEN }}
+          npm run sonar -Dsonar.login=${{ env.SONAR_TOKEN }}
 
       - name: Enquire last git Tag
         id: last_tag
