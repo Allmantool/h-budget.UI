@@ -78,7 +78,7 @@ jobs:
             echo "Trigger: PR or other event - skipping Docker build"
           fi
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 

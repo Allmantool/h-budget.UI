@@ -36,7 +36,15 @@ module.exports = {
 			{
 				preset: 'conventionalcommits',
 				writerOpts: {
-					committerDate: false,
+					transform: (commit, context) => {
+						if (!commit.committerDate || isNaN(new Date(commit.committerDate).getTime())) {
+							delete commit.committerDate;
+						}
+						if (!commit.authorDate || isNaN(new Date(commit.authorDate).getTime())) {
+							delete commit.authorDate;
+						}
+						return commit;
+					},
 				},
 				presetConfig: {
 					types: [
