@@ -35,6 +35,9 @@ module.exports = {
 			'@semantic-release/release-notes-generator',
 			{
 				preset: 'conventionalcommits',
+				writerOpts: {
+					committerDate: false,
+				},
 				presetConfig: {
 					types: [
 						{ type: 'feat', section: 'Features', hidden: false },

@@ -46,7 +46,8 @@
     "deps:check": "npx npm-check-updates --target minor",
     "deps:update:minor": "npx npm-check-updates --target minor -u",
     "deps:update:patch": "npx npm-check-updates --target patch -u",
-    "ci:verify": "npm run lint && npm run test:ci && npm run build:prod"
+    "ci:verify": "npm run lint && npm run test:ci && npm run build:prod",
+    "preinstall": "node -e \"const v=require('child_process').execSync('npm -v').toString().trim(); if (parseInt(v.split('.')[0],10) < 11) { console.error('❌ npm v11+ required. Current:', v); process.exit(1); }\""
   },
   "dependencies": {
     "@angular/animations": "^20.3.16",
@@ -140,5 +141,9 @@
   "overrides": {
     "ora": "5.4.1"
   },
-  "packageManager": "npm"
+  "packageManager": "npm",
+  "engines": {
+    "node": ">=24.0.0",
+    "npm": ">=11.0.0"
+  }
 }
