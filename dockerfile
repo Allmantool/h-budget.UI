@@ -17,7 +17,7 @@ RUN apk update && \
 
 ENV CHROME_BIN=/usr/bin/chromium-browser
 
-RUN npm run build-prod --if-present --verbose
+RUN npm run build:prod --if-present --verbose
 
 FROM nginx:alpine3.18 AS publish
 
