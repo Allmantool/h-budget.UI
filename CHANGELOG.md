@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.30 (2026-02-01)</small>
+
+* Merge pull request #637 from Allmantool/fix/docker-file-npm-build-command-naming-issue ([0e6fb0f3570115eb7415a4773cd5e0b66898acb2](https://github.com/Allmantool/h-budget.UI/commit/0e6fb0f3570115eb7415a4773cd5e0b66898acb2)), closes [#637](https://github.com/Allmantool/h-budget.UI/issues/637)
+* fix: typo ([1a15bd30d4e6a32c6c760009a061c55ae7b736a2](https://github.com/Allmantool/h-budget.UI/commit/1a15bd30d4e6a32c6c760009a061c55ae7b736a2))
+
 ## <small>1.1.29 (2026-02-01)</small>
 
 * Merge pull request #636 from Allmantool/fix/adjust-dockerfile-npm ([a51fa2e7e53d85289ad958d317ce52facb87cbc7](https://github.com/Allmantool/h-budget.UI/commit/a51fa2e7e53d85289ad958d317ce52facb87cbc7)), closes [#636](https://github.com/Allmantool/h-budget.UI/issues/636)
