@@ -82,16 +82,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Use Node.js 22.x
-        uses: actions/setup-node@v4
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@v6
         with:
-          node-version: "22"
+          node-version: 24
           cache: "npm"
           cache-dependency-path: package-lock.json
 
       - name: Install UI dependencies
         run: |
-          npm i
+          npm ci
 
       - name: Lint the codebase
         run: npm run lint

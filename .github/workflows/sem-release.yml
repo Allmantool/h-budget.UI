@@ -23,10 +23,12 @@ jobs:
           lfs: true
           token: ${{ env.GITHUB_TOKEN }}
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Use Node.js 24.x
+        uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
+          cache: "npm"
+          cache-dependency-path: package-lock.json
 
       - name: Get npm cache directory
         id: npm-cache-dir
@@ -44,17 +46,9 @@ jobs:
             ${{ runner.os }}-npm-
 
       - name: Install dependencies
-        run: npm i --prefer-offline --cache ${{ steps.npm-cache-dir.outputs.dir }}
+        run: npm ci --prefer-offline --cache ${{ steps.npm-cache-dir.outputs.dir }}
         env:
           NPM_CONFIG_CACHE: ${{ steps.npm-cache-dir.outputs.dir }}
-
-      - name: Fix git commit dates
-        run: |
-          # Set proper git config for date handling
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub Actions"
-          # Set date format explicitly
-          git config --global log.date iso-strict
 
       - name: Run Semantic Release
         uses: cycjimmy/semantic-release-action@v5
