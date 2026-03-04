@@ -6,7 +6,7 @@ import { FormInput } from '../types/form-input.type';
 
 @Pipe({
 	name: 'accountingCurrencyFormat',
-	standalone: false
+	standalone: false,
 })
 export class AccountingCurrencyFormatPipe implements PipeTransform {
 	public transform(value: FormInput | null): number | null {

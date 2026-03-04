@@ -16,6 +16,7 @@ import { BehaviorSubject } from 'rxjs/internal/BehaviorSubject';
 import { LTTB } from 'downsample';
 
 import { LineChartTitleService } from './line-chart-title.service';
+import { RatesGridDefaultOptions } from '../../../app/modules/shared/constants/rates-grid-default-options';
 import { ICurrencyChartOptions } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-option.';
 import { ICurrencyChartTitle } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-title';
 import { ICurrencyTableOptions } from '../../../app/modules/shared/store/models/currency-rates/currency-table-options';
@@ -25,7 +26,6 @@ import { CurrencyRateValueModel } from '../../../domain/models/rates/currency-ra
 import { ChartOptions } from '../models/chart-options';
 import { LineChartOptions } from '../models/line-chart-options';
 import { DataPoint } from '../types/data-point.type';
-import { RatesGridDefaultOptions } from '../../../app/modules/shared/constants/rates-grid-default-options';
 
 @Injectable()
 export class LineChartService {
@@ -65,7 +65,9 @@ export class LineChartService {
 			new CurrencyRateValueModel().fromDataPoint(<DataPoint>d)
 		);
 
-		const rateValueSeriesData = _.map(downSampleRates, r => _.round(r.ratePerUnit ?? 0, RatesGridDefaultOptions.RATE_DIFF_PRECISION));
+		const rateValueSeriesData = _.map(downSampleRates, r =>
+			_.round(r.ratePerUnit ?? 0, RatesGridDefaultOptions.RATE_DIFF_PRECISION)
+		);
 		const rateValueLabels = _.map(downSampleRates, r => format(r.updateDate!, options.dateFormat));
 		const defaultTitle = LineChartTitleService.calculateTitle(
 			this.tableOptionsSignal().selectedItem.abbreviation,

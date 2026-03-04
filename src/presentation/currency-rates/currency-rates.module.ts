@@ -14,11 +14,11 @@ import { AppCoreModule } from '../../app/modules/core';
 import { AngularMaterialSharedModule } from '../../app/modules/shared/angular-material.shared.module';
 import { CustomUIComponentsSharedModule } from '../../app/modules/shared/custom-ui-components.shared.module';
 import { DialogsSharedModule } from '../../app/modules/shared/dialogs.shared.module';
+import { LoaderService } from '../../app/modules/shared/services/loader-service';
 import { AppSharedModule } from '../../app/modules/shared/shared.module';
 import { CurrencyChartState } from '../../app/modules/shared/store/states/rates/currency-chart.state';
 import { CurrencyRatesState } from '../../app/modules/shared/store/states/rates/currency-rates.state';
 import { CurrencyTableState } from '../../app/modules/shared/store/states/rates/currency-table.state';
-import { LoaderService } from '../../app/modules/shared/services/loader-service';
 import {
 	CurrencyRatesDashboardComponent,
 	CurrencyRatesGridComponent,

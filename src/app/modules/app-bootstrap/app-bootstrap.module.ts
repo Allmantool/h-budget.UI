@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
-import { APP_INITIALIZER, inject, NgModule, ErrorHandler } from '@angular/core';
+import { APP_INITIALIZER, ErrorHandler, inject, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -9,8 +9,8 @@ import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
 import { NgxsLoggerPluginModule } from '@ngxs/logger-plugin';
 import { NgxsModule } from '@ngxs/store';
 import { catchError, of, take, tap } from 'rxjs';
-import * as Sentry from "@sentry/angular";
 
+import * as Sentry from '@sentry/angular';
 import { environment } from 'environments/environment';
 
 import { BootstrapRoutingModule } from './app-bootstrap-routing.module';

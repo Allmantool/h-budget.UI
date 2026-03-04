@@ -1,26 +1,35 @@
 .currency-rates-grid--width {
-	display: grid;
-	grid-template-columns: 85em;
+    display: grid;
+    grid-template-columns: 85em;
 }
 
 .currency-rates-grid__show-button--align-center {
-	display: flex;
-	justify-content: space-around;
-	margin-bottom: 1em;
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 1em;
+}
+
+.currency-rates-grid__tooble-group {
+    margin-left: 1em;
+    margin-right: 1em;
+}
+
+.currency-rates-grid__show-button {
+    align-items: center;
 }
 
 .abbreviation-flag {
-	width: 100%;
-	height: 2em;
+    width: 100%;
+    height: 2em;
 }
 
 .country-column {
-	width: 1em;
+    width: 1em;
 }
 
 .overlay {
-	z-index: 50;
-	background-color: rgba(255, 255, 255, 0.5);
-	width: 100%;
-	height: 100%;
+    z-index: 50;
+    background-color: rgba(255, 255, 255, 0.5);
+    width: 100%;
+    height: 100%;
 }

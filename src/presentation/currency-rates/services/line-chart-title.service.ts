@@ -1,8 +1,8 @@
 import * as _ from 'lodash';
 
 import { HexColors } from '../../../app/modules/shared/constants/hex-colors';
-import { ICurrencyChartTitle } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-title';
 import { RatesGridDefaultOptions } from '../../../app/modules/shared/constants/rates-grid-default-options';
+import { ICurrencyChartTitle } from '../../../app/modules/shared/store/models/currency-rates/currency-chart-title';
 
 export class LineChartTitleService {
 	public static calculateTitle(abbreviation: string, rateValuesForPeriod: number[]): ICurrencyChartTitle {

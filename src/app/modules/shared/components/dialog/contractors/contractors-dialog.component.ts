@@ -22,7 +22,7 @@ import { AddCounterParty } from '../../../store/states/handbooks/actions/contrac
 	templateUrl: './contractors-dialog.component.html',
 	styleUrls: ['./contractors-dialog.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false
+	standalone: false,
 })
 export class ContractorsDialogComponent {
 	private dialogConfiguration: DialogContainer<IContractorModel, IContractorModel>;

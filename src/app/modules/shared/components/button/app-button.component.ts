@@ -5,7 +5,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 	templateUrl: './app-button.component.html',
 	styleUrls: ['./app-button.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false
+	standalone: false,
 })
 export class AppButtonComponent {
 	@Input() public text: string = '';

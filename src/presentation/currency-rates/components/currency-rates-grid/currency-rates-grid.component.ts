@@ -7,6 +7,7 @@ import { Select, Store } from '@ngxs/store';
 import { combineLatest, Observable, Subject } from 'rxjs';
 
 import { RatesDialogService } from './../../services/rates-dialog.service';
+import { LoaderService } from '../../../../app/modules/shared/services/loader-service';
 import { ICurrencyTableOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-table-options';
 import { IPreviousDayCurrencyRate } from '../../../../app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
 import {
@@ -23,7 +24,6 @@ import { CurrencyRateGroupModel } from '../../../../domain/models/rates/currency
 import { RatesGridColumnOptions } from '../../constants/rates-grid-options';
 import { CurrencyGridRateModel } from '../../models/currency-grid-rate.model';
 import { CurrencyRatesGridService } from '../../services/currency-rates-grid.service';
-import { LoaderService } from '../../../../app/modules/shared/services/loader-service';
 
 @Component({
 	selector: 'app-currency-rates-grid',

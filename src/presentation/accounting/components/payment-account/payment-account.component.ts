@@ -17,6 +17,7 @@ import { Observable, take } from 'rxjs';
 import { nameof } from 'ts-simple-nameof';
 import { Guid } from 'typescript-guid';
 
+import { LoaderService } from '../../../../app/modules/shared/services/loader-service';
 import {
 	SetActivePaymentAccount,
 	SetInitialPaymentAccounts,
@@ -25,7 +26,6 @@ import { getPaymentAccounts } from '../../../../app/modules/shared/store/states/
 import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
 import { AccountTypes } from '../../../../domain/models/accounting/account-types';
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
-import { LoaderService } from '../../../../app/modules/shared/services/loader-service';
 
 @Component({
 	selector: 'payment-accounts',
@@ -66,9 +66,11 @@ export class PaymentAccountComponent implements OnInit {
 				);
 
 				this.creditVirtualAccountsSignal.set(
-					_.filter(accounts, (account: any) =>
-						account[nameof<IPaymentAccountModel>(p => p.type)] === AccountTypes.Loan ||
-						account[nameof<IPaymentAccountModel>(p => p.type)] === AccountTypes.Credit
+					_.filter(
+						accounts,
+						(account: any) =>
+							account[nameof<IPaymentAccountModel>(p => p.type)] === AccountTypes.Loan ||
+							account[nameof<IPaymentAccountModel>(p => p.type)] === AccountTypes.Credit
 					)
 				);
 			});
