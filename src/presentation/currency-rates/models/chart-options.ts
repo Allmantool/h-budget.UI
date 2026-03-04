@@ -1,4 +1,4 @@
-import { ApexAxisChartSeries, ApexChart, ApexTitleSubtitle, ApexXAxis } from 'ng-apexcharts';
+import { ApexAxisChartSeries, ApexChart, ApexTitleSubtitle, ApexXAxis, ApexYAxis } from 'ng-apexcharts';
 
 export type ChartOptions = {
 	series: ApexAxisChartSeries;
