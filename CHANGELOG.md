@@ -1,5 +1,16 @@
 # 📦 Changelog
 
+## <small>1.1.31 (2026-03-04)</small>
+
+* Merge pull request #638 from Allmantool/chore/deps-safe-upgrade ([c571cf530360c678598f19f152663fc334921a3a](https://github.com/Allmantool/h-budget.UI/commit/c571cf530360c678598f19f152663fc334921a3a)), closes [#638](https://github.com/Allmantool/h-budget.UI/issues/638)
+* Merge pull request #639 from Allmantool/tech/update-ui-ux-grid ([1c3a04198a4cf48ff8bff62c87571a0b72dcb663](https://github.com/Allmantool/h-budget.UI/commit/1c3a04198a4cf48ff8bff62c87571a0b72dcb663)), closes [#639](https://github.com/Allmantool/h-budget.UI/issues/639)
+* Merge pull request #640 from Allmantool/tech/update-ui-ux-grid ([261c0ba59042f0428f06bc4f7b582acd149f869c](https://github.com/Allmantool/h-budget.UI/commit/261c0ba59042f0428f06bc4f7b582acd149f869c)), closes [#640](https://github.com/Allmantool/h-budget.UI/issues/640)
+* chore: self review ([9b6ec1fe527d81162293938706b048e543af7be0](https://github.com/Allmantool/h-budget.UI/commit/9b6ec1fe527d81162293938706b048e543af7be0))
+* chore: self review ([586df796c7ffa25744b8468e4f9509524408db5e](https://github.com/Allmantool/h-budget.UI/commit/586df796c7ffa25744b8468e4f9509524408db5e))
+* chore: ui / ux ([657733e390acf932f03e9c697247336e3e97e580](https://github.com/Allmantool/h-budget.UI/commit/657733e390acf932f03e9c697247336e3e97e580))
+* tech: update npm packages ([248bb307c12632861c05344ac45a887695bf5d59](https://github.com/Allmantool/h-budget.UI/commit/248bb307c12632861c05344ac45a887695bf5d59))
+* build(deps): upgrade npm dependencies ([bbcb86f858a73e6f5df27540ed9889e289902160](https://github.com/Allmantool/h-budget.UI/commit/bbcb86f858a73e6f5df27540ed9889e289902160))
+
 ## <small>1.1.30 (2026-02-01)</small>
 
 * Merge pull request #637 from Allmantool/fix/docker-file-npm-build-command-naming-issue ([0e6fb0f3570115eb7415a4773cd5e0b66898acb2](https://github.com/Allmantool/h-budget.UI/commit/0e6fb0f3570115eb7415a4773cd5e0b66898acb2)), closes [#637](https://github.com/Allmantool/h-budget.UI/issues/637)
