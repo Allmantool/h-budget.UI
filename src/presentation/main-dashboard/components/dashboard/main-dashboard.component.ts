@@ -7,15 +7,14 @@ import { Meta, Title } from '@angular/platform-browser';
 	templateUrl: './main-dashboard.component.html',
 	styleUrls: ['./main-dashboard.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false
+	standalone: false,
 })
 export class MainDashboardComponent implements OnInit {
 	constructor(
 		private readonly location: Location,
 		private readonly meta: Meta,
 		private readonly title: Title
-	) {
-	}
+	) {}
 
 	ngOnInit(): void {
 		this.title.setTitle(this.browserTitle);

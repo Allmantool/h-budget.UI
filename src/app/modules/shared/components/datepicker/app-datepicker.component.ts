@@ -20,7 +20,7 @@ import { BehaviorSubject } from 'rxjs';
 		},
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false
+	standalone: false,
 })
 export class DatepickerComponent implements ControlValueAccessor, OnInit {
 	private onTouched!: Function;

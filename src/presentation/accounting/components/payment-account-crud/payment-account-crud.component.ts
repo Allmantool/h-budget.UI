@@ -16,7 +16,7 @@ import { PaymentAccountDialogService } from '../../services/payment-account-dial
 	templateUrl: './payment-account-crud.component.html',
 	styleUrls: ['./payment-account-crud.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false
+	standalone: false,
 })
 export class PaymentAccountCrudComponent {
 	public activePaymentAccountGuidSignal: Signal<string>;

@@ -30,7 +30,7 @@ import {
 	templateUrl: './payment-account-dialog.component.html',
 	styleUrls: ['./payment-account-dialog.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false
+	standalone: false,
 })
 export class PaymentAccountDialogComponent {
 	private dialogConfiguration: DialogContainer<Result<IPaymentAccountModel>, Result<IPaymentAccountModel>>;

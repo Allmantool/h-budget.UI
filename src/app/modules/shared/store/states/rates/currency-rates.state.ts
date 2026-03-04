@@ -32,7 +32,8 @@ export class CurrencyRatesState {
 		const ratesFromTheState = getState().rateGroups;
 
 		const upToDateCurrencyGroups = ratesFromTheState.map(cg => {
-			const ratesToAdd: CurrencyRateValueModel[] = addedRateGroups.find(i => i.currencyId == cg.currencyId)?.rateValues ?? [];
+			const ratesToAdd: CurrencyRateValueModel[] =
+				addedRateGroups.find(i => i.currencyId == cg.currencyId)?.rateValues ?? [];
 
 			const ratesForUpdate = _.differenceWith(ratesToAdd, cg.rateValues!, _.isEqual.bind(this));
 

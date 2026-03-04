@@ -5,7 +5,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 	templateUrl: './progress-spinner.component.html',
 	styleUrls: ['./progress-spinner.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false
+	standalone: false,
 })
 export class ProgressSpinnerComponent {
 	@Input() isLoading: boolean | null = false;

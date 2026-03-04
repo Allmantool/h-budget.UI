@@ -25,7 +25,7 @@ import { PaymentsHistoryService } from '../../services/payments-history.service'
 	templateUrl: './payments-history.component.html',
 	styleUrls: ['./payments-history.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false
+	standalone: false,
 })
 export class PaymentsHistoryComponent implements OnInit, AfterViewInit {
 	private readonly destroyRef = inject(DestroyRef);

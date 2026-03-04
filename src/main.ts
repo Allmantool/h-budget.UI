@@ -1,7 +1,7 @@
 import { enableProdMode } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
-import * as Sentry from "@sentry/angular";
+import * as Sentry from '@sentry/angular';
 import { Integrations } from '@sentry/tracing';
 
 import { AppBootstrapModule } from './app/modules/app-bootstrap/app-bootstrap.module';
@@ -12,12 +12,10 @@ if (environment.production) {
 }
 
 Sentry.init({
-  dsn: "",
-  integrations: [
-    Sentry.replayIntegration(),
-  ],
-  replaysSessionSampleRate: 0.1,
-  replaysOnErrorSampleRate: 1.0,
+	dsn: '',
+	integrations: [Sentry.replayIntegration()],
+	replaysSessionSampleRate: 0.1,
+	replaysOnErrorSampleRate: 1.0,
 	environment: environment.production ? 'production' : 'development',
 });
 

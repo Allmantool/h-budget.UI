@@ -13,7 +13,7 @@ import { DialogContainer } from '../../../../shared/models/dialog-container';
 	templateUrl: './dates-range-dialog.component.html',
 	styleUrls: ['./dates-range-dialog.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false
+	standalone: false,
 })
 export class DateRangeDialogComponent {
 	private dialogConfiguration: DialogContainer<any, any>;

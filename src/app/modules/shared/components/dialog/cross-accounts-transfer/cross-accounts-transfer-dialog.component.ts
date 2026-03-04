@@ -19,10 +19,10 @@ import { IPaymentAccountModel } from '../../../../../../domain/models/accounting
 import { ICrossAccountsTransferResponse } from '../../../../../../domain/models/accounting/responses/cross-accounts-transfer.response';
 import { OperationTypes } from '../../../../../../domain/types/operation.types';
 import { CurrencyAbbreviations } from '../../../constants/rates-abbreviations';
+import { RatesGridDefaultOptions } from '../../../constants/rates-grid-default-options';
 import { DialogContainer } from '../../../models/dialog-container';
 import { SelectDropdownOptions } from '../../../models/select-dropdown-options';
 import { Add } from '../../../store/states/accounting/actions/payment-operation.actions';
-import { RatesGridDefaultOptions } from '../../../constants/rates-grid-default-options';
 import {
 	getActivePaymentAccount,
 	getActivePaymentAccountId,
@@ -34,7 +34,7 @@ import {
 	templateUrl: './cross-accounts-transfer-dialog.component.html',
 	styleUrls: ['./cross-accounts-transfer-dialog.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false
+	standalone: false,
 })
 export class CrossAccountsTransferDialogComponent {
 	private dialogConfiguration: DialogContainer<ICrossAccountsTransferModel, Result<ICrossAccountsTransferResponse>>;

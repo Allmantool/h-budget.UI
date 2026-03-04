@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-import { Observable, finalize } from 'rxjs';
+import { finalize, Observable } from 'rxjs';
 
 @Injectable({
 	providedIn: 'root',

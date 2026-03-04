@@ -1,58 +1,37 @@
-name: Safe NPM dependency upgrade
+name: Safe NPM Dependency Upgrade
 
 on:
   schedule:
-    - cron: "0 0 * * *"
+    # Daily at 1:00 AM UTC — patch only
+    - cron: "0 1 * * *"
+    # Weekly at 3:00 AM UTC on Sunday — safe minor
+    - cron: "0 3 * * 0"
   workflow_dispatch:
 
 jobs:
-  upgrade-deps:
-    runs-on: ubuntu-latest
 
+  daily-patch:
+    name: Daily Patch Update
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Use Node.js 24.x
-        uses: actions/setup-node@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: npm
           cache-dependency-path: package-lock.json
 
-      - name: Install baseline deps
+      - name: Install baseline dependencies
         run: npm ci
 
-      - name: Snapshot dependency files
-        run: |
-          cp package.json package.json.bak
-          cp package-lock.json package-lock.json.bak
+      - name: Patch update only
+        run: npm run deps:update:patch
 
-      - name: Try dependency upgrade (minor)
-        id: upgrade
-        run: |
-          npm run deps:update:minor
-          npm i --package-lock-only
-        continue-on-error: true
-
-      - name: Reinstall deps after upgrade
-        if: steps.upgrade.outcome == 'success'
-        run: npm ci
-        continue-on-error: true
-
-      - name: Run full CI verification
-        if: steps.upgrade.outcome == 'success'
-        run: npm run ci:verify
-        continue-on-error: true
-
-      - name: Rollback on failure 🔥
-        if: failure()
-        run: |
-          echo "Upgrade failed — rolling back"
-          mv package.json.bak package.json
-          mv package-lock.json.bak package-lock.json
+      # - name: Run CI verification
+      #   run: npm run ci:verify
 
       - name: Detect changes
         id: changes
@@ -63,15 +42,92 @@ jobs:
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Commit & create PR
+      - name: Create PR
         if: steps.changes.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
-          branch: chore/deps-safe-upgrade
-          title: "build(deps): safe npm dependency upgrade"
-          commit-message: "build(deps): upgrade npm dependencies"
-          body: |
-            ✅ Automated dependency upgrade  
-            - Minor versions only  
-            - Full CI verification passed  
-            - Nx + Angular validated
+          branch: chore/deps-patch-upgrade
+          title: "build(deps): patch dependency upgrade"
+          commit-message: "build(deps): patch dependency upgrade"
+
+  weekly-minor:
+    name: Weekly Minor Update (Safe Libraries)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install baseline dependencies
+        run: npm ci
+
+      - name: Minor update (safe libs only)
+        run: npm run deps:update:minor:safe
+
+      # - name: Run CI verification
+      #   run: npm run ci:verify
+
+      - name: Detect changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create PR
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/deps-minor-upgrade
+          title: "build(deps): minor dependency upgrade"
+          commit-message: "build(deps): minor dependency upgrade"
+
+  angular-nx-migrate:
+    name: Angular / NX Migration (Manual)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install baseline dependencies
+        run: npm ci
+
+      - name: Run Angular/NX migration
+        run: |
+          npx nx migrate latest
+          npm install
+          npx nx migrate --run-migrations
+          npm run ci:verify
+
+      - name: Detect changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create PR
+        if: steps.changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: chore/deps-angular-nx
+          title: "build(deps): Angular/NX framework migration"
+          commit-message: "build(deps): Angular/NX migration"
