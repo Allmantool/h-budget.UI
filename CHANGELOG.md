@@ -1,5 +1,14 @@
 # 📦 Changelog
 
+## <small>1.1.32 (2026-03-06)</small>
+
+* Merge pull request #641 from Allmantool/fix/adjust-syntax-march-2025 ([34db0d9cb4a3999097bdbc2a0c6fa3bb82ca8c25](https://github.com/Allmantool/h-budget.UI/commit/34db0d9cb4a3999097bdbc2a0c6fa3bb82ca8c25)), closes [#641](https://github.com/Allmantool/h-budget.UI/issues/641)
+* Merge pull request #643 from Allmantool/chore/deps-minor-upgrade ([08a94111a2cb6b3e9eaa4f36e2a0963b53cefd30](https://github.com/Allmantool/h-budget.UI/commit/08a94111a2cb6b3e9eaa4f36e2a0963b53cefd30)), closes [#643](https://github.com/Allmantool/h-budget.UI/issues/643)
+* Merge pull request #644 from Allmantool/fix/update-packages-daily ([bfb13879a153bffa0f6379ff7e324ba2288a52f5](https://github.com/Allmantool/h-budget.UI/commit/bfb13879a153bffa0f6379ff7e324ba2288a52f5)), closes [#644](https://github.com/Allmantool/h-budget.UI/issues/644)
+* no message ([5e77ec962c54e83a8657b6c257643bff73817496](https://github.com/Allmantool/h-budget.UI/commit/5e77ec962c54e83a8657b6c257643bff73817496))
+* fix: fix package daily update ([b3e8441d3e8bf4ccccca446d8eb021dca87c65f7](https://github.com/Allmantool/h-budget.UI/commit/b3e8441d3e8bf4ccccca446d8eb021dca87c65f7))
+* build(deps): minor dependency upgrade ([674c24942164d55a1df3641c748c9572b2ca3153](https://github.com/Allmantool/h-budget.UI/commit/674c24942164d55a1df3641c748c9572b2ca3153))
+
 ## <small>1.1.31 (2026-03-04)</small>
 
 * Merge pull request #638 from Allmantool/chore/deps-safe-upgrade ([c571cf530360c678598f19f152663fc334921a3a](https://github.com/Allmantool/h-budget.UI/commit/c571cf530360c678598f19f152663fc334921a3a)), closes [#638](https://github.com/Allmantool/h-budget.UI/issues/638)
