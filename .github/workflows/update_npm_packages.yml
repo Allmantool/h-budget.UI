@@ -67,8 +67,8 @@ jobs:
       - name: Install baseline dependencies
         run: npm ci
 
-      - name: Minor update (safe libs only)
-        run: npm run deps:update:minor:safe
+      - name: patch update (safe libs only)
+        run: npm run deps:update:minor:patch
 
       # - name: Run CI verification
       #   run: npm run ci:verify
