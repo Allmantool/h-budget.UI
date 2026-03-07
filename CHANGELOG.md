@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.33 (2026-03-07)</small>
+
+* Merge pull request #645 from Allmantool/chore/deps-patch-upgrade ([e398683cf6401b73747728be2606e89cad208675](https://github.com/Allmantool/h-budget.UI/commit/e398683cf6401b73747728be2606e89cad208675)), closes [#645](https://github.com/Allmantool/h-budget.UI/issues/645)
+* build(deps): patch dependency upgrade ([3fc9525ceef58d993e0385f611775d28bb590cd1](https://github.com/Allmantool/h-budget.UI/commit/3fc9525ceef58d993e0385f611775d28bb590cd1))
+
 ## <small>1.1.32 (2026-03-06)</small>
 
 * Merge pull request #641 from Allmantool/fix/adjust-syntax-march-2025 ([34db0d9cb4a3999097bdbc2a0c6fa3bb82ca8c25](https://github.com/Allmantool/h-budget.UI/commit/34db0d9cb4a3999097bdbc2a0c6fa3bb82ca8c25)), closes [#641](https://github.com/Allmantool/h-budget.UI/issues/641)
