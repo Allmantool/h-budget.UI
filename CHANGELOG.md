@@ -1,5 +1,14 @@
 # 📦 Changelog
 
+## <small>1.1.34 (2026-03-08)</small>
+
+* Merge pull request #646 from Allmantool/tech/add-sse-initial-support ([a07a17ba12e01d8a7c1bfcbe657296c8772a933c](https://github.com/Allmantool/h-budget.UI/commit/a07a17ba12e01d8a7c1bfcbe657296c8772a933c)), closes [#646](https://github.com/Allmantool/h-budget.UI/issues/646)
+* Merge pull request #647 from Allmantool/fix/fix-typos-v1 ([f4f39ef413a57750c628dad6ae48180838d75c45](https://github.com/Allmantool/h-budget.UI/commit/f4f39ef413a57750c628dad6ae48180838d75c45)), closes [#647](https://github.com/Allmantool/h-budget.UI/issues/647)
+* fix: fix typos ([92edf5c94537f3d633de772741a082734e900545](https://github.com/Allmantool/h-budget.UI/commit/92edf5c94537f3d633de772741a082734e900545))
+* chore: self review ([e9dab222e643fac77e190d04e1e7b7341ab86802](https://github.com/Allmantool/h-budget.UI/commit/e9dab222e643fac77e190d04e1e7b7341ab86802))
+* chore: self review ([cbdc5321faf79f5852d9b7f9fe020a6f65afca36](https://github.com/Allmantool/h-budget.UI/commit/cbdc5321faf79f5852d9b7f9fe020a6f65afca36))
+* tech: add sse support ([328d89edc36bf76373261258c607c7f89b980aa9](https://github.com/Allmantool/h-budget.UI/commit/328d89edc36bf76373261258c607c7f89b980aa9))
+
 ## <small>1.1.33 (2026-03-07)</small>
 
 * Merge pull request #645 from Allmantool/chore/deps-patch-upgrade ([e398683cf6401b73747728be2606e89cad208675](https://github.com/Allmantool/h-budget.UI/commit/e398683cf6401b73747728be2606e89cad208675)), closes [#645](https://github.com/Allmantool/h-budget.UI/issues/645)
