@@ -1,4 +1,4 @@
-name: Semantic Release
+apply changesname: Semantic Release
 
 on:
   workflow_call:

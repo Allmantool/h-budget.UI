@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, Signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, DestroyRef, inject, OnDestroy, OnInit, Signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import * as _ from 'lodash';
@@ -19,6 +19,8 @@ import { IPaymentRepresentationModel } from '../../models/operation-record';
 import { AccountsService } from '../../services/accounts.service';
 import { HandbooksService } from '../../services/handbooks.service';
 import { PaymentsHistoryService } from '../../services/payments-history.service';
+import { SseService } from 'infrastructure/sse-service';
+import { AppConfigurationService } from 'app/modules/shared/services/app-configuration.service';
 
 @Component({
 	selector: 'payments-history',
@@ -27,7 +29,7 @@ import { PaymentsHistoryService } from '../../services/payments-history.service'
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: false,
 })
-export class PaymentsHistoryComponent implements OnInit, AfterViewInit {
+export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewInit {
 	private readonly destroyRef = inject(DestroyRef);
 
 	@Select(getAccountPayments)
@@ -63,8 +65,9 @@ export class PaymentsHistoryComponent implements OnInit, AfterViewInit {
 		private readonly handbooksService: HandbooksService,
 		private readonly paymentsHistoryService: PaymentsHistoryService,
 		private readonly accountsService: AccountsService,
-		private readonly store: Store
-	) {}
+		private readonly store: Store,
+		private readonly sseService: SseService
+	) { }
 
 	public ngOnInit(): void {
 		this.handbooksService.setupHandbooksStore();
@@ -72,6 +75,18 @@ export class PaymentsHistoryComponent implements OnInit, AfterViewInit {
 		this.accountingTableOptions$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(options => {
 			this.clickedRowGuids.clear();
 			this.clickedRowGuids.add(options?.selectedRecordGuid);
+		});
+
+		this.sseService.connect("accounting/notifications/account");
+
+		this.sseService.notifications$.subscribe((notification) => {
+			if (notification.eventType === "UpdatePaymentAccountBalanceCommand") {
+				payments: this.paymentsHistoryService.refreshPaymentsHistory(
+					this.activePaymentAccountIdSignal()
+				);
+
+				this.accountsService.refreshAccounts(this.activePaymentAccountIdSignal())
+			}
 		});
 	}
 
@@ -89,6 +104,10 @@ export class PaymentsHistoryComponent implements OnInit, AfterViewInit {
 				)
 			)
 			.subscribe(payload => this.dataSource$.next(payload.payments));
+	}
+
+	ngOnDestroy() {
+		this.sseService.disconnect();
 	}
 
 	public selectRow(record: IPaymentRepresentationModel): void {
