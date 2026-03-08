@@ -20,6 +20,7 @@ import { AccountsService } from '../../services/accounts.service';
 import { HandbooksService } from '../../services/handbooks.service';
 import { PaymentsHistoryService } from '../../services/payments-history.service';
 import { SseService } from 'infrastructure/sse-service';
+import { AppConfigurationService } from 'app/modules/shared/services/app-configuration.service';
 
 @Component({
 	selector: 'payments-history',
@@ -65,7 +66,7 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		private readonly paymentsHistoryService: PaymentsHistoryService,
 		private readonly accountsService: AccountsService,
 		private readonly store: Store,
-		private sseService: SseService
+		private readonly sseService: SseService
 	) { }
 
 	public ngOnInit(): void {
@@ -76,7 +77,7 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 			this.clickedRowGuids.add(options?.selectedRecordGuid);
 		});
 
-		this.sseService.connect("/notifications/account");
+		this.sseService.connect("accounting/notifications/account");
 
 		this.sseService.notifications$.subscribe((notification) => {
 			if (notification.eventType === "UpdatePaymentAccountBalanceCommand") {
