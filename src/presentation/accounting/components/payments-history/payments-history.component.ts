@@ -20,7 +20,6 @@ import { AccountsService } from '../../services/accounts.service';
 import { HandbooksService } from '../../services/handbooks.service';
 import { PaymentsHistoryService } from '../../services/payments-history.service';
 import { SseService } from 'infrastructure/sse-service';
-import { AppConfigurationService } from 'app/modules/shared/services/app-configuration.service';
 
 @Component({
 	selector: 'payments-history',
