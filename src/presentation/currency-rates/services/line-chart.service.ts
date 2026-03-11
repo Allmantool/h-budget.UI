@@ -29,7 +29,7 @@ import { DataPoint } from '../types/data-point.type';
 
 @Injectable()
 export class LineChartService {
-	private maxRatesAmount: number = 60;
+	private maxRatesAmount: number = 35;
 	public tableOptionsSignal: Signal<ICurrencyTableOptions>;
 	public currencyChartOptionSignal: Signal<ICurrencyChartOptions>;
 

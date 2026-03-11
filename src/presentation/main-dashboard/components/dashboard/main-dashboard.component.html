@@ -1,19 +1,44 @@
-<div class="content" role="main">
-	<main-dashboard-cart
-		[title]="'Currencies'"
-		[subtitle]="'Currency rates information'"
-		[imagePath]="'/assets/currency-rates.png'"
-		[navigateLink]="'/dashboard/currency-rates'"
-		[description]="'The currency rates page contains information about currency exchange rates.'"
-	>
-	</main-dashboard-cart>
+<div
+	class="main-dashboard"
+	role="main"
+>
+	<section class="main-dashboard__hero">
+		<div>
+			<p class="main-dashboard__eyebrow">Workspace overview</p>
+			<h1 class="main-dashboard__title">Choose the tool you need without losing orientation.</h1>
+			<p class="main-dashboard__copy">
+				The application is split into focused spaces for market monitoring and accounting workflows. Start from
+				the card that matches your task.
+			</p>
+		</div>
 
-	<main-dashboard-cart
-		[title]="'Accounting'"
-		[subtitle]="'Financies'"
-		[imagePath]="'/assets/accounting-v2.jpg'"
-		[navigateLink]="'/dashboard/accounting'"
-		[description]="'CRUD you h-budget'"
-	>
-	</main-dashboard-cart>
+		<div class="main-dashboard__stats">
+			<div class="main-dashboard__stat-card">
+				<strong>2</strong>
+				<span>core workspaces</span>
+			</div>
+			<div class="main-dashboard__stat-card">
+				<strong>1</strong>
+				<span>shared navigation shell</span>
+			</div>
+		</div>
+	</section>
+
+	<section class="main-dashboard__grid">
+		<main-dashboard-cart
+			[title]="'Currencies'"
+			[subtitle]="'Currency rates information'"
+			[imagePath]="'/assets/currency-rates.png'"
+			[navigateLink]="'/dashboard/currency-rates'"
+			[description]="'Review market trends, compare currencies, and inspect historical movement with interactive charts.'"
+		></main-dashboard-cart>
+
+		<main-dashboard-cart
+			[title]="'Accounting'"
+			[subtitle]="'Financial operations'"
+			[imagePath]="'/assets/accounting-v2.jpg'"
+			[navigateLink]="'/dashboard/accounting'"
+			[description]="'Manage accounts, inspect operations, and work with detail panels without breaking your flow.'"
+		></main-dashboard-cart>
+	</section>
 </div>

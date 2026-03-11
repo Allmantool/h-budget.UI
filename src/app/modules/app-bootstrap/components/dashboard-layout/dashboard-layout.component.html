@@ -1,72 +1,79 @@
-<div class="wrapper">
-	<div class="layout-content">
-		<div class="dashboard-layout-left-sidebar-outlet">
-			<mat-drawer-container
-				class="dashboard-sidenav-container"
-				autosize
+<div class="workspace-shell">
+	<aside class="workspace-sidebar">
+		<div class="workspace-sidebar__section">
+			<p class="workspace-sidebar__eyebrow">Navigate</p>
+			<a
+				*ngFor="let navigationItem of navigationItems"
+				class="workspace-sidebar__nav-item"
+				[class.workspace-sidebar__nav-item--active]="isRouteActive(navigationItem.route)"
+				[routerLink]="navigationItem.route"
 			>
-				<mat-drawer
-					#drawer
-					class="dashboard-sidenav"
-					mode="side"
-				>
-					@if (showFiller) {
-					    <p>Hidden text</p>
-					}
-					<button
-						(click)="showFiller = !showFiller"
-						mat-raised-button
-					>
-						Toggle extra text menu #1
-					</button>
-					<button
-						(click)="showFiller = !showFiller"
-						mat-raised-button
-					>
-						Toggle extra text menu #1
-					</button>
-				</mat-drawer>
-				<div class="dashboard-sidenav-content-items">
-					<div class="dashboard-sidenav-content">
-						<button
-							type="button"
-							mat-button
-                            (click)="navigateToDashboardAsync()"
-						>
-							Dashboard
-						</button>
-					</div>
-					<div class="dashboard-sidenav-content">
-						<button
-							type="button"
-							mat-button
-                            (click)="navigateToRatesAsync()"
-						>
-							Rates
-						</button>
-					</div>
-					<div class="dashboard-sidenav-content">
-						<button
-							type="button"
-							mat-button
-                            (click)="navigateToAccountingAsync()"
-						>
-							Accounting
-						</button>
-					</div>
-				</div>
-			</mat-drawer-container>
-			<router-outlet name="left_sidebar"></router-outlet>
+				<span class="material-icons">{{ navigationItem.icon }}</span>
+				<span>
+					<strong>{{ navigationItem.label }}</strong>
+					<small>{{ navigationItem.description }}</small>
+				</span>
+			</a>
 		</div>
 
-		<div class="dashboard-layout-central-outlet">
+		<div class="workspace-sidebar__section workspace-sidebar__section--hint">
+			<p class="workspace-sidebar__eyebrow">Guidance</p>
+			<h3 class="workspace-sidebar__title">Stay oriented while moving between tools.</h3>
+			<p class="workspace-sidebar__copy">
+				Use Overview for discovery, Rates for market analysis, and Accounting for operational actions.
+			</p>
+		</div>
+
+		<router-outlet name="left_sidebar"></router-outlet>
+	</aside>
+
+	<section class="workspace-main">
+		<header class="workspace-header">
+			<div>
+				<p class="workspace-header__eyebrow">Current workspace</p>
+				<h2 class="workspace-header__title">{{ currentSectionSignal()?.label || 'Overview' }}</h2>
+				<p class="workspace-header__copy">
+					{{ currentSectionSignal()?.description || 'Move through the application from a single shell.' }}
+				</p>
+			</div>
+
+			<div class="workspace-header__actions">
+				<button
+					mat-stroked-button
+					(click)="navigateToDashboardAsync()"
+				>
+					Overview
+				</button>
+				<button
+					mat-flat-button
+					(click)="navigateToRatesAsync()"
+				>
+					Rates
+				</button>
+				<button
+					mat-stroked-button
+					(click)="navigateToAccountingAsync()"
+				>
+					Accounting
+				</button>
+			</div>
+		</header>
+
+		<div class="workspace-main__content">
 			<router-outlet #rootAppOutlet="outlet"></router-outlet>
 		</div>
+	</section>
 
-		<div class="dashboard-layout-right_sidebar-outlet">
-			<router-outlet name="right_sidebar"></router-outlet>
+	<aside class="workspace-aside">
+		<div class="workspace-aside__card">
+			<p class="workspace-sidebar__eyebrow">Quick orientation</p>
+			<h3 class="workspace-sidebar__title">What to do here</h3>
+			<p class="workspace-sidebar__copy">
+				Review summaries first, then drill into detailed visualizations or transaction tools as needed.
+			</p>
 		</div>
-	</div>
+		<router-outlet name="right_sidebar"></router-outlet>
+	</aside>
 
 	<div
 		*ngIf="isDataLoading$ | async"

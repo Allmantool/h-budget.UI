@@ -2,49 +2,56 @@
 	class="grid-wrapper"
 	*ngIf="!loaderService.isLoading()"
 >
-	<div class="currency-rates-grid__show-button currency-rates-grid__show-button--align-center">
-		<button
-			mat-raised-button
-			(click)="getTodayCurrencyRatesAsync()"
-		>
-			Get today currency rates
-		</button>
+	<div class="currency-rates-grid__toolbar">
+		<div class="currency-rates-grid__intro">
+			<p class="currency-rates-grid__eyebrow">Active table</p>
+			<h3 class="currency-rates-grid__title">Latest official rates</h3>
+			<p class="currency-rates-grid__subtitle">
+				Select a row to update the chart focus. Use the presets to jump between common historical windows.
+			</p>
+		</div>
 
-		<ng-container>
-			<mat-button-toggle-group
-				aria-label="Font Style"
+		<div class="currency-rates-grid__actions">
+			<button
 				mat-raised-button
-				class="currency-rates-grid__tooble-group"
-				value="{{ tableOptionsSignal().selectedDateRange.diffInMonths }}"
-				(change)="setDateRange($event.value)"
+				color="primary"
+				(click)="getTodayCurrencyRatesAsync()"
 			>
-				<mat-button-toggle value="1">1 Month</mat-button-toggle>
-				<mat-button-toggle value="3">3 Months</mat-button-toggle>
-				<mat-button-toggle value="6">6 Months</mat-button-toggle>
-				<mat-button-toggle value="12">1 Year</mat-button-toggle>
-				<mat-button-toggle value="24">2 Years</mat-button-toggle>
-				<mat-button-toggle value="36">3 Years</mat-button-toggle>
-				<mat-button-toggle value="60">5 Years</mat-button-toggle>
-				<mat-button-toggle value="120">10 Years</mat-button-toggle>
-			</mat-button-toggle-group>
-		</ng-container>
+				Get today currency rates
+			</button>
 
-		<button
-			mat-raised-button
-			(click)="openGetCurrencyRatesDialog()"
-		>
-			Get currency rates for date range
-		</button>
+			<button
+				mat-stroked-button
+				(click)="openGetCurrencyRatesDialog()"
+			>
+				Custom date range
+			</button>
+		</div>
 	</div>
 
-	<div
-		class="currency-rates-grid currency-rates-grid--width"
-		*ngIf="!loaderService.isLoading()"
-	>
+	<div class="currency-rates-grid__filters">
+		<mat-button-toggle-group
+			aria-label="Rate history period"
+			class="currency-rates-grid__toggle-group"
+			[value]="tableOptionsSignal().selectedDateRange.diffInMonths"
+			(change)="setDateRange($event.value)"
+		>
+			<mat-button-toggle value="1">1M</mat-button-toggle>
+			<mat-button-toggle value="3">3M</mat-button-toggle>
+			<mat-button-toggle value="6">6M</mat-button-toggle>
+			<mat-button-toggle value="12">1Y</mat-button-toggle>
+			<mat-button-toggle value="24">2Y</mat-button-toggle>
+			<mat-button-toggle value="36">3Y</mat-button-toggle>
+			<mat-button-toggle value="60">5Y</mat-button-toggle>
+			<mat-button-toggle value="120">10Y</mat-button-toggle>
+		</mat-button-toggle-group>
+	</div>
+
+	<div class="currency-rates-grid">
 		<table
 			mat-table
 			[dataSource]="todayRatesTableDataSource"
-			class="mat-elevation-z8"
+			class="currency-rates-grid__table"
 		>
 			<ng-container [matColumnDef]="ratesGridColumnOptions.SELECT">
 				<th
@@ -56,6 +63,7 @@
 				<td
 					mat-cell
 					*matCellDef="let row"
+					class="currency-rates-grid__selection-cell"
 				>
 					<mat-checkbox
 						(click)="$event.stopPropagation()"
@@ -75,6 +83,7 @@
 				<td
 					mat-cell
 					*matCellDef="let element"
+					class="currency-rates-grid__id-cell"
 				>
 					{{ element.currencyId }}
 				</td>
@@ -108,6 +117,7 @@
 				<td
 					mat-cell
 					*matCellDef="let element"
+					class="currency-rates-grid__name-cell"
 				>
 					{{ element.name }} [{{ element.abbreviation }}]
 				</td>
@@ -124,6 +134,7 @@
 					[style.color]="ratesGridColumnOptions.TRENDS[element.currencyTrend]"
 					mat-cell
 					*matCellDef="let element"
+					class="currency-rates-grid__value-cell"
 				>
 					{{ element.ratePerUnit }}
 				</td>
@@ -140,6 +151,7 @@
 					[style.color]="ratesGridColumnOptions.TRENDS[element.currencyTrend]"
 					mat-cell
 					*matCellDef="let element"
+					class="currency-rates-grid__trend-cell"
 				>
 					{{ element.rateDiff ?? 0 }} %
 					<span class="material-icons md-18">{{ element.currencyTrend }}</span>
@@ -164,10 +176,12 @@
 			<tr
 				mat-header-row
 				*matHeaderRowDef="ratesGridColumnOptions.NAMES"
+				class="currency-rates-grid__header-row"
 			></tr>
 			<tr
 				mat-row
 				*matRowDef="let row; columns: ratesGridColumnOptions.NAMES"
+				class="currency-rates-grid__row"
 			></tr>
 		</table>
 	</div>

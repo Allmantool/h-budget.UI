@@ -1,3 +1,83 @@
-.money-transfer {
-	padding-top: 1em;
+.payments-dashboard {
+	display: grid;
+	gap: 1rem;
+	padding: 1rem;
+}
+
+.payments-dashboard__hero {
+	display: grid;
+	grid-template-columns: minmax(0, 1.5fr) minmax(260px, 0.8fr);
+	gap: 1rem;
+	padding: 1.35rem;
+	border-radius: 24px;
+	background: linear-gradient(135deg, #f8fafc, #eff6ff 50%, #f0fdf4);
+	border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.payments-dashboard__eyebrow,
+.payments-dashboard__summary-label,
+.payments-dashboard__balance-label {
+	margin: 0 0 0.3rem;
+	font-size: 0.78rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: #0e7490;
+}
+
+.payments-dashboard__title {
+	margin: 0;
+	font-family: Georgia, 'Times New Roman', serif;
+	font-size: clamp(1.8rem, 3vw, 3rem);
+	line-height: 1.05;
+}
+
+.payments-dashboard__copy {
+	margin: 0.5rem 0 0;
+	color: #617089;
+	line-height: 1.5;
+}
+
+.payments-dashboard__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
+	margin-top: 1rem;
+}
+
+.payments-dashboard__balance-card,
+.payments-dashboard__summary-card {
+	display: grid;
+	gap: 0.25rem;
+	padding: 1rem;
+	border-radius: 18px;
+	background: rgba(255, 255, 255, 0.82);
+	border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.payments-dashboard__balance-card strong,
+.payments-dashboard__summary-card strong {
+	font-size: 1.7rem;
+}
+
+.payments-dashboard__balance-card span:last-child,
+.payments-dashboard__summary-card span:last-child {
+	color: #617089;
+}
+
+.payments-dashboard__summary {
+	display: grid;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	gap: 0.85rem;
+}
+
+.payments-dashboard__summary-card--net {
+	background: linear-gradient(135deg, rgba(14, 116, 144, 0.1), rgba(255, 255, 255, 0.94));
+}
+
+@media (max-width: 1100px) {
+	.payments-dashboard__hero,
+	.payments-dashboard__summary {
+		grid-template-columns: 1fr;
+	}
 }

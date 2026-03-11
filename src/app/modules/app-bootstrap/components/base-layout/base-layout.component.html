@@ -1,26 +1,46 @@
-<div class="base-content-wrapper">
-	<div class="dashboard-toolbar">
-		<mat-toolbar>
-			<button
-				mat-icon-button
-				[matMenuTriggerFor]="menu"
-				class="icon"
-				aria-label="icon-button with menu icon"
-			>
-				<mat-icon>menu</mat-icon>
-			</button>
+<div class="app-shell">
+	<header class="app-shell__header">
+		<div class="app-shell__brand">
+			<div class="app-shell__brand-mark">HB</div>
+			<div>
+				<p class="app-shell__eyebrow">H-Budget workspace</p>
+				<h1 class="app-shell__title">Manage rates and accounting from one navigation system.</h1>
+			</div>
+		</div>
 
-			<mat-menu #menu="matMenu">
-				<button mat-menu-item (click)="navigateToDashboardAsync()">
-					<mat-icon>home</mat-icon>
-					<span>Home</span>
-				</button>
-			</mat-menu>
+		<div class="app-shell__status">
+			<div class="app-shell__status-card">
+				<p class="app-shell__status-label">Active area</p>
+				<strong>{{ activeNavigationItemSignal()?.label || 'Overview' }}</strong>
+				<span>{{ activeNavigationItemSignal()?.description }}</span>
+			</div>
+			<div class="app-shell__status-card">
+				<p class="app-shell__status-label">Application map</p>
+				<strong>{{ primaryNavigationItems.length }} spaces</strong>
+				<span>Overview, market insights, and accounting workflows</span>
+			</div>
+		</div>
+	</header>
 
-			<span>Welcome to h-budget app [base]</span>
-			<span class="spacer"></span>
-		</mat-toolbar>
+	<nav
+		class="app-shell__nav"
+		aria-label="Primary"
+	>
+		<a
+			*ngFor="let navigationItem of primaryNavigationItems"
+			class="app-shell__nav-item"
+			[class.app-shell__nav-item--active]="isRouteActive(navigationItem.route)"
+			[routerLink]="navigationItem.route"
+		>
+			<span class="material-icons app-shell__nav-icon">{{ navigationItem.icon }}</span>
+			<span class="app-shell__nav-copy">
+				<strong>{{ navigationItem.label }}</strong>
+				<small>{{ navigationItem.description }}</small>
+			</span>
+		</a>
+	</nav>
 
-	</div>
-	<router-outlet></router-outlet>
+	<main class="app-shell__content">
+		<router-outlet></router-outlet>
+	</main>
 </div>

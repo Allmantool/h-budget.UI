@@ -1,25 +1,62 @@
-<mat-accordion class="account-note">
-	<mat-expansion-panel hideToggle>
-		<mat-expansion-panel-header (click)="navigateToPaymentAccountsAsync()">
-			<mat-panel-title>
-				<span>{{paymentAccountGeneralInfoSignal()}}</span>
-			</mat-panel-title>
-			<mat-panel-description>
-				Total Sum: {{activePaymentsAccountSignal().balance}} [{{activePaymentsAccountSignal().currency}}]
-			</mat-panel-description>
-		</mat-expansion-panel-header>
-	</mat-expansion-panel>
-</mat-accordion>
+<section class="payments-dashboard">
+	<div class="payments-dashboard__hero">
+		<div>
+			<p class="payments-dashboard__eyebrow">Active account</p>
+			<h1 class="payments-dashboard__title">{{ activePaymentsAccountSignal().emitter }}</h1>
+			<p class="payments-dashboard__copy">
+				{{ activePaymentsAccountSignal().description }} · {{ activePaymentsAccountSignal().currency }}
+			</p>
+			<div class="payments-dashboard__actions">
+				<button
+					mat-flat-button
+					color="primary"
+					(click)="moneyTransfer()"
+				>
+					Money transfer
+				</button>
+				<button
+					mat-stroked-button
+					(click)="navigateToPaymentAccountsAsync()"
+				>
+					Change account
+				</button>
+			</div>
+		</div>
 
-<div class="money-transfer">
-	<app-button
-		[hidden]="false"
-		(click)="moneyTransfer()"
-		type="fab"
-		text="Money transfer"
-		color="primary"
-		icon="send_money"
-	></app-button>
-</div>
+		<div class="payments-dashboard__balance-card">
+			<span class="payments-dashboard__balance-label">Current balance</span>
+			<strong>{{ activePaymentsAccountSignal().balance }}</strong>
+			<span>{{ activePaymentsAccountSignal().currency }}</span>
+		</div>
+	</div>
 
-<payments-history></payments-history>
+	<div class="payments-dashboard__summary">
+		<div class="payments-dashboard__summary-card">
+			<span class="payments-dashboard__summary-label">Operations</span>
+			<strong>{{ accountingSummarySignal().operationsCount }}</strong>
+			<span>{{ accountingSummarySignal().settledCount }} settled</span>
+		</div>
+		<div class="payments-dashboard__summary-card">
+			<span class="payments-dashboard__summary-label">Scheduled</span>
+			<strong>{{ accountingSummarySignal().scheduledCount }}</strong>
+			<span>future-dated records</span>
+		</div>
+		<div class="payments-dashboard__summary-card">
+			<span class="payments-dashboard__summary-label">Income</span>
+			<strong>{{ accountingSummarySignal().income }}</strong>
+			<span>{{ activePaymentsAccountSignal().currency }}</span>
+		</div>
+		<div class="payments-dashboard__summary-card">
+			<span class="payments-dashboard__summary-label">Expense</span>
+			<strong>{{ accountingSummarySignal().expense }}</strong>
+			<span>{{ activePaymentsAccountSignal().currency }}</span>
+		</div>
+		<div class="payments-dashboard__summary-card payments-dashboard__summary-card--net">
+			<span class="payments-dashboard__summary-label">Net flow</span>
+			<strong>{{ accountingSummarySignal().net }}</strong>
+			<span>{{ activePaymentsAccountSignal().currency }}</span>
+		</div>
+	</div>
+
+	<payments-history></payments-history>
+</section>

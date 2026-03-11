@@ -50,8 +50,8 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
 	@ViewChild(ChartComponent, { static: false }) chart!: ChartComponent;
 	public chartOptions: Partial<ChartOptions> = {};
 
-	@Input() public chartWidth = '500%';
-	@Input() public chartHeight = '360';
+	@Input() public chartWidth = '100%';
+	@Input() public chartHeight = '380';
 
 	public isChartInitialized$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 

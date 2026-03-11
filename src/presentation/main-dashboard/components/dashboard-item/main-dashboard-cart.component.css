@@ -1,32 +1,54 @@
-.dahsboard-card-item {
+.dashboard-card-item {
 	display: grid;
-	grid-template-columns: 1fr;
-	grid-template-rows: 0.5fr 3fr 0.5fr;
-	width: 35em;
-	height: 35em;
+	grid-template-rows: auto 1fr auto;
+	min-height: 30rem;
+	border-radius: 26px;
+	border: 1px solid rgba(15, 23, 42, 0.08);
+	box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+	overflow: hidden;
 }
 
-.dahsboard-card-item_image {
-	background-image: url('/assets/currency-logo.png');
-	background-size: cover;
+.dashboard-card-item__media {
+	padding: 1rem 1rem 0;
 }
 
-.mdc-card__media {
-	height: 256px;
-	place-self: center;
+.dashboard-card-item__image {
+	display: block;
+	width: 100%;
+	height: 15rem;
+	object-fit: cover;
+	border-radius: 20px;
 }
 
-.dahsboard-card-item_navigate-buttom {
+.dashboard-card-item__content {
+	display: grid;
+	gap: 0.6rem;
+	padding: 1.1rem 1.1rem 0;
+}
+
+.dashboard-card-item__subtitle {
+	margin: 0;
+	font-size: 0.8rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: #0e7490;
+}
+
+.dashboard-card-item__title {
+	margin: 0;
+	font-size: 1.75rem;
+	line-height: 1.08;
+}
+
+.dashboard-card-item__description {
+	margin: 0;
+	color: #617089;
+	line-height: 1.6;
+}
+
+.dashboard-card-item__footer {
 	display: flex;
-	justify-content: center;
-	height: inherit;
-	align-items: self-end;
-	margin-bottom: 0;
-	padding: 0;
-}
-
-.dahsboard-card-item_content {
-	display: flex;
-	flex-direction: column;
-	height: 100%;
+	justify-content: flex-start;
+	padding: 1.1rem;
 }

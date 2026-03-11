@@ -1,4 +1,13 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, DestroyRef, inject, OnDestroy, OnInit, Signal } from '@angular/core';
+import {
+	AfterViewInit,
+	ChangeDetectionStrategy,
+	Component,
+	DestroyRef,
+	inject,
+	OnDestroy,
+	OnInit,
+	Signal,
+} from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import * as _ from 'lodash';
@@ -66,7 +75,7 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		private readonly accountsService: AccountsService,
 		private readonly store: Store,
 		private readonly sseService: SseService
-	) { }
+	) {}
 
 	public ngOnInit(): void {
 		this.handbooksService.setupHandbooksStore();
@@ -76,15 +85,13 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 			this.clickedRowGuids.add(options?.selectedRecordGuid);
 		});
 
-		this.sseService.connect("accounting/notifications/account");
+		this.sseService.connect('accounting/notifications/account');
 
-		this.sseService.notifications$.subscribe((notification) => {
-			if (notification.eventType === "UpdatePaymentAccountBalanceCommand") {
-				payments: this.paymentsHistoryService.refreshPaymentsHistory(
-					this.activePaymentAccountIdSignal()
-				);
+		this.sseService.notifications$.subscribe(notification => {
+			if (notification.eventType === 'UpdatePaymentAccountBalanceCommand') {
+				payments: this.paymentsHistoryService.refreshPaymentsHistory(this.activePaymentAccountIdSignal());
 
-				this.accountsService.refreshAccounts(this.activePaymentAccountIdSignal())
+				this.accountsService.refreshAccounts(this.activePaymentAccountIdSignal());
 			}
 		});
 	}
@@ -113,5 +120,17 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		this.store.dispatch(new SetActiveAccountingOperation(record.key));
 	}
 
-	public isFuturePayment = (record: IPaymentRepresentationModel): boolean => isFuture(record.operationDate.getDate());
+	public isFuturePayment = (record: IPaymentRepresentationModel): boolean => isFuture(record.operationDate);
+
+	public readonly historySummarySignal = toSignal(this.dataSource$.pipe(), {
+		initialValue: [],
+	});
+
+	public get recordsCount(): number {
+		return this.historySummarySignal().length;
+	}
+
+	public get futureRecordsCount(): number {
+		return this.historySummarySignal().filter(record => this.isFuturePayment(record)).length;
+	}
 }

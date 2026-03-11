@@ -1,17 +1,67 @@
-<!-- Toolbar -->
-<div class="acconting-wrapper">
-	<div class="accounting-layout-content">
-		<div class="accounting-layout-left-sidebar-outlet">
+<div class="accounting-shell">
+	<aside class="accounting-sidebar">
+		<div class="accounting-card">
+			<p class="accounting-eyebrow">Navigate</p>
+			<a
+				*ngFor="let navigationItem of navigationItems"
+				class="accounting-nav-item"
+				[class.accounting-nav-item--active]="isRouteActive(navigationItem.route)"
+				[routerLink]="navigationItem.route"
+			>
+				<span class="material-icons">{{ navigationItem.icon }}</span>
+				<span class="accounting-nav-item-tab">
+					<strong>{{ navigationItem.label }}</strong>
+					<small>{{ navigationItem.description }}</small>
+				</span>
+			</a>
 		</div>
 
-		<div class="accounting-layout-central-outlet">
+		<div class="accounting-card">
+			<p class="accounting-eyebrow">Flow</p>
+			<h3 class="accounting-title">Keep accounts, operations, and details visible together.</h3>
+			<p class="accounting-copy">
+				The main area stays focused on data, while the right rail can host editing or detail workflows.
+			</p>
+		</div>
+	</aside>
+
+	<section class="accounting-main">
+		<header class="accounting-header">
+			<div>
+				<p class="accounting-eyebrow">Workspace</p>
+				<h2 class="accounting-header__title">Accounting operations</h2>
+				<p class="accounting-copy">
+					Track balances, review operations, and keep side details accessible without losing context.
+				</p>
+			</div>
+			<div class="accounting-header__actions">
+				<button
+					mat-stroked-button
+					(click)="navigateToDashboardAsync()"
+				>
+					Overview
+				</button>
+				<a
+					mat-flat-button
+					routerLink="/dashboard/currency-rates"
+				>
+					Rates
+				</a>
+			</div>
+		</header>
+
+		<div class="accounting-main__content">
 			<router-outlet #rootAppOutlet="outlet"></router-outlet>
 		</div>
+	</section>
 
-		<div class="accounting-layout-right_sidebar-outlet">
-			<router-outlet name="right_sidebar"></router-outlet>
+	<aside class="accounting-detail">
+		<div class="accounting-card">
+			<p class="accounting-eyebrow">Detail panel</p>
+			<p class="accounting-copy">Selected forms and detail views open here so the primary list stays in place.</p>
 		</div>
-	</div>
+		<router-outlet name="right_sidebar"></router-outlet>
+	</aside>
 
 	<div
 		*ngIf="isDataLoading$ | async"

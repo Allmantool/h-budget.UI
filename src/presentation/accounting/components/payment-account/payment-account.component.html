@@ -1,165 +1,202 @@
-<mat-accordion class="headers-align">
-	<mat-expansion-panel
-		[expanded]="step === 0"
-		(opened)="setStep(0)"
-		hideToggle
-	>
-		<mat-expansion-panel-header>
-			<mat-panel-title>Wallet money</mat-panel-title>
-			<mat-panel-description>
-				Money on hands
-				<mat-icon>account_balance_wallet</mat-icon>
-			</mat-panel-description>
-		</mat-expansion-panel-header>
+<section class="accounts-workspace">
+	<div class="accounts-workspace__hero">
+		<div>
+			<p class="accounts-workspace__eyebrow">Accounts hub</p>
+			<h1 class="accounts-workspace__title">Pick the account space you want to work with.</h1>
+			<p class="accounts-workspace__copy">
+				Group accounts by type, scan balances quickly, and open operations only after selecting the account that
+				will drive the workspace.
+			</p>
+		</div>
 
-		<mat-selection-list
-			#cash
-			[multiple]="false"
-			(selectionChange)="chooseAccount($event)"
+		<div class="accounts-workspace__stats">
+			<div class="accounts-workspace__stat-card">
+				<span class="accounts-workspace__stat-label">Total accounts</span>
+				<strong>{{ totalAccountsCount }}</strong>
+			</div>
+			<div class="accounts-workspace__stat-card">
+				<span class="accounts-workspace__stat-label">Wallet balance</span>
+				<strong>{{ getAccountsTotalBalance(cashAccountsSignal()) }}</strong>
+			</div>
+			<div class="accounts-workspace__stat-card">
+				<span class="accounts-workspace__stat-label">Virtual balance</span>
+				<strong>{{ getAccountsTotalBalance(debitVirtualAccountsSignal()) }}</strong>
+			</div>
+			<div class="accounts-workspace__stat-card">
+				<span class="accounts-workspace__stat-label">Loans and credit</span>
+				<strong>{{ getAccountsTotalBalance(creditVirtualAccountsSignal()) }}</strong>
+			</div>
+		</div>
+	</div>
+
+	<mat-accordion class="headers-align accounts-workspace__accordion">
+		<mat-expansion-panel
+			[expanded]="step === 0"
+			(opened)="setStep(0)"
+			hideToggle
 		>
-			<mat-list-option
-				*ngFor="let paymentAccount of cashAccountsSignal()"
-				[value]="paymentAccount.key"
+			<mat-expansion-panel-header>
+				<mat-panel-title>Wallet money</mat-panel-title>
+				<mat-panel-description>
+					{{ cashAccountsSignal().length }} accounts · {{ getAccountsTotalBalance(cashAccountsSignal()) }}
+					total
+					<mat-icon>account_balance_wallet</mat-icon>
+				</mat-panel-description>
+			</mat-expansion-panel-header>
+
+			<mat-selection-list
+				#cash
+				[multiple]="false"
+				(selectionChange)="chooseAccount($event)"
 			>
-				<span
-					class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
-				></span>
-				{{paymentAccount.emitter }} | {{paymentAccount.description}} | Balance:
-				<span [class]="paymentAccount.balance > 0 ? 'positive-balance' : 'negative-balance'">
-					{{ paymentAccount.balance }}
-				</span>
-				[{{paymentAccount.currency}}]
-			</mat-list-option>
-		</mat-selection-list>
+				<mat-list-option
+					*ngFor="let paymentAccount of cashAccountsSignal()"
+					[value]="paymentAccount.key"
+					class="accounts-workspace__account-row"
+				>
+					<span
+						class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
+					></span>
+					{{paymentAccount.emitter }} | {{paymentAccount.description}} | Balance:
+					<span [class]="paymentAccount.balance > 0 ? 'positive-balance' : 'negative-balance'">
+						{{ paymentAccount.balance }}
+					</span>
+					[{{paymentAccount.currency}}]
+				</mat-list-option>
+			</mat-selection-list>
 
-		<mat-action-row>
-			<button
-				mat-button
-				color="primary"
-				[disabled]="isNavigateToOperationsDisabled"
-				(click)="navigateToOperations()"
-			>
-				Navigate
-			</button>
-		</mat-action-row>
-	</mat-expansion-panel>
+			<mat-action-row>
+				<button
+					mat-button
+					color="primary"
+					[disabled]="isNavigateToOperationsDisabled"
+					(click)="navigateToOperations()"
+				>
+					Navigate
+				</button>
+			</mat-action-row>
+		</mat-expansion-panel>
 
-	<mat-expansion-panel
-		[expanded]="step === 1"
-		(opened)="setStep(1)"
-		hideToggle
-	>
-		<mat-expansion-panel-header>
-			<mat-panel-title>Virtual accounts</mat-panel-title>
-			<mat-panel-description>
-				A virtual account is a fintech (financial technology) product that allows users to make payments quickly
-				and efficiently
-				<mat-icon>payments</mat-icon>
-			</mat-panel-description>
-		</mat-expansion-panel-header>
-
-		<mat-selection-list
-			#virtual
-			[multiple]="false"
-			(selectionChange)="chooseAccount($event)"
+		<mat-expansion-panel
+			[expanded]="step === 1"
+			(opened)="setStep(1)"
+			hideToggle
 		>
-			<mat-list-option
-				*ngFor="let paymentAccount of debitVirtualAccountsSignal()"
-				[value]="paymentAccount.key"
-			>
-				<span
-					class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
-				></span>
-				{{paymentAccount.emitter }} | {{paymentAccount.description}} | Balance:
-				<span [class]="paymentAccount.balance > 0 ? 'positive-balance' : 'negative-balance'">
-					{{ paymentAccount.balance }}
-				</span>
-				[{{paymentAccount.currency}}]
-			</mat-list-option>
-		</mat-selection-list>
+			<mat-expansion-panel-header>
+				<mat-panel-title>Virtual accounts</mat-panel-title>
+				<mat-panel-description>
+					{{ debitVirtualAccountsSignal().length }} accounts · {{
+					getAccountsTotalBalance(debitVirtualAccountsSignal()) }} total
+					<mat-icon>payments</mat-icon>
+				</mat-panel-description>
+			</mat-expansion-panel-header>
 
-		<mat-action-row>
-			<button
-				mat-button
-				color="warn"
-				(click)="prevStep()"
+			<mat-selection-list
+				#virtual
+				[multiple]="false"
+				(selectionChange)="chooseAccount($event)"
 			>
-				Previous
-			</button>
-			<button
-				mat-button
-				color="primary"
-				(click)="nextStep()"
-			>
-				Next
-			</button>
-			<button
-				mat-button
-				color="primary"
-				[disabled]="isNavigateToOperationsDisabled"
-				(click)="navigateToOperations()"
-			>
-				Navigate
-			</button>
-		</mat-action-row>
-	</mat-expansion-panel>
+				<mat-list-option
+					*ngFor="let paymentAccount of debitVirtualAccountsSignal()"
+					[value]="paymentAccount.key"
+					class="accounts-workspace__account-row"
+				>
+					<span
+						class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
+					></span>
+					{{paymentAccount.emitter }} | {{paymentAccount.description}} | Balance:
+					<span [class]="paymentAccount.balance > 0 ? 'positive-balance' : 'negative-balance'">
+						{{ paymentAccount.balance }}
+					</span>
+					[{{paymentAccount.currency}}]
+				</mat-list-option>
+			</mat-selection-list>
 
-	<mat-expansion-panel
-		[expanded]="step === 2"
-		(opened)="setStep(2)"
-		hideToggle
-	>
-		<mat-expansion-panel-header>
-			<mat-panel-title>Loans</mat-panel-title>
-			<mat-panel-description>
-				Lend (a sum of money or item of property).
-				<mat-icon>credit_score</mat-icon>
-			</mat-panel-description>
-		</mat-expansion-panel-header>
+			<mat-action-row>
+				<button
+					mat-button
+					color="warn"
+					(click)="prevStep()"
+				>
+					Previous
+				</button>
+				<button
+					mat-button
+					color="primary"
+					(click)="nextStep()"
+				>
+					Next
+				</button>
+				<button
+					mat-button
+					color="primary"
+					[disabled]="isNavigateToOperationsDisabled"
+					(click)="navigateToOperations()"
+				>
+					Navigate
+				</button>
+			</mat-action-row>
+		</mat-expansion-panel>
 
-		<mat-selection-list
-			#loan
-			[multiple]="false"
-			(selectionChange)="chooseAccount($event)"
+		<mat-expansion-panel
+			[expanded]="step === 2"
+			(opened)="setStep(2)"
+			hideToggle
 		>
-			<mat-list-option
-				*ngFor="let paymentAccount of creditVirtualAccountsSignal()"
-				[value]="paymentAccount.key"
-			>
-				<span
-					class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
-				></span>
-				{{paymentAccount.emitter }} | {{paymentAccount.description}} | Balance:
-				<span [class]="paymentAccount.balance > 0 ? 'positive-balance' : 'negative-balance'">
-					{{ paymentAccount.balance }}
-				</span>
-				[{{paymentAccount.currency}}]
-			</mat-list-option>
-		</mat-selection-list>
+			<mat-expansion-panel-header>
+				<mat-panel-title>Loans</mat-panel-title>
+				<mat-panel-description>
+					{{ creditVirtualAccountsSignal().length }} accounts · {{
+					getAccountsTotalBalance(creditVirtualAccountsSignal()) }} total
+					<mat-icon>credit_score</mat-icon>
+				</mat-panel-description>
+			</mat-expansion-panel-header>
 
-		<mat-action-row>
-			<button
-				mat-button
-				color="warn"
-				(click)="prevStep()"
+			<mat-selection-list
+				#loan
+				[multiple]="false"
+				(selectionChange)="chooseAccount($event)"
 			>
-				Previous
-			</button>
-			<button
-				mat-button
-				color="primary"
-				(click)="nextStep()"
-			>
-				End
-			</button>
-			<button
-				mat-button
-				color="primary"
-				[disabled]="isNavigateToOperationsDisabled"
-				(click)="navigateToOperations()"
-			>
-				Navigate
-			</button>
-		</mat-action-row>
-	</mat-expansion-panel>
-</mat-accordion>
+				<mat-list-option
+					*ngFor="let paymentAccount of creditVirtualAccountsSignal()"
+					[value]="paymentAccount.key"
+					class="accounts-workspace__account-row"
+				>
+					<span
+						class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
+					></span>
+					{{paymentAccount.emitter }} | {{paymentAccount.description}} | Balance:
+					<span [class]="paymentAccount.balance > 0 ? 'positive-balance' : 'negative-balance'">
+						{{ paymentAccount.balance }}
+					</span>
+					[{{paymentAccount.currency}}]
+				</mat-list-option>
+			</mat-selection-list>
+
+			<mat-action-row>
+				<button
+					mat-button
+					color="warn"
+					(click)="prevStep()"
+				>
+					Previous
+				</button>
+				<button
+					mat-button
+					color="primary"
+					(click)="nextStep()"
+				>
+					End
+				</button>
+				<button
+					mat-button
+					color="primary"
+					[disabled]="isNavigateToOperationsDisabled"
+					(click)="navigateToOperations()"
+				>
+					Navigate
+				</button>
+			</mat-action-row>
+		</mat-expansion-panel>
+	</mat-accordion>
+</section>
