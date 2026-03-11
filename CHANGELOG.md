@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.37 (2026-03-11)</small>
+
+* Merge pull request #650 from Allmantool/fix/adjust-bundle-limits ([e81837570c6c96222a8292fc416dd80c76eb8485](https://github.com/Allmantool/h-budget.UI/commit/e81837570c6c96222a8292fc416dd80c76eb8485)), closes [#650](https://github.com/Allmantool/h-budget.UI/issues/650)
+* fix: increase bundle limits ([b1161b573c8b8fb2f61811f07b403908718ceb45](https://github.com/Allmantool/h-budget.UI/commit/b1161b573c8b8fb2f61811f07b403908718ceb45))
+
 ## <small>1.1.36 (2026-03-11)</small>
 
 * Merge pull request #649 from Allmantool/tech/improve-ui-ux-v1 ([59b638b0ea594efa567e5c4d2c2e7714d1082058](https://github.com/Allmantool/h-budget.UI/commit/59b638b0ea594efa567e5c4d2c2e7714d1082058)), closes [#649](https://github.com/Allmantool/h-budget.UI/issues/649)
