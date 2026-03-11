@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.35 (2026-03-11)</small>
+
+* Merge pull request #648 from Allmantool/chore/deps-patch-upgrade ([acdaf623c70b8ff68a7684fe2d3d604d451eda05](https://github.com/Allmantool/h-budget.UI/commit/acdaf623c70b8ff68a7684fe2d3d604d451eda05)), closes [#648](https://github.com/Allmantool/h-budget.UI/issues/648)
+* build(deps): patch dependency upgrade ([7828c69b06e2bbd35c06e180c9c44d54b53986c9](https://github.com/Allmantool/h-budget.UI/commit/7828c69b06e2bbd35c06e180c9c44d54b53986c9))
+
 ## <small>1.1.34 (2026-03-08)</small>
 
 * Merge pull request #646 from Allmantool/tech/add-sse-initial-support ([a07a17ba12e01d8a7c1bfcbe657296c8772a933c](https://github.com/Allmantool/h-budget.UI/commit/a07a17ba12e01d8a7c1bfcbe657296c8772a933c)), closes [#646](https://github.com/Allmantool/h-budget.UI/issues/646)
