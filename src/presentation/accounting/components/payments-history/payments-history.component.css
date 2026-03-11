@@ -1,34 +1,76 @@
-.account-note {
-	display: flex;
-	flex-direction: row;
-	align-items: end;
-	text-wrap: nowrap;
-	flex-shrink: 0;
+.payments-history {
+	display: grid;
+	gap: 1rem;
 }
 
-mat-expansion-panel {
-	width: 100%;
+.payments-history__header {
+	display: flex;
+	justify-content: space-between;
+	align-items: end;
+	gap: 1rem;
+}
+
+.payments-history__eyebrow {
+	margin: 0 0 0.3rem;
+	font-size: 0.78rem;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: #0e7490;
+}
+
+.payments-history__title {
+	margin: 0;
+	font-size: 1.4rem;
+	line-height: 1.1;
+}
+
+.payments-history__copy {
+	margin: 0.4rem 0 0;
+	color: #617089;
+	line-height: 1.5;
+}
+
+.payments-history__stats {
+	display: flex;
+	gap: 0.75rem;
+}
+
+.payments-history__stat {
+	display: grid;
+	gap: 0.2rem;
+	padding: 0.85rem 1rem;
+	border-radius: 16px;
+	background: rgba(255, 255, 255, 0.82);
+	border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.payments-history__stat span {
+	color: #617089;
 }
 
 .accounting-table {
-	margin-top: 1em;
-	padding-top: 1em;
+	padding: 0.75rem;
+	border-radius: 22px;
+	border: 1px solid rgba(15, 23, 42, 0.08);
+	background: rgba(255, 255, 255, 0.9);
 }
 
 .row-is-clicked {
 	font-weight: bold;
-	background-color: gold;
+	background-color: rgba(14, 116, 144, 0.12);
 	opacity: 100% !important;
 }
 
 .future-payment {
-	opacity: 25%;
+	opacity: 0.65;
+	background: rgba(245, 158, 11, 0.08);
 }
 
 .mat-mdc-table {
-	overflow-y: scroll;
+	overflow-y: auto;
 	max-height: 70em;
-	min-height: 70em;
+	min-height: 48em;
 }
 
 .mat-mdc-cell {
@@ -49,12 +91,10 @@ mat-expansion-panel {
 
 .mat-column-income {
 	width: 10em;
-	color: limegreen;
 }
 
 .mat-column-expense {
 	width: 10em;
-	color: lightcoral;
 }
 
 .mat-column-balance {
@@ -63,4 +103,27 @@ mat-expansion-panel {
 
 .mat-column-comment {
 	width: 25em;
+}
+
+.payments-history__amount {
+	font-weight: 700;
+}
+
+.payments-history__amount--income {
+	color: limegreen;
+}
+
+.payments-history__amount--expense {
+	color: lightcoral;
+}
+
+.payments-history__amount--balance {
+	color: #10233c;
+}
+
+@media (max-width: 900px) {
+	.payments-history__header {
+		flex-direction: column;
+		align-items: start;
+	}
 }

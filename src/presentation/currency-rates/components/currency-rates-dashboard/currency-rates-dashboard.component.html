@@ -1,5 +1,242 @@
-<div class="rates-dashboard-content">
-	<currency-rates-line-chart class="rates-dashboard-content_chart">
-	</currency-rates-line-chart>
-	<app-currency-rates-grid></app-currency-rates-grid>
+<div class="rates-dashboard">
+	<section class="rates-hero">
+		<div class="rates-hero__content">
+			<p class="rates-eyebrow">Rates intelligence</p>
+			<h1 class="rates-title">Monitor currency performance with clearer context and faster decisions.</h1>
+			<p class="rates-subtitle">
+				Track the active market, compare historical movement, and review the current archive without leaving the
+				same workspace.
+			</p>
+
+			<div class="rates-hero__chips">
+				<span class="rates-chip">
+					<span class="material-icons rates-chip__icon">currency_exchange</span>
+					{{ tableOptionsSignal().selectedItem.abbreviation }} selected
+				</span>
+				<span class="rates-chip">
+					<span class="material-icons rates-chip__icon">calendar_month</span>
+					{{ tableOptionsSignal().selectedDateRange.diffInMonths }} month range
+				</span>
+				<span class="rates-chip">
+					<span class="material-icons rates-chip__icon">sync</span>
+					{{ rateGroupsSignal().length }} currencies tracked
+				</span>
+			</div>
+		</div>
+
+		<div class="rates-hero__stats">
+			<mat-card class="rates-stat-card">
+				<p class="rates-stat-card__label">Focused currency</p>
+				<div class="rates-stat-card__value">{{ selectedCurrencySignal()?.name || 'Loading' }}</div>
+				<p class="rates-stat-card__meta">{{ tableOptionsSignal().selectedItem.abbreviation }}</p>
+			</mat-card>
+
+			<mat-card class="rates-stat-card">
+				<p class="rates-stat-card__label">Latest rate per unit</p>
+				<div class="rates-stat-card__value">{{ selectedRateSignal()?.ratePerUnit ?? '...' }}</div>
+				<p class="rates-stat-card__meta">{{ selectedRateSignal()?.updateDate | date: 'dd MMM yyyy' }}</p>
+			</mat-card>
+
+			<mat-card class="rates-stat-card">
+				<p class="rates-stat-card__label">Archive coverage</p>
+				<div class="rates-stat-card__value">{{ tableOptionsSignal().selectedDateRange.diffInMonths || 0 }}</div>
+				<p class="rates-stat-card__meta">months in active window</p>
+			</mat-card>
+
+			<mat-card class="rates-stat-card">
+				<p class="rates-stat-card__label">Data refresh</p>
+				<div class="rates-stat-card__value">{{ latestRefreshSignal() ? 'Ready' : 'Syncing' }}</div>
+				<p class="rates-stat-card__meta">
+					{{ latestRefreshSignal() ? (latestRefreshSignal()! | date: 'dd MMM yyyy') : 'Waiting for feed' }}
+				</p>
+			</mat-card>
+		</div>
+	</section>
+
+	<section
+		class="rates-comparison"
+		*ngIf="selectedCurrencyComparisonSignal()"
+	>
+		<mat-card class="rates-panel">
+			<div class="rates-panel__header rates-panel__header--compact">
+				<div>
+					<p class="rates-panel__eyebrow">Market comparison</p>
+					<h2 class="rates-panel__title">
+						How {{ tableOptionsSignal().selectedItem.abbreviation }} performs against peers
+					</h2>
+				</div>
+				<p class="rates-panel__description">
+					Trend ranking is calculated as cross-rates against the selected currency in the active date window.
+				</p>
+			</div>
+
+			<div class="rates-comparison__summary">
+				<div class="rates-comparison__pill">
+					<span class="rates-comparison__pill-label">Current rank</span>
+					<strong>#{{ selectedCurrencyRankSignal() }}</strong>
+					<span>of {{ currencyComparisonsSignal().length }}</span>
+				</div>
+				<div class="rates-comparison__pill">
+					<span class="rates-comparison__pill-label">Trend</span>
+					<strong>{{ selectedCurrencyComparisonSignal()?.trend }}%</strong>
+					<span>baseline for {{ tableOptionsSignal().selectedItem.abbreviation }}</span>
+				</div>
+				<div
+					class="rates-comparison__pill"
+					*ngIf="peerComparisonSignal()"
+				>
+					<span class="rates-comparison__pill-label">Relative position</span>
+					<strong>{{ peerComparisonSignal()?.outperforming }}</strong>
+					<span>currencies behind, {{ peerComparisonSignal()?.underperforming }} ahead</span>
+				</div>
+			</div>
+
+			<div class="rates-comparison__grid">
+				<div
+					class="rates-compare-card rates-compare-card--leader"
+					*ngIf="strongestCurrencySignal()"
+				>
+					<p class="rates-compare-card__label">Strongest mover</p>
+					<div class="rates-compare-card__value">
+						{{ strongestCurrencySignal()?.abbreviation }}
+						<span>{{ strongestCurrencySignal()?.trend }}%</span>
+					</div>
+					<p class="rates-compare-card__meta">{{ strongestCurrencySignal()?.name }}</p>
+				</div>
+
+				<div class="rates-compare-card rates-compare-card--active">
+					<p class="rates-compare-card__label">Active currency</p>
+					<div class="rates-compare-card__value">
+						{{ selectedCurrencyComparisonSignal()?.abbreviation }}
+						<span>{{ selectedCurrencyComparisonSignal()?.trend }}%</span>
+					</div>
+					<p class="rates-compare-card__meta">
+						{{ selectedCurrencySignal()?.name }} is the reference currency, so its cross-rate stays at {{
+						selectedCurrencyComparisonSignal()?.latestRate }}
+					</p>
+				</div>
+
+				<div
+					class="rates-compare-card rates-compare-card--laggard"
+					*ngIf="weakestCurrencySignal()"
+				>
+					<p class="rates-compare-card__label">Weakest mover</p>
+					<div class="rates-compare-card__value">
+						{{ weakestCurrencySignal()?.abbreviation }}
+						<span>{{ weakestCurrencySignal()?.trend }}%</span>
+					</div>
+					<p class="rates-compare-card__meta">{{ weakestCurrencySignal()?.name }}</p>
+				</div>
+			</div>
+
+			<div class="rates-infographics">
+				<div class="rates-infographics__card">
+					<div class="rates-infographics__header">
+						<div>
+							<p class="rates-panel__eyebrow">Apex infographic</p>
+							<h3 class="rates-infographics__title">Trend movers map</h3>
+						</div>
+						<p class="rates-infographics__description">
+							Shows which currencies strengthened or weakened against the selected currency.
+						</p>
+					</div>
+
+					<apx-chart
+						[series]="trendLeaderboardChartSignal().series"
+						[chart]="trendLeaderboardChartSignal().chart"
+						[plotOptions]="trendLeaderboardChartSignal().plotOptions"
+						[dataLabels]="trendLeaderboardChartSignal().dataLabels"
+						[xaxis]="trendLeaderboardChartSignal().xaxis"
+						[yaxis]="trendLeaderboardChartSignal().yaxis"
+						[grid]="trendLeaderboardChartSignal().grid"
+						[tooltip]="trendLeaderboardChartSignal().tooltip"
+						[fill]="trendLeaderboardChartSignal().fill"
+					></apx-chart>
+				</div>
+
+				<div class="rates-infographics__card">
+					<div class="rates-infographics__header">
+						<div>
+							<p class="rates-panel__eyebrow">Apex infographic</p>
+							<h3 class="rates-infographics__title">Market position donut</h3>
+						</div>
+						<p class="rates-infographics__description">
+							Shows how many currencies are above or below the selected currency baseline.
+						</p>
+					</div>
+
+					<apx-chart
+						[series]="marketPositionChartSignal().series"
+						[chart]="marketPositionChartSignal().chart"
+						[labels]="marketPositionChartSignal().labels"
+						[legend]="marketPositionChartSignal().legend"
+						[plotOptions]="marketPositionChartSignal().plotOptions"
+						[stroke]="marketPositionChartSignal().stroke"
+						[fill]="marketPositionChartSignal().fill"
+						[tooltip]="marketPositionChartSignal().tooltip"
+						[responsive]="marketPositionChartSignal().responsive"
+					></apx-chart>
+				</div>
+			</div>
+
+			<div class="rates-leaderboard">
+				<div class="rates-leaderboard__header">
+					<span>Trend leaderboard</span>
+					<span>
+						{{ tableOptionsSignal().selectedDateRange.diffInMonths }} month window vs {{
+						tableOptionsSignal().selectedItem.abbreviation }}
+					</span>
+				</div>
+
+				<div class="rates-leaderboard__list">
+					<div
+						*ngFor="let comparison of currencyComparisonsSignal() | slice: 0 : 6; let index = index"
+						class="rates-leaderboard__item"
+						[class.rates-leaderboard__item--active]="comparison.currencyId === tableOptionsSignal().selectedItem.currencyId"
+					>
+						<div class="rates-leaderboard__main">
+							<span class="rates-leaderboard__rank">#{{ index + 1 }}</span>
+							<div>
+								<div class="rates-leaderboard__currency">{{ comparison.abbreviation }}</div>
+								<div class="rates-leaderboard__name">{{ comparison.name }}</div>
+							</div>
+						</div>
+						<div class="rates-leaderboard__trend">{{ comparison.trend }}%</div>
+					</div>
+				</div>
+			</div>
+		</mat-card>
+	</section>
+
+	<section class="rates-dashboard-content">
+		<mat-card class="rates-panel rates-panel--chart">
+			<div class="rates-panel__header">
+				<div>
+					<p class="rates-panel__eyebrow">Trend view</p>
+					<h2 class="rates-panel__title">
+						{{ tableOptionsSignal().selectedItem.abbreviation }} rate movement
+					</h2>
+				</div>
+				<p class="rates-panel__description">
+					Interactive history for the selected currency over the current date range.
+				</p>
+			</div>
+
+			<currency-rates-line-chart class="rates-dashboard-content__chart"></currency-rates-line-chart>
+		</mat-card>
+
+		<mat-card class="rates-panel rates-panel--table">
+			<div class="rates-panel__header">
+				<div>
+					<p class="rates-panel__eyebrow">Rates explorer</p>
+					<h2 class="rates-panel__title">Daily board and quick actions</h2>
+				</div>
+				<p class="rates-panel__description">
+					Switch periods, pull fresh data, and select the currency that drives the chart above.
+				</p>
+			</div>
+
+			<app-currency-rates-grid></app-currency-rates-grid>
+		</mat-card>
+	</section>
 </div>

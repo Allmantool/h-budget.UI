@@ -37,7 +37,9 @@ export class CoreAppState {
 		const requestUnderProcessing = [...getState().requestsUnderProcessing];
 
 		patchState({
-			requestsUnderProcessing: [..._.filter(requestUnderProcessing, requestCorrelationId)],
+			requestsUnderProcessing: requestUnderProcessing.filter(
+				correlationId => correlationId !== requestCorrelationId
+			),
 		});
 	}
 }

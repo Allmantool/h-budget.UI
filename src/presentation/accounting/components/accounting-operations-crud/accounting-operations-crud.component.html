@@ -1,6 +1,13 @@
 <div class="crud-content">
 	<form [formGroup]="crudRecordFg">
-		<div class="record-crud-section-title">New record:</div>
+		<div class="record-crud-header">
+			<p class="record-crud-section-title">{{ crudModeLabelSignal() }}</p>
+			<h3 class="record-crud-title">{{ crudTitleSignal() }}</h3>
+			<p class="record-crud-copy">
+				{{ isDraftRecordSignal() ? 'Create and save a new accounting operation.' : 'Update the selected
+				operation or remove it if it is no longer needed.' }}
+			</p>
+		</div>
 		<div class="date-section">
 			<app-datepicker
 				[disabled]="isNotReadyForSaveSignal()"
@@ -82,9 +89,9 @@
 		<div class="command-buttons">
 			<app-button
 				[isDisabled]="isNotReadyForSaveSignal()"
-				(click)="applyChangesAsync()"
+				(click)="saveRecordAsync()"
 				type="fab"
-				text="Apply changes"
+				[text]="isDraftRecordSignal() ? 'Save record' : 'Save changes'"
 				color="primary"
 				icon="save"
 			></app-button>
@@ -92,14 +99,15 @@
 				[hidden]="false"
 				(click)="addRecordAsync()"
 				type="fab"
-				text="Add new"
+				text="New record"
 				color="accent"
 				icon="add_circle_outline"
 			></app-button>
 			<app-button
+				[isDisabled]="isNotReadyForSaveSignal()"
 				(click)="deleteRecordAsync()"
 				type="fab"
-				text="Delete"
+				[text]="isDraftRecordSignal() ? 'Discard draft' : 'Delete record'"
 				color="warn"
 				icon="delete_forever"
 			></app-button>

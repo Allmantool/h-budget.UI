@@ -79,6 +79,14 @@ export class PaymentAccountComponent implements OnInit {
 
 	public step: number = 0;
 
+	public get totalAccountsCount(): number {
+		return (
+			this.cashAccountsSignal().length +
+			this.debitVirtualAccountsSignal().length +
+			this.creditVirtualAccountsSignal().length
+		);
+	}
+
 	public setStep(index: number) {
 		this.step = index;
 	}
@@ -112,6 +120,13 @@ export class PaymentAccountComponent implements OnInit {
 				},
 			],
 			{ relativeTo: this.route }
+		);
+	}
+
+	public getAccountsTotalBalance(accounts: IPaymentAccountModel[]): number {
+		return _.round(
+			_.sumBy(accounts, account => account.balance),
+			2
 		);
 	}
 }

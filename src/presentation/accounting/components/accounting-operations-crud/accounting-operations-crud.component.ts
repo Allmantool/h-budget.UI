@@ -4,13 +4,15 @@ import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angul
 
 import * as _ from 'lodash';
 
-import { Select } from '@ngxs/store';
+import { Select, Store } from '@ngxs/store';
 import { BehaviorSubject, combineLatest, Observable, take } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { Guid } from 'typescript-guid';
 
 import { SelectDropdownOptions } from '../../../../app/modules/shared/models/select-dropdown-options';
 import { IAccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
+import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
+import { Delete } from '../../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
 import { getAccountPayments } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import { getActivePaymentAccountId } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import {
@@ -91,6 +93,9 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	public activePaymentAccountIdSignal: Signal<Guid | undefined> = toSignal(this.getActivePaymentAccountId$, {
 		initialValue: undefined,
 	});
+	public readonly isDraftRecordSignal: Signal<boolean>;
+	public readonly crudModeLabelSignal: Signal<string>;
+	public readonly crudTitleSignal: Signal<string>;
 
 	constructor(
 		private readonly fb: UntypedFormBuilder,
@@ -98,7 +103,8 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		private readonly categoriesDialogService: CategoriesDialogService,
 		private readonly contractorsDialogService: ContractorsDialogService,
 		private readonly paymentHistoryService: PaymentsHistoryService,
-		private readonly transferProvider: CrossAccountsTransferProvider
+		private readonly transferProvider: CrossAccountsTransferProvider,
+		private readonly store: Store
 	) {
 		this.accountingRecordsSignal = toSignal(this.accountingRecords$, { initialValue: [] });
 
@@ -165,6 +171,10 @@ export class AccountingOperationsCrudComponent implements OnInit {
 				operationType: payment?.operationType,
 			} as IPaymentOperationModel;
 		});
+
+		this.isDraftRecordSignal = computed(() => this.selectedPaymentSignal()?.key === Guid.EMPTY);
+		this.crudModeLabelSignal = computed(() => (this.isDraftRecordSignal() ? 'Create new record' : 'Edit record'));
+		this.crudTitleSignal = computed(() => (this.isDraftRecordSignal() ? 'Draft operation' : 'Selected operation'));
 	}
 
 	public ngOnInit(): void {
@@ -234,6 +244,21 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		const accountId = this.selectedPaymentSignal()?.paymentAccountId;
 		const operationType = this.selectedPaymentSignal().operationType;
 
+		if (recordIdForDelete === Guid.EMPTY) {
+			this.store.dispatch(new SetActiveAccountingOperation(undefined));
+			this.store.dispatch(new Delete(Guid.EMPTY));
+			this.crudRecordFg.patchValue({
+				key: null,
+				operationDate: null,
+				contractor: null,
+				category: null,
+				income: null,
+				expense: null,
+				comment: null,
+			});
+			return;
+		}
+
 		if (operationType == OperationTypes.Transfer) {
 			this.transferProvider.deleteById(accountId, recordIdForDelete).pipe(take(1)).subscribe();
 		}
@@ -247,5 +272,9 @@ export class AccountingOperationsCrudComponent implements OnInit {
 
 	public addContractor(): void {
 		this.contractorsDialogService.openContractors();
+	}
+
+	public async saveRecordAsync(): Promise<void> {
+		await this.applyChangesAsync();
 	}
 }

@@ -13,8 +13,6 @@ module.exports = function (config) {
 			require('@angular-devkit/build-angular/plugins/karma'),
 			require('karma-sonarqube-reporter'),
 		],
-		files: [{ pattern: '**/*.spec.ts', included: false, watched: true }],
-		browser: 'Chrome_without_security',
 		customLaunchers: {
 			Chrome_without_security: {
 				base: 'ChromeHeadless',
@@ -73,9 +71,9 @@ module.exports = function (config) {
 		port: 9876,
 		colors: true,
 		logLevel: config.LOG_INFO,
-		autoWatch: true,
-		browsers: ['Chrome'],
-		singleRun: false,
-		restartOnFileChange: true,
+		autoWatch: false,
+		browsers: ['ChromiumNoSandbox'],
+		singleRun: true,
+		restartOnFileChange: false,
 	});
 };

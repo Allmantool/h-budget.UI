@@ -1,3 +1,14 @@
 .currency-rates-chart {
-	text-align: center;
+	width: 100%;
+}
+
+.currency-rates-chart__canvas {
+	display: block;
+	width: 100%;
+}
+
+.currency-rates-chart-spinner {
+	display: flex;
+	justify-content: center;
+	padding: 2rem 0;
 }

@@ -1,35 +1,138 @@
-.currency-rates-grid--width {
-    display: grid;
-    grid-template-columns: 85em;
+.grid-wrapper {
+	display: grid;
+	gap: 1rem;
 }
 
-.currency-rates-grid__show-button--align-center {
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 1em;
+.currency-rates-grid__toolbar {
+	display: flex;
+	justify-content: space-between;
+	align-items: end;
+	gap: 1rem;
+	flex-wrap: wrap;
 }
 
-.currency-rates-grid__tooble-group {
-    margin-left: 1em;
-    margin-right: 1em;
+.currency-rates-grid__intro,
+.currency-rates-grid__actions,
+.currency-rates-grid__filters {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.75rem;
 }
 
-.currency-rates-grid__show-button {
-    align-items: center;
+.currency-rates-grid__intro {
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.currency-rates-grid__eyebrow {
+	margin: 0;
+	font-size: 0.78rem;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: #0e7490;
+}
+
+.currency-rates-grid__title,
+.currency-rates-grid__subtitle {
+	margin: 0;
+}
+
+.currency-rates-grid__title {
+	font-size: 1.35rem;
+	line-height: 1.1;
+}
+
+.currency-rates-grid__subtitle {
+	max-width: 56ch;
+	color: #5d6b82;
+	line-height: 1.5;
+}
+
+.currency-rates-grid__actions {
+	align-items: center;
+	justify-content: flex-end;
+}
+
+.currency-rates-grid__filters {
+	padding: 0.35rem;
+	border-radius: 18px;
+	background: #f4f7fb;
+}
+
+.currency-rates-grid__toggle-group {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.currency-rates-grid {
+	overflow: auto;
+	border-radius: 20px;
+	border: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.currency-rates-grid__table {
+	width: 100%;
+	min-width: 840px;
+	background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+}
+
+.currency-rates-grid__header-row {
+	background: #f8fafc;
+}
+
+.currency-rates-grid__row {
+	transition:
+		background-color 180ms ease,
+		transform 180ms ease;
+}
+
+.currency-rates-grid__row:hover {
+	background: rgba(14, 116, 144, 0.06);
+}
+
+.currency-rates-grid__selection-cell,
+.currency-rates-grid__id-cell {
+	white-space: nowrap;
+}
+
+.currency-rates-grid__name-cell {
+	font-weight: 600;
+}
+
+.currency-rates-grid__value-cell,
+.currency-rates-grid__trend-cell {
+	font-weight: 700;
 }
 
 .abbreviation-flag {
-    width: 100%;
-    height: 2em;
+	width: 100%;
+	height: 1.5rem;
+	border-radius: 999px;
+	box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
 }
 
 .country-column {
-    width: 1em;
+	width: 3.25rem;
 }
 
 .overlay {
-    z-index: 50;
-    background-color: rgba(255, 255, 255, 0.5);
-    width: 100%;
-    height: 100%;
+	z-index: 50;
+	background-color: rgba(255, 255, 255, 0.65);
+	width: 100%;
+	height: 100%;
+}
+
+@media (max-width: 768px) {
+	.currency-rates-grid__toolbar {
+		align-items: start;
+	}
+
+	.currency-rates-grid__actions {
+		justify-content: start;
+	}
+
+	.currency-rates-grid__table {
+		min-width: 720px;
+	}
 }

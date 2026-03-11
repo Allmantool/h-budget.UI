@@ -1,129 +1,155 @@
-<div
-	class="accounting-table mat-elevation-z8"
-	tabindex="0"
->
-	<mat-table
-		#table
-		[dataSource]="dataSource$"
+<section class="payments-history">
+	<div class="payments-history__header">
+		<div>
+			<p class="payments-history__eyebrow">Operations history</p>
+			<h3 class="payments-history__title">Transactions timeline</h3>
+			<p class="payments-history__copy">
+				Scan income, expense, balance progression, and future-dated operations in one place.
+			</p>
+		</div>
+
+		<div class="payments-history__stats">
+			<div class="payments-history__stat">
+				<strong>{{ recordsCount }}</strong>
+				<span>records</span>
+			</div>
+			<div class="payments-history__stat">
+				<strong>{{ futureRecordsCount }}</strong>
+				<span>scheduled</span>
+			</div>
+		</div>
+	</div>
+
+	<div
+		class="accounting-table"
+		tabindex="0"
 	>
-		<caption hidden>Accounting grid</caption>
+		<mat-table
+			#table
+			[dataSource]="dataSource$"
+		>
+			<caption hidden>Accounting grid</caption>
 
-		<ng-container matColumnDef="operationDate">
-			<th
-				mat-header-cell
-				*matHeaderCellDef
-			>
-				Date
-			</th>
-			<td
-				mat-cell
-				*matCellDef="let element"
-			>
-				{{ element.operationDate | date }}
-			</td>
-		</ng-container>
+			<ng-container matColumnDef="operationDate">
+				<th
+					mat-header-cell
+					*matHeaderCellDef
+				>
+					Date
+				</th>
+				<td
+					mat-cell
+					*matCellDef="let element"
+				>
+					{{ element.operationDate | date }}
+				</td>
+			</ng-container>
 
-		<ng-container matColumnDef="contractor">
-			<th
-				mat-header-cell
-				*matHeaderCellDef
-			>
-				Contractor
-			</th>
-			<td
-				mat-cell
-				*matCellDef="let element"
-			>
-				{{ element.contractor }}
-			</td>
-		</ng-container>
+			<ng-container matColumnDef="contractor">
+				<th
+					mat-header-cell
+					*matHeaderCellDef
+				>
+					Contractor
+				</th>
+				<td
+					mat-cell
+					*matCellDef="let element"
+				>
+					{{ element.contractor }}
+				</td>
+			</ng-container>
 
-		<ng-container matColumnDef="category">
-			<th
-				mat-header-cell
-				*matHeaderCellDef
-			>
-				Category
-			</th>
-			<td
-				mat-cell
-				*matCellDef="let element"
-			>
-				{{ element.category }}
-			</td>
-		</ng-container>
+			<ng-container matColumnDef="category">
+				<th
+					mat-header-cell
+					*matHeaderCellDef
+				>
+					Category
+				</th>
+				<td
+					mat-cell
+					*matCellDef="let element"
+				>
+					{{ element.category }}
+				</td>
+			</ng-container>
 
-		<ng-container matColumnDef="income">
-			<th
-				mat-header-cell
-				*matHeaderCellDef
-			>
-				Income
-			</th>
-			<td
-				mat-cell
-				*matCellDef="let element"
-			>
-				{{ element.income | accountingCurrencyFormat | currency:' ' }}
-			</td>
-		</ng-container>
+			<ng-container matColumnDef="income">
+				<th
+					mat-header-cell
+					*matHeaderCellDef
+				>
+					Income
+				</th>
+				<td
+					mat-cell
+					*matCellDef="let element"
+					class="payments-history__amount payments-history__amount--income"
+				>
+					{{ element.income | accountingCurrencyFormat | currency:' ' }}
+				</td>
+			</ng-container>
 
-		<ng-container matColumnDef="expense">
-			<th
-				mat-header-cell
-				*matHeaderCellDef
-			>
-				Expense
-			</th>
-			<td
-				mat-cell
-				*matCellDef="let element"
-			>
-				{{ element.expense | accountingCurrencyFormat | currency:' ' }}
-			</td>
-		</ng-container>
+			<ng-container matColumnDef="expense">
+				<th
+					mat-header-cell
+					*matHeaderCellDef
+				>
+					Expense
+				</th>
+				<td
+					mat-cell
+					*matCellDef="let element"
+					class="payments-history__amount payments-history__amount--expense"
+				>
+					{{ element.expense | accountingCurrencyFormat | currency:' ' }}
+				</td>
+			</ng-container>
 
-		<ng-container matColumnDef="balance">
-			<th
-				mat-header-cell
-				*matHeaderCellDef
-			>
-				Balance
-			</th>
-			<td
-				mat-cell
-				*matCellDef="let element"
-			>
-				{{ element.balance | accountingCurrencyFormat | currency:' ' }}
-			</td>
-		</ng-container>
+			<ng-container matColumnDef="balance">
+				<th
+					mat-header-cell
+					*matHeaderCellDef
+				>
+					Balance
+				</th>
+				<td
+					mat-cell
+					*matCellDef="let element"
+					class="payments-history__amount payments-history__amount--balance"
+				>
+					{{ element.balance | accountingCurrencyFormat | currency:' ' }}
+				</td>
+			</ng-container>
 
-		<ng-container matColumnDef="comment">
-			<th
-				mat-header-cell
-				*matHeaderCellDef
-			>
-				Comment
-			</th>
-			<td
-				mat-cell
-				*matCellDef="let element"
-			>
-				{{ element.comment }}
-			</td>
-		</ng-container>
+			<ng-container matColumnDef="comment">
+				<th
+					mat-header-cell
+					*matHeaderCellDef
+				>
+					Comment
+				</th>
+				<td
+					mat-cell
+					*matCellDef="let element"
+				>
+					{{ element.comment }}
+				</td>
+			</ng-container>
 
-		<tr
-			mat-header-row
-			*matHeaderRowDef="displayedColumns; sticky: true"
-		></tr>
-		<tr
-			class="row"
-			mat-row
-			(click)="selectRow(row)"
-			[class.row-is-clicked]="clickedRowGuids.has(row?.key)"
-			[class.future-payment]="isFuturePayment(row)"
-			*matRowDef="let row; columns: displayedColumns;"
-		></tr>
-	</mat-table>
-</div>
+			<tr
+				mat-header-row
+				*matHeaderRowDef="displayedColumns; sticky: true"
+			></tr>
+			<tr
+				class="row"
+				mat-row
+				(click)="selectRow(row)"
+				[class.row-is-clicked]="clickedRowGuids.has(row?.key)"
+				[class.future-payment]="isFuturePayment(row)"
+				*matRowDef="let row; columns: displayedColumns;"
+			></tr>
+		</mat-table>
+	</div>
+</section>
