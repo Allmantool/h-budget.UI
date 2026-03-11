@@ -1,5 +1,11 @@
 # 📦 Changelog
 
+## <small>1.1.36 (2026-03-11)</small>
+
+* Merge pull request #649 from Allmantool/tech/improve-ui-ux-v1 ([59b638b0ea594efa567e5c4d2c2e7714d1082058](https://github.com/Allmantool/h-budget.UI/commit/59b638b0ea594efa567e5c4d2c2e7714d1082058)), closes [#649](https://github.com/Allmantool/h-budget.UI/issues/649)
+* test: improve tests ([6bec01be5d7d03acbd09e823741a35fc997e5e9c](https://github.com/Allmantool/h-budget.UI/commit/6bec01be5d7d03acbd09e823741a35fc997e5e9c))
+* tech: improve UI / uX ([0233c337797a9f66e8f67094d1748e7e8638b69d](https://github.com/Allmantool/h-budget.UI/commit/0233c337797a9f66e8f67094d1748e7e8638b69d))
+
 ## <small>1.1.35 (2026-03-11)</small>
 
 * Merge pull request #648 from Allmantool/chore/deps-patch-upgrade ([acdaf623c70b8ff68a7684fe2d3d604d451eda05](https://github.com/Allmantool/h-budget.UI/commit/acdaf623c70b8ff68a7684fe2d3d604d451eda05)), closes [#648](https://github.com/Allmantool/h-budget.UI/issues/648)
