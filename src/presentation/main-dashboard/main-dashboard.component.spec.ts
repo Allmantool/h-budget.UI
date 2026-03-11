@@ -3,15 +3,19 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { TestBed } from '@angular/core/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { RouterTestingModule } from '@angular/router/testing';
 
+import { MainDashboardCartComponent } from './components/dashboard-item/main-dashboard-cart.component';
 import { MainDashboardComponent } from './components/dashboard/main-dashboard.component';
 
 describe('main dashboard component', () => {
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
-			imports: [RouterTestingModule],
-			declarations: [MainDashboardComponent],
+			imports: [RouterTestingModule, NoopAnimationsModule, MatCardModule, MatButtonModule],
+			declarations: [MainDashboardComponent, MainDashboardCartComponent],
 		}).compileComponents();
 	});
 
@@ -32,8 +36,8 @@ describe('main dashboard component', () => {
 		fixture.detectChanges();
 
 		const compiled: any = fixture.nativeElement;
-		const titleSpan = compiled.querySelector('.content');
+		const cards = compiled.querySelectorAll('main-dashboard-cart');
 
-		expect(titleSpan.children.length).toBe(2);
+		expect(cards.length).toBe(2);
 	});
 });
