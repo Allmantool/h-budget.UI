@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.38 (2026-03-12)</small>
+
+* Merge pull request #651 from Allmantool/chore/deps-patch-upgrade ([d716c2141e1f3659268f93127bbbea2998e6b9a9](https://github.com/Allmantool/h-budget.UI/commit/d716c2141e1f3659268f93127bbbea2998e6b9a9)), closes [#651](https://github.com/Allmantool/h-budget.UI/issues/651)
+* build(deps): patch dependency upgrade ([982f1f75e1024e6967307d79d19dd805e5fb3553](https://github.com/Allmantool/h-budget.UI/commit/982f1f75e1024e6967307d79d19dd805e5fb3553))
+
 ## <small>1.1.37 (2026-03-11)</small>
 
 * Merge pull request #650 from Allmantool/fix/adjust-bundle-limits ([e81837570c6c96222a8292fc416dd80c76eb8485](https://github.com/Allmantool/h-budget.UI/commit/e81837570c6c96222a8292fc416dd80c76eb8485)), closes [#650](https://github.com/Allmantool/h-budget.UI/issues/650)
