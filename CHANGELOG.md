@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.39 (2026-03-14)</small>
+
+* Merge pull request #652 from Allmantool/tech/sse-v2 ([e6b215a697760c66d9fb5c9e5c334c8c2650e805](https://github.com/Allmantool/h-budget.UI/commit/e6b215a697760c66d9fb5c9e5c334c8c2650e805)), closes [#652](https://github.com/Allmantool/h-budget.UI/issues/652)
+* chore: self review ([3cefabe329c0035c5aad2c3b219b56dc8956473c](https://github.com/Allmantool/h-budget.UI/commit/3cefabe329c0035c5aad2c3b219b56dc8956473c))
+
 ## <small>1.1.38 (2026-03-12)</small>
 
 * Merge pull request #651 from Allmantool/chore/deps-patch-upgrade ([d716c2141e1f3659268f93127bbbea2998e6b9a9](https://github.com/Allmantool/h-budget.UI/commit/d716c2141e1f3659268f93127bbbea2998e6b9a9)), closes [#651](https://github.com/Allmantool/h-budget.UI/issues/651)
