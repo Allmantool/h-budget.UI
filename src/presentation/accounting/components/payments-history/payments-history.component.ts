@@ -14,7 +14,7 @@ import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
 import { isFuture } from 'date-fns';
-import { BehaviorSubject, forkJoin, Observable, of } from 'rxjs';
+import { BehaviorSubject, filter, forkJoin, Observable, of, tap } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
 import { Guid } from 'typescript-guid';
 
@@ -87,13 +87,21 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 
 		this.sseService.connect('accounting/notifications/account');
 
-		this.sseService.notifications$.subscribe(notification => {
-			if (notification.eventType === 'UpdatePaymentAccountBalanceCommand') {
-				payments: this.paymentsHistoryService.refreshPaymentsHistory(this.activePaymentAccountIdSignal());
-
-				this.accountsService.refreshAccounts(this.activePaymentAccountIdSignal());
-			}
-		});
+		this.sseService.notifications$
+			.pipe(
+				takeUntilDestroyed(this.destroyRef),
+				filter(
+					notification =>
+						notification.eventType === 'UpdatePaymentAccountBalanceCommand' &&
+						notification.accountId === this.activePaymentAccountIdSignal().toString()
+				),
+				exhaustMap(() =>
+					this.paymentsHistoryService.refreshPaymentsHistory(this.activePaymentAccountIdSignal()).pipe(
+						tap(() => this.accountsService.refreshAccounts(this.activePaymentAccountIdSignal()))
+					)
+				)
+			)
+			.subscribe(payments => this.dataSource$.next(payments));
 	}
 
 	public ngAfterViewInit(): void {

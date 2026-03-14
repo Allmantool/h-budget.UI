@@ -46,22 +46,11 @@ export class SseService {
 
     this.eventSource = new EventSource(url);
 
-    this.eventSource.onmessage = (event) => {
+    this.eventSource.onmessage = event => this.handleNotificationEvent(event);
 
-      try {
-
-        if (!event.data) return;
-
-        this.lastEventId = event.lastEventId;
-
-        const data: AccountNotification = JSON.parse(event.data);
-
-        this.ngZone.run(() => this.notificationSubject.next(data));
-
-      } catch {
-        console.warn("Invalid SSE data", event.data);
-      }
-    };
+    this.eventSource.addEventListener("UpdatePaymentAccountBalanceCommand", event =>
+      this.handleNotificationEvent(event as MessageEvent<string>)
+    );
 
     this.eventSource.addEventListener("heartbeat", () => {
       console.debug("heartbeat received");
@@ -93,5 +82,22 @@ export class SseService {
   public disconnect() {
     this.eventSource?.close();
     this.eventSource = undefined;
+  }
+
+  private handleNotificationEvent(event: MessageEvent<string>): void {
+
+    try {
+
+      if (!event.data) return;
+
+      this.lastEventId = event.lastEventId;
+
+      const data: AccountNotification = JSON.parse(event.data);
+
+      this.ngZone.run(() => this.notificationSubject.next(data));
+
+    } catch {
+      console.warn("Invalid SSE data", event.data);
+    }
   }
 }
