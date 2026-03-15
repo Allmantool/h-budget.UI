@@ -1,103 +1,133 @@
 import { Injectable, NgZone } from '@angular/core';
-import { Subject, timer, take } from 'rxjs';
-import { AccountNotification } from './account-notification';
+
+import { HubConnection, HubConnectionBuilder, HubConnectionState, HttpTransportType } from '@microsoft/signalr';
+import { Subject, take, timer } from 'rxjs';
+
 import { AppConfigurationService } from 'app/modules/shared/services/app-configuration.service';
+
+import { AccountNotification } from './account-notification';
 
 @Injectable({ providedIn: 'root' })
 export class SseService {
+	private connection?: HubConnection;
 
-  private accountingHostUrl?: string;
-  private eventSource?: EventSource;
-  private sseUrl?: string;
+	private reconnectDelay = 1000;
+	private readonly maxReconnectDelay = 30000;
 
-  private reconnectDelay = 1000;
-  private readonly maxReconnectDelay = 30000;
+	private notificationSubject = new Subject<AccountNotification>();
+	public notifications$ = this.notificationSubject.asObservable();
 
-  private lastEventId?: string;
+	constructor(
+		private readonly ngZone: NgZone,
+		private readonly appConfigurationService: AppConfigurationService
+	) {}
 
-  private notificationSubject = new Subject<AccountNotification>();
-  public notifications$ = this.notificationSubject.asObservable();
+	public connect(url: string): void {
+		if (this.connection) {
+			return;
+		}
 
-  constructor(
-    private readonly ngZone: NgZone,
-    private readonly appConfigurationService: AppConfigurationService
-  ) {
-    this.accountingHostUrl = this.appConfigurationService.settings?.gatewayHost;
-  }
+		const gatewayHost = this.appConfigurationService.settings?.gatewayHost;
 
-  public connect(url: string): void {
+		if (!gatewayHost) {
+			console.warn('SignalR gateway host is not configured');
+			return;
+		}
 
-    if (this.eventSource) {
-      return;
-    }
+		const hubUrl = `${gatewayHost}/${url}`;
 
-    this.sseUrl = `${this.accountingHostUrl}/${url}`;
+		this.connection = new HubConnectionBuilder()
+			.withUrl(hubUrl, {
+				skipNegotiation: true,
+				transport: HttpTransportType.WebSockets,
+			})
+			.withAutomaticReconnect([0, 2000, 5000, 10000, 30000])
+			.build();
 
-    this.ngZone.runOutsideAngular(() => this.setupEventSource());
-  }
+		this.registerHandlers(this.connection);
 
-  private setupEventSource() {
+		this.ngZone.runOutsideAngular(() => {
+			void this.startConnection(this.connection!);
+		});
+	}
 
-    if (!this.sseUrl) return;
+	public disconnect(): void {
+		const activeConnection = this.connection;
 
-    const url = this.lastEventId
-      ? `${this.sseUrl}?lastEventId=${this.lastEventId}`
-      : this.sseUrl;
+		this.connection = undefined;
+		this.reconnectDelay = 1000;
 
-    this.eventSource = new EventSource(url);
+		if (!activeConnection) {
+			return;
+		}
 
-    this.eventSource.onmessage = event => this.handleNotificationEvent(event);
+		void activeConnection.stop();
+	}
 
-    this.eventSource.addEventListener("UpdatePaymentAccountBalanceCommand", event =>
-      this.handleNotificationEvent(event as MessageEvent<string>)
-    );
+	private registerHandlers(connection: HubConnection): void {
+		connection.on('ReceiveAccountNotification', payload => this.handleNotificationEvent(payload));
 
-    this.eventSource.addEventListener("heartbeat", () => {
-      console.debug("heartbeat received");
-    });
+		connection.onreconnecting(() => {
+			console.warn('SignalR connection lost. Waiting for reconnect...');
+		});
 
-    this.eventSource.onopen = () => {
-      this.reconnectDelay = 1000;
-      console.debug("SSE connected");
-    };
+		connection.onreconnected(() => {
+			this.reconnectDelay = 1000;
+			console.debug('SignalR reconnected');
+		});
 
-    this.eventSource.onerror = () => {
+		connection.onclose(() => {
+			if (this.connection !== connection) {
+				return;
+			}
 
-      if (this.eventSource?.readyState === EventSource.CLOSED) {
+			console.warn('SignalR connection closed. Reconnecting...');
+			this.scheduleReconnect(connection);
+		});
+	}
 
-        console.warn("SSE connection lost. Reconnecting...");
+	private async startConnection(connection: HubConnection): Promise<void> {
+		if (this.connection !== connection || connection.state !== HubConnectionState.Disconnected) {
+			return;
+		}
 
-        const delay = this.reconnectDelay;
+		try {
+			await connection.start();
+			this.reconnectDelay = 1000;
+			console.debug('SignalR connected');
+		} catch (error) {
+			console.warn('SignalR connection failed. Reconnecting...', error);
+			this.scheduleReconnect(connection);
+		}
+	}
 
-        this.reconnectDelay = Math.min(this.reconnectDelay * 2, this.maxReconnectDelay);
+	private scheduleReconnect(connection: HubConnection): void {
+		const delay = this.reconnectDelay;
 
-        timer(delay).pipe(take(1)).subscribe(() => {
-          this.disconnect();
-          this.setupEventSource();
-        });
-      }
-    };
-  }
+		this.reconnectDelay = Math.min(this.reconnectDelay * 2, this.maxReconnectDelay);
 
-  public disconnect() {
-    this.eventSource?.close();
-    this.eventSource = undefined;
-  }
+		timer(delay)
+			.pipe(take(1))
+			.subscribe(() => {
+				if (this.connection !== connection) {
+					return;
+				}
 
-  private handleNotificationEvent(event: MessageEvent<string>): void {
+				void this.startConnection(connection);
+			});
+	}
 
-    try {
+	private handleNotificationEvent(payload: AccountNotification | string): void {
+		try {
+			if (!payload) {
+				return;
+			}
 
-      if (!event.data) return;
+			const data: AccountNotification = typeof payload === 'string' ? JSON.parse(payload) : payload;
 
-      this.lastEventId = event.lastEventId;
-
-      const data: AccountNotification = JSON.parse(event.data);
-
-      this.ngZone.run(() => this.notificationSubject.next(data));
-
-    } catch {
-      console.warn("Invalid SSE data", event.data);
-    }
-  }
+			this.ngZone.run(() => this.notificationSubject.next(data));
+		} catch {
+			console.warn('Invalid SignalR data', payload);
+		}
+	}
 }
