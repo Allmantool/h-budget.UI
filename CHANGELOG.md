@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.41 (2026-03-15)</small>
+
+* Merge pull request #654 from Allmantool/fix/config-fix-v1 ([ea7a021fc9fcadf6b40d4db0a7d5a21dd5813962](https://github.com/Allmantool/h-budget.UI/commit/ea7a021fc9fcadf6b40d4db0a7d5a21dd5813962)), closes [#654](https://github.com/Allmantool/h-budget.UI/issues/654)
+* chore: self review ([c2a78458bfc1ee5c925a5d75a734182ac980a892](https://github.com/Allmantool/h-budget.UI/commit/c2a78458bfc1ee5c925a5d75a734182ac980a892))
+
 ## <small>1.1.40 (2026-03-15)</small>
 
 * Merge pull request #653 from Allmantool/tech/tracing-v2 ([19c7ff006b01449a8646de9edb28c5b86698affa](https://github.com/Allmantool/h-budget.UI/commit/19c7ff006b01449a8646de9edb28c5b86698affa)), closes [#653](https://github.com/Allmantool/h-budget.UI/issues/653)
