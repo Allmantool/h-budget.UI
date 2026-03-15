@@ -1,4 +1,4 @@
 {
+    "telemetryEndpoint": "",
     "gatewayHost": ""
-    "telemetryEndpoint": "/otlp/v1/traces"
 }
