@@ -25,6 +25,7 @@ import { PaymentHistoryMappingProfile } from '../../../data/providers/accounting
 import { ICategoryModel } from '../../../domain/models/accounting/category.model';
 import { IContractorModel } from '../../../domain/models/accounting/contractor.model.';
 import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
+import { SseService } from '../../../infrastructure/sse-service';
 import { AccountingRoutingModule } from '../../../presentation/accounting/accounting-routing.module';
 import { PaymentsHistoryComponent } from '../../../presentation/accounting/components/payments-history/payments-history.component';
 import { IPaymentRepresentationModel } from '../../../presentation/accounting/models/operation-record';
@@ -40,6 +41,7 @@ describe('payments history component', () => {
 	let categoriesProviderSpy: DefaultCategoriesProvider;
 	let paymentsHistoryServiceSpy: PaymentsHistoryService;
 	let accountsServiceSpy: AccountsService;
+	let sseServiceSpy: jasmine.SpyObj<SseService>;
 
 	let store: Store;
 
@@ -81,6 +83,12 @@ describe('payments history component', () => {
 			refreshAccounts: undefined,
 		});
 
+		sseServiceSpy = jasmine.createSpyObj<SseService>(
+			'sseService',
+			['connect', 'disconnect'],
+			{ notifications$: of() }
+		);
+
 		// eslint-disable-next-line @typescript-eslint/no-floating-promises
 		TestBed.configureTestingModule({
 			imports: [
@@ -117,6 +125,10 @@ describe('payments history component', () => {
 				{
 					provide: AccountsService,
 					useValue: accountsServiceSpy,
+				},
+				{
+					provide: SseService,
+					useValue: sseServiceSpy,
 				},
 			],
 		}).compileComponents();

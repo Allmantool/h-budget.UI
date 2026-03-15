@@ -85,7 +85,7 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 			this.clickedRowGuids.add(options?.selectedRecordGuid);
 		});
 
-		this.sseService.connect('accounting/notifications/account');
+		this.sseService.connect('accounting/notifications/account-hub');
 
 		this.sseService.notifications$
 			.pipe(

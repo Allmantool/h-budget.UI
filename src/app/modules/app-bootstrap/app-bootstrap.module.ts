@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { HTTP_INTERCEPTORS, HttpClient } from '@angular/common/http';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { APP_INITIALIZER, ErrorHandler, inject, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -8,13 +6,12 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
 import { NgxsLoggerPluginModule } from '@ngxs/logger-plugin';
 import { NgxsModule } from '@ngxs/store';
-import { catchError, of, take, tap } from 'rxjs';
 
 import * as Sentry from '@sentry/angular';
 import { environment } from 'environments/environment';
 
+import { loadAppSettings } from '../../../app-settings';
 import { BootstrapRoutingModule } from './app-bootstrap-routing.module';
-import { IAppSettingsModel } from '../../../domain/models/app-settings.model';
 import { AppCoreModule } from '../core';
 import { CorrelationIdInterceptor } from '../core/interceptors/correlation-id.interceptor';
 import { HttpRequestLoaderInterceptor } from '../core/interceptors/http-request-loader.interceptor';
@@ -45,38 +42,16 @@ import { CoreAppState } from '../shared/store/states/core/core-app.state';
 			provide: APP_INITIALIZER,
 			useFactory: () => {
 				const appConfigurationService = inject(AppConfigurationService);
-				const httpClient = inject(HttpClient);
 
 				return () =>
-					new Promise(resolve => {
-						if (environment.production) {
-							httpClient
-								.get('assets/config.json')
-								.pipe(
-									take(1),
-									tap(appSettings => {
-										appConfigurationService.settings = appSettings as IAppSettingsModel;
-										console.log(
-											`Prod settings is: ${JSON.stringify(appConfigurationService.settings)}`
-										);
+					loadAppSettings().then(appSettings => {
+						appConfigurationService.settings = appSettings;
 
-										resolve(true);
-									}),
-									catchError(err => {
-										appConfigurationService.settings = undefined;
-
-										console.error(`Prod bootstrap error: ${JSON.stringify(err)}`);
-
-										return of(null);
-									})
-								)
-								.subscribe();
-						} else {
-							const appSettings: IAppSettingsModel = require('/src/assets/config.json');
-							appConfigurationService.settings = appSettings;
-
-							resolve(true);
+						if (appSettings) {
+							console.log(`App settings: ${JSON.stringify(appConfigurationService.settings)}`);
 						}
+
+						return true;
 					});
 			},
 			multi: true,
