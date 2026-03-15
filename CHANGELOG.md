@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.40 (2026-03-15)</small>
+
+* Merge pull request #653 from Allmantool/tech/tracing-v2 ([19c7ff006b01449a8646de9edb28c5b86698affa](https://github.com/Allmantool/h-budget.UI/commit/19c7ff006b01449a8646de9edb28c5b86698affa)), closes [#653](https://github.com/Allmantool/h-budget.UI/issues/653)
+* tech: tracing v2 ([41799e0facc810f26a52cc1142fcbef3a96e78f3](https://github.com/Allmantool/h-budget.UI/commit/41799e0facc810f26a52cc1142fcbef3a96e78f3))
+
 ## <small>1.1.39 (2026-03-14)</small>
 
 * Merge pull request #652 from Allmantool/tech/sse-v2 ([e6b215a697760c66d9fb5c9e5c334c8c2650e805](https://github.com/Allmantool/h-budget.UI/commit/e6b215a697760c66d9fb5c9e5c334c8c2650e805)), closes [#652](https://github.com/Allmantool/h-budget.UI/issues/652)
