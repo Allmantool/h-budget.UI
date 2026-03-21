@@ -2,17 +2,16 @@ name: Safe NPM Dependency Upgrade
 
 on:
   schedule:
-    # Daily at 1:00 AM UTC — patch only
-    - cron: "0 1 * * *"
-    # Weekly at 3:00 AM UTC on Sunday — safe minor
-    - cron: "0 3 * * 0"
+    - cron: "0 1 * * *"   # Daily patch
+    - cron: "0 3 * * 0"   # Weekly minor
   workflow_dispatch:
 
 jobs:
-
   daily-patch:
     name: Daily Patch Update
+    if: github.event_name == 'schedule' && github.event.schedule == '0 1 * * *'
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v6
         with:
@@ -27,8 +26,8 @@ jobs:
       - name: Install baseline dependencies
         run: npm ci
 
-      - name: Patch update only
-        run: npm run deps:update:patch
+      - name: Patch update only (safe packages)
+        run: npm run deps:update:patch:safe
 
       # - name: Run CI verification
       #   run: npm run ci:verify
@@ -52,7 +51,9 @@ jobs:
 
   weekly-minor:
     name: Weekly Minor Update (Safe Libraries)
+    if: github.event_name == 'schedule' && github.event.schedule == '0 3 * * 0'
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v6
         with:
@@ -67,8 +68,8 @@ jobs:
       - name: Install baseline dependencies
         run: npm ci
 
-      - name: patch update (safe libs only)
-        run: npm run deps:update:minor:patch
+      - name: Minor update (safe packages only)
+        run: npm run deps:update:minor:safe
 
       # - name: Run CI verification
       #   run: npm run ci:verify
@@ -92,8 +93,9 @@ jobs:
 
   angular-nx-migrate:
     name: Angular / NX Migration (Manual)
-    runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v6
         with:
