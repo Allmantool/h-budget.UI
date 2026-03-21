@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.42 (2026-03-21)</small>
+
+* Merge pull request #655 from Allmantool/tech/update-ci-cd-v2 ([25d12b11d158e7ea6f26b7520f974f5569cb91a9](https://github.com/Allmantool/h-budget.UI/commit/25d12b11d158e7ea6f26b7520f974f5569cb91a9)), closes [#655](https://github.com/Allmantool/h-budget.UI/issues/655)
+* chore: improve ci / cd ([07c747f6ae08d7c4b81b901641c05744c2c7e29e](https://github.com/Allmantool/h-budget.UI/commit/07c747f6ae08d7c4b81b901641c05744c2c7e29e))
+
 ## <small>1.1.41 (2026-03-15)</small>
 
 * Merge pull request #654 from Allmantool/fix/config-fix-v1 ([ea7a021fc9fcadf6b40d4db0a7d5a21dd5813962](https://github.com/Allmantool/h-budget.UI/commit/ea7a021fc9fcadf6b40d4db0a7d5a21dd5813962)), closes [#654](https://github.com/Allmantool/h-budget.UI/issues/654)
