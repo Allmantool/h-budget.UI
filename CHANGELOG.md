@@ -1,5 +1,12 @@
 # 📦 Changelog
 
+## <small>1.1.43 (2026-05-13)</small>
+
+* Merge pull request #657 from Allmantool/chore/deps-minor-upgrade ([eb4823fe1ba3bd0fe652e107a28d72aa4924eacb](https://github.com/Allmantool/h-budget.UI/commit/eb4823fe1ba3bd0fe652e107a28d72aa4924eacb)), closes [#657](https://github.com/Allmantool/h-budget.UI/issues/657)
+* Merge pull request #658 from Allmantool/chore/deps-patch-upgrade ([ca18c3bb328fd0548cc6fd73def646e3b8970da9](https://github.com/Allmantool/h-budget.UI/commit/ca18c3bb328fd0548cc6fd73def646e3b8970da9)), closes [#658](https://github.com/Allmantool/h-budget.UI/issues/658)
+* build(deps): minor dependency upgrade ([9e0b764f9da55667fc07abffb7f6aaf50ab531db](https://github.com/Allmantool/h-budget.UI/commit/9e0b764f9da55667fc07abffb7f6aaf50ab531db))
+* build(deps): patch dependency upgrade ([718070fc4fb05eaffda148c274bc2ead602be0c7](https://github.com/Allmantool/h-budget.UI/commit/718070fc4fb05eaffda148c274bc2ead602be0c7))
+
 ## <small>1.1.42 (2026-03-21)</small>
 
 * Merge pull request #655 from Allmantool/tech/update-ci-cd-v2 ([25d12b11d158e7ea6f26b7520f974f5569cb91a9](https://github.com/Allmantool/h-budget.UI/commit/25d12b11d158e7ea6f26b7520f974f5569cb91a9)), closes [#655](https://github.com/Allmantool/h-budget.UI/issues/655)
