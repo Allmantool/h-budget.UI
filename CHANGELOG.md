@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.44 (2026-05-30)</small>
+
+* Merge pull request #660 from Allmantool/tech/add-cocdex-base-code-standards ([542d2e78f06ea169281d3fb4bc0434709b4fdfd9](https://github.com/Allmantool/h-budget.UI/commit/542d2e78f06ea169281d3fb4bc0434709b4fdfd9)), closes [#660](https://github.com/Allmantool/h-budget.UI/issues/660)
+* tech: add-cocdex-base-code-standards ([ca77559c81396c414367ea000aada4cb92023c36](https://github.com/Allmantool/h-budget.UI/commit/ca77559c81396c414367ea000aada4cb92023c36))
+
 ## <small>1.1.43 (2026-05-13)</small>
 
 * Merge pull request #657 from Allmantool/chore/deps-minor-upgrade ([eb4823fe1ba3bd0fe652e107a28d72aa4924eacb](https://github.com/Allmantool/h-budget.UI/commit/eb4823fe1ba3bd0fe652e107a28d72aa4924eacb)), closes [#657](https://github.com/Allmantool/h-budget.UI/issues/657)
