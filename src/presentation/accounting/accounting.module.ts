@@ -4,6 +4,8 @@ import { RouterLink } from '@angular/router';
 import { MapperModule } from '@dynamic-mapper/angular';
 import { NgxsModule } from '@ngxs/store';
 
+import { AccountingRoutingModule } from './accounting-routing.module';
+import { AccountingOperationsCrudComponent } from './components/accounting-operations-crud/accounting-operations-crud.component';
 import { PaymentAccountComponent } from './components/payment-account/payment-account.component';
 import { PaymentAccountCrudComponent } from './components/payment-account-crud/payment-account-crud.component';
 import { PaymentsDashboardComponent } from './components/payments-dashboard/payments-dashboard.component';
@@ -42,7 +44,6 @@ import { PaymentOperationsProvider } from '../../data/providers/accounting/payme
 import { PaymentsHistoryProvider } from '../../data/providers/accounting/payments-history.provider';
 import { CurrencyExchangeService } from '../../data/providers/rates/currency-exchange.service';
 import { ExchangeRatesMappingProfile } from '../../data/providers/rates/mappers/exchange-rates-mapping.profile';
-import { AccountingOperationsCrudComponent, AccountingRoutingModule } from '../accounting';
 
 @NgModule({
 	declarations: [

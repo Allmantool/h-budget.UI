@@ -6,6 +6,10 @@ import { NgxsModule } from '@ngxs/store';
 import { DataRatesMappingProfile } from 'data/providers/rates/mappers/data-rates-mapping.profiler';
 import { NationalBankCurrenciesProvider } from 'data/providers/rates/national-bank-currencies.provider';
 
+import { CurrencyRatesDashboardComponent } from './components/currency-rates-dashboard/currency-rates-dashboard.component';
+import { CurrencyRatesGridComponent } from './components/currency-rates-grid/currency-rates-grid.component';
+import { CurrencyRatesLineChartComponent } from './components/currency-rates-line-chart/currency-rates-line-chart.component';
+import { CurrencyRatesRoutingModule } from './currency-rates-routing.module';
 import { PresentationRatesMappingProfile } from './mappers/presentation-rates-mapping.profiler';
 import { CurrencyRatesGridService } from './services/currency-rates-grid.service';
 import { LineChartService } from './services/line-chart.service';
@@ -19,12 +23,6 @@ import { AppSharedModule } from '../../app/modules/shared/shared.module';
 import { CurrencyChartState } from '../../app/modules/shared/store/states/rates/currency-chart.state';
 import { CurrencyRatesState } from '../../app/modules/shared/store/states/rates/currency-rates.state';
 import { CurrencyTableState } from '../../app/modules/shared/store/states/rates/currency-table.state';
-import {
-	CurrencyRatesDashboardComponent,
-	CurrencyRatesGridComponent,
-	CurrencyRatesLineChartComponent,
-	CurrencyRatesRoutingModule,
-} from '../currency-rates';
 
 @NgModule({
 	declarations: [CurrencyRatesDashboardComponent, CurrencyRatesGridComponent, CurrencyRatesLineChartComponent],

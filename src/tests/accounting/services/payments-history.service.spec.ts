@@ -81,16 +81,25 @@ describe('payments history service', () => {
 
 	it('should return selected history operation', (done: DoneFn) => {
 		const result = sut.paymentOperationAsHistoryRecord();
+
+		expect(result.key).toEqual(Guid.EMPTY);
 		done();
 	});
 
 	it('should refresh history', (done: DoneFn) => {
-		const result = sut.refreshPaymentsHistory('');
-		done();
+		sut.refreshPaymentsHistory('').subscribe(result => {
+			expect(result.length).toBe(1);
+			expect(paymensHistoryProviderSpy.getOperationsHistoryForPaymentAccount.calls.mostRecent().args).toEqual([
+				'',
+			]);
+			done();
+		});
 	});
 
 	it('should refresh store', (done: DoneFn) => {
-		const result = sut.refreshPaymentOperationsStore('');
+		sut.refreshPaymentOperationsStore('');
+
+		expect(paymensHistoryProviderSpy.getOperationsHistoryForPaymentAccount.calls.mostRecent().args).toEqual(['']);
 		done();
 	});
 });

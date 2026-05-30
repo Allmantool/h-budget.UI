@@ -90,6 +90,8 @@ describe('app-form-field component', () => {
 	});
 
 	it('"trackByFn" should', () => {
-		sut.trackByFn(1, new SelectDropdownOptions({}));
+		const result = sut.trackByFn(1, new SelectDropdownOptions({ value: 'option' }));
+
+		expect(result).toBe('option1');
 	});
 });

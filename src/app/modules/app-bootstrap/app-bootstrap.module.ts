@@ -10,8 +10,9 @@ import { NgxsModule } from '@ngxs/store';
 import * as Sentry from '@sentry/angular';
 import { environment } from 'environments/environment';
 
-import { loadAppSettings } from '../../../app-settings';
 import { BootstrapRoutingModule } from './app-bootstrap-routing.module';
+import { BaseLayoutComponent } from './components/base-layout/base-layout.component';
+import { loadAppSettings } from '../../../app-settings';
 import { AppCoreModule } from '../core';
 import { CorrelationIdInterceptor } from '../core/interceptors/correlation-id.interceptor';
 import { HttpRequestLoaderInterceptor } from '../core/interceptors/http-request-loader.interceptor';
@@ -19,7 +20,6 @@ import { AngularMaterialSharedModule } from '../shared/angular-material.shared.m
 import { CustomUIComponentsSharedModule } from '../shared/custom-ui-components.shared.module';
 import { AppConfigurationService } from '../shared/services/app-configuration.service';
 import { AppSharedModule } from '../shared/shared.module';
-import { BaseLayoutComponent } from './components/base-layout/base-layout.component';
 import { ngxsConfig } from '../shared/store/ngxs.config';
 import { CoreAppState } from '../shared/store/states/core/core-app.state';
 
@@ -46,10 +46,6 @@ import { CoreAppState } from '../shared/store/states/core/core-app.state';
 				return () =>
 					loadAppSettings().then(appSettings => {
 						appConfigurationService.settings = appSettings;
-
-						if (appSettings) {
-							console.log(`App settings: ${JSON.stringify(appConfigurationService.settings)}`);
-						}
 
 						return true;
 					});

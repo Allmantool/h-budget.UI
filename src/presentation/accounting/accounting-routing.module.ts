@@ -1,5 +1,5 @@
 import { NgModule } from '@angular/core';
-import { provideRouter, Routes, withDebugTracing } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 
 import { AccountingOperationsCrudComponent } from './components/accounting-operations-crud/accounting-operations-crud.component';
 import { PaymentAccountComponent } from './components/payment-account/payment-account.component';
@@ -18,8 +18,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-	imports: [],
-	exports: [],
-	providers: [provideRouter(routes, withDebugTracing())],
+	imports: [RouterModule.forChild(routes)],
+	exports: [RouterModule],
 })
 export class AccountingRoutingModule {}
