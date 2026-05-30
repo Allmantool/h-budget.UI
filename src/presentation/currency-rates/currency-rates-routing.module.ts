@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
-import { provideRouter, Routes, withDebugTracing } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 
-import { CurrencyRatesDashboardComponent } from '../currency-rates';
+import { CurrencyRatesDashboardComponent } from './components/currency-rates-dashboard/currency-rates-dashboard.component';
 
 const routes: Routes = [
 	{
@@ -11,8 +11,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-	imports: [],
-	exports: [],
-	providers: [provideRouter(routes, withDebugTracing())],
+	imports: [RouterModule.forChild(routes)],
+	exports: [RouterModule],
 })
 export class CurrencyRatesRoutingModule {}

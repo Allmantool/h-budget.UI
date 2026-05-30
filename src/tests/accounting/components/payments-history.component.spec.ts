@@ -83,11 +83,9 @@ describe('payments history component', () => {
 			refreshAccounts: undefined,
 		});
 
-		sseServiceSpy = jasmine.createSpyObj<SseService>(
-			'sseService',
-			['connect', 'disconnect'],
-			{ notifications$: of() }
-		);
+		sseServiceSpy = jasmine.createSpyObj<SseService>('sseService', ['connect', 'disconnect'], {
+			notifications$: of(),
+		});
 
 		// eslint-disable-next-line @typescript-eslint/no-floating-promises
 		TestBed.configureTestingModule({
@@ -148,8 +146,15 @@ describe('payments history component', () => {
 		sut = TestBed.inject(PaymentsHistoryComponent);
 	});
 
-	it('should be initialized PaymentsHistoryComponent with "ngOnInit"', async () => {
+	it('should be initialized PaymentsHistoryComponent with "ngOnInit"', () => {
 		store.dispatch(new SetActiveAccountingOperation(Guid.parse('24a07833-5cf5-4885-b09d-32c089fac4dd')));
-		await sut.ngOnInit();
+		sut.ngOnInit();
+
+		expect(sseServiceSpy.connect.calls.mostRecent().args).toEqual(['accounting/notifications/account-hub']);
+		expect(
+			Array.from(sut.clickedRowGuids).some(guid =>
+				guid.equals(Guid.parse('24a07833-5cf5-4885-b09d-32c089fac4dd'))
+			)
+		).toBe(true);
 	});
 });

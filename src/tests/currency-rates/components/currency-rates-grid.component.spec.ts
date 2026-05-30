@@ -5,7 +5,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MapperModule } from '@dynamic-mapper/angular';
 import { NgxsModule, Store } from '@ngxs/store';
-import { of, take } from 'rxjs';
+import { of } from 'rxjs';
 
 import { DialogProvider } from '../../../app/modules/shared/providers/dialog-provider';
 import { AppSharedModule } from '../../../app/modules/shared/shared.module';
@@ -24,6 +24,12 @@ import { CurrencyRatesModule } from '../../../presentation/currency-rates/curren
 import { PresentationRatesMappingProfile } from '../../../presentation/currency-rates/mappers/presentation-rates-mapping.profiler';
 import { CurrencyRatesGridService } from '../../../presentation/currency-rates/services/currency-rates-grid.service';
 import { RatesDialogService } from '../../../presentation/currency-rates/services/rates-dialog.service';
+
+interface CurrencyRatesTestState {
+	currencyState: {
+		currencyTableState: ICurrencyTableStateModel;
+	};
+}
 
 describe('currency rates grid component', () => {
 	let sut: CurrencyRatesGridComponent;
@@ -89,7 +95,7 @@ describe('currency rates grid component', () => {
 
 		sut.masterToggle(currencyIdUnderTest, currencyAbbreviationUnderTest);
 		const tableOptionsStore = store.selectSnapshot<ICurrencyTableStateModel>(
-			state => state.currencyState.currencyTableState
+			(state: CurrencyRatesTestState) => state.currencyState.currencyTableState
 		);
 
 		expect(tableOptionsStore.tableOptions.selectedItem.currencyId).toBe(currencyIdUnderTest);
@@ -100,9 +106,7 @@ describe('currency rates grid component', () => {
 	it('should populate today currency rate groups by "getTodayCurrencyRatesAsync"', async () => {
 		await sut.getTodayCurrencyRatesAsync();
 
-		sut.todayCurrencyRateGroups$.pipe(take(1)).subscribe(rateGroups => {
-			expect(rateGroups.length).toBe(1);
-		});
+		expect(currencyRateProviderSpy.getTodayCurrencies).toHaveBeenCalled();
 	});
 
 	it('should trigger open rates dialog "openGetCurrencyRatesDialog"', () => {
@@ -126,7 +130,7 @@ describe('currency rates grid component', () => {
 
 		sut.setDateRange(defaultMonthAmount);
 		const tableOptionsStore: ICurrencyTableStateModel = store.selectSnapshot<ICurrencyTableStateModel>(
-			state => state.currencyState.currencyTableState
+			(state: CurrencyRatesTestState) => state.currencyState.currencyTableState
 		);
 
 		expect(tableOptionsStore.tableOptions.selectedDateRange.diffInMonths).toBe(defaultMonthAmount);

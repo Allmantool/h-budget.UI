@@ -19,7 +19,7 @@ import { PaymentAccountComponent } from '../../../presentation/accounting/compon
 describe('payment account component', () => {
 	let sut: PaymentAccountComponent;
 
-	let paymentAccountsProviderSpy: DefaultPaymentAccountsProvider;
+	let paymentAccountsProviderSpy: jasmine.SpyObj<DefaultPaymentAccountsProvider>;
 
 	const activatedRouteStub = { queryParams: new BehaviorSubject<object>({}) };
 
@@ -68,6 +68,9 @@ describe('payment account component', () => {
 	it('should be initialized PaymentAccountComponent with "ngAfterViewInit"', (done: DoneFn) => {
 		store.dispatch(new SetActiveAccountingOperation(Guid.parse('24a07833-5cf5-4885-b09d-32c089fac4dd')));
 		sut.ngOnInit();
+
+		expect(paymentAccountsProviderSpy.getPaymentAccounts.calls.count()).toBe(1);
+		expect(sut.isNavigateToOperationsDisabled).toBe(true);
 		done();
 	});
 });

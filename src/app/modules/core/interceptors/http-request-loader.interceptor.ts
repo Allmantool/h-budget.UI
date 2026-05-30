@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpResponse } from '@angular/common/http';
+import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { Store } from '@ngxs/store';
-import { finalize, Observable, tap } from 'rxjs';
+import { finalize, Observable } from 'rxjs';
 
 import { ApiHeaders } from '../../shared/constants/api-headers';
 import { AddProcessingRequest, RemoveProcessingRequest } from '../../shared/store/states/core/actions/core-app.actions';
@@ -21,11 +21,6 @@ export class HttpRequestLoaderInterceptor implements HttpInterceptor {
 		}
 
 		return next.handle(req).pipe(
-			tap(event => {
-				if (event instanceof HttpResponse && correlationId) {
-					this.store.dispatch(new RemoveProcessingRequest(correlationId));
-				}
-			}),
 			finalize(() => {
 				if (correlationId) {
 					this.store.dispatch(new RemoveProcessingRequest(correlationId));

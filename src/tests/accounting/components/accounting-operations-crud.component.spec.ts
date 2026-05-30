@@ -137,6 +137,8 @@ describe('accounting operations crud component', () => {
 
 	it('should be initialized AccountingOperationsCrudComponent with "ngAfterViewInit"', (done: DoneFn) => {
 		sut.ngOnInit();
+
+		expect(sut.crudRecordFg).toBeTruthy();
 		done();
 	});
 
@@ -156,9 +158,9 @@ describe('accounting operations crud component', () => {
 
 		sut.crudRecordFg.markAsDirty();
 
-		await sut.applyChangesAsync().then(result => {
-			console.log(result);
-		});
+		await sut.applyChangesAsync();
+
+		expect(accountingOperationsServiceSpy.updateAsync).toHaveBeenCalled();
 	});
 
 	it('Verify that "addRecordAsync()" has not been executed if an existed record', async () => {
