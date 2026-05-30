@@ -1,5 +1,11 @@
 # 📦 Changelog
 
+## <small>1.1.45 (2026-05-30)</small>
+
+* Merge pull request #661 from Allmantool/test/improve-coverage-v1 ([f3cee412d0f38efc40bb10a25cf1d337df5ba9bc](https://github.com/Allmantool/h-budget.UI/commit/f3cee412d0f38efc40bb10a25cf1d337df5ba9bc)), closes [#661](https://github.com/Allmantool/h-budget.UI/issues/661)
+* test:improve coverage ([fe4340a39a383cdc63607092a3245266085ad577](https://github.com/Allmantool/h-budget.UI/commit/fe4340a39a383cdc63607092a3245266085ad577))
+* chore: self review ([8460e1bf77616e80a25dafddd3076f0a0507ea61](https://github.com/Allmantool/h-budget.UI/commit/8460e1bf77616e80a25dafddd3076f0a0507ea61))
+
 ## <small>1.1.44 (2026-05-30)</small>
 
 * Merge pull request #660 from Allmantool/tech/add-cocdex-base-code-standards ([542d2e78f06ea169281d3fb4bc0434709b4fdfd9](https://github.com/Allmantool/h-budget.UI/commit/542d2e78f06ea169281d3fb4bc0434709b4fdfd9)), closes [#660](https://github.com/Allmantool/h-budget.UI/issues/660)
