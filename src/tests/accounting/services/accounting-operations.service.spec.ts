@@ -10,6 +10,7 @@ import { Result } from 'core/result';
 import { ngxsConfig } from '../../../app/modules/shared/store/ngxs.config';
 import { AccountingOperationsTableState } from '../../../app/modules/shared/store/states/accounting/accounting-operations-table.state';
 import { SetActivePaymentAccount } from '../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
+import { SetInitialPaymentOperations } from '../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
 import { PaymentAccountState } from '../../../app/modules/shared/store/states/accounting/payment-account.state';
 import { AccountingOperationsState } from '../../../app/modules/shared/store/states/accounting/payment-operations.state';
 import { DefaultPaymentAccountsProvider } from '../../../data/providers/accounting/payment-accounts.provider';
@@ -121,6 +122,50 @@ describe('accounting operations service', () => {
 		const result = await sut.deleteByIdAsync(operationForDeleteGuid);
 
 		expect(result.isSucceeded).toBeTruthy();
+	});
+
+	it('should remove only the targeted record from a list of three operations', async () => {
+		const accountId = Guid.parse('1c12ec59-8875-45c1-9fb0-e4edcf34a074');
+		const firstOperationId = Guid.parse('11111111-1111-1111-1111-111111111111');
+		const secondOperationId = Guid.parse('22222222-2222-2222-2222-222222222222');
+		const thirdOperationId = Guid.parse('33333333-3333-3333-3333-333333333333');
+
+		store.dispatch(
+			new SetInitialPaymentOperations([
+				{
+					key: firstOperationId,
+					paymentAccountId: accountId,
+					operationDate: new Date('2024-01-05T00:00:00Z'),
+				} as IPaymentOperationModel,
+				{
+					key: secondOperationId,
+					paymentAccountId: accountId,
+					operationDate: new Date('2024-01-06T00:00:00Z'),
+				} as IPaymentOperationModel,
+				{
+					key: thirdOperationId,
+					paymentAccountId: accountId,
+					operationDate: new Date('2024-01-07T00:00:00Z'),
+				} as IPaymentOperationModel,
+			])
+		);
+
+		await sut.deleteByIdAsync(secondOperationId);
+
+		expect(paymentOperationsProviderSpy.removePaymentOperation).toHaveBeenCalledWith(
+			accountId.toString(),
+			secondOperationId.toString()
+		);
+
+		const remainingOperations = store.selectSnapshot(
+			(state: { accountingOperations: { operationRecords: IPaymentOperationModel[] } }) =>
+				state.accountingOperations.operationRecords
+		);
+
+		expect(remainingOperations.map(operation => operation.key.toString())).toEqual([
+			firstOperationId.toString(),
+			thirdOperationId.toString(),
+		]);
 	});
 
 	it('should execute "updateOperationAsync" successfully', async () => {
