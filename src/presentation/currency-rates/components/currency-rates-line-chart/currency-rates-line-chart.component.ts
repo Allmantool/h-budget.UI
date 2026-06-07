@@ -66,7 +66,7 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
 			width: this.chartWidth,
 			dateFormat: 'dd MMM yy',
 			type: 'area',
-		} as LineChartOptions;
+		};
 
 		this.tableOptionsSignal = toSignal(this.currencyTableOptions$, { initialValue: {} as ICurrencyTableOptions });
 	}

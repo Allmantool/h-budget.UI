@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { IContractorModel } from 'domain/models/accounting/contractor.model.';
 
 import _ from 'lodash';
 
@@ -7,7 +8,6 @@ import { nameof } from 'ts-simple-nameof';
 
 import { AddCounterParty, SetInitialContractors } from './actions/contractor.actions';
 import { IContractorsStateModel } from './models/IContractorsStateModel';
-import { IContractorModel } from 'domain/models/accounting/contractor.model.';
 
 @State<IContractorsStateModel>({
 	name: 'contractorsHandbook',

@@ -75,7 +75,7 @@ export class PaymentOperationsMappingProfile extends Profile {
 			},
 			operationType: opt => {
 				opt.preCondition(src => !_.isNil(src.transactionType));
-				opt.mapFrom(src => src.transactionType as OperationTypes);
+				opt.mapFrom(src => src.transactionType);
 			},
 		});
 	}

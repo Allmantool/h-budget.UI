@@ -2,9 +2,18 @@ name: Safe NPM Dependency Upgrade
 
 on:
   schedule:
-    - cron: "0 1 * * *"   # Daily patch
-    - cron: "0 3 * * 0"   # Weekly minor
+    - cron: "0 1 * * *" # Daily conservative patch updates
+    - cron: "0 3 * * 0" # Weekly allowlisted minor updates
   workflow_dispatch:
+    inputs:
+      migration_target:
+        description: "Angular/Nx migration target passed to nx migrate"
+        required: false
+        default: "latest"
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   daily-patch:
@@ -26,28 +35,43 @@ jobs:
       - name: Install baseline dependencies
         run: npm ci
 
-      - name: Patch update only (safe packages)
+      - name: Apply safe patch updates
         run: npm run deps:update:patch:safe
 
-      # - name: Run CI verification
-      #   run: npm run ci:verify
-
-      - name: Detect changes
+      - name: Detect dependency changes
         id: changes
-        run: |
-          if git diff --quiet; then
-            echo "changed=false" >> $GITHUB_OUTPUT
-          else
-            echo "changed=true" >> $GITHUB_OUTPUT
-          fi
+        run: node tools/deps/changed.mjs --type patch --github-output "$GITHUB_OUTPUT" --summary-file dependency-update-summary.md
+
+      # PR creation is intentionally gated behind clean verification.
+      # Unsafe dependency sets fail here and never reach create-pull-request.
+      - name: Verify updated dependency set
+        if: steps.changes.outputs.changed == 'true'
+        run: npm run deps:verify
+
+      - name: Refresh PR summary
+        if: steps.changes.outputs.changed == 'true'
+        run: node tools/deps/changed.mjs --type patch --summary-file dependency-update-summary.md
+
+      - name: Upload dependency upgrade diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-upgrade-patch-diagnostics
+          path: |
+            dependency-update-summary.md
+            logs/dependency-upgrade/**
+            .dependency-upgrade/**
+          if-no-files-found: ignore
 
       - name: Create PR
         if: steps.changes.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           branch: chore/deps-patch-upgrade
-          title: "build(deps): patch dependency upgrade"
-          commit-message: "build(deps): patch dependency upgrade"
+          title: "build(deps): safe patch dependency upgrade"
+          commit-message: "build(deps): safe patch dependency upgrade"
+          body-path: dependency-update-summary.md
+          delete-branch: true
 
   weekly-minor:
     name: Weekly Minor Update (Safe Libraries)
@@ -68,31 +92,46 @@ jobs:
       - name: Install baseline dependencies
         run: npm ci
 
-      - name: Minor update (safe packages only)
+      - name: Apply allowlisted minor updates
         run: npm run deps:update:minor:safe
 
-      # - name: Run CI verification
-      #   run: npm run ci:verify
-
-      - name: Detect changes
+      - name: Detect dependency changes
         id: changes
-        run: |
-          if git diff --quiet; then
-            echo "changed=false" >> $GITHUB_OUTPUT
-          else
-            echo "changed=true" >> $GITHUB_OUTPUT
-          fi
+        run: node tools/deps/changed.mjs --type minor --github-output "$GITHUB_OUTPUT" --summary-file dependency-update-summary.md
+
+      # PR creation is intentionally gated behind clean verification.
+      # Unsafe dependency sets fail here and never reach create-pull-request.
+      - name: Verify updated dependency set
+        if: steps.changes.outputs.changed == 'true'
+        run: npm run deps:verify
+
+      - name: Refresh PR summary
+        if: steps.changes.outputs.changed == 'true'
+        run: node tools/deps/changed.mjs --type minor --summary-file dependency-update-summary.md
+
+      - name: Upload dependency upgrade diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-upgrade-minor-diagnostics
+          path: |
+            dependency-update-summary.md
+            logs/dependency-upgrade/**
+            .dependency-upgrade/**
+          if-no-files-found: ignore
 
       - name: Create PR
         if: steps.changes.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           branch: chore/deps-minor-upgrade
-          title: "build(deps): minor dependency upgrade"
-          commit-message: "build(deps): minor dependency upgrade"
+          title: "build(deps): safe minor dependency upgrade"
+          commit-message: "build(deps): safe minor dependency upgrade"
+          body-path: dependency-update-summary.md
+          delete-branch: true
 
   angular-nx-migrate:
-    name: Angular / NX Migration (Manual)
+    name: Angular / Nx Migration (Manual)
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
@@ -110,26 +149,46 @@ jobs:
       - name: Install baseline dependencies
         run: npm ci
 
-      - name: Run Angular/NX migration
+      - name: Run Angular/Nx migration
         run: |
-          npx nx migrate latest
+          npx nx migrate "${{ inputs.migration_target }}"
           npm install
-          npx nx migrate --run-migrations
-          npm run ci:verify
-
-      - name: Detect changes
-        id: changes
-        run: |
-          if git diff --quiet; then
-            echo "changed=false" >> $GITHUB_OUTPUT
-          else
-            echo "changed=true" >> $GITHUB_OUTPUT
+          if [ -f migrations.json ]; then
+            npx nx migrate --run-migrations
+            npm install
           fi
+
+      - name: Detect dependency changes
+        id: changes
+        run: node tools/deps/changed.mjs --type angular-nx-migration --github-output "$GITHUB_OUTPUT" --summary-file dependency-update-summary.md
+
+      # Framework migrations are manual, but still gated. No green verification means no PR.
+      - name: Verify migrated dependency set
+        if: steps.changes.outputs.changed == 'true'
+        run: npm run deps:verify:framework
+
+      - name: Refresh PR summary
+        if: steps.changes.outputs.changed == 'true'
+        run: node tools/deps/changed.mjs --type angular-nx-migration --summary-file dependency-update-summary.md
+
+      - name: Upload dependency migration diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-upgrade-angular-nx-diagnostics
+          path: |
+            dependency-update-summary.md
+            logs/dependency-upgrade/**
+            .dependency-upgrade/**
+            migrations.json
+          if-no-files-found: ignore
 
       - name: Create PR
         if: steps.changes.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
-          branch: chore/deps-angular-nx
-          title: "build(deps): Angular/NX framework migration"
-          commit-message: "build(deps): Angular/NX migration"
+          branch: chore/deps-angular-nx-migration
+          title: "build(deps): Angular/Nx framework migration"
+          commit-message: "build(deps): Angular/Nx framework migration"
+          body-path: dependency-update-summary.md
+          delete-branch: true

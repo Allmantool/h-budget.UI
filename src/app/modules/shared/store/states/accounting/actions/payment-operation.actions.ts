@@ -1,6 +1,6 @@
-import { Guid } from 'typescript-guid';
-
 import { IPaymentOperationModel } from 'domain/models/accounting/payment-operation.model';
+
+import { Guid } from 'typescript-guid';
 
 export class SetInitialPaymentOperations {
 	static readonly type = '[Payment operation] Set initial payment operations';

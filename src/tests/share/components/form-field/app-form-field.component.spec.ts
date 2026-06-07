@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-
 import { SelectDropdownOptions } from 'app/modules/shared/models/select-dropdown-options';
 
 import { AppFormFieldComponent } from '../../../../app/modules/shared/components/form-field/app-form-field.component';
@@ -25,7 +24,7 @@ describe('app-form-field component', () => {
 
 	it('"writeValue" should populate input element respectively', () => {
 		const payload = 'some test value';
-		sut.writeValue(payload as FormInput);
+		sut.writeValue(payload);
 
 		expect(sut.data$.value).toBe(payload);
 	});

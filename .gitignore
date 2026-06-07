@@ -115,5 +115,7 @@ reports/*
 .nx/cache
 .cache/
 .nx/workspace-data
+.dependency-upgrade/
+dependency-update-summary.md
 # Sentry Config File
 .sentryclirc

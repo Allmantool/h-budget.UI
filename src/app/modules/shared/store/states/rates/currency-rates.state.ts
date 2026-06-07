@@ -66,17 +66,13 @@ export class CurrencyRatesState {
 			take(1),
 			tap(currencyRateGroups =>
 				ctx.patchState({
-					rateGroups: _.map(
-						currencyRateGroups,
-						rg =>
-							({
-								currencyId: rg.currencyId,
-								name: rg.name,
-								abbreviation: rg.abbreviation,
-								scale: rg.scale,
-								rateValues: _.orderBy(rg.rateValues, i => i.updateDate),
-							}) as CurrencyRateGroupModel
-					),
+					rateGroups: _.map(currencyRateGroups, rg => ({
+						currencyId: rg.currencyId,
+						name: rg.name,
+						abbreviation: rg.abbreviation,
+						scale: rg.scale,
+						rateValues: _.orderBy(rg.rateValues, i => i.updateDate),
+					})),
 				})
 			)
 		);

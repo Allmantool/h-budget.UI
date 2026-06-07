@@ -2,13 +2,12 @@ import { ChangeDetectionStrategy, Component, computed, Inject, signal, Signal } 
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Result } from 'core/result';
 
 import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
 import { filter, Observable, take } from 'rxjs';
-
-import { Result } from 'core/result';
 
 import { AccountTypes } from '../../../../../../domain/models/accounting/account-types';
 import { IPaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';

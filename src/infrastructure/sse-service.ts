@@ -1,9 +1,9 @@
 import { Injectable, NgZone } from '@angular/core';
+import { AppConfigurationService } from 'app/modules/shared/services/app-configuration.service';
 
-import { HubConnection, HubConnectionBuilder, HubConnectionState, HttpTransportType } from '@microsoft/signalr';
 import { Subject, take, timer } from 'rxjs';
 
-import { AppConfigurationService } from 'app/modules/shared/services/app-configuration.service';
+import { HttpTransportType, HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 
 import { AccountNotification } from './account-notification';
 
@@ -65,7 +65,9 @@ export class SseService {
 	}
 
 	private registerHandlers(connection: HubConnection): void {
-		connection.on('ReceiveAccountNotification', payload => this.handleNotificationEvent(payload));
+		connection.on('ReceiveAccountNotification', (payload: AccountNotification | string) =>
+			this.handleNotificationEvent(payload)
+		);
 
 		connection.onreconnecting(() => {
 			console.warn('SignalR connection lost. Waiting for reconnect...');
@@ -123,11 +125,15 @@ export class SseService {
 				return;
 			}
 
-			const data: AccountNotification = typeof payload === 'string' ? JSON.parse(payload) : payload;
+			const data = this.parseNotification(payload);
 
 			this.ngZone.run(() => this.notificationSubject.next(data));
 		} catch {
 			console.warn('Invalid SignalR data', payload);
 		}
+	}
+
+	private parseNotification(payload: AccountNotification | string): AccountNotification {
+		return typeof payload === 'string' ? (JSON.parse(payload) as AccountNotification) : payload;
 	}
 }

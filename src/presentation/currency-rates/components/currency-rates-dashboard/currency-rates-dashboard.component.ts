@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, OnInit, Signal } from '@angular/core';
-import { Title } from '@angular/platform-browser';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { Title } from '@angular/platform-browser';
 
 import * as _ from 'lodash';
 
@@ -25,8 +25,8 @@ import { Observable } from 'rxjs';
 import { ICurrencyTableOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-table-options';
 import { getCurrencyTableOptions } from '../../../../app/modules/shared/store/states/rates/selectors/currency-table-options.selectors';
 import { getRates } from '../../../../app/modules/shared/store/states/rates/selectors/currency.selectors';
-import { CurrencyRateGroupModel } from '../../../../domain/models/rates/currency-rates-group.model';
 import { CurrencyRateValueModel } from '../../../../domain/models/rates/currency-rate-value.model';
+import { CurrencyRateGroupModel } from '../../../../domain/models/rates/currency-rates-group.model';
 
 interface CurrencyTrendComparison {
 	currencyId: number;
@@ -136,7 +136,7 @@ export class CurrencyRatesDashboardComponent implements OnInit {
 		}
 
 		return this.rateGroupsSignal()
-			.map(rateGroup => {
+			.map((rateGroup): CurrencyTrendComparison | null => {
 				const ratesInRange = _.chain(rateGroup.rateValues ?? [])
 					.filter(
 						(rateValue: CurrencyRateValueModel) =>
@@ -157,7 +157,7 @@ export class CurrencyRatesDashboardComponent implements OnInit {
 							return null;
 						}
 
-						return <CrossRatePoint>{
+						return {
 							updateDate: rateValue.updateDate!,
 							rate: _.round(currentRate / activeRate, 6),
 						};
@@ -167,7 +167,7 @@ export class CurrencyRatesDashboardComponent implements OnInit {
 				if (rateGroup.currencyId === activeCurrencyId) {
 					const latestRatePoint = _.last(activeRatesInRange);
 
-					return <CurrencyTrendComparison>{
+					return {
 						currencyId: rateGroup.currencyId ?? 0,
 						abbreviation: rateGroup.abbreviation ?? '',
 						name: rateGroup.name ?? 'Unknown currency',
@@ -183,7 +183,7 @@ export class CurrencyRatesDashboardComponent implements OnInit {
 					return null;
 				}
 
-				return <CurrencyTrendComparison>{
+				return {
 					currencyId: rateGroup.currencyId ?? 0,
 					abbreviation: rateGroup.abbreviation ?? '',
 					name: rateGroup.name ?? 'Unknown currency',
@@ -228,13 +228,13 @@ export class CurrencyRatesDashboardComponent implements OnInit {
 		};
 	});
 
-	public readonly trendLeaderboardChartSignal = computed(() => {
+	public readonly trendLeaderboardChartSignal = computed<TrendBarChartOptions>(() => {
 		const comparisons = this.currencyComparisonsSignal();
 		const topMovers = comparisons.slice(0, 5);
 		const bottomMovers = [...comparisons.slice(-3)].reverse();
 		const chartItems = _.uniqBy([...topMovers, ...bottomMovers], comparison => comparison.currencyId);
 
-		return <TrendBarChartOptions>{
+		return {
 			series: [
 				{
 					name: 'Trend %',
@@ -258,7 +258,7 @@ export class CurrencyRatesDashboardComponent implements OnInit {
 			},
 			dataLabels: {
 				enabled: true,
-				formatter: value => `${value}%`,
+				formatter: (value: string | number | number[]) => `${String(value)}%`,
 				style: {
 					fontSize: '12px',
 					fontWeight: '700',
@@ -273,7 +273,7 @@ export class CurrencyRatesDashboardComponent implements OnInit {
 					show: false,
 				},
 				labels: {
-					formatter: value => `${value}%`,
+					formatter: (value: string | number | number[]) => `${String(value)}%`,
 				},
 			},
 			yaxis: {
@@ -290,7 +290,7 @@ export class CurrencyRatesDashboardComponent implements OnInit {
 			},
 			tooltip: {
 				y: {
-					formatter: value => `${value}%`,
+					formatter: (value: string | number | number[]) => `${String(value)}%`,
 				},
 			},
 			fill: {
@@ -306,10 +306,10 @@ export class CurrencyRatesDashboardComponent implements OnInit {
 		};
 	});
 
-	public readonly marketPositionChartSignal = computed(() => {
+	public readonly marketPositionChartSignal = computed<MarketShareChartOptions>(() => {
 		const peerComparison = this.peerComparisonSignal();
 
-		return <MarketShareChartOptions>{
+		return {
 			series: [peerComparison?.outperforming ?? 0, peerComparison?.underperforming ?? 0],
 			chart: {
 				type: 'donut',
@@ -342,7 +342,7 @@ export class CurrencyRatesDashboardComponent implements OnInit {
 			},
 			tooltip: {
 				y: {
-					formatter: value => `${value} currencies`,
+					formatter: (value: string | number | number[]) => `${String(value)} currencies`,
 				},
 			},
 			responsive: [

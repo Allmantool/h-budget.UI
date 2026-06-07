@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/ban-types */
 
 import { ChangeDetectionStrategy, Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -30,8 +29,8 @@ import { FormInput } from '../../types/form-input.type';
 	standalone: false,
 })
 export class AppFormFieldComponent implements ControlValueAccessor {
-	private onTouched!: Function;
-	private onChanged!: (value: FormInput) => {};
+	private onTouched!: () => void;
+	private onChanged!: (value: FormInput) => void;
 
 	@Input() public disabled: boolean = false;
 	@Input() public fieldType: string = InputTypes.INPUT;
@@ -65,10 +64,7 @@ export class AppFormFieldComponent implements ControlValueAccessor {
 		}
 
 		this.dropdownOptions$.next(
-			_.map(
-				dropdownOptions,
-				opt => new SelectDropdownOptions({ description: opt as string, value: opt as string })
-			)
+			_.map(dropdownOptions, opt => new SelectDropdownOptions({ description: opt, value: opt }))
 		);
 
 		if (!_.isNil(this.defaultValue)) {
@@ -92,11 +88,11 @@ export class AppFormFieldComponent implements ControlValueAccessor {
 		this.onDataChanged.emit(value);
 	}
 
-	public registerOnChange(fn: (value: FormInput) => {}): void {
+	public registerOnChange(fn: (value: FormInput) => void): void {
 		this.onChanged = fn;
 	}
 
-	public registerOnTouched(fn: Function): void {
+	public registerOnTouched(fn: () => void): void {
 		this.onTouched = fn;
 	}
 

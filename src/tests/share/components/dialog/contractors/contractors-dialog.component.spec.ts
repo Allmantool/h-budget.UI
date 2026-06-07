@@ -5,12 +5,11 @@ import { TestBed } from '@angular/core/testing';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { MatChipInput, MatChipInputEvent } from '@angular/material/chips';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Result } from 'core/result';
 
 import { NgxsModule } from '@ngxs/store';
 import { of } from 'rxjs';
 import { Guid } from 'typescript-guid';
-
-import { Result } from 'core/result';
 
 import { AppCoreModule } from '../../../../../app/modules/core/core.module';
 import { AngularMaterialSharedModule } from '../../../../../app/modules/shared/angular-material.shared.module';
@@ -159,7 +158,7 @@ describe('contractors-dialog.component', () => {
 			nativeElement: {
 				value: 'grid input value',
 			} as HTMLInputElement,
-		} as ElementRef<HTMLInputElement>;
+		};
 
 		componentUnderTest.selected({
 			option: {

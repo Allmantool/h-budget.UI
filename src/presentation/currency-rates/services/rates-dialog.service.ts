@@ -27,7 +27,7 @@ export class RatesDialogService {
 		config.data = {
 			title: 'Update rates for specify period:',
 			onSubmit: this.onSubmit,
-		} as DialogContainer<DaysRangePayload, number>;
+		};
 
 		this.dialogProvider.openDialog(DateRangeDialogComponent, config);
 	}

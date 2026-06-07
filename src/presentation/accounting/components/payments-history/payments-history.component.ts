@@ -9,6 +9,7 @@ import {
 	Signal,
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { SseService } from 'infrastructure/sse-service';
 
 import * as _ from 'lodash';
 
@@ -28,7 +29,6 @@ import { IPaymentRepresentationModel } from '../../models/operation-record';
 import { AccountsService } from '../../services/accounts.service';
 import { HandbooksService } from '../../services/handbooks.service';
 import { PaymentsHistoryService } from '../../services/payments-history.service';
-import { SseService } from 'infrastructure/sse-service';
 
 @Component({
 	selector: 'payments-history',
@@ -96,9 +96,9 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 						notification.accountId === this.activePaymentAccountIdSignal().toString()
 				),
 				exhaustMap(() =>
-					this.paymentsHistoryService.refreshPaymentsHistory(this.activePaymentAccountIdSignal()).pipe(
-						tap(() => this.accountsService.refreshAccounts(this.activePaymentAccountIdSignal()))
-					)
+					this.paymentsHistoryService
+						.refreshPaymentsHistory(this.activePaymentAccountIdSignal())
+						.pipe(tap(() => this.accountsService.refreshAccounts(this.activePaymentAccountIdSignal())))
 				)
 			)
 			.subscribe(payments => this.dataSource$.next(payments));

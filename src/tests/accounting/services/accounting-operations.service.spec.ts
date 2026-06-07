@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { TestBed } from '@angular/core/testing';
+import { Result } from 'core/result';
 
 import { NgxsModule, Store } from '@ngxs/store';
 import { of, Subscription } from 'rxjs';
 import { Guid } from 'typescript-guid';
-
-import { Result } from 'core/result';
 
 import { ngxsConfig } from '../../../app/modules/shared/store/ngxs.config';
 import { AccountingOperationsTableState } from '../../../app/modules/shared/store/states/accounting/accounting-operations-table.state';
@@ -152,10 +151,9 @@ describe('accounting operations service', () => {
 
 		await sut.deleteByIdAsync(secondOperationId);
 
-		expect(paymentOperationsProviderSpy.removePaymentOperation).toHaveBeenCalledWith(
-			accountId.toString(),
-			secondOperationId.toString()
-		);
+		const removePaymentOperationSpy = paymentOperationsProviderSpy['removePaymentOperation'] as jasmine.Spy;
+
+		expect(removePaymentOperationSpy).toHaveBeenCalledWith(accountId.toString(), secondOperationId.toString());
 
 		const remainingOperations = store.selectSnapshot(
 			(state: { accountingOperations: { operationRecords: IPaymentOperationModel[] } }) =>

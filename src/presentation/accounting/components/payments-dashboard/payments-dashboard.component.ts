@@ -1,15 +1,14 @@
 import { ChangeDetectionStrategy, Component, computed, OnInit, signal, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
+import { CrossAccountsTransferService } from 'presentation/accounting/services/cross-accounts-transfer.dialog.service';
 
 import _ from 'lodash';
-import { isFuture, isPast } from 'date-fns';
 
 import { Select, Store } from '@ngxs/store';
+import { isFuture, isPast } from 'date-fns';
 import { Observable } from 'rxjs';
 import { Guid } from 'typescript-guid';
-
-import { CrossAccountsTransferService } from 'presentation/accounting/services/cross-accounts-transfer.dialog.service';
 
 import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
 import { getAccountPayments } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
@@ -18,6 +17,7 @@ import {
 	getActivePaymentAccountId,
 } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
+import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
 
 @Component({
 	selector: 'payments-dashboard',
@@ -36,13 +36,13 @@ export class PaymentsDashboardComponent implements OnInit {
 	public activePaymentAccount$!: Observable<IPaymentAccountModel>;
 
 	@Select(getAccountPayments)
-	public accountPayments$!: Observable<any[]>;
+	public accountPayments$!: Observable<IPaymentOperationModel[]>;
 
 	public activePaymentsAccountSignal: Signal<IPaymentAccountModel> = toSignal(this.activePaymentAccount$, {
 		initialValue: {} as IPaymentAccountModel,
 	});
 
-	public accountPaymentsSignal: Signal<any[]> = toSignal(this.accountPayments$, {
+	public accountPaymentsSignal: Signal<IPaymentOperationModel[]> = toSignal(this.accountPayments$, {
 		initialValue: [],
 	});
 
@@ -85,10 +85,9 @@ export class PaymentsDashboardComponent implements OnInit {
 		};
 	});
 
-	public async ngOnInit(): Promise<void> {
+	public ngOnInit(): void {
 		if (_.isNil(this.activePaymentsAccountSignal())) {
-			await this.navigateToPaymentAccountsAsync();
-			return;
+			void this.navigateToPaymentAccountsAsync();
 		}
 	}
 

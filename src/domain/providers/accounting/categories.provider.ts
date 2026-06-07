@@ -1,6 +1,6 @@
-import { Observable } from 'rxjs';
-
 import { Result } from 'core/result';
+
+import { Observable } from 'rxjs';
 
 import { ICategoryModel } from '../../models/accounting/category.model';
 

@@ -4,12 +4,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { TestBed } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { SetInitialPaymentOperations } from 'app/modules/shared/store/states/accounting/actions/payment-operation.actions';
 
 import { MapperModule } from '@dynamic-mapper/angular';
 import { NgxsModule, Store } from '@ngxs/store';
 import { Guid } from 'typescript-guid';
-
-import { SetInitialPaymentOperations } from 'app/modules/shared/store/states/accounting/actions/payment-operation.actions';
 
 import { AppCoreModule } from '../../../app/modules/core/core.module';
 import { AngularMaterialSharedModule } from '../../../app/modules/shared/angular-material.shared.module';
@@ -154,7 +153,7 @@ describe('accounting operations crud component', () => {
 			expense: 0,
 			income: 11,
 			operationDate: new Date(2024, 0, 11),
-		} as IPaymentRepresentationModel);
+		});
 
 		sut.crudRecordFg.markAsDirty();
 
@@ -188,7 +187,7 @@ describe('accounting operations crud component', () => {
 
 		sut.crudRecordFg.patchValue({
 			key: operationKey,
-		} as IPaymentRepresentationModel);
+		});
 
 		await sut.deleteRecordAsync().then(() => {
 			expect(accountingOperationsServiceSpy.deleteByIdAsync).toHaveBeenCalledWith(operationKey);

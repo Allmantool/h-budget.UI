@@ -1,10 +1,10 @@
 import { enableProdMode } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
-import * as Sentry from '@sentry/angular';
+import { init, replayIntegration } from '@sentry/angular';
 
-import { loadAppSettings } from './app-settings';
 import { AppBootstrapModule } from './app/modules/app-bootstrap/app-bootstrap.module';
+import { loadAppSettings } from './app-settings';
 import { environment } from './environments/environment';
 import { initializeBrowserTracing } from './infrastructure/browser-telemetry';
 
@@ -15,9 +15,9 @@ if (environment.production) {
 void loadAppSettings()
 	.then(settings => {
 		if (settings?.sentryDns) {
-			Sentry.init({
+			init({
 				dsn: settings.sentryDns,
-				integrations: [Sentry.replayIntegration()],
+				integrations: [replayIntegration()],
 				replaysSessionSampleRate: 0.1,
 				replaysOnErrorSampleRate: 1.0,
 				environment: environment.production ? 'production' : 'development',

@@ -3,13 +3,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { TestBed } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
-import { MainDashboardCartComponent } from './components/dashboard-item/main-dashboard-cart.component';
 import { MainDashboardComponent } from './components/dashboard/main-dashboard.component';
+import { MainDashboardCartComponent } from './components/dashboard-item/main-dashboard-cart.component';
 
 describe('main dashboard component', () => {
 	beforeEach(async () => {

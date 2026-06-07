@@ -1,12 +1,11 @@
 import { HTTP_INTERCEPTORS, HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { getTestBed, TestBed } from '@angular/core/testing';
+import { IRatesGroupEntity } from 'data/providers/rates/entities/rates-group.entity';
 
 import { Mapper, MapperModule } from '@dynamic-mapper/angular';
 import { take } from 'rxjs';
 import { Guid } from 'typescript-guid';
-
-import { IRatesGroupEntity } from 'data/providers/rates/entities/rates-group.entity';
 
 import { CorrelationIdInterceptor } from '../../../app/modules/core/interceptors/correlation-id.interceptor';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';

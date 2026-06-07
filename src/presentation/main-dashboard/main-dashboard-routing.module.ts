@@ -1,6 +1,5 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-
 import { AccountingLayoutComponent } from 'app/modules/app-bootstrap/components/accounting-layout/accounting-layout.component';
 import { DashboardLayoutComponent } from 'app/modules/app-bootstrap/components/dashboard-layout/dashboard-layout.component';
 

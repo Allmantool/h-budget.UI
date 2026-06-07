@@ -1,1 +1,1 @@
-export interface IHandbooksStateModel {}
+export type IHandbooksStateModel = Record<string, never>;

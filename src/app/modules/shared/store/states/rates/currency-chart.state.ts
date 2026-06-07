@@ -11,7 +11,7 @@ import { ICurrencyChartOptions } from '../../models/currency-rates/currency-char
 	defaults: {
 		chartOptions: {
 			activeCurrencyTrendTitle: '',
-		} as ICurrencyChartOptions,
+		},
 	},
 	children: [],
 })
@@ -25,7 +25,7 @@ export class CurrencyChartState {
 		patchState({
 			chartOptions: {
 				activeCurrencyTrendTitle: activeCurrencyTitle,
-			} as ICurrencyChartOptions,
+			},
 		});
 	}
 }

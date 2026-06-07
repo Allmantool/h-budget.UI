@@ -1,10 +1,9 @@
 import { NgModule } from '@angular/core';
+import { DataRatesMappingProfile } from 'data/providers/rates/mappers/data-rates-mapping.profiler';
+import { NationalBankCurrenciesProvider } from 'data/providers/rates/national-bank-currencies.provider';
 
 import { MapperModule } from '@dynamic-mapper/angular';
 import { NgxsModule } from '@ngxs/store';
-
-import { DataRatesMappingProfile } from 'data/providers/rates/mappers/data-rates-mapping.profiler';
-import { NationalBankCurrenciesProvider } from 'data/providers/rates/national-bank-currencies.provider';
 
 import { CurrencyRatesDashboardComponent } from './components/currency-rates-dashboard/currency-rates-dashboard.component';
 import { CurrencyRatesGridComponent } from './components/currency-rates-grid/currency-rates-grid.component';

@@ -1,5 +1,5 @@
-export namespace InputTypes {
-	export const INPUT: string = 'INPUT';
-	export const SELECT: string = 'SELECT';
-	export const TEXT_AREA: string = 'TEXT_AREA';
-}
+export const InputTypes = {
+	INPUT: 'INPUT',
+	SELECT: 'SELECT',
+	TEXT_AREA: 'TEXT_AREA',
+} as const;
