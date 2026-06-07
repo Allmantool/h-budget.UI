@@ -1,5 +1,11 @@
 # 📦 Changelog
 
+## <small>1.1.48 (2026-06-07)</small>
+
+* Merge pull request #666 from Allmantool/tech/ehnance-auto-update-with-verification ([51000aa39213dcbcfb56cf112f4ddd82a015aac6](https://github.com/Allmantool/h-budget.UI/commit/51000aa39213dcbcfb56cf112f4ddd82a015aac6)), closes [#666](https://github.com/Allmantool/h-budget.UI/issues/666)
+* chore: add standards ([a29e91e04e7b610ee1b6943789abea308aba00b6](https://github.com/Allmantool/h-budget.UI/commit/a29e91e04e7b610ee1b6943789abea308aba00b6))
+* tech: add verification when try to package autoupdate ([3279680be66bf8ab1daaf7b37c5b079bf65da73d](https://github.com/Allmantool/h-budget.UI/commit/3279680be66bf8ab1daaf7b37c5b079bf65da73d))
+
 ## <small>1.1.47 (2026-06-02)</small>
 
 * Merge pull request #664 from Allmantool/chore/deps-patch-upgrade ([3bf27c24449c3851dd839d805bf28d0ae8a1f4ca](https://github.com/Allmantool/h-budget.UI/commit/3bf27c24449c3851dd839d805bf28d0ae8a1f4ca)), closes [#664](https://github.com/Allmantool/h-budget.UI/issues/664)
