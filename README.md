@@ -1,9 +1,8 @@
-# H-bugdet app
+# H-budget app
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 12.0.2.
-And migrated up to version 17 at the moment of writting
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 12.0.2 and has since been migrated to Angular 20 with Nx.
 
-Maing goal is to create home finantial app for private use
+Main goal is to create a home financial app for private use.
 
 ## Code scaffolding
 
@@ -11,11 +10,11 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 ## Build
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+Run `npm run build` for a development build or `npm run build:prod` for a production build. The build artifacts will be stored in the `dist/` directory.
 
 ## Running unit tests
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Run `npm run test` or `npm run test:ci` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
 ## Running end-to-end tests
 
