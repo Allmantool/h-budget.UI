@@ -1,87 +1,37 @@
 # Angular Coding Standards
 
-This project follows the official Angular style guide, existing local conventions, and the priorities in `AGENTS.md`: correctness, simplicity, readability, maintainability, testability, then measured performance.
+`AGENTS.md` is the canonical source for project coding rules. This document is a short human-facing companion; if the two disagree, update this file to match `AGENTS.md`.
 
-## Project Conventions
+## Project-Specific Defaults
 
 - Use the existing Nx and npm workflow.
-- Keep the current NgModule architecture unless a task explicitly asks for standalone migration.
-- Keep feature UI under `src/presentation` and app shell/shared modules under `src/app/modules`.
-- Keep domain, data, and infrastructure responsibilities separated under their existing top-level folders.
-- Use NGXS for shared application state because it is already established in the project.
+- Preserve the current Angular 20 NgModule architecture. Do not migrate to standalone APIs unless explicitly requested.
+- Keep feature UI under `src/presentation`, shell/shared Angular modules under `src/app/modules`, domain contracts under `src/domain`, data/provider implementations under `src/data`, and telemetry/SSE infrastructure under `src/infrastructure`.
+- Use NGXS for shared state because it is already established.
+- Keep Angular Material/CDK, RxJS, Signals, dynamic-mapper, Sentry, and OpenTelemetry usage consistent with nearby code.
 - Preserve strict TypeScript and strict Angular template checking.
 
-## Architecture
+## Daily Coding Rules
 
-- Prefer feature-based organization and keep feature routing, components, services, models, and data-access code close together.
-- Keep `shared` reusable and domain-neutral.
-- Keep `core` for singleton app-wide services, interceptors, guards, config, and shell concerns.
-- Avoid dumping feature-specific business logic into shared modules.
-- Prefer lazy-loaded modules for large feature areas.
+- Make the smallest behavior-preserving change that solves the task.
+- Keep components focused on UI orchestration; move reusable business logic to services, facades, NGXS state/selectors, validators, mappers, use cases, or pure helpers.
+- Keep direct `HttpClient` usage inside data/provider or API service classes, not components.
+- Keep DTO/entity, domain, state, form, and UI/view-model shapes intentionally mapped.
+- Prefer lazy-loaded feature modules for large screens/features and keep routing close to the feature.
+- Keep `shared` reusable and domain-neutral; keep feature-specific logic in the owning feature.
+- Use `OnPush`, list tracking, typed inputs/outputs, lifecycle-safe subscriptions, and accessible templates where they fit local conventions.
+- Prefer reactive forms for complex forms; preserve existing form style when a narrow change does not justify migration.
+- Do not add dependencies, broad abstractions, folder moves, or formatting churn without a clear current need.
 
-## Components and Templates
+## Validation
 
-- Keep components focused on presentation and UI orchestration.
-- Move reusable business logic to services, facades, stores, or pure functions.
-- Prefer smaller presentational components beneath page/container components when it improves clarity.
-- Use `OnPush` where it matches the current feature style.
-- Avoid expensive template calls, complex inline expressions, and repeated long expressions.
-- Use signals, observables, computed values, or view models for derived UI state.
-- Use list tracking with `trackBy` or Angular control-flow tracking where appropriate.
-- Prefer semantic HTML, accessible labels, keyboard support, and non-color-only state indicators.
+Run the smallest relevant verification set for the change:
 
-## Services, State, and Data Access
+- `npm run lint`
+- `npm run test`
+- `npm run test:ci`
+- `npm run build`
+- `npm run build:prod`
+- `npm run validate` or `npm run ci:build` when broader confidence is needed
 
-- Give services one clear responsibility.
-- Avoid god services that mix API calls, state, business rules, and UI concerns.
-- Keep API mapping explicit and testable.
-- Prefer immutable state updates.
-- Use simple component state for local UI concerns.
-- Use NGXS, services, signals, or facades for shared or feature state when needed.
-- Do not introduce a new state-management library unless explicitly requested.
-
-## TypeScript
-
-- Avoid `any`; use `unknown` at unsafe boundaries and narrow it.
-- Prefer explicit domain models and DTOs.
-- Prefer `readonly` when values should not be reassigned.
-- Use discriminated unions for meaningful state variants.
-- Avoid large parameter lists, deep inheritance, and boolean flag parameters that significantly change behavior.
-- Prefer composition and clear domain-specific names.
-- Use barrel files only when they simplify imports without creating cycles.
-
-## RxJS and Signals
-
-- Avoid nested subscriptions.
-- Prefer the `async` pipe for template subscriptions.
-- Clean up manual subscriptions with `takeUntilDestroyed`, `DestroyRef`, or the established local pattern.
-- Use `tap` for side effects and `map` for transformations.
-- Choose flattening operators intentionally based on cancellation and concurrency needs.
-- Do not expose writable Subjects directly.
-- Use signals for local reactive state when they simplify code.
-- Use `computed` for derived signal state and `effect` only for side effects.
-- Do not migrate whole features to signals unless requested.
-
-## Styling
-
-- Keep styles scoped to components unless global styling is genuinely needed.
-- Avoid deep selectors unless there is no better option.
-- Prefer existing CSS conventions and Angular Material/CDK primitives.
-- Avoid magic color and spacing values when reusable tokens or variables are available.
-
-## Testing
-
-- Add or update tests for meaningful behavior changes.
-- Prefer public behavior over implementation details.
-- Keep tests deterministic and readable.
-- Avoid over-mocking.
-- Use the existing Karma/Jasmine/Nx setup.
-- Add regression tests for fixed bugs.
-
-## Gradual Enforcement
-
-- Keep lint rules warning-level first when existing code is not clean.
-- Preserve current strict compiler options.
-- Stage additional strictness such as `noImplicitOverride` and `noUncheckedIndexedAccess` behind validation because they can expose many existing issues at once.
-- Stage broad cleanup rules such as consistent type-only imports and prefer-readonly after the existing lint error backlog is reduced.
-- Do not mass-format the repository as part of behavior changes.
+If a check cannot be run, document why and note the remaining risk.

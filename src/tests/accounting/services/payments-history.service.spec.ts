@@ -37,7 +37,7 @@ describe('payments history service', () => {
 				comment: 'test-comment',
 				amount: 1024.2,
 			} as IPaymentOperationModel,
-		} as IPaymentHistoryModel,
+		},
 	];
 
 	beforeEach(() => {

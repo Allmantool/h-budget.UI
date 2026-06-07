@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, Signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { OperationTypes } from 'domain/types/operation.types';
 
 import * as _ from 'lodash';
 
@@ -37,7 +38,6 @@ import {
 	getContractorAsNodesMap,
 	getContractorNodes,
 } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
-import { OperationTypes } from 'domain/types/operation.types';
 import { CrossAccountsTransferProvider } from '../../../../data/providers/accounting/cross-accounts-transfer.provider';
 
 @Component({

@@ -35,7 +35,7 @@ describe('payment account component', () => {
 					balance: 0,
 					emitter: '',
 					description: '',
-				} as IPaymentAccountModel,
+				},
 			]),
 		});
 

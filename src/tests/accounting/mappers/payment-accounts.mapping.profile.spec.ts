@@ -31,7 +31,7 @@ describe('payment-accounts-mapping.profile tests', () => {
 				accountType: 0,
 				balance: 11.23,
 				currency: 'USD',
-			} as IPaymentAccountEntity,
+			},
 			{
 				key: '7ce79bb4-820e-446b-9291-8673ca1551de',
 				description: 'd 2',
@@ -39,7 +39,7 @@ describe('payment-accounts-mapping.profile tests', () => {
 				accountType: 1,
 				balance: 132.23,
 				currency: 'EUR',
-			} as IPaymentAccountEntity,
+			},
 		];
 
 		const result = mapper.map(PaymentAccountsMappingProfile.PaymentAccountEntityToDomain, paymentAccounts);

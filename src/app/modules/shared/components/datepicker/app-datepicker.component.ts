@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/ban-types */
 /* eslint-disable @angular-eslint/no-output-on-prefix */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { ChangeDetectionStrategy, Component, EventEmitter, forwardRef, Input, OnInit, Output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -23,8 +21,8 @@ import { BehaviorSubject } from 'rxjs';
 	standalone: false,
 })
 export class DatepickerComponent implements ControlValueAccessor, OnInit {
-	private onTouched!: Function;
-	private onChanged!: (value: Date | null) => {};
+	private onTouched!: () => void;
+	private onChanged!: (value: Date | null) => void;
 
 	@Input() public disabled: boolean = false;
 
@@ -46,15 +44,15 @@ export class DatepickerComponent implements ControlValueAccessor, OnInit {
 		this.data$.next(value);
 	}
 
-	public registerOnChange(fn: (value: any) => {}): void {
+	public registerOnChange(fn: (value: Date | null) => void): void {
 		this.onChanged = fn;
 	}
 
-	public registerOnTouched(fn: Function): void {
+	public registerOnTouched(fn: () => void): void {
 		this.onTouched = fn;
 	}
 
-	public updateValue(event: MatDatepickerInputEvent<Date, string>) {
+	public updateValue(event: MatDatepickerInputEvent<Date, string>): void {
 		const dateValue = event.value;
 
 		this.data$.next(dateValue);

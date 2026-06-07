@@ -31,7 +31,7 @@ export class CategoriesDialogService {
 		config.data = {
 			title: 'Budget categories:',
 			onSubmit: onSave,
-		} as DialogContainer<ICategoryModel, ICategoryModel>;
+		};
 
 		config.disableClose = true;
 

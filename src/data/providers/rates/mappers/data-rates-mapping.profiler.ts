@@ -1,11 +1,12 @@
+import { CurrencyRateValueModel } from 'domain/models/rates/currency-rate-value.model';
+import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group.model';
+
 import * as _ from 'lodash';
 
 import { MappingPair, Profile } from '@dynamic-mapper/mapper';
 
 import { IRateValueEntity } from '../entities/rate-value.entity';
 import { IRatesGroupEntity } from '../entities/rates-group.entity';
-import { CurrencyRateValueModel } from 'domain/models/rates/currency-rate-value.model';
-import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group.model';
 
 export class DataRatesMappingProfile extends Profile {
 	static readonly RatesGroupEntityToDomain = new MappingPair<IRatesGroupEntity, CurrencyRateGroupModel>();

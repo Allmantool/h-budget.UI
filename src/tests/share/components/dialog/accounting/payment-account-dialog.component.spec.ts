@@ -2,12 +2,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { PaymentAccountState } from 'app/modules/shared/store/states/accounting/payment-account.state';
 
 import { NgxsModule } from '@ngxs/store';
 import { of } from 'rxjs';
 import { Guid } from 'typescript-guid';
-
-import { PaymentAccountState } from 'app/modules/shared/store/states/accounting/payment-account.state';
 
 import { AppCoreModule } from '../../../../../app/modules/core/core.module';
 import { AngularMaterialSharedModule } from '../../../../../app/modules/shared/angular-material.shared.module';

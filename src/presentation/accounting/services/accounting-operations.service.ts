@@ -1,13 +1,12 @@
 import { Injectable, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { Result } from 'core/result';
 
 import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Guid } from 'typescript-guid';
-
-import { Result } from 'core/result';
 
 import { SetActiveAccountingOperation } from '../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
 import {

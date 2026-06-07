@@ -1,3 +1,5 @@
+import { ZoneContextManager } from '@opentelemetry/context-zone-peer-dep';
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { registerInstrumentations } from '@opentelemetry/instrumentation';
 import { DocumentLoadInstrumentation } from '@opentelemetry/instrumentation-document-load';
 import { FetchInstrumentation } from '@opentelemetry/instrumentation-fetch';
@@ -6,15 +8,10 @@ import { XMLHttpRequestInstrumentation } from '@opentelemetry/instrumentation-xm
 import { defaultResource, resourceFromAttributes } from '@opentelemetry/resources';
 import { BatchSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { WebTracerProvider } from '@opentelemetry/sdk-trace-web';
-import { ZoneContextManager } from '@opentelemetry/context-zone-peer-dep';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
-import {
-	SEMRESATTRS_DEPLOYMENT_ENVIRONMENT,
-	SEMRESATTRS_SERVICE_NAME,
-} from '@opentelemetry/semantic-conventions';
+import { SEMRESATTRS_DEPLOYMENT_ENVIRONMENT, SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions';
 
-import { environment } from '../environments/environment';
 import { IAppSettingsModel } from '../domain/models/app-settings.model';
+import { environment } from '../environments/environment';
 
 let tracingInitialized = false;
 

@@ -31,7 +31,7 @@ export class ContractorsDialogService {
 		config.data = {
 			title: 'Counter parties:',
 			onSubmit: onSave,
-		} as DialogContainer<IContractorModel, IContractorModel>;
+		};
 
 		config.disableClose = true;
 

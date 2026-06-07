@@ -1,14 +1,13 @@
 import { getTestBed, TestBed } from '@angular/core/testing';
+import { SetInitialCategories } from 'app/modules/shared/store/states/handbooks/actions/category.actions';
+import { SetInitialContractors } from 'app/modules/shared/store/states/handbooks/actions/contractor.actions';
+import { IPaymentRepresentationModel } from 'presentation/accounting/models/operation-record';
 
 import _ from 'lodash';
 
 import { Mapper, MapperModule } from '@dynamic-mapper/angular';
 import { NgxsModule, Store } from '@ngxs/store';
 import { Guid } from 'typescript-guid';
-
-import { SetInitialCategories } from 'app/modules/shared/store/states/handbooks/actions/category.actions';
-import { SetInitialContractors } from 'app/modules/shared/store/states/handbooks/actions/contractor.actions';
-import { IPaymentRepresentationModel } from 'presentation/accounting/models/operation-record';
 
 import { CategoriesState } from '../../../app/modules/shared/store/states/handbooks/categories.state';
 import { ContractorsState } from '../../../app/modules/shared/store/states/handbooks/contractors.state';
@@ -43,7 +42,7 @@ describe('payment-representations-mapping.profile tests', () => {
 				{
 					key: Guid.parse('a249b2e9-edf0-45f2-a274-92ac310d4008'),
 					nameNodes: ['test_contractor_node_1'],
-				} as IContractorModel,
+				},
 			])
 		);
 	});
@@ -55,7 +54,7 @@ describe('payment-representations-mapping.profile tests', () => {
 					key: Guid.parse('3b2a138e-f575-425a-8650-a309480a6ece'),
 					operationType: PaymentOperationTypes.Income,
 					nameNodes: ['test_category_node_1', 'test_category_node_2'],
-				} as ICategoryModel,
+				},
 			])
 		);
 
@@ -100,7 +99,7 @@ describe('payment-representations-mapping.profile tests', () => {
 					key: Guid.parse('7ae67a56-2f85-4db1-b409-bb6e2c61d772'),
 					operationType: PaymentOperationTypes.Expense,
 					nameNodes: ['expense_1', 'test_category_node_2'],
-				} as ICategoryModel,
+				},
 			])
 		);
 
@@ -145,7 +144,7 @@ describe('payment-representations-mapping.profile tests', () => {
 					comment: 'comments 1',
 					operationType: OperationTypes.Payment,
 				},
-			} as IPaymentHistoryModel,
+			},
 		];
 
 		const result = mapper.map(
@@ -171,7 +170,7 @@ describe('payment-representations-mapping.profile tests', () => {
 					key: Guid.parse('3b2a138e-f575-425a-8650-a309480a6ece'),
 					operationType: PaymentOperationTypes.Income,
 					nameNodes: ['test_category_node_1', 'test_category_node_2'],
-				} as ICategoryModel,
+				},
 			])
 		);
 
@@ -185,7 +184,7 @@ describe('payment-representations-mapping.profile tests', () => {
 				operationDate: new Date(2024, 0, 18),
 				comment: 'comments 2',
 				operationType: OperationTypes.Payment,
-			} as IPaymentOperationModel,
+			},
 		];
 
 		const result = mapper.map(
@@ -215,7 +214,7 @@ describe('payment-representations-mapping.profile tests', () => {
 				operationDate: new Date(2024, 0, 18),
 				comment: 'comments 2',
 				operationType: OperationTypes.Payment,
-			} as IPaymentOperationModel,
+			},
 		];
 
 		const result = mapper.map(

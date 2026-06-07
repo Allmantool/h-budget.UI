@@ -51,7 +51,7 @@ describe('payments history component', () => {
 				{
 					key: Guid.parse('f67501cd-d235-4147-8bd6-963ff2665398'),
 					nameNodes: ['test', 'contractor-1'],
-				} as IContractorModel,
+				},
 			]),
 		});
 

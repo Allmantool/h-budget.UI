@@ -1,10 +1,9 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Result } from 'core/result';
 
 import { Mapper } from '@dynamic-mapper/angular';
 import { map, Observable, retry, take } from 'rxjs';
-
-import { Result } from 'core/result';
 
 import { IContractorEntity } from './entities/contractor.entity';
 import { DataContractorProfile } from './mappers/contractor.mapping.profile';

@@ -7,13 +7,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import { TestBed } from '@angular/core/testing';
+import { CurrencyTableState } from 'app/modules/shared/store/states/rates/currency-table.state';
 
 import * as _ from 'lodash';
 
 import { NgxsModule, Store } from '@ngxs/store';
 import { of } from 'rxjs';
-
-import { CurrencyTableState } from 'app/modules/shared/store/states/rates/currency-table.state';
 
 import { CurrencyTrend } from './../../../../app/modules/shared/store/models/currency-rates/currency-trend';
 import { ngxsConfig } from './../../../../app/modules/shared/store/ngxs.config';

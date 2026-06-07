@@ -1,70 +1,51 @@
 # Angular Code Review Checklist
 
-Use this checklist for human reviews and Codex-generated changes.
+Use this checklist for human reviews and Codex-generated changes. `AGENTS.md` is the canonical rule source.
 
-## Correctness and Scope
+## Scope and Behavior
 
-- The change solves the requested problem.
-- Scope is small and focused.
-- No unrelated rewrites or mass formatting are included.
-- Public behavior and APIs are preserved unless the task requires a change.
-- Error handling and validation follow existing patterns.
+- The change solves the requested problem with a small, focused diff.
+- Existing UX, routes, public APIs, data contracts, validation, permissions, telemetry, and error handling are preserved unless the task required a change.
+- No unrelated rewrites, dependency additions, state-library changes, standalone migration, folder moves, or mass formatting are included.
 
 ## Angular Architecture
 
-- Feature code stays close to the owning feature.
-- `shared` contains only reusable, domain-neutral code.
-- `core` contains only singleton app-wide concerns.
-- NgModule conventions are preserved unless standalone migration was explicitly requested.
-- Lazy loading is preserved or used for large feature areas.
+- NgModule, `RouterModule`, lazy-loaded feature modules, and NGXS conventions are preserved.
+- Feature code stays near the owning `src/presentation/<feature>` area.
+- `src/app/modules/shared` remains reusable and domain-neutral.
+- Domain contracts/models stay under `src/domain`; HTTP/data-provider implementations and mapping profiles stay under `src/data`.
+- Components do not inject `HttpClient` directly.
 
-## Components and Templates
+## Components, Templates, and UX
 
 - Components have clear presentation or orchestration responsibilities.
-- Complex business logic is not placed directly in components.
-- Templates are readable and avoid complex inline expressions.
-- Repeated lists use tracking where appropriate.
-- Expensive methods are not called directly from templates.
-- `OnPush`, `protected`, and `readonly` are used where they fit the local style.
+- Business logic is not buried in templates or oversized components.
+- Templates avoid expensive call expressions, complex inline logic, unsafe null assertions, and missing list tracking.
+- Loading, empty, error, disabled, and permission states are considered.
+- Semantic HTML, keyboard access, focus behavior, labels for icon-only controls, and non-color-only status indicators are preserved or improved.
 
-## Services, State, RxJS, and Signals
+## State, RxJS, Signals, and Mapping
 
-- Services have one clear responsibility.
-- API/data mapping is explicit and testable.
-- NGXS usage follows existing project patterns.
-- RxJS subscriptions are cleaned up.
-- Nested subscriptions are avoided.
-- Stream errors are handled where user experience or consistency requires it.
-- Signals are used intentionally, with `computed` for derived state and `effect` only for side effects.
+- NGXS state models, actions, selectors, and updates are typed and immutable.
+- Service-based state keeps writable Subjects private.
+- Signals expose readonly or controlled state, use `computed` for derivation, and use `effect` only for side effects.
+- RxJS subscriptions are lifecycle-safe; nested subscriptions and silent error swallowing are avoided.
+- DTO/entity, domain, state, form, and UI/view-model mapping is explicit and tested where meaningful.
 
-## TypeScript and Linting
+## TypeScript, Security, and Maintainability
 
-- Strict typing is preserved.
-- `any` is avoided or justified at unsafe boundaries.
-- Function parameters and constructor dependencies remain understandable.
-- ESLint warnings are addressed or documented.
-- Formatting follows Prettier and EditorConfig.
-
-## Accessibility and Security
-
-- Semantic HTML is used where practical.
-- Interactive controls have labels and keyboard support.
-- Important state is not communicated only through color.
-- ARIA is valid and purposeful.
-- No secrets, tokens, credentials, personal data, or sensitive business data are logged or committed.
+- Strict typing is preserved; `any` and non-null assertions are avoided or justified.
+- Names are domain-specific and responsibilities are cohesive.
+- No secrets, tokens, credentials, PII, private endpoints, or sensitive business data are logged or committed.
+- Angular sanitization, binding, existing auth/permission patterns, and interceptor behavior are not bypassed.
+- Comments explain non-obvious domain or technical decisions rather than restating code.
 
 ## Tests and Validation
 
-- Meaningful behavior changes have tests.
-- Bug fixes include regression coverage when practical.
-- Tests focus on public behavior.
-- `npm run lint` has been run when practical.
-- `npm run test:ci` or the closest project test command has been run when practical.
-- `npm run build:prod` or the closest build command has been run when practical.
-
-## Performance-Sensitive UI Paths
-
-- Performance changes are based on measurement or an obvious bottleneck.
-- Large lists avoid unnecessary re-rendering.
-- Observable and signal computations avoid avoidable repeated expensive work.
-- Bundle-size impact is considered before adding dependencies.
+- Meaningful logic changes have tests; bug fixes include regression coverage when practical.
+- Tests focus on public behavior and mock API/provider boundaries.
+- Error paths, nullable mapping cases, route behavior, and edge cases are covered when touched.
+- Relevant checks passed, or remaining issues are documented:
+  - `npm run lint`
+  - `npm run test` or `npm run test:ci`
+  - `npm run build` or `npm run build:prod`

@@ -2,13 +2,13 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { APP_INITIALIZER, ErrorHandler, inject, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { environment } from 'environments/environment';
 
 import { NgxsReduxDevtoolsPluginModule } from '@ngxs/devtools-plugin';
 import { NgxsLoggerPluginModule } from '@ngxs/logger-plugin';
 import { NgxsModule } from '@ngxs/store';
 
 import * as Sentry from '@sentry/angular';
-import { environment } from 'environments/environment';
 
 import { BootstrapRoutingModule } from './app-bootstrap-routing.module';
 import { BaseLayoutComponent } from './components/base-layout/base-layout.component';

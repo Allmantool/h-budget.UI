@@ -9,6 +9,21 @@
 				"project": ["tsconfig.json", "e2e/tsconfig.json"],
 				"createDefaultProgram": true
 			},
+			"plugins": ["import"],
+			"settings": {
+				"import/internal-regex": "^@angular(?:/.*)?$",
+				"import/external-module-folders": ["node_modules"],
+				"import/parsers": {
+					"@typescript-eslint/parser": [".ts"]
+				},
+				"import/resolver": {
+					"alias": true,
+					"typescript": {
+						"alwaysTryTypes": true,
+						"project": "./tsconfig.json"
+					}
+				}
+			},
 			"extends": [
 				"plugin:@angular-eslint/recommended",
 				"plugin:@angular-eslint/template/process-inline-templates",
@@ -135,32 +150,7 @@
 		},
 		{
 			"files": ["*.html"],
-			"plugins": ["@typescript-eslint", "prettier", "import"],
-			"settings": {
-				"import/internal-regex": "@angular/**",
-				"import/external-module-folders": ["node_modules"],
-				"import/parsers": {
-					"@typescript-eslint/parser": [".ts"]
-				},
-				"import/resolver": {
-					"alias": true,
-					"typescript": {
-						"alwaysTryTypes": true,
-						"project": "./tsconfig.json"
-					}
-				}
-			},
-			"extends": [
-				"plugin:import/typescript",
-				"plugin:import/errors",
-				"plugin:import/warnings",
-				"plugin:import/recommended",
-				"plugin:@angular-eslint/template/recommended",
-				"plugin:prettier/recommended",
-				"eslint:recommended",
-				"plugin:@typescript-eslint/recommended",
-				"plugin:prettier/recommended"
-			],
+			"extends": ["plugin:@angular-eslint/template/recommended", "plugin:prettier/recommended"],
 			"rules": {
 				"@angular-eslint/template/alt-text": "warn",
 				"@angular-eslint/template/button-has-type": "warn",
@@ -171,6 +161,12 @@
 				"@angular-eslint/template/no-call-expression": "warn",
 				"@angular-eslint/template/no-negated-async": "warn",
 				"@angular-eslint/template/valid-aria": "warn"
+			}
+		},
+		{
+			"files": ["src/app/modules/shared/store/states/**/*.state.ts"],
+			"rules": {
+				"@typescript-eslint/unbound-method": "off"
 			}
 		}
 	]

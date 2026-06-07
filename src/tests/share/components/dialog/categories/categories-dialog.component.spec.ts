@@ -161,7 +161,7 @@ describe('categories-dialog.component', () => {
 			nativeElement: {
 				value: 'grid input value',
 			} as HTMLInputElement,
-		} as ElementRef<HTMLInputElement>;
+		};
 
 		componentUnderTest.selected({
 			option: {

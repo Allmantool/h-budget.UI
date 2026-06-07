@@ -62,7 +62,7 @@ export class CurrencyRatesGridComponent implements OnInit {
 		this.tableOptionsSignal = toSignal(this.currencyTableOptions$, { initialValue: {} as ICurrencyTableOptions });
 	}
 
-	async ngOnInit(): Promise<void> {
+	ngOnInit(): void {
 		this.todayCurrencyRateGroups$
 			.pipe(takeUntilDestroyed(this.destroyRef))
 			.subscribe((todayRateGroups: CurrencyRateGroupModel[]) => {
@@ -77,15 +77,17 @@ export class CurrencyRatesGridComponent implements OnInit {
 		combineLatest([this.previousDayRates$, this.todayCurrencyRateGroups$])
 			.pipe(takeUntilDestroyed(this.destroyRef))
 			.subscribe(([previousDayRates, todayRateGroups]) => {
-				this.loaderService.withLoader(async () => {
-					this.todayRatesTableDataSource = this.currencyRatesGridService.enrichWithTrend(
-						previousDayRates,
-						todayRateGroups
-					);
-				});
+				void this.loaderService.withLoader(() =>
+					Promise.resolve().then(() => {
+						this.todayRatesTableDataSource = this.currencyRatesGridService.enrichWithTrend(
+							previousDayRates,
+							todayRateGroups
+						);
+					})
+				);
 			});
 
-		await this.getTodayCurrencyRatesAsync();
+		void this.getTodayCurrencyRatesAsync();
 	}
 
 	public masterToggle(currencyId: number, abbreviation: string): void {
