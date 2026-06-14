@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.49 (2026-06-14)</small>
+
+* Merge pull request #667 from Allmantool/chore/deps-minor-upgrade ([1eaa10b2350e1cfecb9597110bc0cfb4ceb4c520](https://github.com/Allmantool/h-budget.UI/commit/1eaa10b2350e1cfecb9597110bc0cfb4ceb4c520)), closes [#667](https://github.com/Allmantool/h-budget.UI/issues/667)
+* build(deps): safe minor dependency upgrade ([a31b9e97145d60e8ed03549534df16e74c7cbd02](https://github.com/Allmantool/h-budget.UI/commit/a31b9e97145d60e8ed03549534df16e74c7cbd02))
+
 ## <small>1.1.48 (2026-06-07)</small>
 
 * Merge pull request #666 from Allmantool/tech/ehnance-auto-update-with-verification ([51000aa39213dcbcfb56cf112f4ddd82a015aac6](https://github.com/Allmantool/h-budget.UI/commit/51000aa39213dcbcfb56cf112f4ddd82a015aac6)), closes [#666](https://github.com/Allmantool/h-budget.UI/issues/666)
