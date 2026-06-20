@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.50 (2026-06-20)</small>
+
+* Merge pull request #668 from Allmantool/chore/deps-patch-upgrade ([ce29d2ed37fab41a27eb0478b3edce536c9a3709](https://github.com/Allmantool/h-budget.UI/commit/ce29d2ed37fab41a27eb0478b3edce536c9a3709)), closes [#668](https://github.com/Allmantool/h-budget.UI/issues/668)
+* build(deps): safe patch dependency upgrade ([83695ef1ce371e21bce954512666af991a08bdc1](https://github.com/Allmantool/h-budget.UI/commit/83695ef1ce371e21bce954512666af991a08bdc1))
+
 ## <small>1.1.49 (2026-06-14)</small>
 
 * Merge pull request #667 from Allmantool/chore/deps-minor-upgrade ([1eaa10b2350e1cfecb9597110bc0cfb4ceb4c520](https://github.com/Allmantool/h-budget.UI/commit/1eaa10b2350e1cfecb9597110bc0cfb4ceb4c520)), closes [#667](https://github.com/Allmantool/h-budget.UI/issues/667)
