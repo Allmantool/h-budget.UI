@@ -4,7 +4,7 @@ import * as _ from 'lodash';
 
 @Pipe({
 	name: 'currencyAbbreviationToFlagFormat',
-	standalone: false,
+	standalone: true,
 })
 export class CurrencyAbbreviationToFlagFormatPipe implements PipeTransform {
 	public transform(currencyAbbreviation: string): string {

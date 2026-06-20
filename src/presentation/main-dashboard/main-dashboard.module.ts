@@ -10,7 +10,7 @@ import { CustomUIComponentsSharedModule } from '../../app/modules/shared/custom-
 import { AppSharedModule } from '../../app/modules/shared/shared.module';
 
 @NgModule({
-	declarations: [MainDashboardComponent, MainDashboardCartComponent, DashboardLayoutComponent],
+	declarations: [MainDashboardComponent, DashboardLayoutComponent],
 	imports: [
 		MainDashboardRoutingModule,
 		AppSharedModule,
@@ -18,6 +18,7 @@ import { AppSharedModule } from '../../app/modules/shared/shared.module';
 		AppCoreModule,
 		AngularMaterialSharedModule,
 		CustomUIComponentsSharedModule,
+		MainDashboardCartComponent,
 	],
 	providers: [],
 	bootstrap: [DashboardLayoutComponent],

@@ -14,8 +14,14 @@ import { MainDashboardCartComponent } from './components/dashboard-item/main-das
 describe('main dashboard component', () => {
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
-			imports: [RouterTestingModule, NoopAnimationsModule, MatCardModule, MatButtonModule],
-			declarations: [MainDashboardComponent, MainDashboardCartComponent],
+			imports: [
+				RouterTestingModule,
+				NoopAnimationsModule,
+				MatCardModule,
+				MatButtonModule,
+				MainDashboardCartComponent,
+			],
+			declarations: [MainDashboardComponent],
 		}).compileComponents();
 	});
 

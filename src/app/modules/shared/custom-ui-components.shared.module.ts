@@ -10,19 +10,19 @@ import { ProgressSpinnerComponent } from './components/progress-spinner/progress
 import { AppSharedModule } from './shared.module';
 import { AppCoreModule } from '../core';
 
-const customUIComponents = [
+const standaloneCustomUIComponents = [
 	AppDividerComponent,
 	ProgressSpinnerComponent,
 	ProgressBarComponent,
-	DatepickerComponent,
-	AppFormFieldComponent,
 	AppButtonComponent,
 ];
 
+const declaredCustomUIComponents = [DatepickerComponent, AppFormFieldComponent];
+
 @NgModule({
-	declarations: [customUIComponents],
-	exports: [customUIComponents],
-	imports: [AppCoreModule, AppSharedModule, AngularMaterialSharedModule],
+	declarations: [declaredCustomUIComponents],
+	exports: [standaloneCustomUIComponents, declaredCustomUIComponents],
+	imports: [AppCoreModule, AppSharedModule, AngularMaterialSharedModule, standaloneCustomUIComponents],
 	providers: [],
 	bootstrap: [],
 })

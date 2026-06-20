@@ -5,7 +5,7 @@ import { DashboardLayoutComponent } from 'app/modules/app-bootstrap/components/d
 
 import { MainDashboardComponent } from './components/dashboard/main-dashboard.component';
 
-const routes: Routes = [
+export const mainDashboardRoutes: Routes = [
 	{
 		path: '',
 		component: DashboardLayoutComponent,
@@ -29,7 +29,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-	imports: [RouterModule.forChild(routes)],
+	imports: [RouterModule.forChild(mainDashboardRoutes)],
 	exports: [RouterModule],
 })
 export class MainDashboardRoutingModule {}

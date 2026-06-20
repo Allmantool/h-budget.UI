@@ -3,7 +3,7 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 
 import { PageNotFoundComponent } from '../shared/components/page-not-found/page-not-found.component';
 
-const routes: Routes = [
+export const appRoutes: Routes = [
 	{ path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 	{
 		path: 'dashboard',
@@ -13,7 +13,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-	imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })],
+	imports: [RouterModule.forRoot(appRoutes, { preloadingStrategy: PreloadAllModules })],
 	exports: [RouterModule],
 })
 export class BootstrapRoutingModule {}

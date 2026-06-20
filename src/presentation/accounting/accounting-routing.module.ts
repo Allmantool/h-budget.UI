@@ -6,7 +6,7 @@ import { PaymentAccountComponent } from './components/payment-account/payment-ac
 import { PaymentAccountCrudComponent } from './components/payment-account-crud/payment-account-crud.component';
 import { PaymentsDashboardComponent } from './components/payments-dashboard/payments-dashboard.component';
 
-const routes: Routes = [
+export const accountingRoutes: Routes = [
 	{ path: 'operations', component: PaymentsDashboardComponent },
 	{ path: '', component: PaymentAccountComponent },
 	{
@@ -18,7 +18,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-	imports: [RouterModule.forChild(routes)],
+	imports: [RouterModule.forChild(accountingRoutes)],
 	exports: [RouterModule],
 })
 export class AccountingRoutingModule {}

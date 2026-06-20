@@ -3,7 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { CurrencyRatesDashboardComponent } from './components/currency-rates-dashboard/currency-rates-dashboard.component';
 
-const routes: Routes = [
+export const currencyRatesRoutes: Routes = [
 	{
 		path: '',
 		component: CurrencyRatesDashboardComponent,
@@ -11,7 +11,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-	imports: [RouterModule.forChild(routes)],
+	imports: [RouterModule.forChild(currencyRatesRoutes)],
 	exports: [RouterModule],
 })
 export class CurrencyRatesRoutingModule {}
