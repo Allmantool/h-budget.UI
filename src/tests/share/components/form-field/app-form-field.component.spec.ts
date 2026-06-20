@@ -9,11 +9,10 @@ describe('app-form-field component', () => {
 
 	beforeEach(() => {
 		TestBed.configureTestingModule({
-			imports: [],
-			providers: [AppFormFieldComponent],
+			imports: [AppFormFieldComponent],
 		});
 
-		sut = TestBed.inject(AppFormFieldComponent);
+		sut = TestBed.createComponent(AppFormFieldComponent).componentInstance;
 
 		sut.disabled = false;
 		sut.selectOptions = ['opt1'];

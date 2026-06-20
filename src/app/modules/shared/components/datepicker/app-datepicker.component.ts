@@ -1,8 +1,13 @@
 /* eslint-disable @angular-eslint/no-output-on-prefix */
 
+import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, forwardRef, Input, OnInit, Output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerInputEvent } from '@angular/material/datepicker';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 
 import { BehaviorSubject } from 'rxjs';
 
@@ -18,7 +23,8 @@ import { BehaviorSubject } from 'rxjs';
 		},
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [AsyncPipe, MatDatepickerModule, MatFormFieldModule, MatInputModule, MatNativeDateModule],
 })
 export class DatepickerComponent implements ControlValueAccessor, OnInit {
 	private onTouched!: () => void;
