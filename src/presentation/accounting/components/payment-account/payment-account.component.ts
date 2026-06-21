@@ -1,3 +1,4 @@
+import { NgFor } from '@angular/common';
 import {
 	ChangeDetectionStrategy,
 	Component,
@@ -7,16 +8,19 @@ import {
 	signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { MatSelectionListChange } from '@angular/material/list';
+import { MatButtonModule } from '@angular/material/button';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule, MatSelectionListChange } from '@angular/material/list';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import * as _ from 'lodash';
 
 import { Store } from '@ngxs/store';
 import { Observable, take } from 'rxjs';
-import { nameof } from 'ts-simple-nameof';
 import { Guid } from 'typescript-guid';
 
+import { CurrencyAbbreviationToFlagFormatPipe } from '../../../../app/modules/shared/pipes/currency-abbreviation-to-flag.pipe';
 import { LoaderService } from '../../../../app/modules/shared/services/loader-service';
 import {
 	SetActivePaymentAccount,
@@ -32,7 +36,15 @@ import { IPaymentAccountModel } from '../../../../domain/models/accounting/payme
 	templateUrl: './payment-account.component.html',
 	styleUrls: ['./payment-account.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [
+		NgFor,
+		MatButtonModule,
+		MatExpansionModule,
+		MatIconModule,
+		MatListModule,
+		CurrencyAbbreviationToFlagFormatPipe,
+	],
 })
 export class PaymentAccountComponent implements OnInit {
 	public isNavigateToOperationsDisabled: boolean = true;
@@ -58,11 +70,11 @@ export class PaymentAccountComponent implements OnInit {
 		runInInjectionContext(this.injector, () => {
 			this.paymentAccounts$.pipe(takeUntilDestroyed()).subscribe(accounts => {
 				this.cashAccountsSignal.set(
-					_.filter(accounts, [nameof<IPaymentAccountModel>(p => p.type), AccountTypes.WalletCache])
+					_.filter(accounts, (account: IPaymentAccountModel) => account.type === AccountTypes.WalletCache)
 				);
 
 				this.debitVirtualAccountsSignal.set(
-					_.filter(accounts, [nameof<IPaymentAccountModel>(p => p.type), AccountTypes.Virtual])
+					_.filter(accounts, (account: IPaymentAccountModel) => account.type === AccountTypes.Virtual)
 				);
 
 				this.creditVirtualAccountsSignal.set(
