@@ -46,7 +46,7 @@ import { CurrencyExchangeService } from '../../data/providers/rates/currency-exc
 import { ExchangeRatesMappingProfile } from '../../data/providers/rates/mappers/exchange-rates-mapping.profile';
 
 @NgModule({
-	declarations: [AccountingLayoutComponent, AccountingOperationsCrudComponent],
+	declarations: [AccountingLayoutComponent],
 	imports: [
 		AngularMaterialSharedModule,
 		RouterLink,
@@ -57,6 +57,7 @@ import { ExchangeRatesMappingProfile } from '../../data/providers/rates/mappers/
 		AppCoreModule,
 		AccountingRoutingModule,
 		DialogsSharedModule,
+		AccountingOperationsCrudComponent,
 		PaymentAccountComponent,
 		PaymentAccountCrudComponent,
 		PaymentsDashboardComponent,

@@ -1,6 +1,9 @@
+import { NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, Signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { OperationTypes } from 'domain/types/operation.types';
 
 import * as _ from 'lodash';
@@ -10,6 +13,9 @@ import { BehaviorSubject, combineLatest, Observable, take } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { Guid } from 'typescript-guid';
 
+import { AppButtonComponent } from '../../../../app/modules/shared/components/button/app-button.component';
+import { DatepickerComponent } from '../../../../app/modules/shared/components/datepicker/app-datepicker.component';
+import { AppFormFieldComponent } from '../../../../app/modules/shared/components/form-field/app-form-field.component';
 import { SelectDropdownOptions } from '../../../../app/modules/shared/models/select-dropdown-options';
 import { IAccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
 import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
@@ -24,6 +30,12 @@ import {
 	getCategoryAsNodesMap,
 	getCategoryNodes,
 } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
+import {
+	getContractorAsNodesMap,
+	getContractorNodes,
+} from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
+import { CrossAccountsTransferProvider } from '../../../../data/providers/accounting/cross-accounts-transfer.provider';
+import '../../../../domain/extensions/handbookExtensions';
 import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
 import { IContractorModel } from '../../../../domain/models/accounting/contractor.model.';
 import { PaymentOperationTypes } from '../../../../domain/models/accounting/operation-types';
@@ -31,21 +43,24 @@ import { IPaymentOperationModel } from '../../../../domain/models/accounting/pay
 import { IPaymentRepresentationModel } from '../../models/operation-record';
 import { AccountingOperationsService } from '../../services/accounting-operations.service';
 import { CategoriesDialogService } from '../../services/categories-dialog.service';
-import { PaymentsHistoryService } from '../../services/payments-history.service';
-import '../../../../domain/extensions/handbookExtensions';
 import { ContractorsDialogService } from '../../services/contractors-dialog.service';
-import {
-	getContractorAsNodesMap,
-	getContractorNodes,
-} from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
-import { CrossAccountsTransferProvider } from '../../../../data/providers/accounting/cross-accounts-transfer.provider';
+import { PaymentsHistoryService } from '../../services/payments-history.service';
 
 @Component({
 	selector: 'accounting-crud',
 	templateUrl: './accounting-operations-crud.component.html',
 	styleUrls: ['./accounting-operations-crud.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [
+		NgIf,
+		ReactiveFormsModule,
+		MatButtonModule,
+		MatIconModule,
+		AppButtonComponent,
+		DatepickerComponent,
+		AppFormFieldComponent,
+	],
 })
 export class AccountingOperationsCrudComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);
