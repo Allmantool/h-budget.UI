@@ -18,7 +18,7 @@ export const mainDashboardRoutes: Routes = [
 	{
 		path: 'currency-rates',
 		component: DashboardLayoutComponent,
-		loadChildren: () => import('../currency-rates').then(m => m.CurrencyRatesModule),
+		loadChildren: () => import('../currency-rates/currency-rates.routes').then(m => m.currencyRatesRoutes),
 	},
 	{
 		path: 'accounting',
