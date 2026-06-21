@@ -1,12 +1,18 @@
 import { SelectionModel } from '@angular/cdk/collections';
+import { DatePipe, NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, Signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
 import { Select, Store } from '@ngxs/store';
 import { combineLatest, Observable, Subject } from 'rxjs';
 
 import { RatesDialogService } from './../../services/rates-dialog.service';
+import { ProgressSpinnerComponent } from '../../../../app/modules/shared/components/progress-spinner/progress-spinner.component';
+import { CurrencyAbbreviationToFlagFormatPipe } from '../../../../app/modules/shared/pipes/currency-abbreviation-to-flag.pipe';
 import { LoaderService } from '../../../../app/modules/shared/services/loader-service';
 import { ICurrencyTableOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-table-options';
 import { IPreviousDayCurrencyRate } from '../../../../app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
@@ -30,7 +36,17 @@ import { CurrencyRatesGridService } from '../../services/currency-rates-grid.ser
 	templateUrl: './currency-rates-grid.component.html',
 	styleUrls: ['./currency-rates-grid.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [
+		DatePipe,
+		NgIf,
+		MatButtonModule,
+		MatButtonToggleModule,
+		MatCheckboxModule,
+		MatTableModule,
+		CurrencyAbbreviationToFlagFormatPipe,
+		ProgressSpinnerComponent,
+	],
 })
 export class CurrencyRatesGridComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);
