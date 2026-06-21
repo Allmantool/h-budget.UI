@@ -50,7 +50,6 @@ import { ExchangeRatesMappingProfile } from '../../data/providers/rates/mappers/
 		AccountingLayoutComponent,
 		AccountingOperationsCrudComponent,
 		PaymentAccountComponent,
-		PaymentsHistoryComponent,
 		PaymentsDashboardComponent,
 		PaymentAccountCrudComponent,
 	],
@@ -64,6 +63,7 @@ import { ExchangeRatesMappingProfile } from '../../data/providers/rates/mappers/
 		AppCoreModule,
 		AccountingRoutingModule,
 		DialogsSharedModule,
+		PaymentsHistoryComponent,
 		NgxsModule.forFeature([
 			AccountingOperationsState,
 			AccountingOperationsTableState,
