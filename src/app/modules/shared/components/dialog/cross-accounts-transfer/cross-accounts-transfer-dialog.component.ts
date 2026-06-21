@@ -1,9 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { ENTER } from '@angular/cdk/keycodes';
+import { NgFor } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, Inject, signal, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatStepperModule } from '@angular/material/stepper';
 
 import _ from 'lodash';
 
@@ -28,13 +32,27 @@ import {
 	getActivePaymentAccountId,
 	getPaymentAccounts,
 } from '../../../store/states/accounting/selectors/payment-account.selector';
+import { DatepickerComponent } from '../../datepicker/app-datepicker.component';
+import { AppFormFieldComponent } from '../../form-field/app-form-field.component';
+import { ProgressBarComponent } from '../../progress-bar/progress-bar.component';
 
 @Component({
 	selector: 'cross-accounts-transfer-dialog',
 	templateUrl: './cross-accounts-transfer-dialog.component.html',
 	styleUrls: ['./cross-accounts-transfer-dialog.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [
+		AppFormFieldComponent,
+		DatepickerComponent,
+		MatButtonModule,
+		MatDialogModule,
+		MatIconModule,
+		MatStepperModule,
+		NgFor,
+		ProgressBarComponent,
+		ReactiveFormsModule,
+	],
 })
 export class CrossAccountsTransferDialogComponent {
 	private dialogConfiguration: DialogContainer<ICrossAccountsTransferModel, Result<ICrossAccountsTransferResponse>>;
