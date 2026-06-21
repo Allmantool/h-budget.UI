@@ -1,7 +1,12 @@
 import { ChangeDetectionStrategy, Component, computed, Inject, signal, Signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+import { MatStepperModule } from '@angular/material/stepper';
 import { Result } from 'core/result';
 
 import * as _ from 'lodash';
@@ -15,6 +20,7 @@ import { CurrencyAbbreviations } from '../../../constants/rates-abbreviations';
 import { DialogContainer } from '../../../models/dialog-container';
 import { DialogOperationTypes } from '../../../models/dialog-operation-types';
 import { SelectDropdownOptions } from '../../../models/select-dropdown-options';
+import { CurrencyAbbreviationToFlagFormatPipe } from '../../../pipes/currency-abbreviation-to-flag.pipe';
 import {
 	AddPaymentAccount,
 	UpdatePaymentAccount,
@@ -23,13 +29,27 @@ import {
 	getActivePaymentAccountId,
 	getPaymentAccounts,
 } from '../../../store/states/accounting/selectors/payment-account.selector';
+import { AppFormFieldComponent } from '../../form-field/app-form-field.component';
+import { ProgressBarComponent } from '../../progress-bar/progress-bar.component';
 
 @Component({
 	selector: 'payment-account-dialog',
 	templateUrl: './payment-account-dialog.component.html',
 	styleUrls: ['./payment-account-dialog.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [
+		ReactiveFormsModule,
+		MatButtonModule,
+		MatDialogModule,
+		MatDividerModule,
+		MatIconModule,
+		MatListModule,
+		MatStepperModule,
+		AppFormFieldComponent,
+		ProgressBarComponent,
+		CurrencyAbbreviationToFlagFormatPipe,
+	],
 })
 export class PaymentAccountDialogComponent {
 	private dialogConfiguration: DialogContainer<Result<IPaymentAccountModel>, Result<IPaymentAccountModel>>;

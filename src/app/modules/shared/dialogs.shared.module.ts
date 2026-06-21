@@ -16,6 +16,7 @@ const standaloneDialogComponents = [
 	CategoriesDialogComponent,
 	ContractorsDialogComponent,
 	CrossAccountsTransferDialogComponent,
+	PaymentAccountDialogComponent,
 ];
 
 const dialogComponents = [
@@ -26,10 +27,8 @@ const dialogComponents = [
 	CrossAccountsTransferDialogComponent,
 ];
 
-const moduleDialogComponents = [PaymentAccountDialogComponent];
-
 @NgModule({
-	declarations: [moduleDialogComponents],
+	declarations: [],
 	exports: [dialogComponents],
 	imports: [
 		AppCoreModule,
