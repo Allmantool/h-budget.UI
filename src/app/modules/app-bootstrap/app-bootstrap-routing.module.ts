@@ -7,7 +7,10 @@ export const appRoutes: Routes = [
 	{ path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 	{
 		path: 'dashboard',
-		loadChildren: () => import('../../../presentation/main-dashboard').then(m => m.MainDashboardModule),
+		loadChildren: () =>
+			import('../../../presentation/main-dashboard/main-dashboard-routing.module').then(
+				m => m.mainDashboardRoutes
+			),
 	},
 	{ path: '**', component: PageNotFoundComponent },
 ];

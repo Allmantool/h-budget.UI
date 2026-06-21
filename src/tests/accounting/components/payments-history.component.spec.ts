@@ -32,7 +32,6 @@ import { IPaymentRepresentationModel } from '../../../presentation/accounting/mo
 import { AccountsService } from '../../../presentation/accounting/services/accounts.service';
 import { HandbooksService } from '../../../presentation/accounting/services/handbooks.service';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
-import { MainDashboardModule } from '../../../presentation/main-dashboard/main-dashboard.module';
 
 describe('payments history component', () => {
 	let sut: PaymentsHistoryComponent;
@@ -90,7 +89,6 @@ describe('payments history component', () => {
 		// eslint-disable-next-line @typescript-eslint/no-floating-promises
 		TestBed.configureTestingModule({
 			imports: [
-				MainDashboardModule,
 				AccountingRoutingModule,
 				NgxsModule.forRoot(
 					[

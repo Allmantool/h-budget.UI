@@ -13,10 +13,16 @@ import { MainDashboardComponent } from '../../presentation/main-dashboard/compon
 import { mainDashboardRoutes } from '../../presentation/main-dashboard/main-dashboard-routing.module';
 
 describe('SPA routing', () => {
-	it('configures app bootstrap routes for dashboard and not found flows', () => {
+	it('configures app bootstrap routes for dashboard and not found flows', async () => {
+		const dashboardRoute = appRoutes.find(route => route.path === 'dashboard');
+		const loadedDashboardBoundary = await dashboardRoute?.loadChildren?.();
+
 		expect(appRoutes).toContain(jasmine.objectContaining({ path: '', redirectTo: 'dashboard', pathMatch: 'full' }));
-		expect(appRoutes).toContain(jasmine.objectContaining({ path: 'dashboard' }));
-		expect(appRoutes.find(route => route.path === 'dashboard')?.loadChildren).toBeDefined();
+		expect(dashboardRoute).toEqual(jasmine.objectContaining({ path: 'dashboard' }));
+		expect(dashboardRoute?.loadChildren).toBeDefined();
+		expect(Array.isArray(loadedDashboardBoundary)).toBeTrue();
+		expect(typeof loadedDashboardBoundary).not.toBe('function');
+		expect(loadedDashboardBoundary).toBe(mainDashboardRoutes);
 		expect(appRoutes).toContain(jasmine.objectContaining({ path: '**', component: PageNotFoundComponent }));
 	});
 
