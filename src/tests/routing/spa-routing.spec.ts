@@ -10,7 +10,7 @@ import { PaymentsDashboardComponent } from '../../presentation/accounting/compon
 import { CurrencyRatesDashboardComponent } from '../../presentation/currency-rates/components/currency-rates-dashboard/currency-rates-dashboard.component';
 import { currencyRatesRoutes } from '../../presentation/currency-rates/currency-rates-routing.module';
 import { MainDashboardComponent } from '../../presentation/main-dashboard/components/dashboard/main-dashboard.component';
-import { mainDashboardRoutes } from '../../presentation/main-dashboard/main-dashboard-routing.module';
+import { mainDashboardRoutes } from '../../presentation/main-dashboard/main-dashboard.routes';
 
 describe('SPA routing', () => {
 	it('configures app bootstrap routes for dashboard and not found flows', async () => {

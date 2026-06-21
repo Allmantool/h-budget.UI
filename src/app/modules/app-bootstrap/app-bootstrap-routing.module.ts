@@ -8,9 +8,7 @@ export const appRoutes: Routes = [
 	{
 		path: 'dashboard',
 		loadChildren: () =>
-			import('../../../presentation/main-dashboard/main-dashboard-routing.module').then(
-				m => m.mainDashboardRoutes
-			),
+			import('../../../presentation/main-dashboard/main-dashboard.routes').then(m => m.mainDashboardRoutes),
 	},
 	{ path: '**', component: PageNotFoundComponent },
 ];
