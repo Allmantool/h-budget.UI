@@ -11,7 +11,7 @@ import { DialogProvider } from './providers/dialog-provider';
 import { AppSharedModule } from './shared.module';
 import { AppCoreModule } from '../core';
 
-const standaloneDialogComponents = [DateRangeDialogComponent];
+const standaloneDialogComponents = [DateRangeDialogComponent, CategoriesDialogComponent];
 
 const dialogComponents = [
 	DateRangeDialogComponent,
@@ -22,7 +22,6 @@ const dialogComponents = [
 ];
 
 const moduleDialogComponents = [
-	CategoriesDialogComponent,
 	PaymentAccountDialogComponent,
 	ContractorsDialogComponent,
 	CrossAccountsTransferDialogComponent,

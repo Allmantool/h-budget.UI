@@ -69,6 +69,7 @@ describe('categories-dialog.component', () => {
 				AngularMaterialSharedModule,
 				CustomUIComponentsSharedModule,
 				AppSharedModule,
+				CategoriesDialogComponent,
 				NgxsModule.forRoot([CategoriesState], ngxsConfig),
 			],
 			providers: [
