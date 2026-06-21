@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, OnInit, signal, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
 import { Router } from '@angular/router';
 import { CrossAccountsTransferService } from 'presentation/accounting/services/cross-accounts-transfer.dialog.service';
 
@@ -18,13 +19,15 @@ import {
 } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
+import { PaymentsHistoryComponent } from '../payments-history/payments-history.component';
 
 @Component({
 	selector: 'payments-dashboard',
 	templateUrl: './payments-dashboard.component.html',
 	styleUrls: ['./payments-dashboard.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [MatButtonModule, PaymentsHistoryComponent],
 })
 export class PaymentsDashboardComponent implements OnInit {
 	public paymentAccountGeneralInfoSignal: Signal<string> = signal('');
