@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 
 import { MainDashboardComponent } from './components/dashboard/main-dashboard.component';
-import { MainDashboardCartComponent } from './components/dashboard-item/main-dashboard-cart.component';
 import { MainDashboardRoutingModule } from './main-dashboard-routing.module';
 import { DashboardLayoutComponent } from '../../app/modules/app-bootstrap/components/dashboard-layout/dashboard-layout.component';
 import { AppCoreModule } from '../../app/modules/core/core.module';
@@ -10,15 +9,15 @@ import { CustomUIComponentsSharedModule } from '../../app/modules/shared/custom-
 import { AppSharedModule } from '../../app/modules/shared/shared.module';
 
 @NgModule({
-	declarations: [MainDashboardComponent, DashboardLayoutComponent],
+	declarations: [DashboardLayoutComponent],
 	imports: [
 		MainDashboardRoutingModule,
+		MainDashboardComponent,
 		AppSharedModule,
 		AngularMaterialSharedModule,
 		AppCoreModule,
 		AngularMaterialSharedModule,
 		CustomUIComponentsSharedModule,
-		MainDashboardCartComponent,
 	],
 	providers: [],
 	bootstrap: [DashboardLayoutComponent],

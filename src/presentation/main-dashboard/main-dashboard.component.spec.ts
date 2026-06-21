@@ -3,8 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { TestBed } from '@angular/core/testing';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
+import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 
@@ -14,14 +13,7 @@ import { MainDashboardCartComponent } from './components/dashboard-item/main-das
 describe('main dashboard component', () => {
 	beforeEach(async () => {
 		await TestBed.configureTestingModule({
-			imports: [
-				RouterTestingModule,
-				NoopAnimationsModule,
-				MatCardModule,
-				MatButtonModule,
-				MainDashboardCartComponent,
-			],
-			declarations: [MainDashboardComponent],
+			imports: [RouterTestingModule, NoopAnimationsModule, MainDashboardComponent],
 		}).compileComponents();
 	});
 
@@ -45,5 +37,23 @@ describe('main dashboard component', () => {
 		const cards = compiled.querySelectorAll('main-dashboard-cart');
 
 		expect(cards.length).toBe(2);
+	});
+
+	it('should bind dashboard cards in the expected order with route targets', () => {
+		const fixture = TestBed.createComponent(MainDashboardComponent);
+		fixture.detectChanges();
+
+		const cards = fixture.debugElement
+			.queryAll(By.directive(MainDashboardCartComponent))
+			.map(card => card.componentInstance as MainDashboardCartComponent);
+
+		expect(cards.map(card => card.title)).toEqual(['Currencies', 'Accounting']);
+		expect(cards.map(card => card.subtitle)).toEqual(['Currency rates information', 'Financial operations']);
+		expect(cards.map(card => card.imagePath)).toEqual(['/assets/currency-rates.png', '/assets/accounting-v2.jpg']);
+		expect(cards.map(card => card.navigateLink)).toEqual(['/dashboard/currency-rates', '/dashboard/accounting']);
+		expect(cards.map(card => card.description)).toEqual([
+			'Review market trends, compare currencies, and inspect historical movement with interactive charts.',
+			'Manage accounts, inspect operations, and work with detail panels without breaking your flow.',
+		]);
 	});
 });
