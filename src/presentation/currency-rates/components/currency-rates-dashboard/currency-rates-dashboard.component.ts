@@ -1,5 +1,7 @@
+import { DatePipe, NgFor, NgIf, SlicePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, OnInit, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { MatCardModule } from '@angular/material/card';
 import { Title } from '@angular/platform-browser';
 
 import * as _ from 'lodash';
@@ -19,6 +21,7 @@ import {
 	ApexTooltip,
 	ApexXAxis,
 	ApexYAxis,
+	NgApexchartsModule,
 } from 'ng-apexcharts';
 import { Observable } from 'rxjs';
 
@@ -27,6 +30,8 @@ import { getCurrencyTableOptions } from '../../../../app/modules/shared/store/st
 import { getRates } from '../../../../app/modules/shared/store/states/rates/selectors/currency.selectors';
 import { CurrencyRateValueModel } from '../../../../domain/models/rates/currency-rate-value.model';
 import { CurrencyRateGroupModel } from '../../../../domain/models/rates/currency-rates-group.model';
+import { CurrencyRatesGridComponent } from '../currency-rates-grid/currency-rates-grid.component';
+import { CurrencyRatesLineChartComponent } from '../currency-rates-line-chart/currency-rates-line-chart.component';
 
 interface CurrencyTrendComparison {
 	currencyId: number;
@@ -70,7 +75,17 @@ type MarketShareChartOptions = {
 	templateUrl: './currency-rates-dashboard.component.html',
 	styleUrls: ['./currency-rates-dashboard.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [
+		DatePipe,
+		NgFor,
+		NgIf,
+		SlicePipe,
+		MatCardModule,
+		NgApexchartsModule,
+		CurrencyRatesGridComponent,
+		CurrencyRatesLineChartComponent,
+	],
 })
 export class CurrencyRatesDashboardComponent implements OnInit {
 	@Select(getCurrencyTableOptions)

@@ -24,7 +24,6 @@ import { CurrencyRatesState } from '../../app/modules/shared/store/states/rates/
 import { CurrencyTableState } from '../../app/modules/shared/store/states/rates/currency-table.state';
 
 @NgModule({
-	declarations: [CurrencyRatesDashboardComponent],
 	imports: [
 		CurrencyRatesRoutingModule,
 		AppCoreModule,
@@ -32,6 +31,7 @@ import { CurrencyTableState } from '../../app/modules/shared/store/states/rates/
 		AngularMaterialSharedModule,
 		CustomUIComponentsSharedModule,
 		DialogsSharedModule,
+		CurrencyRatesDashboardComponent,
 		CurrencyRatesGridComponent,
 		CurrencyRatesLineChartComponent,
 		NgxsModule.forFeature([CurrencyRatesState, CurrencyTableState, CurrencyChartState]),
