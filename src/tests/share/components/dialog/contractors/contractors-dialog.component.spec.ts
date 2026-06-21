@@ -66,6 +66,7 @@ describe('contractors-dialog.component', () => {
 				AngularMaterialSharedModule,
 				CustomUIComponentsSharedModule,
 				AppSharedModule,
+				ContractorsDialogComponent,
 				NgxsModule.forRoot([ContractorsState], ngxsConfig),
 			],
 			providers: [

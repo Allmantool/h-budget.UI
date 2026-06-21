@@ -1,12 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 
 import { ENTER } from '@angular/cdk/keycodes';
+import { AsyncPipe, NgFor } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, Inject, signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { MatChipInputEvent } from '@angular/material/chips';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { MatButtonModule } from '@angular/material/button';
+import { MatChipInputEvent, MatChipsModule } from '@angular/material/chips';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 
 import * as _ from 'lodash';
 
@@ -16,13 +20,26 @@ import { map, Observable, startWith, take } from 'rxjs';
 import { IContractorModel } from '../../../../../../domain/models/accounting/contractor.model.';
 import { DialogContainer } from '../../../models/dialog-container';
 import { AddCounterParty } from '../../../store/states/handbooks/actions/contractor.actions';
+import { ProgressBarComponent } from '../../progress-bar/progress-bar.component';
 
 @Component({
 	selector: 'contractors-dialog',
 	templateUrl: './contractors-dialog.component.html',
 	styleUrls: ['./contractors-dialog.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [
+		AsyncPipe,
+		MatAutocompleteModule,
+		MatButtonModule,
+		MatChipsModule,
+		MatDialogModule,
+		MatFormFieldModule,
+		MatIconModule,
+		NgFor,
+		ProgressBarComponent,
+		ReactiveFormsModule,
+	],
 })
 export class ContractorsDialogComponent {
 	private dialogConfiguration: DialogContainer<IContractorModel, IContractorModel>;

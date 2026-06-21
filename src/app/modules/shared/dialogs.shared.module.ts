@@ -11,7 +11,7 @@ import { DialogProvider } from './providers/dialog-provider';
 import { AppSharedModule } from './shared.module';
 import { AppCoreModule } from '../core';
 
-const standaloneDialogComponents = [DateRangeDialogComponent, CategoriesDialogComponent];
+const standaloneDialogComponents = [DateRangeDialogComponent, CategoriesDialogComponent, ContractorsDialogComponent];
 
 const dialogComponents = [
 	DateRangeDialogComponent,
@@ -21,11 +21,7 @@ const dialogComponents = [
 	CrossAccountsTransferDialogComponent,
 ];
 
-const moduleDialogComponents = [
-	PaymentAccountDialogComponent,
-	ContractorsDialogComponent,
-	CrossAccountsTransferDialogComponent,
-];
+const moduleDialogComponents = [PaymentAccountDialogComponent, CrossAccountsTransferDialogComponent];
 
 @NgModule({
 	declarations: [moduleDialogComponents],
