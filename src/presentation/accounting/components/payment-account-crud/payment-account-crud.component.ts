@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
 
 import * as _ from 'lodash';
 
@@ -16,7 +19,8 @@ import { PaymentAccountDialogService } from '../../services/payment-account-dial
 	templateUrl: './payment-account-crud.component.html',
 	styleUrls: ['./payment-account-crud.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [MatButtonModule, MatIconModule, MatListModule],
 })
 export class PaymentAccountCrudComponent {
 	public activePaymentAccountGuidSignal: Signal<string>;
