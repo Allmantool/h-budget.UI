@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
@@ -6,7 +8,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 	templateUrl: './main-dashboard-cart.component.html',
 	styleUrls: ['./main-dashboard-cart.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [MatButtonModule, MatCardModule],
 })
 export class MainDashboardCartComponent {
 	@Input() description: string = '';

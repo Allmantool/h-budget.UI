@@ -1,11 +1,15 @@
+import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
 	selector: 'app-button',
 	templateUrl: './app-button.component.html',
 	styleUrls: ['./app-button.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [CommonModule, MatButtonModule, MatIconModule],
 })
 export class AppButtonComponent {
 	@Input() public text: string = '';

@@ -58,6 +58,7 @@ describe('rates dialog service', () => {
 				AngularMaterialSharedModule,
 				CustomUIComponentsSharedModule,
 				AppSharedModule,
+				DateRangeDialogComponent,
 				NgxsModule.forRoot([CurrencyTableState], ngxsConfig),
 			],
 			providers: [

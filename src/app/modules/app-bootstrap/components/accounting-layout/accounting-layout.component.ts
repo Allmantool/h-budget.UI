@@ -1,6 +1,8 @@
+import { AsyncPipe, NgFor, NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, Signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
+import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 
 import * as _ from 'lodash';
 
@@ -8,6 +10,7 @@ import { Select } from '@ngxs/store';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
 
+import { ProgressSpinnerComponent } from '../../../shared/components/progress-spinner/progress-spinner.component';
 import { requestsUnderProcessing } from '../../../shared/store/states/core/selectors/core-app.selectors';
 
 interface AccountingNavigationItem {
@@ -22,7 +25,8 @@ interface AccountingNavigationItem {
 	templateUrl: './accounting-layout.component.html',
 	styleUrls: ['./accounting-layout.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [AsyncPipe, NgFor, NgIf, MatButtonModule, RouterLink, RouterOutlet, ProgressSpinnerComponent],
 })
 export class AccountingLayoutComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);

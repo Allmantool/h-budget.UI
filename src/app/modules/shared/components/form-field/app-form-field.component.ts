@@ -2,8 +2,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 
+import { AsyncPipe, NgFor, NgSwitch, NgSwitchCase, NgSwitchDefault, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 
 import _ from 'lodash';
 
@@ -12,6 +16,7 @@ import { BehaviorSubject } from 'rxjs';
 import { DefaultInputTypeValuesFactory } from '../../factories/default-type-values.factory';
 import { InputTypes } from '../../models/input-types';
 import { SelectDropdownOptions } from '../../models/select-dropdown-options';
+import { AccountingCurrencyFormatPipe } from '../../pipes/accounting-currency.pipe';
 import { FormInput } from '../../types/form-input.type';
 
 @Component({
@@ -26,7 +31,19 @@ import { FormInput } from '../../types/form-input.type';
 		},
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [
+		AsyncPipe,
+		NgFor,
+		NgSwitch,
+		NgSwitchCase,
+		NgSwitchDefault,
+		NgTemplateOutlet,
+		MatFormFieldModule,
+		MatInputModule,
+		MatSelectModule,
+		AccountingCurrencyFormatPipe,
+	],
 })
 export class AppFormFieldComponent implements ControlValueAccessor {
 	private onTouched!: () => void;

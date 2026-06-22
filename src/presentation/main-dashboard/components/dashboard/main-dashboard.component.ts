@@ -2,12 +2,15 @@ import { Location } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 
+import { MainDashboardCartComponent } from '../dashboard-item/main-dashboard-cart.component';
+
 @Component({
 	selector: 'main-dashboard',
 	templateUrl: './main-dashboard.component.html',
 	styleUrls: ['./main-dashboard.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [MainDashboardCartComponent],
 })
 export class MainDashboardComponent implements OnInit {
 	constructor(

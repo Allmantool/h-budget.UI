@@ -1,11 +1,10 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { AccountingLayoutComponent } from 'app/modules/app-bootstrap/components/accounting-layout/accounting-layout.component';
 import { DashboardLayoutComponent } from 'app/modules/app-bootstrap/components/dashboard-layout/dashboard-layout.component';
 
 import { MainDashboardComponent } from './components/dashboard/main-dashboard.component';
 
-const routes: Routes = [
+export const mainDashboardRoutes: Routes = [
 	{
 		path: '',
 		component: DashboardLayoutComponent,
@@ -19,17 +18,11 @@ const routes: Routes = [
 	{
 		path: 'currency-rates',
 		component: DashboardLayoutComponent,
-		loadChildren: () => import('../currency-rates').then(m => m.CurrencyRatesModule),
+		loadChildren: () => import('../currency-rates/currency-rates.routes').then(m => m.currencyRatesRoutes),
 	},
 	{
 		path: 'accounting',
 		component: AccountingLayoutComponent,
-		loadChildren: () => import('../accounting').then(m => m.AccountingModule),
+		loadChildren: () => import('../accounting/accounting.routes').then(m => m.accountingRoutes),
 	},
 ];
-
-@NgModule({
-	imports: [RouterModule.forChild(routes)],
-	exports: [RouterModule],
-})
-export class MainDashboardRoutingModule {}

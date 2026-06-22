@@ -1,10 +1,20 @@
 import { ENTER } from '@angular/cdk/keycodes';
+import { AsyncPipe, NgFor } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, Inject, signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormControl, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
-import { MatChipInputEvent } from '@angular/material/chips';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {
+	FormControl,
+	ReactiveFormsModule,
+	UntypedFormBuilder,
+	UntypedFormControl,
+	UntypedFormGroup,
+} from '@angular/forms';
+import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { MatButtonModule } from '@angular/material/button';
+import { MatChipInputEvent, MatChipsModule } from '@angular/material/chips';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 
 import * as _ from 'lodash';
 
@@ -15,13 +25,28 @@ import { ICategoryModel } from '../../../../../../domain/models/accounting/categ
 import { PaymentOperationTypes } from '../../../../../../domain/models/accounting/operation-types';
 import { DialogContainer } from '../../../models/dialog-container';
 import { AddCategory } from '../../../store/states/handbooks/actions/category.actions';
+import { AppFormFieldComponent } from '../../form-field/app-form-field.component';
+import { ProgressBarComponent } from '../../progress-bar/progress-bar.component';
 
 @Component({
 	selector: 'categories-dialog',
 	templateUrl: './categories-dialog.component.html',
 	styleUrls: ['./categories-dialog.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [
+		AppFormFieldComponent,
+		AsyncPipe,
+		MatAutocompleteModule,
+		MatButtonModule,
+		MatChipsModule,
+		MatDialogModule,
+		MatFormFieldModule,
+		MatIconModule,
+		NgFor,
+		ProgressBarComponent,
+		ReactiveFormsModule,
+	],
 })
 export class CategoriesDialogComponent {
 	private dialogConfiguration: DialogContainer<ICategoryModel, ICategoryModel>;

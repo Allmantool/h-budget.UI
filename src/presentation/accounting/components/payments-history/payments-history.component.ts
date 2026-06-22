@@ -1,3 +1,4 @@
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import {
 	AfterViewInit,
 	ChangeDetectionStrategy,
@@ -9,6 +10,7 @@ import {
 	Signal,
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { MatTableModule } from '@angular/material/table';
 import { SseService } from 'infrastructure/sse-service';
 
 import * as _ from 'lodash';
@@ -24,6 +26,7 @@ import { SetActiveAccountingOperation } from '../../../../app/modules/shared/sto
 import { getAccountPayments } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import { getActivePaymentAccountId } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
+import { AccountingCurrencyFormatPipe } from '../../../../app/modules/shared/pipes/accounting-currency.pipe';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
 import { IPaymentRepresentationModel } from '../../models/operation-record';
 import { AccountsService } from '../../services/accounts.service';
@@ -35,7 +38,8 @@ import { PaymentsHistoryService } from '../../services/payments-history.service'
 	templateUrl: './payments-history.component.html',
 	styleUrls: ['./payments-history.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [CurrencyPipe, DatePipe, MatTableModule, AccountingCurrencyFormatPipe],
 })
 export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewInit {
 	private readonly destroyRef = inject(DestroyRef);

@@ -24,7 +24,7 @@ import { ngxsConfig } from '../shared/store/ngxs.config';
 import { CoreAppState } from '../shared/store/states/core/core-app.state';
 
 @NgModule({
-	declarations: [BaseLayoutComponent],
+	declarations: [],
 	imports: [
 		NgxsModule.forRoot([CoreAppState], ngxsConfig),
 		NgxsLoggerPluginModule.forRoot(),
@@ -36,6 +36,7 @@ import { CoreAppState } from '../shared/store/states/core/core-app.state';
 		BrowserModule,
 		AngularMaterialSharedModule,
 		BrowserAnimationsModule,
+		BaseLayoutComponent,
 	],
 	providers: [
 		{

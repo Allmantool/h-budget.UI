@@ -64,7 +64,7 @@
 	</aside>
 
 	<div
-		*ngIf="isDataLoading$ | async"
+		*ngIf="!rootAppOutlet.isActivated && (isDataLoading$ | async)"
 		class="overlay"
 	>
 		<div class="spinner-wrapper">

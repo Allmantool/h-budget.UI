@@ -3,17 +3,18 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 
 import { PageNotFoundComponent } from '../shared/components/page-not-found/page-not-found.component';
 
-const routes: Routes = [
+export const appRoutes: Routes = [
 	{ path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 	{
 		path: 'dashboard',
-		loadChildren: () => import('../../../presentation/main-dashboard').then(m => m.MainDashboardModule),
+		loadChildren: () =>
+			import('../../../presentation/main-dashboard/main-dashboard.routes').then(m => m.mainDashboardRoutes),
 	},
 	{ path: '**', component: PageNotFoundComponent },
 ];
 
 @NgModule({
-	imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules })],
+	imports: [RouterModule.forRoot(appRoutes, { preloadingStrategy: PreloadAllModules })],
 	exports: [RouterModule],
 })
 export class BootstrapRoutingModule {}

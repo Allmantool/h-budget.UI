@@ -11,7 +11,6 @@ import { AccountingCurrencyFormatPipe } from './pipes/accounting-currency.pipe';
 import { CurrencyAbbreviationToFlagFormatPipe } from './pipes/currency-abbreviation-to-flag.pipe';
 
 @NgModule({
-	declarations: [PageNotFoundComponent, AccountingCurrencyFormatPipe, CurrencyAbbreviationToFlagFormatPipe],
 	exports: [
 		CommonModule,
 
@@ -25,7 +24,14 @@ import { CurrencyAbbreviationToFlagFormatPipe } from './pipes/currency-abbreviat
 		AccountingCurrencyFormatPipe,
 		CurrencyAbbreviationToFlagFormatPipe,
 	],
-	imports: [AppCoreModule, ReactiveFormsModule, AngularMaterialSharedModule],
+	imports: [
+		AppCoreModule,
+		ReactiveFormsModule,
+		AngularMaterialSharedModule,
+		PageNotFoundComponent,
+		AccountingCurrencyFormatPipe,
+		CurrencyAbbreviationToFlagFormatPipe,
+	],
 	providers: [],
 	bootstrap: [],
 })

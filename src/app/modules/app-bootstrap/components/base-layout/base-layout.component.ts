@@ -1,6 +1,7 @@
+import { NgFor } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, Signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
 
 import * as _ from 'lodash';
 
@@ -22,7 +23,8 @@ interface PrimaryNavigationItem {
 	templateUrl: './base-layout.component.html',
 	styleUrls: ['./base-layout.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [NgFor, RouterLink, RouterOutlet],
 })
 export class BaseLayoutComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);

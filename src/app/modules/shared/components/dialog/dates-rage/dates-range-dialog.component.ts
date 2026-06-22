@@ -1,19 +1,23 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChangeDetectionStrategy, Component, Inject, signal } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
 import { take } from 'rxjs';
 
 import { DialogContainer } from '../../../../shared/models/dialog-container';
+import { DatepickerComponent } from '../../datepicker/app-datepicker.component';
+import { ProgressBarComponent } from '../../progress-bar/progress-bar.component';
 
 @Component({
 	selector: 'dates-range-dialog',
 	templateUrl: './dates-range-dialog.component.html',
 	styleUrls: ['./dates-range-dialog.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [DatepickerComponent, MatButtonModule, MatDialogModule, ProgressBarComponent, ReactiveFormsModule],
 })
 export class DateRangeDialogComponent {
 	private dialogConfiguration: DialogContainer<any, any>;

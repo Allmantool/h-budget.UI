@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
+import { AsyncPipe, NgIf } from '@angular/common';
 import {
 	AfterViewInit,
 	ChangeDetectionStrategy,
@@ -15,10 +16,11 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
-import { ChartComponent } from 'ng-apexcharts';
+import { ChartComponent, NgApexchartsModule } from 'ng-apexcharts';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
+import { ProgressSpinnerComponent } from '../../../../app/modules/shared/components/progress-spinner/progress-spinner.component';
 import { ICurrencyTableOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-table-options';
 import { FetchAllCurrencyRates } from '../../../../app/modules/shared/store/states/rates/actions/currency.actions';
 import { getCurrencyTableOptions } from '../../../../app/modules/shared/store/states/rates/selectors/currency-table-options.selectors';
@@ -34,7 +36,8 @@ import { LineChartService } from '../../services/line-chart.service';
 	templateUrl: './currency-rates-line-chart.component.html',
 	styleUrls: ['./currency-rates-line-chart.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
-	standalone: false,
+	standalone: true,
+	imports: [AsyncPipe, NgIf, NgApexchartsModule, ProgressSpinnerComponent],
 })
 export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
 	private readonly destroyRef = inject(DestroyRef);
