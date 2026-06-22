@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { NgxsModule, Store } from '@ngxs/store';
@@ -12,16 +12,26 @@ import { AddProcessingRequest } from '../../../shared/store/states/core/actions/
 import { CoreAppState } from '../../../shared/store/states/core/core-app.state';
 
 @Component({
+	selector: 'accounting-layout-primary-route',
 	standalone: true,
 	template: 'primary accounting route',
 })
 class PrimaryRouteComponent {}
 
 @Component({
+	selector: 'accounting-layout-right-sidebar-route',
 	standalone: true,
 	template: 'right sidebar accounting route',
 })
 class RightSidebarRouteComponent {}
+
+@Component({
+	selector: 'accounting-layout-route-host',
+	standalone: true,
+	imports: [RouterOutlet],
+	template: '<router-outlet></router-outlet>',
+})
+class AccountingLayoutRouteHostComponent {}
 
 describe('AccountingLayoutComponent', () => {
 	let fixture: ComponentFixture<AccountingLayoutComponent>;
@@ -104,5 +114,40 @@ describe('AccountingLayoutComponent', () => {
 		const nativeElement = fixture.nativeElement as HTMLElement;
 
 		expect(nativeElement.querySelector('.overlay')).not.toBeNull();
+	});
+
+	it('does not cover active routed accounting content when a request is still processing', async () => {
+		fixture.destroy();
+		TestBed.resetTestingModule();
+
+		await TestBed.configureTestingModule({
+			imports: [
+				RouterTestingModule.withRoutes([
+					{
+						path: 'dashboard/accounting',
+						component: AccountingLayoutComponent,
+						children: [{ path: '', component: PrimaryRouteComponent }],
+					},
+				]),
+				NgxsModule.forRoot([CoreAppState], ngxsConfig),
+				AccountingLayoutRouteHostComponent,
+			],
+		}).compileComponents();
+
+		const routedFixture = TestBed.createComponent(AccountingLayoutRouteHostComponent);
+		const router = TestBed.inject(Router);
+		const store = TestBed.inject(Store);
+
+		await router.navigateByUrl('/dashboard/accounting');
+		routedFixture.detectChanges();
+		await routedFixture.whenStable();
+
+		store.dispatch(new AddProcessingRequest('accounting-layout-active-route-request'));
+		routedFixture.detectChanges();
+
+		const nativeElement = routedFixture.nativeElement as HTMLElement;
+
+		expect(nativeElement.textContent).toContain('primary accounting route');
+		expect(nativeElement.querySelector('.overlay')).toBeNull();
 	});
 });

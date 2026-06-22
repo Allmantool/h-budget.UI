@@ -1,3 +1,4 @@
+import { NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, OnInit, signal, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,7 +28,7 @@ import { PaymentsHistoryComponent } from '../payments-history/payments-history.c
 	styleUrls: ['./payments-dashboard.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [MatButtonModule, PaymentsHistoryComponent],
+	imports: [NgIf, MatButtonModule, PaymentsHistoryComponent],
 })
 export class PaymentsDashboardComponent implements OnInit {
 	public paymentAccountGeneralInfoSignal: Signal<string> = signal('');
@@ -41,9 +42,12 @@ export class PaymentsDashboardComponent implements OnInit {
 	@Select(getAccountPayments)
 	public accountPayments$!: Observable<IPaymentOperationModel[]>;
 
-	public activePaymentsAccountSignal: Signal<IPaymentAccountModel> = toSignal(this.activePaymentAccount$, {
-		initialValue: {} as IPaymentAccountModel,
-	});
+	public activePaymentsAccountSignal: Signal<IPaymentAccountModel | undefined> = toSignal(
+		this.activePaymentAccount$,
+		{
+			initialValue: undefined,
+		}
+	);
 
 	public accountPaymentsSignal: Signal<IPaymentOperationModel[]> = toSignal(this.accountPayments$, {
 		initialValue: [],
@@ -58,10 +62,16 @@ export class PaymentsDashboardComponent implements OnInit {
 		private readonly store: Store,
 		private readonly accountsTransferService: CrossAccountsTransferService
 	) {
-		this.paymentAccountGeneralInfoSignal = computed(
-			() => `${this.activePaymentAccountIdSignal()?.toString()}
-				${this.activePaymentsAccountSignal().emitter} | ${this.activePaymentsAccountSignal().description}`
-		);
+		this.paymentAccountGeneralInfoSignal = computed(() => {
+			const activePaymentAccount = this.activePaymentsAccountSignal();
+
+			if (_.isNil(activePaymentAccount)) {
+				return '';
+			}
+
+			return `${this.activePaymentAccountIdSignal()?.toString()}
+				${activePaymentAccount.emitter} | ${activePaymentAccount.description}`;
+		});
 	}
 
 	public readonly accountingSummarySignal = computed(() => {
@@ -89,7 +99,7 @@ export class PaymentsDashboardComponent implements OnInit {
 	});
 
 	public ngOnInit(): void {
-		if (_.isNil(this.activePaymentsAccountSignal())) {
+		if (_.isNil(this.store.selectSnapshot(getActivePaymentAccount))) {
 			void this.navigateToPaymentAccountsAsync();
 		}
 	}

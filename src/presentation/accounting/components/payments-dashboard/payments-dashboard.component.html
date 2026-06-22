@@ -1,10 +1,13 @@
-<section class="payments-dashboard">
+<section
+	*ngIf="activePaymentsAccountSignal() as activePaymentAccount; else selectPaymentAccount"
+	class="payments-dashboard"
+>
 	<div class="payments-dashboard__hero">
 		<div>
 			<p class="payments-dashboard__eyebrow">Active account</p>
-			<h1 class="payments-dashboard__title">{{ activePaymentsAccountSignal().emitter }}</h1>
+			<h1 class="payments-dashboard__title">{{ activePaymentAccount.emitter }}</h1>
 			<p class="payments-dashboard__copy">
-				{{ activePaymentsAccountSignal().description }} · {{ activePaymentsAccountSignal().currency }}
+				{{ activePaymentAccount.description }} · {{ activePaymentAccount.currency }}
 			</p>
 			<div class="payments-dashboard__actions">
 				<button
@@ -25,8 +28,8 @@
 
 		<div class="payments-dashboard__balance-card">
 			<span class="payments-dashboard__balance-label">Current balance</span>
-			<strong>{{ activePaymentsAccountSignal().balance }}</strong>
-			<span>{{ activePaymentsAccountSignal().currency }}</span>
+			<strong>{{ activePaymentAccount.balance }}</strong>
+			<span>{{ activePaymentAccount.currency }}</span>
 		</div>
 	</div>
 
@@ -44,19 +47,39 @@
 		<div class="payments-dashboard__summary-card">
 			<span class="payments-dashboard__summary-label">Income</span>
 			<strong>{{ accountingSummarySignal().income }}</strong>
-			<span>{{ activePaymentsAccountSignal().currency }}</span>
+			<span>{{ activePaymentAccount.currency }}</span>
 		</div>
 		<div class="payments-dashboard__summary-card">
 			<span class="payments-dashboard__summary-label">Expense</span>
 			<strong>{{ accountingSummarySignal().expense }}</strong>
-			<span>{{ activePaymentsAccountSignal().currency }}</span>
+			<span>{{ activePaymentAccount.currency }}</span>
 		</div>
 		<div class="payments-dashboard__summary-card payments-dashboard__summary-card--net">
 			<span class="payments-dashboard__summary-label">Net flow</span>
 			<strong>{{ accountingSummarySignal().net }}</strong>
-			<span>{{ activePaymentsAccountSignal().currency }}</span>
+			<span>{{ activePaymentAccount.currency }}</span>
 		</div>
 	</div>
 
 	<payments-history></payments-history>
 </section>
+
+<ng-template #selectPaymentAccount>
+	<section class="payments-dashboard">
+		<div class="payments-dashboard__hero">
+			<div>
+				<p class="payments-dashboard__eyebrow">Active account</p>
+				<h1 class="payments-dashboard__title">Select a payment account</h1>
+				<p class="payments-dashboard__copy">Operations are available after an account is selected.</p>
+				<div class="payments-dashboard__actions">
+					<button
+						mat-stroked-button
+						(click)="navigateToPaymentAccountsAsync()"
+					>
+						Change account
+					</button>
+				</div>
+			</div>
+		</div>
+	</section>
+</ng-template>

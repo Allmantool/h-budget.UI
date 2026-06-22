@@ -100,6 +100,17 @@ describe('payment account CRUD component', () => {
 		expect(paymentAccountDialogServiceSpy.openForUpdate.calls.count()).toBe(0);
 	});
 
+	it('should open the create dialog from the rendered add button when no account is selected', () => {
+		const addButton = getButtonByLabel('Add a payment account');
+
+		expect(addButton?.disabled).toBeFalse();
+
+		addButton?.click();
+
+		expect(paymentAccountDialogServiceSpy.openForSave.calls.count()).toBe(1);
+		expect(paymentAccountDialogServiceSpy.openForUpdate.calls.count()).toBe(0);
+	});
+
 	it('should open the update dialog with the active payment account identity', async () => {
 		await setActivePaymentAccount(accountId);
 

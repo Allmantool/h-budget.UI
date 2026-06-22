@@ -186,6 +186,33 @@ describe('payments dashboard component', () => {
 		expect(navigateSpy.calls.mostRecent().args).toEqual([['/dashboard/accounting'], { relativeTo: null }]);
 	});
 
+	it('should safely return to account selection when operations initialize without an active account', async () => {
+		const navigateSpy = spyOn(router, 'navigate').and.resolveTo(true);
+
+		fixture.destroy();
+		store.reset({
+			...store.snapshot(),
+			paymentAccounts: {
+				activeAccountGuid: '',
+				accounts: [],
+			},
+		});
+		paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.reset();
+
+		fixture = TestBed.createComponent(PaymentsDashboardComponent);
+		component = fixture.componentInstance;
+
+		expect(() => fixture.detectChanges()).not.toThrow();
+
+		await fixture.whenStable();
+		fixture.detectChanges();
+
+		expect(navigateSpy.calls.mostRecent().args).toEqual([['/dashboard/accounting'], { relativeTo: null }]);
+		expect(getNativeText()).toContain('Select a payment account');
+		expect(getNativeElement().querySelector('payments-history')).toBeNull();
+		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(0);
+	});
+
 	function createPaymentOperation(amount: number, operationDate: Date): IPaymentOperationModel {
 		return {
 			key: Guid.create(),
