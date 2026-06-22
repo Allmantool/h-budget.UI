@@ -13,12 +13,11 @@ import { CategoriesState } from '../../../app/modules/shared/store/states/handbo
 import { ContractorsState } from '../../../app/modules/shared/store/states/handbooks/contractors.state';
 import { HandbooksState } from '../../../app/modules/shared/store/states/handbooks/handbooks.state';
 import { PaymentRepresentationsMappingProfile } from '../../../data/providers/accounting/mappers/payment-representations.mapping.profile';
-import { ICategoryModel } from '../../../domain/models/accounting/category.model';
-import { IContractorModel } from '../../../domain/models/accounting/contractor.model.';
 import { PaymentOperationTypes } from '../../../domain/models/accounting/operation-types';
 import { IPaymentHistoryModel } from '../../../domain/models/accounting/payment-history.model';
 import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 import { OperationTypes } from '../../../domain/types/operation.types';
+import '../../../domain/extensions/handbookExtensions';
 
 describe('payment-representations-mapping.profile tests', () => {
 	let mapper: Mapper;

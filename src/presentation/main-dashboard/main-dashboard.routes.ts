@@ -23,6 +23,6 @@ export const mainDashboardRoutes: Routes = [
 	{
 		path: 'accounting',
 		component: AccountingLayoutComponent,
-		loadChildren: () => import('../accounting').then(m => m.AccountingModule),
+		loadChildren: () => import('../accounting/accounting.routes').then(m => m.accountingRoutes),
 	},
 ];
