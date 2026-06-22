@@ -1,5 +1,35 @@
 # 📦 Changelog
 
+## <small>1.1.51 (2026-06-22)</small>
+
+* Converted BaseLayoutComponent to standalone ([8e0421b5a685fe77e182c2ca8cd1b7b8d758d5d4](https://github.com/Allmantool/h-budget.UI/commit/8e0421b5a685fe77e182c2ca8cd1b7b8d758d5d4))
+* Merge pull request #669 from Allmantool/tech/move-to-standalone-components ([34343ae7c9f786708927ee390533ce7111ab8afb](https://github.com/Allmantool/h-budget.UI/commit/34343ae7c9f786708927ee390533ce7111ab8afb)), closes [#669](https://github.com/Allmantool/h-budget.UI/issues/669)
+* chore: 10-Converted only CurrencyRatesLineChartComponent to standalone ([ddcc24b8a9a04046b435757615ffd44ca51df396](https://github.com/Allmantool/h-budget.UI/commit/ddcc24b8a9a04046b435757615ffd44ca51df396))
+* chore: 11-Converted CurrencyRatesDashboardComponent to standalone ([4a9fd53484f47ecd0ce28f5267e71e11c8b13e28](https://github.com/Allmantool/h-budget.UI/commit/4a9fd53484f47ecd0ce28f5267e71e11c8b13e28))
+* chore: 11-Converted only CurrencyRatesGridComponent to standalone ([274af57f3b17cc9191783445ff0c4c608a69befa](https://github.com/Allmantool/h-budget.UI/commit/274af57f3b17cc9191783445ff0c4c608a69befa))
+* chore: 12-Converted only PaymentsHistoryComponent to standalone ([d54319d38418eab92a8d76021a2a4ad1fd165b21](https://github.com/Allmantool/h-budget.UI/commit/d54319d38418eab92a8d76021a2a4ad1fd165b21))
+* chore: 12-Migrated Currency Rates from the lazy NgModule boundary to a standalone ([ae2a731665f622f54d7bb3721f0f57055f5c6c6a](https://github.com/Allmantool/h-budget.UI/commit/ae2a731665f622f54d7bb3721f0f57055f5c6c6a))
+* chore: 13-Converted only PaymentsDashboardComponent to standalone ([094bf91ca45337d6360f3e62fa9a9c766bf79d42](https://github.com/Allmantool/h-budget.UI/commit/094bf91ca45337d6360f3e62fa9a9c766bf79d42))
+* chore: 14-Converted PaymentAccountComponent to standalone ([573676b47921dd23c928568c7f198b9b9e5a6f58](https://github.com/Allmantool/h-budget.UI/commit/573676b47921dd23c928568c7f198b9b9e5a6f58))
+* chore: 15-Converted only PaymentAccountCrudComponent to standalone ([02ae1cc560b3ef77e596820bbbfa6cedd41dc9d9](https://github.com/Allmantool/h-budget.UI/commit/02ae1cc560b3ef77e596820bbbfa6cedd41dc9d9))
+* chore: 16-Converted AccountingOperationsCrudComponent to standalone ([f092e847d728b8e39996db20ba0c6dc62d7f84b0](https://github.com/Allmantool/h-budget.UI/commit/f092e847d728b8e39996db20ba0c6dc62d7f84b0))
+* chore: 17-Converted only AccountingLayoutComponent to standalone ([8ec74496919c4edfb92760a9b4ddbd3bea43156e](https://github.com/Allmantool/h-budget.UI/commit/8ec74496919c4edfb92760a9b4ddbd3bea43156e))
+* chore: 18-Completed the Accounting route/provider boundary migration. ([138ae05c548dcbbe78bbe60f06774b7e5008e52b](https://github.com/Allmantool/h-budget.UI/commit/138ae05c548dcbbe78bbe60f06774b7e5008e52b))
+* chore: 3-Converted only `DateRangeDialogComponent` to standalone ([98c076e2034ee382b12178d46f8bf5f471999b17](https://github.com/Allmantool/h-budget.UI/commit/98c076e2034ee382b12178d46f8bf5f471999b17))
+* chore: 4-Converted only ContractorsDialogComponent to standalone ([768bdc86b92aa2576b11e597de308eabd02aeb93](https://github.com/Allmantool/h-budget.UI/commit/768bdc86b92aa2576b11e597de308eabd02aeb93))
+* chore: 5-Converted only CrossAccountsTransferDialogComponent to standalone ([f8f22a1cfd082901ed444295f1954cd9c244946b](https://github.com/Allmantool/h-budget.UI/commit/f8f22a1cfd082901ed444295f1954cd9c244946b))
+* chore: 6-Converted only PaymentAccountDialogComponent to standalone ([7e87eb39e433453f3f912cb7fa7128a348991f43](https://github.com/Allmantool/h-budget.UI/commit/7e87eb39e433453f3f912cb7fa7128a348991f43))
+* chore: 7-Converted only DashboardLayoutComponent to standalone ([192b3f40535a37eb33c138b252b4fa07dbb9022c](https://github.com/Allmantool/h-budget.UI/commit/192b3f40535a37eb33c138b252b4fa07dbb9022c))
+* chore: 7-Converted only MainDashboardComponent to standalone ([1da28589745b81849a80257cdba435026ff42ea7](https://github.com/Allmantool/h-budget.UI/commit/1da28589745b81849a80257cdba435026ff42ea7))
+* chore: 8-Migrated only the root /dashboard ([6fa40f9564dad9f661a33d7c73529a84bde4c6f9](https://github.com/Allmantool/h-budget.UI/commit/6fa40f9564dad9f661a33d7c73529a84bde4c6f9))
+* chore: 9-Removed the dead Main Dashboard NgModule wrappers and moved mainDashboardRoutes into a neutral route file. ([4266b0c8ac14b8c8a42097312901e63f1ee52644](https://github.com/Allmantool/h-budget.UI/commit/4266b0c8ac14b8c8a42097312901e63f1ee52644))
+* chore: convert only CategoriesDialogComponent to standalone ([148a8a8478183c38c2cd76abaeef8aea6a758c14](https://github.com/Allmantool/h-budget.UI/commit/148a8a8478183c38c2cd76abaeef8aea6a758c14))
+* chore: self review ([b18e51ce74ae37437c4ca60531df9275e18b9b91](https://github.com/Allmantool/h-budget.UI/commit/b18e51ce74ae37437c4ca60531df9275e18b9b91))
+* chore: tune ([581eb7be7197a1af9f54f19a638d58b66acafb27](https://github.com/Allmantool/h-budget.UI/commit/581eb7be7197a1af9f54f19a638d58b66acafb27))
+* test: add test coverage ([fc68d4d730273ad52b7acbbe0d1e750388858dac](https://github.com/Allmantool/h-budget.UI/commit/fc68d4d730273ad52b7acbbe0d1e750388858dac))
+* tech: 1-Implemented the first standalone migration slice ([40673ee386bd1d2a88cf0482f92ff56a2e8f1419](https://github.com/Allmantool/h-budget.UI/commit/40673ee386bd1d2a88cf0482f92ff56a2e8f1419))
+* tech: 2-Converted only the shared CVA controls to standalone and kept CustomUIComponentsSharedModule as a transitional NgModule wrapper ([4cd77940fc2612f4523717a577de2ca5a022168e](https://github.com/Allmantool/h-budget.UI/commit/4cd77940fc2612f4523717a577de2ca5a022168e))
+
 ## <small>1.1.50 (2026-06-20)</small>
 
 * Merge pull request #668 from Allmantool/chore/deps-patch-upgrade ([ce29d2ed37fab41a27eb0478b3edce536c9a3709](https://github.com/Allmantool/h-budget.UI/commit/ce29d2ed37fab41a27eb0478b3edce536c9a3709)), closes [#668](https://github.com/Allmantool/h-budget.UI/issues/668)
