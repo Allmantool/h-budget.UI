@@ -53,10 +53,8 @@
 		</div>
 	</section>
 
-	<section
-		class="rates-comparison"
-		*ngIf="selectedCurrencyComparisonSignal()"
-	>
+	@if (selectedCurrencyComparisonSignal()) {
+	<section class="rates-comparison">
 		<mat-card class="rates-panel">
 			<div class="rates-panel__header rates-panel__header--compact">
 				<div>
@@ -69,7 +67,6 @@
 					Trend ranking is calculated as cross-rates against the selected currency in the active date window.
 				</p>
 			</div>
-
 			<div class="rates-comparison__summary">
 				<div class="rates-comparison__pill">
 					<span class="rates-comparison__pill-label">Current rank</span>
@@ -81,21 +78,17 @@
 					<strong>{{ selectedCurrencyComparisonSignal()?.trend }}%</strong>
 					<span>baseline for {{ tableOptionsSignal().selectedItem.abbreviation }}</span>
 				</div>
-				<div
-					class="rates-comparison__pill"
-					*ngIf="peerComparisonSignal()"
-				>
+				@if (peerComparisonSignal()) {
+				<div class="rates-comparison__pill">
 					<span class="rates-comparison__pill-label">Relative position</span>
 					<strong>{{ peerComparisonSignal()?.outperforming }}</strong>
 					<span>currencies behind, {{ peerComparisonSignal()?.underperforming }} ahead</span>
 				</div>
+				}
 			</div>
-
 			<div class="rates-comparison__grid">
-				<div
-					class="rates-compare-card rates-compare-card--leader"
-					*ngIf="strongestCurrencySignal()"
-				>
+				@if (strongestCurrencySignal()) {
+				<div class="rates-compare-card rates-compare-card--leader">
 					<p class="rates-compare-card__label">Strongest mover</p>
 					<div class="rates-compare-card__value">
 						{{ strongestCurrencySignal()?.abbreviation }}
@@ -103,7 +96,7 @@
 					</div>
 					<p class="rates-compare-card__meta">{{ strongestCurrencySignal()?.name }}</p>
 				</div>
-
+				}
 				<div class="rates-compare-card rates-compare-card--active">
 					<p class="rates-compare-card__label">Active currency</p>
 					<div class="rates-compare-card__value">
@@ -115,11 +108,8 @@
 						selectedCurrencyComparisonSignal()?.latestRate }}
 					</p>
 				</div>
-
-				<div
-					class="rates-compare-card rates-compare-card--laggard"
-					*ngIf="weakestCurrencySignal()"
-				>
+				@if (weakestCurrencySignal()) {
+				<div class="rates-compare-card rates-compare-card--laggard">
 					<p class="rates-compare-card__label">Weakest mover</p>
 					<div class="rates-compare-card__value">
 						{{ weakestCurrencySignal()?.abbreviation }}
@@ -127,8 +117,8 @@
 					</div>
 					<p class="rates-compare-card__meta">{{ weakestCurrencySignal()?.name }}</p>
 				</div>
+				}
 			</div>
-
 			<div class="rates-infographics">
 				<div class="rates-infographics__card">
 					<div class="rates-infographics__header">
@@ -140,7 +130,6 @@
 							Shows which currencies strengthened or weakened against the selected currency.
 						</p>
 					</div>
-
 					<apx-chart
 						[series]="trendLeaderboardChartSignal().series"
 						[chart]="trendLeaderboardChartSignal().chart"
@@ -153,7 +142,6 @@
 						[fill]="trendLeaderboardChartSignal().fill"
 					></apx-chart>
 				</div>
-
 				<div class="rates-infographics__card">
 					<div class="rates-infographics__header">
 						<div>
@@ -164,7 +152,6 @@
 							Shows how many currencies are above or below the selected currency baseline.
 						</p>
 					</div>
-
 					<apx-chart
 						[series]="marketPositionChartSignal().series"
 						[chart]="marketPositionChartSignal().chart"
@@ -178,7 +165,6 @@
 					></apx-chart>
 				</div>
 			</div>
-
 			<div class="rates-leaderboard">
 				<div class="rates-leaderboard__header">
 					<span>Trend leaderboard</span>
@@ -187,10 +173,10 @@
 						tableOptionsSignal().selectedItem.abbreviation }}
 					</span>
 				</div>
-
 				<div class="rates-leaderboard__list">
+					@for (comparison of currencyComparisonsSignal() | slice: 0 : 6; track comparison.currencyId; let
+					index = $index) {
 					<div
-						*ngFor="let comparison of currencyComparisonsSignal() | slice: 0 : 6; let index = index"
 						class="rates-leaderboard__item"
 						[class.rates-leaderboard__item--active]="comparison.currencyId === tableOptionsSignal().selectedItem.currencyId"
 					>
@@ -203,10 +189,12 @@
 						</div>
 						<div class="rates-leaderboard__trend">{{ comparison.trend }}%</div>
 					</div>
+					}
 				</div>
 			</div>
 		</mat-card>
 	</section>
+	}
 
 	<section class="rates-dashboard-content">
 		<mat-card class="rates-panel rates-panel--chart">

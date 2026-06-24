@@ -1,7 +1,5 @@
-<section
-	*ngIf="activePaymentsAccountSignal() as activePaymentAccount; else selectPaymentAccount"
-	class="payments-dashboard"
->
+@if (activePaymentsAccountSignal(); as activePaymentAccount) {
+<section class="payments-dashboard">
 	<div class="payments-dashboard__hero">
 		<div>
 			<p class="payments-dashboard__eyebrow">Active account</p>
@@ -25,14 +23,12 @@
 				</button>
 			</div>
 		</div>
-
 		<div class="payments-dashboard__balance-card">
 			<span class="payments-dashboard__balance-label">Current balance</span>
 			<strong>{{ activePaymentAccount.balance }}</strong>
 			<span>{{ activePaymentAccount.currency }}</span>
 		</div>
 	</div>
-
 	<div class="payments-dashboard__summary">
 		<div class="payments-dashboard__summary-card">
 			<span class="payments-dashboard__summary-label">Operations</span>
@@ -60,26 +56,24 @@
 			<span>{{ activePaymentAccount.currency }}</span>
 		</div>
 	</div>
-
 	<payments-history></payments-history>
 </section>
-
-<ng-template #selectPaymentAccount>
-	<section class="payments-dashboard">
-		<div class="payments-dashboard__hero">
-			<div>
-				<p class="payments-dashboard__eyebrow">Active account</p>
-				<h1 class="payments-dashboard__title">Select a payment account</h1>
-				<p class="payments-dashboard__copy">Operations are available after an account is selected.</p>
-				<div class="payments-dashboard__actions">
-					<button
-						mat-stroked-button
-						(click)="navigateToPaymentAccountsAsync()"
-					>
-						Change account
-					</button>
-				</div>
+} @else {
+<section class="payments-dashboard">
+	<div class="payments-dashboard__hero">
+		<div>
+			<p class="payments-dashboard__eyebrow">Active account</p>
+			<h1 class="payments-dashboard__title">Select a payment account</h1>
+			<p class="payments-dashboard__copy">Operations are available after an account is selected.</p>
+			<div class="payments-dashboard__actions">
+				<button
+					mat-stroked-button
+					(click)="navigateToPaymentAccountsAsync()"
+				>
+					Change account
+				</button>
 			</div>
 		</div>
-	</section>
-</ng-template>
+	</div>
+</section>
+}

@@ -1,5 +1,5 @@
 import { ENTER } from '@angular/cdk/keycodes';
-import { AsyncPipe, NgFor } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, Inject, signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -43,7 +43,6 @@ import { ProgressBarComponent } from '../../progress-bar/progress-bar.component'
 		MatDialogModule,
 		MatFormFieldModule,
 		MatIconModule,
-		NgFor,
 		ProgressBarComponent,
 		ReactiveFormsModule,
 	],

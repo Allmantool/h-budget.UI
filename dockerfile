@@ -21,7 +21,7 @@ RUN npm run build:prod --if-present --verbose
 
 FROM nginx:alpine3.18 AS publish
 
-COPY --from=build /app/dist/h-budget /usr/share/nginx/html
+COPY --from=build /app/dist/h-budget/browser /usr/share/nginx/html
 
 EXPOSE 80
 EXPOSE 443

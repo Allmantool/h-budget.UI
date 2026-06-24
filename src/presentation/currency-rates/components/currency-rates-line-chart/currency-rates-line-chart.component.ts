@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-floating-promises */
-import { AsyncPipe, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import {
 	AfterViewInit,
 	ChangeDetectionStrategy,
@@ -37,7 +37,7 @@ import { LineChartService } from '../../services/line-chart.service';
 	styleUrls: ['./currency-rates-line-chart.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [AsyncPipe, NgIf, NgApexchartsModule, ProgressSpinnerComponent],
+	imports: [AsyncPipe, NgApexchartsModule, ProgressSpinnerComponent],
 })
 export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
 	private readonly destroyRef = inject(DestroyRef);

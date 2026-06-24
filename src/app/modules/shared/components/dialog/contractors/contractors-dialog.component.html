@@ -10,17 +10,19 @@
 
 				<mat-chip-grid
 					#chipGrid
-					aria-label="Couterparties selection">
-					<mat-chip-row
-						*ngFor="let partyNode of partyNodes"
-						(removed)="remove(partyNode)">
+					aria-label="Couterparties selection"
+				>
+					@for (partyNode of partyNodes; track partyNode) {
+					<mat-chip-row (removed)="remove(partyNode)">
 						{{partyNode}}
 						<button
 							matChipRemove
-							[attr.aria-label]="'remove ' + partyNode">
+							[attr.aria-label]="'remove ' + partyNode"
+						>
 							<mat-icon>cancel</mat-icon>
 						</button>
 					</mat-chip-row>
+					}
 				</mat-chip-grid>
 				<input
 					placeholder="New contractor..."
@@ -29,15 +31,15 @@
 					[matChipInputFor]="chipGrid"
 					[matAutocomplete]="auto"
 					[matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-					(matChipInputTokenEnd)="add($event)" />
+					(matChipInputTokenEnd)="add($event)"
+				/>
 				<mat-autocomplete
 					#auto="matAutocomplete"
-					(optionSelected)="selected($event)">
-					<mat-option
-						*ngFor="let filteredPartyNode of filteredPartyNodes$ | async"
-						[value]="filteredPartyNode">
-						{{filteredPartyNode}}
-					</mat-option>
+					(optionSelected)="selected($event)"
+				>
+					@for (filteredPartyNode of filteredPartyNodes$ | async; track filteredPartyNode) {
+					<mat-option [value]="filteredPartyNode">{{filteredPartyNode}}</mat-option>
+					}
 				</mat-autocomplete>
 			</mat-form-field>
 		</form>
@@ -47,14 +49,16 @@
 		<button
 			mat-raised-button
 			mat-dialog-close
-			(click)="close()">
+			(click)="close()"
+		>
 			Close
 		</button>
 		<button
 			mat-raised-button
 			color="primary"
 			[disabled]="isSaveDisabled"
-			(click)="save()">
+			(click)="save()"
+		>
 			Save
 		</button>
 	</div>

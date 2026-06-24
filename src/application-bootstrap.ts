@@ -1,3 +1,4 @@
+import { provideZoneChangeDetection } from '@angular/core';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
 import { init, replayIntegration } from '@sentry/angular';
@@ -64,7 +65,9 @@ export function initializeSentryForSettings(settings: SentryBootstrapSettings): 
 }
 
 export function bootstrapNgModuleApplication(): Promise<unknown> {
-	return platformBrowserDynamic().bootstrapModule(AppBootstrapModule);
+	return platformBrowserDynamic().bootstrapModule(AppBootstrapModule, {
+		applicationProviders: [provideZoneChangeDetection()],
+	});
 }
 
 export function handleBootstrapError(error: unknown): void {

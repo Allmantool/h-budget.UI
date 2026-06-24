@@ -1,5 +1,5 @@
 import { SelectionModel } from '@angular/cdk/collections';
-import { DatePipe, NgIf } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, Signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
@@ -39,7 +39,6 @@ import { CurrencyRatesGridService } from '../../services/currency-rates-grid.ser
 	standalone: true,
 	imports: [
 		DatePipe,
-		NgIf,
 		MatButtonModule,
 		MatButtonToggleModule,
 		MatCheckboxModule,
@@ -93,13 +92,9 @@ export class CurrencyRatesGridComponent implements OnInit {
 		combineLatest([this.previousDayRates$, this.todayCurrencyRateGroups$])
 			.pipe(takeUntilDestroyed(this.destroyRef))
 			.subscribe(([previousDayRates, todayRateGroups]) => {
-				void this.loaderService.withLoader(() =>
-					Promise.resolve().then(() => {
-						this.todayRatesTableDataSource = this.currencyRatesGridService.enrichWithTrend(
-							previousDayRates,
-							todayRateGroups
-						);
-					})
+				this.todayRatesTableDataSource = this.currencyRatesGridService.enrichWithTrend(
+					previousDayRates,
+					todayRateGroups
 				);
 			});
 

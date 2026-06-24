@@ -1,4 +1,4 @@
-import { DatePipe, NgFor, NgIf, SlicePipe } from '@angular/common';
+import { DatePipe, SlicePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, OnInit, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
@@ -78,8 +78,6 @@ type MarketShareChartOptions = {
 	standalone: true,
 	imports: [
 		DatePipe,
-		NgFor,
-		NgIf,
 		SlicePipe,
 		MatCardModule,
 		NgApexchartsModule,

@@ -1,34 +1,30 @@
 <div class="custom-button">
-	<ng-container [ngSwitch]="type">
-		<ng-container *ngSwitchCase="'raised'">
-			<ng-container *ngTemplateOutlet="raisedButton"></ng-container>
-		</ng-container>
+	@switch (type) { @case ('raised') {
+	<ng-container [ngTemplateOutlet]="raisedButton"></ng-container>
+	} @case ('fab') {
+	<ng-container [ngTemplateOutlet]="fabButton"></ng-container>
+	} }
 
-		<ng-container *ngSwitchCase="'fab'">
-			<ng-container *ngTemplateOutlet="fabButton"></ng-container>
-		</ng-container>
+	<ng-template #raisedButton>
+		<button
+			mat-raised-button
+			[disabled]="isDisabled"
+			[color]="color"
+		>
+			<mat-icon>{{ icon }}</mat-icon>
+			<span>{{ text }}</span>
+		</button>
+	</ng-template>
 
-		<ng-template #raisedButton>
-			<button
-				mat-raised-button
-				[disabled]="isDisabled"
-				[color]="color"
-			>
-				<mat-icon>{{ icon }}</mat-icon>
-				<span>{{ text }}</span>
-			</button>
-		</ng-template>
-
-		<ng-template #fabButton>
-			<button
-				mat-fab
-				extended
-				[disabled]="isDisabled"
-				[color]="color"
-			>
-				<mat-icon>{{ icon }}</mat-icon>
-				<span>{{ text }}</span>
-			</button>
-		</ng-template>
-	</ng-container>
+	<ng-template #fabButton>
+		<button
+			mat-fab
+			extended
+			[disabled]="isDisabled"
+			[color]="color"
+		>
+			<mat-icon>{{ icon }}</mat-icon>
+			<span>{{ text }}</span>
+		</button>
+	</ng-template>
 </div>

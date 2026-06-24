@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
+import developmentAppSettings from './assets/config.json';
 import { IAppSettingsModel } from './domain/models/app-settings.model';
 import { environment } from './environments/environment';
 
@@ -18,7 +18,7 @@ export function loadAppSettings(): Promise<IAppSettingsModel | undefined> {
 					console.error('Failed to load app settings', error);
 					return undefined;
 				})
-		: Promise.resolve(require('/src/assets/config.json') as IAppSettingsModel);
+		: Promise.resolve(developmentAppSettings as IAppSettingsModel);
 
 	return appSettingsPromise;
 }

@@ -1,4 +1,3 @@
-import { NgFor } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, Signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
@@ -24,7 +23,7 @@ interface PrimaryNavigationItem {
 	styleUrls: ['./base-layout.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [NgFor, RouterLink, RouterOutlet],
+	imports: [RouterLink, RouterOutlet],
 })
 export class BaseLayoutComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);

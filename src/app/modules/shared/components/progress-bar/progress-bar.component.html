@@ -1,6 +1,5 @@
-<div
-	*ngIf="isLoading"
-	class="load-progress-bar"
->
+@if (isLoading) {
+<div class="load-progress-bar">
 	<mat-progress-bar mode="query"></mat-progress-bar>
 </div>
+}
