@@ -52,6 +52,7 @@
     "deps:guard": "node tools/deps/guard.mjs",
     "deps:verify": "node tools/deps/verify.mjs",
     "deps:verify:framework": "node tools/deps/verify.mjs --allow-framework-updates",
+    "verify:flag-icons": "node tools/build/verify-flag-icons-assets.mjs",
     "deps:changed": "node tools/deps/changed.mjs",
     "ci:verify": "npm run deps:verify",
     "preinstall": "node -e \"const v=require('child_process').execSync('npm -v').toString().trim(); if (parseInt(v.split('.')[0],10) < 11) { console.error('❌ npm v11+ required. Current:', v); process.exit(1); }\""
