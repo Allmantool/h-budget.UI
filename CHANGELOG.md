@@ -1,5 +1,15 @@
 # 📦 Changelog
 
+## <small>1.1.52 (2026-06-24)</small>
+
+* Merge pull request #670 from Allmantool/tech/update-up-to-version-to-22 ([688fb50f9fe63a4f099293badf19a28d0c846517](https://github.com/Allmantool/h-budget.UI/commit/688fb50f9fe63a4f099293badf19a28d0c846517)), closes [#670](https://github.com/Allmantool/h-budget.UI/issues/670)
+* Merge pull request #671 from Allmantool/fix/update-up-to-version-to-22 ([9edc0d8838dff9ceea8b70658259248cddc6e15e](https://github.com/Allmantool/h-budget.UI/commit/9edc0d8838dff9ceea8b70658259248cddc6e15e)), closes [#671](https://github.com/Allmantool/h-budget.UI/issues/671)
+* Tech: fix the issue with update to vesion 22 ([e3b22aa919383065d0fb26c22035c5b9f4fa92ff](https://github.com/Allmantool/h-budget.UI/commit/e3b22aa919383065d0fb26c22035c5b9f4fa92ff))
+* chore: self review ([6007a818c198d7415b47b561aea1a6d15b171061](https://github.com/Allmantool/h-budget.UI/commit/6007a818c198d7415b47b561aea1a6d15b171061))
+* chore: upate icons ([41b3755ebc4ae121965b963aae435be81276aea8](https://github.com/Allmantool/h-budget.UI/commit/41b3755ebc4ae121965b963aae435be81276aea8))
+* chore: vite migration ([93891644dd4a124858420388bd1191288ed8286b](https://github.com/Allmantool/h-budget.UI/commit/93891644dd4a124858420388bd1191288ed8286b))
+* tech: update up to angular v21 ([3ef27713d2a0bc6ecaa1522b042580208d6fad0c](https://github.com/Allmantool/h-budget.UI/commit/3ef27713d2a0bc6ecaa1522b042580208d6fad0c))
+
 ## <small>1.1.51 (2026-06-22)</small>
 
 * Converted BaseLayoutComponent to standalone ([8e0421b5a685fe77e182c2ca8cd1b7b8d758d5d4](https://github.com/Allmantool/h-budget.UI/commit/8e0421b5a685fe77e182c2ca8cd1b7b8d758d5d4))
