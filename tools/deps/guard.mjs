@@ -13,6 +13,7 @@ import {
 import { isBlockedAutomaticPackage } from './rules.mjs';
 
 const allowFrameworkUpdates = process.argv.includes('--allow-framework-updates');
+const onlineRegistryCheck = process.argv.includes('--online-registry-check');
 
 ensureWorkDirs();
 const packageJson = readJson('package.json');
@@ -21,10 +22,12 @@ const failures = [];
 const warnings = [];
 
 validateLockfileRoot();
+validateWebpackDevServerPolicy();
 validateBlockedRootUpdates();
 validateFrameworkVersionPolicy();
 validateAngularNxAlignment();
 validateNpmPeerGraph();
+validateOnlineRegistryAvailability();
 
 if (warnings.length > 0) {
 	console.warn(warnings.map(warning => `warning: ${warning}`).join('\n'));
@@ -59,6 +62,52 @@ function validateLockfileRoot() {
 			}
 		}
 	}
+}
+
+function validateWebpackDevServerPolicy() {
+	const directWebpackPackages = ['webpack', 'webpack-cli', 'webpack-dev-server'].filter(
+		name => packageJson.dependencies?.[name] !== undefined || packageJson.devDependencies?.[name] !== undefined
+	);
+
+	for (const name of directWebpackPackages) {
+		failures.push(`${name} is declared directly; keep Webpack tooling owned by Angular/Nx builders unless a configured target requires it.`);
+	}
+
+	const overridePaths = findObjectPaths(packageJson.overrides, 'webpack-dev-server');
+	for (const overridePath of overridePaths) {
+		failures.push(`package.json override ${overridePath} forces webpack-dev-server; remove overrides unless the owner and range are proven.`);
+	}
+
+	const lockedVersion = getLockVersion(packageLock, 'webpack-dev-server');
+	const requesters = findPackageRequesters('webpack-dev-server');
+
+	if (!lockedVersion && requesters.length > 0) {
+		failures.push('webpack-dev-server is requested by the lockfile but node_modules/webpack-dev-server is missing.');
+		return;
+	}
+
+	if (!lockedVersion) {
+		return;
+	}
+
+	if (requesters.length === 0) {
+		failures.push(`webpack-dev-server@${lockedVersion} is locked but no package declares it.`);
+		return;
+	}
+
+	for (const requester of requesters) {
+		if (!versionSatisfies(lockedVersion, requester.spec)) {
+			failures.push(
+				`webpack-dev-server@${lockedVersion} does not satisfy ${requester.packageName}@${requester.version} ${requester.section}.${requester.dependencyName}=${requester.spec}.`
+			);
+		}
+	}
+
+	console.log(
+		`webpack-dev-server@${lockedVersion} owner(s): ${requesters
+			.map(requester => `${requester.packageName}@${requester.version} (${requester.section}.${requester.dependencyName}: ${requester.spec})`)
+			.join('; ')}.`
+	);
 }
 
 function validateBlockedRootUpdates() {
@@ -217,10 +266,94 @@ function validateNpmPeerGraph() {
 	);
 }
 
+function validateOnlineRegistryAvailability() {
+	if (!onlineRegistryCheck) {
+		return;
+	}
+
+	const lockedVersion = getLockVersion(packageLock, 'webpack-dev-server');
+	if (!lockedVersion) {
+		return;
+	}
+
+	const result = runCommand('npm', ['view', `webpack-dev-server@${lockedVersion}`, 'version'], { stdio: 'pipe' });
+	const publishedVersion = result.stdout?.trim();
+	if (result.status !== 0 || publishedVersion !== lockedVersion) {
+		failures.push(
+			`Configured npm registry does not resolve webpack-dev-server@${lockedVersion}. Run npm view webpack-dev-server@${lockedVersion} version to inspect registry/cache routing.`
+		);
+	}
+}
+
 function versionsFor(packageNames) {
 	return packageNames
 		.map(name => ({ name, version: getLockVersion(packageLock, name) }))
 		.filter(({ version }) => version);
+}
+
+function findPackageRequesters(dependencyName) {
+	return Object.entries(packageLock.packages ?? [])
+		.flatMap(([packagePath, details]) => {
+			const sections = ['dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies'];
+			return sections
+				.filter(section => details?.[section]?.[dependencyName] !== undefined)
+				.map(section => ({
+					packagePath,
+					packageName: packagePath === '' ? packageJson.name : packagePath.replace(/^node_modules\//, ''),
+					version: packagePath === '' ? packageJson.version : details.version,
+					section,
+					dependencyName,
+					spec: details[section][dependencyName],
+				}));
+		});
+}
+
+function findObjectPaths(value, targetKey, path = 'overrides') {
+	if (!value || typeof value !== 'object') {
+		return [];
+	}
+
+	return Object.entries(value).flatMap(([key, nestedValue]) => {
+		const currentPath = `${path}.${key}`;
+		const matches = key === targetKey ? [currentPath] : [];
+		return [...matches, ...findObjectPaths(nestedValue, targetKey, currentPath)];
+	});
+}
+
+function versionSatisfies(version, spec) {
+	if (!spec || spec === '*') {
+		return true;
+	}
+
+	const parsedVersion = parseVersion(version);
+	if (!parsedVersion) {
+		return false;
+	}
+
+	if (/^\d+\.\d+\.\d+$/.test(spec)) {
+		return version === spec;
+	}
+
+	if (spec.startsWith('^')) {
+		const minimum = parseVersion(spec.slice(1));
+		return (
+			!!minimum &&
+			parsedVersion.major === minimum.major &&
+			compareVersionParts(parsedVersion, minimum) >= 0
+		);
+	}
+
+	return true;
+}
+
+function compareVersionParts(left, right) {
+	for (const key of ['major', 'minor', 'patch']) {
+		if (left[key] !== right[key]) {
+			return left[key] - right[key];
+		}
+	}
+
+	return 0;
 }
 
 function isApprovedAngular21Migration() {

@@ -50,6 +50,7 @@
     "nx:affected": "nx affected --target=build --uncommitted --configuration=production",
     "deps:check": "npm outdated",
     "deps:guard": "node tools/deps/guard.mjs",
+    "deps:guard:online": "node tools/deps/guard.mjs --online-registry-check",
     "deps:verify": "node tools/deps/verify.mjs",
     "deps:verify:framework": "node tools/deps/verify.mjs --allow-framework-updates",
     "verify:flag-icons": "node tools/build/verify-flag-icons-assets.mjs",
