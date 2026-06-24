@@ -1,120 +1,115 @@
 {
-    "root": ".",
-    "sourceRoot": "src",
-    "projectType": "application",
-    "targets": {
-        "build": {
-            "executor": "@nx/angular:webpack-browser",
-            "options": {
-                "outputPath": "dist/h-budget",
-                "main": "src/main.ts",
-                "index": "src/index.html",
-                "polyfills": "src/polyfills.ts",
-                "tsConfig": "tsconfig.app.json",
-                "allowedCommonJsDependencies": [
-                    "apexcharts",
-                    "ts-simple-nameof",
-                    "typescript-guid",
-                    "downsample"
-                ],
-                "assets": [
-                    "src/favicon.ico",
-                    "src/assets"
-                ],
-                "styles": [
-                    "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
-                    "./node_modules/flag-icons/css/flag-icons.min.css",
-                    "src/styles/styles.css"
-                ],
-                "scripts": [
-                    "node_modules/apexcharts/dist/apexcharts.min.js"
-                ]
-            },
-            "configurations": {
-                "production": {
-                    "outputPath": "dist/h-budget",
-                    "optimization": true,
-                    "outputHashing": "all",
-                    "sourceMap": false,
-                    "namedChunks": false,
-                    "vendorChunk": false,
-                    "buildOptimizer": true,
-                    "budgets": [
-                        {
-                            "type": "initial",
-                            "maximumWarning": "2mb",
-                            "maximumError": "5mb"
-                        },
-                        {
-                            "type": "anyComponentStyle",
-                            "maximumWarning": "10kb",
-                            "maximumError": "15kb"
-                        }
-                    ],
-                    "fileReplacements": [
-                        {
-                            "replace": "src/environments/environment.ts",
-                            "with": "src/environments/environment.prod.ts"
-                        }
-                    ]
-                },
-                "development": {
-                    "outputPath": "dist/h-budget",
-                    "optimization": false,
-                    "sourceMap": true,
-                    "namedChunks": true,
-                    "vendorChunk": true,
-                    "extractLicenses": false
-                }
-            },
-            "defaultConfiguration": "development"
-        },
-        "serve": {
-            "executor": "@nx/angular:dev-server",
-            "options": {
-                "buildTarget": "h-budget:build:development",
-                "ssl": true
-            },
-            "configurations": {
-                "production": {
-                    "buildTarget": "h-budget:build:production"
-                },
-                "development": {
-                    "buildTarget": "h-budget:build:development"
-                }
-            },
-            "defaultConfiguration": "development"
-        },
-        "test": {
-            "executor": "@angular-devkit/build-angular:karma",
-            "options": {
-                "main": "src/tests/test.ts",
-                "polyfills": "src/polyfills.ts",
-                "tsConfig": "tsconfig.spec.json",
-                "karmaConfig": "karma.conf.js",
-                "styles": [
-                    "./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
-                    "./node_modules/flag-icons/css/flag-icons.min.css",
-                    "src/styles/styles.css"
-                ],
-                "scripts": [
-                    "node_modules/apexcharts/dist/apexcharts.min.js"
-                ],
-                "assets": [
-                    "src/favicon.ico",
-                    "src/assets"
-                ]
-            }
-        },
-        "lint": {
-            "executor": "@nx/eslint:lint",
-            "options": {
-                "lintFilePatterns": [
-                    "src/**/*.ts",
-                    "src/**/*.html"
-                ]
-            },
-            "outputs": []
-        }
-    }
+	"name": "h-budget",
+	"$schema": "node_modules/nx/schemas/project-schema.json",
+	"sourceRoot": "src",
+	"projectType": "application",
+	"targets": {
+		"build": {
+			"executor": "@nx/angular:application",
+			"options": {
+				"outputPath": {
+					"base": "dist/h-budget"
+				},
+				"index": "src/index.html",
+				"polyfills": ["src/polyfills.ts"],
+				"tsConfig": "tsconfig.app.json",
+				"allowedCommonJsDependencies": [
+					"apexcharts",
+					"lodash",
+					"protobufjs/minimal",
+					"ts-simple-nameof",
+					"typescript-guid",
+					"downsample"
+				],
+				"assets": ["src/favicon.ico", "src/assets"],
+				"styles": [
+					"./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
+					"./node_modules/flag-icons/css/flag-icons.min.css",
+					"src/styles/styles.css"
+				],
+				"scripts": ["node_modules/apexcharts/dist/apexcharts.min.js"],
+				"browser": "src/main.ts"
+			},
+			"configurations": {
+				"production": {
+					"outputPath": {
+						"base": "dist/h-budget"
+					},
+					"optimization": true,
+					"outputHashing": "all",
+					"sourceMap": false,
+					"namedChunks": false,
+					"budgets": [
+						{
+							"type": "initial",
+							"maximumWarning": "2mb",
+							"maximumError": "5mb"
+						},
+						{
+							"type": "anyComponentStyle",
+							"maximumWarning": "10kb",
+							"maximumError": "15kb"
+						}
+					],
+					"fileReplacements": [
+						{
+							"replace": "src/environments/environment.ts",
+							"with": "src/environments/environment.prod.ts"
+						}
+					]
+				},
+				"development": {
+					"outputPath": {
+						"base": "dist/h-budget"
+					},
+					"optimization": false,
+					"sourceMap": true,
+					"namedChunks": true,
+					"extractLicenses": false
+				}
+			},
+			"defaultConfiguration": "development"
+		},
+		"serve": {
+			"executor": "@nx/angular:dev-server",
+			"options": {
+				"buildTarget": "h-budget:build:development",
+				"ssl": true,
+				"sslCert": "./../../Certificates/vm2.linux.pem",
+				"sslKey": "./../../Certificates/vm2.linux-key-nopass.pem"
+			},
+			"configurations": {
+				"production": {
+					"buildTarget": "h-budget:build:production"
+				},
+				"development": {
+					"buildTarget": "h-budget:build:development"
+				}
+			},
+			"defaultConfiguration": "development"
+		},
+		"test": {
+			"executor": "@angular-devkit/build-angular:karma",
+			"options": {
+				"main": "src/tests/test.ts",
+				"polyfills": "src/polyfills.ts",
+				"tsConfig": "tsconfig.spec.json",
+				"karmaConfig": "karma.conf.js",
+				"styles": [
+					"./node_modules/@angular/material/prebuilt-themes/indigo-pink.css",
+					"./node_modules/flag-icons/css/flag-icons.min.css",
+					"src/styles/styles.css"
+				],
+				"scripts": ["node_modules/apexcharts/dist/apexcharts.min.js"],
+				"assets": ["src/favicon.ico", "src/assets"]
+			}
+		},
+		"lint": {
+			"executor": "@nx/eslint:lint",
+			"options": {
+				"lintFilePatterns": ["src/**/*.ts", "src/**/*.html"]
+			},
+			"outputs": []
+		}
+	}
 }
