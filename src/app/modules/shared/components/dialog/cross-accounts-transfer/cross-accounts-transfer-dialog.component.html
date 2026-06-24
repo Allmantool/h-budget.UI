@@ -79,7 +79,9 @@
 						></app-form-field>
 					</form>
 					<div class="transfer-summary">
-						<span *ngFor="let item of this.transferSummarySignal()">{{item}}</span>
+						@for (item of this.transferSummarySignal(); track item) {
+						<span>{{item}}</span>
+						}
 					</div>
 					<div class="confirm-transfer-buttons">
 						<button

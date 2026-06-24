@@ -19,10 +19,8 @@
 					#chipGrid
 					aria-label="Category selection"
 				>
-					<mat-chip-row
-						*ngFor="let categoryNode of categoryNodes"
-						(removed)="remove(categoryNode)"
-					>
+					@for (categoryNode of categoryNodes; track categoryNode) {
+					<mat-chip-row (removed)="remove(categoryNode)">
 						{{categoryNode}}
 						<button
 							matChipRemove
@@ -31,6 +29,7 @@
 							<mat-icon>cancel</mat-icon>
 						</button>
 					</mat-chip-row>
+					}
 				</mat-chip-grid>
 				<input
 					placeholder="New category..."
@@ -45,12 +44,9 @@
 					#auto="matAutocomplete"
 					(optionSelected)="selected($event)"
 				>
-					<mat-option
-						*ngFor="let filteredCategoryNode of filteredCategoryNodes$ | async"
-						[value]="filteredCategoryNode"
-					>
-						{{filteredCategoryNode}}
-					</mat-option>
+					@for (filteredCategoryNode of filteredCategoryNodes$ | async; track filteredCategoryNode) {
+					<mat-option [value]="filteredCategoryNode">{{filteredCategoryNode}}</mat-option>
+					}
 				</mat-autocomplete>
 			</mat-form-field>
 		</form>

@@ -1,64 +1,56 @@
-<ng-container [ngSwitch]="fieldType">
-	<ng-container *ngSwitchCase="'INPUT'">
-		<ng-container *ngTemplateOutlet="inputNumbers"></ng-container>
-	</ng-container>
+@switch (fieldType) { @case ('INPUT') {
+<ng-container [ngTemplateOutlet]="inputNumbers"></ng-container>
+} @case ('SELECT') {
+<ng-container [ngTemplateOutlet]="select"></ng-container>
+} @case ('TEXT_AREA') {
+<ng-container [ngTemplateOutlet]="textarea"></ng-container>
+} @default { Default Template } }
 
-	<ng-container *ngSwitchCase="'SELECT'">
-		<ng-container *ngTemplateOutlet="select"></ng-container>
-	</ng-container>
+<ng-template #inputNumbers>
+	<mat-form-field
+		appearance="outline"
+		floatLabel="always"
+	>
+		<mat-label>{{ title }}</mat-label>
+		<input
+			[disabled]="disabled"
+			(click)="clearInput($event)"
+			class="input-value"
+			matInput
+			type="number"
+			min="0"
+			step="1"
+			placeholder="0.00"
+			(input)="updateValue($event.target)"
+			[value]="(data$ | async) | accountingCurrencyFormat"
+		/>
+		<span matPrefix>{{ numberInputPrefix }}</span>
+	</mat-form-field>
+</ng-template>
 
-	<ng-container *ngSwitchCase="'TEXT_AREA'">
-		<ng-container *ngTemplateOutlet="textarea"></ng-container>
-	</ng-container>
-
-	<ng-container *ngSwitchDefault>Default Template</ng-container>
-
-	<ng-template #inputNumbers>
-		<mat-form-field
-			appearance="outline"
-			floatLabel="always"
+<ng-template #select>
+	<mat-form-field appearance="outline">
+		<mat-label>{{ title }}</mat-label>
+		<mat-select
+			[disabled]="disabled"
+			[value]="data$ | async"
+			(selectionChange)="updateValue($event)"
 		>
-			<mat-label>{{ title }}</mat-label>
-			<input
-				[disabled]="disabled"
-				(click)="clearInput($event)"
-				class="input-value"
-				matInput
-				type="number"
-				min="0"
-				step="1"
-				placeholder="0.00"
-				(input)="updateValue($event.target)"
-				[value]="(data$ | async) | accountingCurrencyFormat"
-			/>
-			<span matPrefix>{{ numberInputPrefix }}</span>
-		</mat-form-field>
-	</ng-template>
+			@for (option of (dropdownOptions$ | async) ?? []; track trackByFn($index, option)) {
+			<mat-option [value]="option.value ?? option">{{ option.description ?? option }}</mat-option>
+			}
+		</mat-select>
+	</mat-form-field>
+</ng-template>
 
-	<ng-template #select>
-		<mat-form-field appearance="outline">
-			<mat-label>{{ title }}</mat-label>
-			<mat-select
-				[disabled]="disabled"
-				[value]="data$ | async"
-				(selectionChange)="updateValue($event)"
-			>
-				<ng-container *ngFor="let option of dropdownOptions$ | async; trackBy: trackByFn">
-					<mat-option [value]="option.value ?? option">{{ option.description ?? option }}</mat-option>
-				</ng-container>
-			</mat-select>
-		</mat-form-field>
-	</ng-template>
-
-	<ng-template #textarea>
-		<mat-form-field appearance="outline">
-			<mat-label>{{ title }}</mat-label>
-			<textarea
-				[disabled]="disabled"
-				matInput
-				[value]="data$ | async"
-				(input)="updateValue($event.target)"
-			></textarea>
-		</mat-form-field>
-	</ng-template>
-</ng-container>
+<ng-template #textarea>
+	<mat-form-field appearance="outline">
+		<mat-label>{{ title }}</mat-label>
+		<textarea
+			[disabled]="disabled"
+			matInput
+			[value]="data$ | async"
+			(input)="updateValue($event.target)"
+		></textarea>
+	</mat-form-field>
+</ng-template>

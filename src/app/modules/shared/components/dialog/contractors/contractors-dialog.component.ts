@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 
 import { ENTER } from '@angular/cdk/keycodes';
-import { AsyncPipe, NgFor } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ElementRef, Inject, signal, ViewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
@@ -36,7 +36,6 @@ import { ProgressBarComponent } from '../../progress-bar/progress-bar.component'
 		MatDialogModule,
 		MatFormFieldModule,
 		MatIconModule,
-		NgFor,
 		ProgressBarComponent,
 		ReactiveFormsModule,
 	],

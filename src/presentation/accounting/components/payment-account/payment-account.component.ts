@@ -1,4 +1,3 @@
-import { NgFor } from '@angular/common';
 import {
 	ChangeDetectionStrategy,
 	Component,
@@ -37,14 +36,7 @@ import { IPaymentAccountModel } from '../../../../domain/models/accounting/payme
 	styleUrls: ['./payment-account.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [
-		NgFor,
-		MatButtonModule,
-		MatExpansionModule,
-		MatIconModule,
-		MatListModule,
-		CurrencyAbbreviationToFlagFormatPipe,
-	],
+	imports: [MatButtonModule, MatExpansionModule, MatIconModule, MatListModule, CurrencyAbbreviationToFlagFormatPipe],
 })
 export class PaymentAccountComponent implements OnInit {
 	public isNavigateToOperationsDisabled: boolean = true;

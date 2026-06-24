@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 
-import { AsyncPipe, NgFor, NgSwitch, NgSwitchCase, NgSwitchDefault, NgTemplateOutlet } from '@angular/common';
+import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, forwardRef, Input, Output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -34,10 +34,6 @@ import { FormInput } from '../../types/form-input.type';
 	standalone: true,
 	imports: [
 		AsyncPipe,
-		NgFor,
-		NgSwitch,
-		NgSwitchCase,
-		NgSwitchDefault,
 		NgTemplateOutlet,
 		MatFormFieldModule,
 		MatInputModule,

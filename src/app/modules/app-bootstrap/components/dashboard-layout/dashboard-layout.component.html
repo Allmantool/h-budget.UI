@@ -2,8 +2,8 @@
 	<aside class="workspace-sidebar">
 		<div class="workspace-sidebar__section">
 			<p class="workspace-sidebar__eyebrow">Navigate</p>
+			@for (navigationItem of navigationItems; track navigationItem) {
 			<a
-				*ngFor="let navigationItem of navigationItems"
 				class="workspace-sidebar__nav-item"
 				[class.workspace-sidebar__nav-item--active]="isRouteActive(navigationItem.route)"
 				[routerLink]="navigationItem.route"
@@ -14,6 +14,7 @@
 					<small>{{ navigationItem.description }}</small>
 				</span>
 			</a>
+			}
 		</div>
 
 		<div class="workspace-sidebar__section workspace-sidebar__section--hint">
@@ -75,12 +76,11 @@
 		<router-outlet name="right_sidebar"></router-outlet>
 	</aside>
 
-	<div
-		*ngIf="isDataLoading$ | async"
-		class="overlay"
-	>
+	@if (isDataLoading$ | async) {
+	<div class="overlay">
 		<div class="spinner-wrapper">
 			<progress-spinner [isLoading]="!rootAppOutlet.isActivated && (isDataLoading$ | async)"></progress-spinner>
 		</div>
 	</div>
+	}
 </div>

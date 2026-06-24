@@ -1,4 +1,4 @@
-import { AsyncPipe, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, Signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
@@ -26,7 +26,7 @@ interface WorkspaceNavigationItem {
 	styleUrls: ['./dashboard-layout.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [AsyncPipe, NgFor, NgIf, MatButtonModule, RouterLink, RouterOutlet, ProgressSpinnerComponent],
+	imports: [AsyncPipe, MatButtonModule, RouterLink, RouterOutlet, ProgressSpinnerComponent],
 })
 export class DashboardLayoutComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);

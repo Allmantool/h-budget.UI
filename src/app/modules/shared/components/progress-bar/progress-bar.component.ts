@@ -1,4 +1,3 @@
-import { NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 
@@ -8,7 +7,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 	styleUrls: ['./progress-bar.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [NgIf, MatProgressBarModule],
+	imports: [MatProgressBarModule],
 })
 export class ProgressBarComponent {
 	@Input() isLoading: boolean | null = false;

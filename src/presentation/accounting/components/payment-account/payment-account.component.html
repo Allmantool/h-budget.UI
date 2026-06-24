@@ -49,8 +49,8 @@
 				[multiple]="false"
 				(selectionChange)="chooseAccount($event)"
 			>
+				@for (paymentAccount of cashAccountsSignal(); track paymentAccount) {
 				<mat-list-option
-					*ngFor="let paymentAccount of cashAccountsSignal()"
 					[value]="paymentAccount.key"
 					class="accounts-workspace__account-row"
 				>
@@ -63,6 +63,7 @@
 					</span>
 					[{{paymentAccount.currency}}]
 				</mat-list-option>
+				}
 			</mat-selection-list>
 
 			<mat-action-row>
@@ -96,8 +97,8 @@
 				[multiple]="false"
 				(selectionChange)="chooseAccount($event)"
 			>
+				@for (paymentAccount of debitVirtualAccountsSignal(); track paymentAccount) {
 				<mat-list-option
-					*ngFor="let paymentAccount of debitVirtualAccountsSignal()"
 					[value]="paymentAccount.key"
 					class="accounts-workspace__account-row"
 				>
@@ -110,6 +111,7 @@
 					</span>
 					[{{paymentAccount.currency}}]
 				</mat-list-option>
+				}
 			</mat-selection-list>
 
 			<mat-action-row>
@@ -157,8 +159,8 @@
 				[multiple]="false"
 				(selectionChange)="chooseAccount($event)"
 			>
+				@for (paymentAccount of creditVirtualAccountsSignal(); track paymentAccount) {
 				<mat-list-option
-					*ngFor="let paymentAccount of creditVirtualAccountsSignal()"
 					[value]="paymentAccount.key"
 					class="accounts-workspace__account-row"
 				>
@@ -171,6 +173,7 @@
 					</span>
 					[{{paymentAccount.currency}}]
 				</mat-list-option>
+				}
 			</mat-selection-list>
 
 			<mat-action-row>

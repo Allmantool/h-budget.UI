@@ -1,4 +1,3 @@
-import { NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, OnInit, signal, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
@@ -28,7 +27,7 @@ import { PaymentsHistoryComponent } from '../payments-history/payments-history.c
 	styleUrls: ['./payments-dashboard.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [NgIf, MatButtonModule, PaymentsHistoryComponent],
+	imports: [MatButtonModule, PaymentsHistoryComponent],
 })
 export class PaymentsDashboardComponent implements OnInit {
 	public paymentAccountGeneralInfoSignal: Signal<string> = signal('');

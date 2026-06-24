@@ -203,8 +203,7 @@ describe('currency rates dashboard component', () => {
 
 		todayRatesSubject.next(sampleRateGroups);
 		todayRatesSubject.complete();
-		await fixture.whenStable();
-		fixture.detectChanges();
+		await settleDashboard();
 
 		expect(getNativeElement().querySelector('.overlay progress-spinner')).toBeNull();
 		expect(getRenderedRows().length).toBe(2);
@@ -220,9 +219,13 @@ describe('currency rates dashboard component', () => {
 
 	async function renderDashboard(): Promise<void> {
 		fixture.detectChanges();
+		await settleDashboard();
+		await settleDashboard();
+	}
+
+	async function settleDashboard(): Promise<void> {
 		await fixture.whenStable();
-		fixture.detectChanges();
-		await fixture.whenStable();
+		await new Promise<void>(resolve => setTimeout(resolve));
 		fixture.detectChanges();
 	}
 

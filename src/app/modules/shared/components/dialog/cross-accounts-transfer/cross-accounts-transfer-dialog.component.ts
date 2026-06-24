@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { ENTER } from '@angular/cdk/keycodes';
-import { NgFor } from '@angular/common';
+
 import { ChangeDetectionStrategy, Component, computed, Inject, signal, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
@@ -49,7 +49,6 @@ import { ProgressBarComponent } from '../../progress-bar/progress-bar.component'
 		MatDialogModule,
 		MatIconModule,
 		MatStepperModule,
-		NgFor,
 		ProgressBarComponent,
 		ReactiveFormsModule,
 	],
@@ -82,15 +81,15 @@ export class CrossAccountsTransferDialogComponent {
 	public paymentAccountsSignal: Signal<IPaymentAccountModel[]>;
 	public paymentAccountIdSignal: Signal<string>;
 	public activePaymentAccountSignal: Signal<IPaymentAccountModel>;
-	public targetPaymentAccountSignal: Signal<IPaymentAccountModel>;
+	public targetPaymentAccountSignal: Signal<IPaymentAccountModel | undefined>;
 
-	public targetPaymentAccountOptionSignal: Signal<SelectDropdownOptions>;
+	public targetPaymentAccountOptionSignal: Signal<SelectDropdownOptions | undefined>;
 
 	public transferAmountSignal: Signal<number>;
 
 	public currencyMultiplierSignal: Signal<number>;
 
-	public transferDirectionsOptionSignal: Signal<SelectDropdownOptions>;
+	public transferDirectionsOptionSignal: Signal<SelectDropdownOptions | null | undefined>;
 
 	public transferSummarySignal: Signal<string[]>;
 
@@ -120,7 +119,7 @@ export class CrossAccountsTransferDialogComponent {
 			transferAmount: new UntypedFormControl(),
 		});
 
-		this.inSenderSignal = computed(() => this.transferDirectionsOptionSignal().value === 'In');
+		this.inSenderSignal = computed(() => this.transferDirectionsOptionSignal()?.value === 'In');
 
 		this.targetPaymentAccountTitlesSignal = computed(() =>
 			_.chain(this.paymentAccountsSignal())
@@ -137,29 +136,36 @@ export class CrossAccountsTransferDialogComponent {
 
 		this.targetPaymentAccountSignal = computed(() =>
 			_.chain(this.paymentAccountsSignal())
-				.find(acc => acc.key?.toString() === this.targetPaymentAccountOptionSignal().value)
+				.find(acc => acc.key?.toString() === this.targetPaymentAccountOptionSignal()?.value)
 				.value()
 		);
 
 		this.transferSummarySignal = computed(() => {
-			const transferDirection = this.inSenderSignal()
-				? `Conversion from '${this.activePaymentAccountSignal().currency}' to '${this.targetPaymentAccountSignal().currency}'`
-				: `Conversion from '${this.targetPaymentAccountSignal().currency}' to '${this.activePaymentAccountSignal().currency}'`;
+			const activePaymentAccount = this.activePaymentAccountSignal();
+			const targetPaymentAccount = this.targetPaymentAccountSignal();
 
-			const originPaymentAccountInfo = `'${this.activePaymentAccountSignal().emitter} | ${this.activePaymentAccountSignal().description}'
-				after: '${_.round(this.activePaymentAccountSignal().balance - this.transferAmountSignal(), RatesGridDefaultOptions.RATE_DIFF_PRECISION)}' ('${this.activePaymentAccountSignal().currency}')`;
+			if (!activePaymentAccount?.currency || !targetPaymentAccount?.currency) {
+				return [];
+			}
+
+			const transferDirection = this.inSenderSignal()
+				? `Conversion from '${activePaymentAccount.currency}' to '${targetPaymentAccount.currency}'`
+				: `Conversion from '${targetPaymentAccount.currency}' to '${activePaymentAccount.currency}'`;
+
+			const originPaymentAccountInfo = `'${activePaymentAccount.emitter} | ${activePaymentAccount.description}'
+				after: '${_.round(activePaymentAccount.balance - this.transferAmountSignal(), RatesGridDefaultOptions.RATE_DIFF_PRECISION)}' ('${activePaymentAccount.currency}')`;
 
 			const targetCurrencyTransferAmount = _.round(
 				this.currencyMultiplierSignal() * this.transferAmountSignal(),
 				3
 			);
 
-			const targetPaymentAccountInfo = `'${this.targetPaymentAccountSignal().emitter} | ${this.targetPaymentAccountSignal().description}'
-				after: '${_.round(this.targetPaymentAccountSignal().balance + targetCurrencyTransferAmount, RatesGridDefaultOptions.RATE_DIFF_PRECISION)}' ('${this.targetPaymentAccountSignal().currency}')`;
+			const targetPaymentAccountInfo = `'${targetPaymentAccount.emitter} | ${targetPaymentAccount.description}'
+				after: '${_.round(targetPaymentAccount.balance + targetCurrencyTransferAmount, RatesGridDefaultOptions.RATE_DIFF_PRECISION)}' ('${targetPaymentAccount.currency}')`;
 
 			return [
 				transferDirection,
-				`Transfer amount ${targetCurrencyTransferAmount} ('${this.targetPaymentAccountSignal().currency}')`,
+				`Transfer amount ${targetCurrencyTransferAmount} ('${targetPaymentAccount.currency}')`,
 				`Sender ${this.inSenderSignal() ? originPaymentAccountInfo : targetPaymentAccountInfo}`,
 				`Receiver ${this.inSenderSignal() ? targetPaymentAccountInfo : originPaymentAccountInfo}`,
 			];
@@ -213,13 +219,19 @@ export class CrossAccountsTransferDialogComponent {
 	}
 
 	public getMultiplier(): void {
+		const targetPaymentAccount = this.targetPaymentAccountSignal();
+
+		if (!targetPaymentAccount) {
+			return;
+		}
+
 		this.exchangeService
 			.getExchangeMultiplier({
 				originCurrency: this.inSenderSignal()
 					? this.activePaymentAccountSignal().currency
-					: this.targetPaymentAccountSignal().currency,
+					: targetPaymentAccount.currency,
 				targetCurrency: this.inSenderSignal()
-					? this.targetPaymentAccountSignal().currency
+					? targetPaymentAccount.currency
 					: this.activePaymentAccountSignal().currency,
 				operationDate: this.operationDateSignal(),
 			})
@@ -228,16 +240,18 @@ export class CrossAccountsTransferDialogComponent {
 	}
 
 	public applyTransfer(): void {
+		const targetPaymentAccount = this.targetPaymentAccountSignal();
+
+		if (!targetPaymentAccount) {
+			return;
+		}
+
 		this.isLoadingSignal.set(true);
 
 		this.dialogConfiguration
 			.onSubmit({
-				sender: this.inSenderSignal()
-					? this.activePaymentAccountSignal().key
-					: this.targetPaymentAccountSignal().key,
-				recipient: this.inSenderSignal()
-					? this.targetPaymentAccountSignal().key
-					: this.activePaymentAccountSignal().key,
+				sender: this.inSenderSignal() ? this.activePaymentAccountSignal().key : targetPaymentAccount.key,
+				recipient: this.inSenderSignal() ? targetPaymentAccount.key : this.activePaymentAccountSignal().key,
 				amount: this.transferAmountSignal(),
 				multiplier: this.currencyMultiplierSignal(),
 				operationAt: this.operationDateSignal(),

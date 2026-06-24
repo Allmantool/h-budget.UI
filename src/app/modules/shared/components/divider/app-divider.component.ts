@@ -1,4 +1,3 @@
-import { NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { MatDividerModule } from '@angular/material/divider';
 
@@ -8,7 +7,7 @@ import { MatDividerModule } from '@angular/material/divider';
 	styleUrls: ['./app-divider.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [NgIf, MatDividerModule],
+	imports: [MatDividerModule],
 })
 export class AppDividerComponent {
 	@Input() isVertical = true;

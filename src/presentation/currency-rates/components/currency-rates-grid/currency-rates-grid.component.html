@@ -1,7 +1,5 @@
-<div
-	class="grid-wrapper"
-	*ngIf="!loaderService.isLoading()"
->
+@if (!loaderService.isLoading()) {
+<div class="grid-wrapper">
 	<div class="currency-rates-grid__toolbar">
 		<div class="currency-rates-grid__intro">
 			<p class="currency-rates-grid__eyebrow">Active table</p>
@@ -10,7 +8,6 @@
 				Select a row to update the chart focus. Use the presets to jump between common historical windows.
 			</p>
 		</div>
-
 		<div class="currency-rates-grid__actions">
 			<button
 				mat-raised-button
@@ -19,7 +16,6 @@
 			>
 				Get today currency rates
 			</button>
-
 			<button
 				mat-stroked-button
 				(click)="openGetCurrencyRatesDialog()"
@@ -28,7 +24,6 @@
 			</button>
 		</div>
 	</div>
-
 	<div class="currency-rates-grid__filters">
 		<mat-button-toggle-group
 			aria-label="Rate history period"
@@ -46,7 +41,6 @@
 			<mat-button-toggle value="120">10Y</mat-button-toggle>
 		</mat-button-toggle-group>
 	</div>
-
 	<div class="currency-rates-grid">
 		<table
 			mat-table
@@ -72,7 +66,6 @@
 					></mat-checkbox>
 				</td>
 			</ng-container>
-
 			<ng-container [matColumnDef]="ratesGridColumnOptions.ID">
 				<th
 					mat-header-cell
@@ -88,7 +81,6 @@
 					{{ element.currencyId }}
 				</td>
 			</ng-container>
-
 			<ng-container [matColumnDef]="ratesGridColumnOptions.ABBREVIATION">
 				<th
 					mat-header-cell
@@ -106,7 +98,6 @@
 					></span>
 				</td>
 			</ng-container>
-
 			<ng-container [matColumnDef]="ratesGridColumnOptions.NAME">
 				<th
 					mat-header-cell
@@ -122,7 +113,6 @@
 					{{ element.name }} [{{ element.abbreviation }}]
 				</td>
 			</ng-container>
-
 			<ng-container [matColumnDef]="ratesGridColumnOptions.RATE_PER_UNIT">
 				<th
 					mat-header-cell
@@ -139,7 +129,6 @@
 					{{ element.ratePerUnit }}
 				</td>
 			</ng-container>
-
 			<ng-container [matColumnDef]="ratesGridColumnOptions.PERCENTAGE_DIFF">
 				<th
 					mat-header-cell
@@ -157,7 +146,6 @@
 					<span class="material-icons md-18">{{ element.currencyTrend }}</span>
 				</td>
 			</ng-container>
-
 			<ng-container [matColumnDef]="ratesGridColumnOptions.UPDATE_DATE">
 				<th
 					mat-header-cell
@@ -172,7 +160,6 @@
 					{{ element.updateDate | date }}
 				</td>
 			</ng-container>
-
 			<tr
 				mat-header-row
 				*matHeaderRowDef="ratesGridColumnOptions.NAMES"
@@ -186,12 +173,10 @@
 		</table>
 	</div>
 </div>
-
-<div
-	*ngIf="loaderService.isLoading()"
-	class="overlay"
->
+} @if (loaderService.isLoading()) {
+<div class="overlay">
 	<div class="spinner-wrapper">
 		<progress-spinner [isLoading]="loaderService.isLoading()"></progress-spinner>
 	</div>
 </div>
+}

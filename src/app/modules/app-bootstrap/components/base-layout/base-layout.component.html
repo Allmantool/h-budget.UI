@@ -26,8 +26,8 @@
 		class="app-shell__nav"
 		aria-label="Primary"
 	>
+		@for (navigationItem of primaryNavigationItems; track navigationItem) {
 		<a
-			*ngFor="let navigationItem of primaryNavigationItems"
 			class="app-shell__nav-item"
 			[class.app-shell__nav-item--active]="isRouteActive(navigationItem.route)"
 			[routerLink]="navigationItem.route"
@@ -38,6 +38,7 @@
 				<small>{{ navigationItem.description }}</small>
 			</span>
 		</a>
+		}
 	</nav>
 
 	<main class="app-shell__content">
