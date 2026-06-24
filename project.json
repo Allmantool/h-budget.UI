@@ -75,8 +75,8 @@
 			"options": {
 				"buildTarget": "h-budget:build:development",
 				"ssl": true,
-				"sslCert": "./../../Certificates/vm2.linux.pem",
-				"sslKey": "./../../Certificates/vm2.linux-key-nopass.pem"
+				"sslCert": "",
+				"sslKey": ""
 			},
 			"configurations": {
 				"production": {
