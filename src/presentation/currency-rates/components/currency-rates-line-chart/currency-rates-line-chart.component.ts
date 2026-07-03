@@ -96,7 +96,7 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
 					rateValues,
 					this.lineChartOptions,
 					chartTitle => {
-						this.chart.updateOptions({
+						void this.chart?.updateOptions({
 							title: {
 								text: chartTitle.text,
 								style: chartTitle.style,
@@ -114,7 +114,7 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
 					this.chartOptions = chartOptions;
 				}
 
-				this.chart?.updateOptions(chartOptions);
+				void this.chart?.updateOptions(chartOptions);
 
 				this.isChartInitialized$.next(true);
 			});

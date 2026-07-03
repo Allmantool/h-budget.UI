@@ -25,20 +25,18 @@
 		</div>
 	</div>
 	<div class="currency-rates-grid__filters">
-		<mat-button-toggle-group
-			aria-label="Rate history period"
+		<mat-button-toggle-group aria-label="Rate history period"
 			class="currency-rates-grid__toggle-group"
 			[value]="tableOptionsSignal().selectedDateRange.diffInMonths"
-			(change)="setDateRange($event.value)"
-		>
-			<mat-button-toggle value="1">1M</mat-button-toggle>
-			<mat-button-toggle value="3">3M</mat-button-toggle>
-			<mat-button-toggle value="6">6M</mat-button-toggle>
-			<mat-button-toggle value="12">1Y</mat-button-toggle>
-			<mat-button-toggle value="24">2Y</mat-button-toggle>
-			<mat-button-toggle value="36">3Y</mat-button-toggle>
-			<mat-button-toggle value="60">5Y</mat-button-toggle>
-			<mat-button-toggle value="120">10Y</mat-button-toggle>
+			(change)="setDateRange(+$event.value)">
+			<mat-button-toggle [value]="1">1M</mat-button-toggle>
+			<mat-button-toggle [value]="3">3M</mat-button-toggle>
+			<mat-button-toggle [value]="6">6M</mat-button-toggle>
+			<mat-button-toggle [value]="12">1Y</mat-button-toggle>
+			<mat-button-toggle [value]="24">2Y</mat-button-toggle>
+			<mat-button-toggle [value]="36">3Y</mat-button-toggle>
+			<mat-button-toggle [value]="60">5Y</mat-button-toggle>
+			<mat-button-toggle [value]="120">10Y</mat-button-toggle>
 		</mat-button-toggle-group>
 	</div>
 	<div class="currency-rates-grid">
