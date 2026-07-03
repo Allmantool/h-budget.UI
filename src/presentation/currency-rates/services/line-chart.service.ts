@@ -26,6 +26,7 @@ import { CurrencyRateValueModel } from '../../../domain/models/rates/currency-ra
 import { ChartOptions } from '../models/chart-options';
 import { LineChartOptions } from '../models/line-chart-options';
 import { DataPoint } from '../types/data-point.type';
+import { ApexZoomRange } from '../types/apex-zoom-range.type';
 
 @Injectable()
 export class LineChartService {
@@ -84,21 +85,53 @@ export class LineChartService {
 			chart: {
 				id: 'currency-line-chart',
 				events: {
-					zoomed: (chartContext, { xaxis }) => {
-						const dataPayload: number[] = LineChartService.getRatesFromChartContext(chartContext);
-						const zoomedData = _.slice(dataPayload, xaxis.min - 1, xaxis.max);
+					zoomed: (_chartContext: unknown, zoomRange: ApexZoomRange): void => {
+						const zoomedData = LineChartService.getRatesInVisibleRange(
+							rateValueSeriesData,
+							zoomRange.xaxis
+						);
+
+						if (_.isEmpty(zoomedData)) {
+							return;
+						}
 
 						const chartTitle = LineChartTitleService.calculateTitle(
 							this.tableOptionsSignal().selectedItem.abbreviation,
 							zoomedData
 						);
 
-						const trendTitle = this.currencyChartOptionSignal().activeCurrencyTrendTitle;
-
-						if (!_.isEqual(trendTitle, chartTitle.text) && !_.isNil(onZoomedCallback)) {
-							onZoomedCallback(chartTitle);
-						}
+						this.emitTitleChanged(chartTitle, onZoomedCallback);
 					},
+
+					scrolled: (_chartContext: unknown, zoomRange: ApexZoomRange): void => {
+						const zoomedData = LineChartService.getRatesInVisibleRange(
+							rateValueSeriesData,
+							zoomRange.xaxis
+						);
+
+						if (_.isEmpty(zoomedData)) {
+							return;
+						}
+
+						const chartTitle = LineChartTitleService.calculateTitle(
+							this.tableOptionsSignal().selectedItem.abbreviation,
+							zoomedData
+						);
+
+						this.emitTitleChanged(chartTitle, onZoomedCallback);
+					},
+
+					beforeResetZoom: (): void => {
+						this.emitTitleChanged(defaultTitle, onZoomedCallback);
+					},
+				},
+				zoom: {
+					enabled: true,
+					type: 'x',
+					autoScaleYaxis: true,
+				},
+				toolbar: {
+					autoSelected: 'zoom',
 				},
 				height: options.height,
 				width: options.width,
@@ -117,7 +150,34 @@ export class LineChartService {
 		return this.charOptions$.value;
 	}
 
-	private static getRatesFromChartContext(chartContext: any): number[] {
-		return chartContext.series.ctx.series.w.globals.series[0];
+	private static getRatesInVisibleRange(
+		rateValues: readonly number[],
+		xaxis?: { min?: number; max?: number }
+	): number[] {
+		if (_.isNil(xaxis?.min) || _.isNil(xaxis?.max)) {
+			return [];
+		}
+
+		const startIndex = Math.max(0, Math.floor(xaxis.min));
+		const endIndexExclusive = Math.min(rateValues.length, Math.ceil(xaxis.max) + 1);
+
+		if (startIndex >= endIndexExclusive) {
+			return [];
+		}
+
+		return rateValues.slice(startIndex, endIndexExclusive);
+	}
+
+	private emitTitleChanged(
+		chartTitle: ICurrencyChartTitle,
+		onZoomedCallback?: (title: ICurrencyChartTitle) => void
+	): void {
+		const trendTitle = this.currencyChartOptionSignal().activeCurrencyTrendTitle;
+
+		if (_.isEqual(trendTitle, chartTitle.text) || _.isNil(onZoomedCallback)) {
+			return;
+		}
+
+		onZoomedCallback(chartTitle);
 	}
 }
