@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.53 (2026-07-03)</small>
+
+* Merge pull request #672 from Allmantool/fix/minor-rates-ui-ux-fixes ([f29cf6e39e4e40d048ee91ae275c06e5202d6793](https://github.com/Allmantool/h-budget.UI/commit/f29cf6e39e4e40d048ee91ae275c06e5202d6793)), closes [#672](https://github.com/Allmantool/h-budget.UI/issues/672)
+* fix: minor-rates-ui-ux-fixes ([68f85f576824250974689425222b63922917224b](https://github.com/Allmantool/h-budget.UI/commit/68f85f576824250974689425222b63922917224b))
+
 ## <small>1.1.52 (2026-06-24)</small>
 
 * Merge pull request #670 from Allmantool/tech/update-up-to-version-to-22 ([688fb50f9fe63a4f099293badf19a28d0c846517](https://github.com/Allmantool/h-budget.UI/commit/688fb50f9fe63a4f099293badf19a28d0c846517)), closes [#670](https://github.com/Allmantool/h-budget.UI/issues/670)
