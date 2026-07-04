@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.54 (2026-07-04)</small>
+
+* Merge pull request #673 from Allmantool/fix/adjust-ui-ux-currency-rates-dashboard ([ea6e86ed253a192081cf825b6e679bf1159aef8e](https://github.com/Allmantool/h-budget.UI/commit/ea6e86ed253a192081cf825b6e679bf1159aef8e)), closes [#673](https://github.com/Allmantool/h-budget.UI/issues/673)
+* chore: impeove rates ui ux ([c611ad31df60c25c6d8d88fba7736816f97bd754](https://github.com/Allmantool/h-budget.UI/commit/c611ad31df60c25c6d8d88fba7736816f97bd754))
+
 ## <small>1.1.53 (2026-07-03)</small>
 
 * Merge pull request #672 from Allmantool/fix/minor-rates-ui-ux-fixes ([f29cf6e39e4e40d048ee91ae275c06e5202d6793](https://github.com/Allmantool/h-budget.UI/commit/f29cf6e39e4e40d048ee91ae275c06e5202d6793)), closes [#672](https://github.com/Allmantool/h-budget.UI/issues/672)
