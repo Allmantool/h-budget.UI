@@ -224,6 +224,9 @@ describe('currency rates lazy route activation', () => {
 		expect(getHarnessText(harness)).toContain('Daily board and quick actions');
 		expect(getHarnessText(harness)).toContain('USD selected');
 		expect(getHarnessText(harness)).toContain('US Dollar');
+
+		getTodayCurrencyRatesButton(harness).click();
+
 		expect(currencyRateProviderSpy.getTodayCurrencies.calls.any()).toBeTrue();
 
 		await harness.navigateByUrl('/dashboard');
@@ -282,6 +285,18 @@ function getCurrencyState(store: Store): CurrencyRatesFeatureState['currencyStat
 
 function getHarnessText(harness: RouterTestingHarness): string {
 	return harness.routeNativeElement?.textContent ?? '';
+}
+
+function getTodayCurrencyRatesButton(harness: RouterTestingHarness): HTMLButtonElement {
+	const button = Array.from<HTMLButtonElement>(harness.routeNativeElement?.querySelectorAll('button') ?? []).find(
+		element => element.textContent?.includes('Get today currency rates')
+	);
+
+	if (!button) {
+		throw new Error('Expected the route to render the get today currency rates button.');
+	}
+
+	return button;
 }
 
 const sampleRateGroups: CurrencyRateGroupModel[] = [

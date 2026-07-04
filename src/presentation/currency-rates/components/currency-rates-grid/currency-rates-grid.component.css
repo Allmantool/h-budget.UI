@@ -1,6 +1,9 @@
 .grid-wrapper {
 	display: grid;
 	gap: 1rem;
+	position: relative;
+	border-radius: 20px;
+	overflow: hidden;
 }
 
 .currency-rates-grid__toolbar {
@@ -116,11 +119,19 @@
 	width: 3.25rem;
 }
 
-.overlay {
-	z-index: 50;
-	background-color: rgba(255, 255, 255, 0.65);
-	width: 100%;
-	height: 100%;
+.currency-rates-grid__loading-host--busy {
+	cursor: progress;
+}
+
+.currency-rates-grid__loading-overlay {
+	position: absolute;
+	inset: 0;
+	z-index: 20;
+	display: grid;
+	place-items: center;
+	border-radius: inherit;
+	background-color: rgba(255, 255, 255, 0.68);
+	pointer-events: auto;
 }
 
 @media (max-width: 768px) {

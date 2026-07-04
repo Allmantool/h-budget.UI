@@ -86,7 +86,12 @@ describe('currency rates line chart component', () => {
 
 		expect(sut).toBeTruthy();
 		expect(currencyRateProviderSpy.getCurrencies.calls.any()).toBeTrue();
-		expect(element.querySelector('progress-spinner')).not.toBeNull();
+		expect(element.querySelector('.currency-rates-chart')).not.toBeNull();
+		expect(element.querySelector('.currency-rates-chart')?.classList.contains('currency-rates-chart--busy')).toBe(
+			true
+		);
+		expect(element.querySelector('.currency-rates-chart')?.getAttribute('aria-busy')).toBe('true');
+		expect(element.querySelector('.currency-rates-chart__loading-overlay progress-spinner')).not.toBeNull();
 		expect(element.querySelector('apx-chart')).toBeNull();
 	});
 

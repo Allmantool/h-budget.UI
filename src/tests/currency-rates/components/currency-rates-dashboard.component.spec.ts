@@ -141,6 +141,7 @@ describe('currency rates dashboard component', () => {
 		seedPopulatedCurrencyState();
 
 		await renderDashboard();
+		await loadTodayRatesFromDashboard();
 
 		const pageText = getText();
 
@@ -157,6 +158,7 @@ describe('currency rates dashboard component', () => {
 	it('should update dashboard and chart focus when the grid selected currency changes', async () => {
 		seedPopulatedCurrencyState();
 		await renderDashboard();
+		await loadTodayRatesFromDashboard();
 
 		getRowCheckboxInputs()[1].click();
 		await fixture.whenStable();
@@ -199,13 +201,21 @@ describe('currency rates dashboard component', () => {
 		await fixture.whenStable();
 		fixture.detectChanges();
 
-		expect(getNativeElement().querySelector('.overlay progress-spinner')).not.toBeNull();
+		getTodayCurrencyRatesButton().click();
+		fixture.detectChanges();
+
+		const loadingHost = getNativeElement().querySelector('.currency-rates-grid__loading-host');
+
+		expect(loadingHost?.classList.contains('currency-rates-grid__loading-host--busy')).toBe(true);
+		expect(loadingHost?.getAttribute('aria-busy')).toBe('true');
+		expect(loadingHost?.querySelector('.currency-rates-grid__loading-overlay progress-spinner')).not.toBeNull();
+		expect(loadingHost?.querySelector('table')).not.toBeNull();
 
 		todayRatesSubject.next(sampleRateGroups);
 		todayRatesSubject.complete();
 		await settleDashboard();
 
-		expect(getNativeElement().querySelector('.overlay progress-spinner')).toBeNull();
+		expect(getNativeElement().querySelector('.currency-rates-grid__loading-overlay progress-spinner')).toBeNull();
 		expect(getRenderedRows().length).toBe(2);
 	});
 
@@ -235,6 +245,23 @@ describe('currency rates dashboard component', () => {
 
 	function getRenderedRows(): HTMLElement[] {
 		return Array.from<HTMLElement>(getNativeElement().querySelectorAll('tbody tr'));
+	}
+
+	function getTodayCurrencyRatesButton(): HTMLButtonElement {
+		const button = Array.from<HTMLButtonElement>(getNativeElement().querySelectorAll('button')).find(element =>
+			element.textContent?.includes('Get today currency rates')
+		);
+
+		if (!button) {
+			throw new Error('Expected the dashboard to render the get today currency rates button.');
+		}
+
+		return button;
+	}
+
+	async function loadTodayRatesFromDashboard(): Promise<void> {
+		getTodayCurrencyRatesButton().click();
+		await settleDashboard();
 	}
 
 	function getText(): string {

@@ -125,7 +125,9 @@ describe('currency rates grid component', () => {
 		expect(component.ratesGridColumnOptions.NAMES).toEqual(RatesGridColumnOptions.NAMES);
 	});
 
-	it('should render representative today rate rows', () => {
+	it('should render representative today rate rows', async () => {
+		await loadTodayRates();
+
 		const tableText = getTableText();
 
 		expect(getRenderedRows().length).toBe(2);
@@ -136,7 +138,9 @@ describe('currency rates grid component', () => {
 		expect(tableText).toContain('3.55');
 	});
 
-	it('should initialize selection from the selected currency state', () => {
+	it('should initialize selection from the selected currency state', async () => {
+		await loadTodayRates();
+
 		const selected = component.todayRatesTableSelection.selected;
 		const rowCheckboxes = getRowCheckboxInputs();
 
@@ -168,6 +172,8 @@ describe('currency rates grid component', () => {
 	});
 
 	it('should update selected currency from an individual row checkbox', async () => {
+		await loadTodayRates();
+
 		getRowCheckboxInputs()[1].click();
 		await fixture.whenStable();
 		fixture.detectChanges();
@@ -198,6 +204,23 @@ describe('currency rates grid component', () => {
 		await loadPromise;
 
 		expect(component.loaderService.isLoading()).toBe(false);
+	});
+
+	it('should render a scoped loading overlay without unmounting the table content', async () => {
+		await loadTodayRates();
+
+		component.loaderService.isLoading.set(true);
+		fixture.detectChanges();
+
+		const loadingHost = getNativeElement().querySelector('.currency-rates-grid__loading-host');
+
+		expect(loadingHost).not.toBeNull();
+		expect(loadingHost?.classList.contains('currency-rates-grid__loading-host--busy')).toBe(true);
+		expect(loadingHost?.getAttribute('aria-busy')).toBe('true');
+		expect(loadingHost?.querySelector('.currency-rates-grid__loading-overlay progress-spinner')).not.toBeNull();
+		expect(loadingHost?.querySelector('table')).not.toBeNull();
+		expect(getRenderedRows().length).toBe(2);
+		expect(getNativeElement().querySelector('.overlay')).toBeNull();
 	});
 
 	it('should trigger open rates dialog "openGetCurrencyRatesDialog"', () => {
@@ -286,6 +309,11 @@ describe('currency rates grid component', () => {
 		return Array.from<HTMLElement>(getNativeElement().querySelectorAll('th')).map(header =>
 			(header.textContent ?? '').trim()
 		);
+	}
+
+	async function loadTodayRates(): Promise<void> {
+		await component.getTodayCurrencyRatesAsync();
+		fixture.detectChanges();
 	}
 
 	function getTableText(): string {

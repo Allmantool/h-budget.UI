@@ -1,5 +1,8 @@
-@if (!loaderService.isLoading()) {
-<div class="grid-wrapper">
+<div
+	class="grid-wrapper currency-rates-grid__loading-host"
+	[class.currency-rates-grid__loading-host--busy]="loaderService.isLoading()"
+	[attr.aria-busy]="loaderService.isLoading()"
+>
 	<div class="currency-rates-grid__toolbar">
 		<div class="currency-rates-grid__intro">
 			<p class="currency-rates-grid__eyebrow">Active table</p>
@@ -13,6 +16,7 @@
 				mat-raised-button
 				color="primary"
 				(click)="getTodayCurrencyRatesAsync()"
+				[disabled]="loaderService.isLoading()"
 			>
 				Get today currency rates
 			</button>
@@ -25,10 +29,12 @@
 		</div>
 	</div>
 	<div class="currency-rates-grid__filters">
-		<mat-button-toggle-group aria-label="Rate history period"
+		<mat-button-toggle-group
+			aria-label="Rate history period"
 			class="currency-rates-grid__toggle-group"
 			[value]="tableOptionsSignal().selectedDateRange.diffInMonths"
-			(change)="setDateRange(+$event.value)">
+			(change)="setDateRange(+$event.value)"
+		>
 			<mat-button-toggle [value]="1">1M</mat-button-toggle>
 			<mat-button-toggle [value]="3">3M</mat-button-toggle>
 			<mat-button-toggle [value]="6">6M</mat-button-toggle>
@@ -170,11 +176,15 @@
 			></tr>
 		</table>
 	</div>
-</div>
-} @if (loaderService.isLoading()) {
-<div class="overlay">
-	<div class="spinner-wrapper">
-		<progress-spinner [isLoading]="loaderService.isLoading()"></progress-spinner>
+
+	@if (loaderService.isLoading()) {
+	<div
+		class="currency-rates-grid__loading-overlay"
+		role="status"
+		aria-live="polite"
+		aria-label="Fresh currency rates are loading"
+	>
+		<progress-spinner [isLoading]="true"></progress-spinner>
 	</div>
+	}
 </div>
-}

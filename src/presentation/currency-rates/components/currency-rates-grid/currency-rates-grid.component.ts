@@ -97,8 +97,6 @@ export class CurrencyRatesGridComponent implements OnInit {
 					todayRateGroups
 				);
 			});
-
-		void this.getTodayCurrencyRatesAsync();
 	}
 
 	public masterToggle(currencyId: number, abbreviation: string): void {

@@ -15,12 +15,13 @@ import { DaysRangePayload } from '../../../domain/models/dates-range-payload.mod
 import { CurrencyRateGroupModel } from '../../../domain/models/rates/currency-rates-group.model';
 import { IBankCurrenciesProvider } from '../../../domain/providers/rates/bank-currencies.provider';
 import { CurrencyGridRateModel } from '../../../presentation/currency-rates/models/currency-grid-rate.model';
+import { ApiRequestOptions } from 'app/modules/shared/constants/api-request-options';
 
 @Injectable()
 export class NationalBankCurrenciesProvider implements IBankCurrenciesProvider {
-	private hostUrl?: string;
+	private readonly hostUrl?: string;
 
-	private apiUrl: string = 'currency-rates';
+	private readonly apiUrl: string = 'currency-rates';
 
 	constructor(
 		private readonly http: HttpClient,
@@ -40,7 +41,7 @@ export class NationalBankCurrenciesProvider implements IBankCurrenciesProvider {
 			map(responseResult =>
 				this.mapper?.map(DataRatesMappingProfile.RatesGroupEntityToDomain, responseResult.payload)
 			),
-			retry(3),
+			retry(ApiRequestOptions.RETRY_AMOUNT),
 			take(1)
 		);
 	}
@@ -61,7 +62,7 @@ export class NationalBankCurrenciesProvider implements IBankCurrenciesProvider {
 			map(responseResult =>
 				this.mapper?.map(DataRatesMappingProfile.RatesGroupEntityToDomain, responseResult.payload)
 			),
-			retry(3),
+			retry(ApiRequestOptions.RETRY_AMOUNT),
 			take(1)
 		);
 	}
@@ -71,7 +72,7 @@ export class NationalBankCurrenciesProvider implements IBankCurrenciesProvider {
 			map(responseResult =>
 				this.mapper?.map(DataRatesMappingProfile.RatesGroupEntityToDomain, responseResult.payload)
 			),
-			retry(3),
+			retry(ApiRequestOptions.RETRY_AMOUNT),
 			take(1)
 		);
 	}

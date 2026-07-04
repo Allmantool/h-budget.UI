@@ -3,9 +3,9 @@ import { IBankCurrenciesProvider } from 'domain/providers/rates/bank-currencies.
 
 import { Observable } from 'rxjs';
 
-import { UseCase } from 'domain/use-case';
+import { IUseCase } from 'core/use-case';
 
-export class GetTodayRatesUseCase implements UseCase<void, CurrencyRateGroupModel[]> {
+export class GetTodayRatesUseCase implements IUseCase<void, CurrencyRateGroupModel[]> {
 	constructor(private readonly ratesRepository: IBankCurrenciesProvider) {}
 
 	execute(): Observable<CurrencyRateGroupModel[]> {
