@@ -1,5 +1,9 @@
-@if (isChartInitialized$ | async) {
-<div class="currency-rates-chart">
+<div
+	class="currency-rates-chart"
+	[class.currency-rates-chart--busy]="(isChartInitialized$ | async) === false"
+	[attr.aria-busy]="(isChartInitialized$ | async) === false"
+>
+	@if (isChartInitialized$ | async) {
 	<apx-chart
 		class="currency-rates-chart__canvas"
 		[series]="chartOptions.series!"
@@ -8,9 +12,14 @@
 		[title]="chartOptions.title!"
 		[yaxis]="chartOptions.yaxis!"
 	></apx-chart>
-</div>
-}
-
-<div class="currency-rates-chart-spinner">
-	<progress-spinner [isLoading]="(isChartInitialized$ | async) === false"></progress-spinner>
+	} @if ((isChartInitialized$ | async) === false) {
+	<div
+		class="currency-rates-chart__loading-overlay"
+		role="status"
+		aria-live="polite"
+		aria-label="Currency rate chart is loading"
+	>
+		<progress-spinner [isLoading]="true"></progress-spinner>
+	</div>
+	}
 </div>

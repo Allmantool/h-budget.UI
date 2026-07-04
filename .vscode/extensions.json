@@ -1,0 +1,66 @@
+{
+  "recommendations": [
+    "Angular.ng-template",
+    "nrwl.angular-console",
+
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "editorconfig.editorconfig",
+    "stylelint.vscode-stylelint",
+    "yoavbls.pretty-ts-errors",
+
+    "christian-kohler.path-intellisense",
+    "christian-kohler.npm-intellisense",
+    "formulahendry.auto-rename-tag",
+    "pranaygp.vscode-css-peek",
+    "vitest.explorer",
+
+    "ms-dotnettools.csdevkit",
+    "ms-dotnettools.csharp",
+    "formulahendry.dotnet-test-explorer",
+    "ryanluker.vscode-coverage-gutters",
+    "pflannery.vscode-versionlens",
+    "jmrog.vscode-nuget-package-manager",
+
+    "SonarSource.sonarlint-vscode",
+    "github.copilot-chat",
+    "openai.chatgpt",
+
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+    "github.vscode-pull-request-github",
+    "github.vscode-github-actions",
+    "joshbolduc.commitlint",
+
+    "ms-azuretools.vscode-containers",
+    "ms-vscode-remote.remote-containers",
+    "ms-vscode-remote.remote-ssh",
+    "ms-vscode-remote.remote-wsl",
+
+    "redhat.vscode-yaml",
+    "ms-azure-devops.azure-pipelines",
+    "ms-kubernetes-tools.vscode-kubernetes-tools",
+    "ms-vscode.azurecli",
+
+    "ms-mssql.mssql",
+    "mongodb.mongodb-vscode",
+
+    "humao.rest-client",
+    "mikestead.dotenv",
+    "davidanson.vscode-markdownlint",
+    "yzhang.markdown-all-in-one",
+    "streetsidesoftware.code-spell-checker"
+  ],
+  "unwantedRecommendations": [
+    "semasquare.vscode-coverage-gutters",
+    "loiane.angular-extension-pack",
+    "loiane.ts-extension-pack",
+    "d4nyll.devops-extension-pack",
+    "ms-vscode.vscode-node-azure-pack",
+    "ms-dotnettools.vscode-dotnet-pack",
+    "aeschli.vscode-css-formatter",
+    "clemenspeters.format-json",
+    "flowtype.flow-for-vscode",
+    "ms-vscode.vscode-typescript-next"
+  ]
+}
