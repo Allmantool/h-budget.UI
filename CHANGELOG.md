@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.55 (2026-07-09)</small>
+
+* Merge pull request #674 from Allmantool/chore/deps-patch-upgrade ([17272d5d06f5f582965623612020e4b1e9894d12](https://github.com/Allmantool/h-budget.UI/commit/17272d5d06f5f582965623612020e4b1e9894d12)), closes [#674](https://github.com/Allmantool/h-budget.UI/issues/674)
+* build(deps): safe patch dependency upgrade ([bb45f2e62a75894b2cf7f4dd773f293deb29e507](https://github.com/Allmantool/h-budget.UI/commit/bb45f2e62a75894b2cf7f4dd773f293deb29e507))
+
 ## <small>1.1.54 (2026-07-04)</small>
 
 * Merge pull request #673 from Allmantool/fix/adjust-ui-ux-currency-rates-dashboard ([ea6e86ed253a192081cf825b6e679bf1159aef8e](https://github.com/Allmantool/h-budget.UI/commit/ea6e86ed253a192081cf825b6e679bf1159aef8e)), closes [#673](https://github.com/Allmantool/h-budget.UI/issues/673)
