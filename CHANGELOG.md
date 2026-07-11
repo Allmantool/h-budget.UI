@@ -1,5 +1,11 @@
 # 📦 Changelog
 
+## <small>1.1.56 (2026-07-11)</small>
+
+* Merge pull request #675 from Allmantool/tech/enhance-codex-standards ([fbcefd8b981181b34c693c682cfce6a671335ee8](https://github.com/Allmantool/h-budget.UI/commit/fbcefd8b981181b34c693c682cfce6a671335ee8)), closes [#675](https://github.com/Allmantool/h-budget.UI/issues/675)
+* chore: apply codex standards ([5611f8c93864091570f322ec21520ed7cc53ba03](https://github.com/Allmantool/h-budget.UI/commit/5611f8c93864091570f322ec21520ed7cc53ba03))
+* chore: self review ([de4ef4c6700241d07273769c07c422be32c032dc](https://github.com/Allmantool/h-budget.UI/commit/de4ef4c6700241d07273769c07c422be32c032dc))
+
 ## <small>1.1.55 (2026-07-09)</small>
 
 * Merge pull request #674 from Allmantool/chore/deps-patch-upgrade ([17272d5d06f5f582965623612020e4b1e9894d12](https://github.com/Allmantool/h-budget.UI/commit/17272d5d06f5f582965623612020e4b1e9894d12)), closes [#674](https://github.com/Allmantool/h-budget.UI/issues/674)
