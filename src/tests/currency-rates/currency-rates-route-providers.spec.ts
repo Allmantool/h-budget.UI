@@ -224,6 +224,8 @@ describe('currency rates lazy route activation', () => {
 		expect(getHarnessText(harness)).toContain('Daily board and quick actions');
 		expect(getHarnessText(harness)).toContain('USD selected');
 		expect(getHarnessText(harness)).toContain('US Dollar');
+		expect(currencyRateProviderSpy.getCurrencies.calls.count()).toBe(1);
+		expect(currencyRateProviderSpy.getTodayCurrencies.calls.any()).toBeFalse();
 
 		getTodayCurrencyRatesButton(harness).click();
 
@@ -235,6 +237,7 @@ describe('currency rates lazy route activation', () => {
 		expect(getHarnessText(harness)).toContain('Daily board and quick actions');
 		expect(getHarnessText(harness)).toContain('USD selected');
 		expect(getHarnessText(harness)).toContain('US Dollar');
+		expect(currencyRateProviderSpy.getCurrencies.calls.count()).toBe(1);
 	});
 
 	function getTestCurrencyRatesRoutes(): Routes {

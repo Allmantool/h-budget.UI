@@ -85,7 +85,7 @@ describe('currency rates line chart component', () => {
 		const element = fixture.nativeElement as HTMLElement;
 
 		expect(sut).toBeTruthy();
-		expect(currencyRateProviderSpy.getCurrencies.calls.any()).toBeTrue();
+		expect(currencyRateProviderSpy.getCurrencies.calls.any()).toBeFalse();
 		expect(element.querySelector('.currency-rates-chart')).not.toBeNull();
 		expect(element.querySelector('.currency-rates-chart')?.classList.contains('currency-rates-chart--busy')).toBe(
 			true

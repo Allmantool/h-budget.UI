@@ -12,12 +12,12 @@ import { CurrencyTableState } from 'app/modules/shared/store/states/rates/curren
 import * as _ from 'lodash';
 
 import { NgxsModule, Store } from '@ngxs/store';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 
-import { CurrencyTrend } from './../../../../app/modules/shared/store/models/currency-rates/currency-trend';
 import { ngxsConfig } from './../../../../app/modules/shared/store/ngxs.config';
 import {
 	AddCurrencyGroups,
+	EnsurePersistedCurrencyRatesLoaded,
 	FetchAllCurrencyRates,
 } from '../../../../app/modules/shared/store/states/rates/actions/currency.actions';
 import { CurrencyChartState } from '../../../../app/modules/shared/store/states/rates/currency-chart.state';
@@ -129,7 +129,7 @@ describe('currency rates store', () => {
 		store
 			.selectOnce(state => state.currencyState.rateGroups)
 			.subscribe(groups => {
-				const updatedRateGroup = _.find(groups, g => g.currencyId == 1);
+				const updatedRateGroup = _.find(groups, g => g.currencyId === 1);
 				const updatedRate = _.find(
 					updatedRateGroup.rateValues,
 					r => r.updateDate.toDateString() === new Date(2022, 1, 3).toDateString()
@@ -191,6 +191,89 @@ describe('currency rates store', () => {
 		const items = _.flattenDeep(_.map(groups, (g: CurrencyRateGroupModel) => g.rateValues!));
 
 		expect(items.length).toBe(2);
+	});
+
+	it('it "EnsurePersistedCurrencyRatesLoaded": loads persisted rates into an empty state once', () => {
+		const snapshot = store.snapshot();
+		const stubValue = new Array<CurrencyRateGroupModel>({
+			currencyId: 1,
+			abbreviation: 'Val-A',
+			name: 'test-name',
+			scale: 2,
+			rateValues: [
+				{
+					ratePerUnit: 16,
+					updateDate: new Date(2022, 1, 4),
+				} as CurrencyRateValueModel,
+				{
+					ratePerUnit: 14,
+					updateDate: new Date(2022, 1, 3),
+				} as CurrencyRateValueModel,
+			],
+		});
+
+		store.reset({
+			...snapshot,
+			currencyState: {
+				...snapshot.currencyState,
+				rateGroups: [],
+				hasLoadedPersistedRates: false,
+				isLoadingPersistedRates: false,
+			},
+		});
+		currencyRateProviderSpy.getCurrencies.and.returnValue(of(stubValue));
+
+		store.dispatch(new EnsurePersistedCurrencyRatesLoaded());
+		store.dispatch(new EnsurePersistedCurrencyRatesLoaded());
+
+		const currencyState = store.selectSnapshot(state => state.currencyState);
+
+		expect(currencyRateProviderSpy.getCurrencies.calls.count()).toBe(1);
+		expect(currencyState.hasLoadedPersistedRates).toBeTrue();
+		expect(currencyState.isLoadingPersistedRates).toBeFalse();
+		expect(currencyState.rateGroups[0].rateValues.map((rate: CurrencyRateValueModel) => rate.ratePerUnit)).toEqual([
+			14, 16,
+		]);
+	});
+
+	it('it "EnsurePersistedCurrencyRatesLoaded": does not overwrite already loaded user state', () => {
+		currencyRateProviderSpy.getCurrencies.and.returnValue(of([]));
+
+		store.dispatch(new EnsurePersistedCurrencyRatesLoaded());
+
+		const groups = store.selectSnapshot(state => state.currencyState.rateGroups);
+
+		expect(currencyRateProviderSpy.getCurrencies.calls.any()).toBeFalse();
+		expect(groups.length).toBe(2);
+	});
+
+	it('it "EnsurePersistedCurrencyRatesLoaded": resets loading state after provider errors', () => {
+		const snapshot = store.snapshot();
+		let hasError = false;
+
+		store.reset({
+			...snapshot,
+			currencyState: {
+				...snapshot.currencyState,
+				rateGroups: [],
+				hasLoadedPersistedRates: false,
+				isLoadingPersistedRates: false,
+			},
+		});
+		currencyRateProviderSpy.getCurrencies.and.returnValue(throwError(() => new Error('load failed')));
+
+		store.dispatch(new EnsurePersistedCurrencyRatesLoaded()).subscribe({
+			error: () => {
+				hasError = true;
+			},
+		});
+
+		const currencyState = store.selectSnapshot(state => state.currencyState);
+
+		expect(hasError).toBeTrue();
+		expect(currencyState.hasLoadedPersistedRates).toBeFalse();
+		expect(currencyState.isLoadingPersistedRates).toBeFalse();
+		expect(currencyState.rateGroups).toEqual([]);
 	});
 
 	it('it "GetCurrencyRatesFromPreviousDay": return expected previous date currency rates', () => {

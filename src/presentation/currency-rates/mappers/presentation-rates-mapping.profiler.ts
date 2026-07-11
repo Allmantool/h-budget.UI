@@ -3,6 +3,7 @@ import * as _ from 'lodash';
 import { MappingPair, Profile } from '@dynamic-mapper/mapper';
 
 import { CurrencyTrend } from '../../../app/modules/shared/store/models/currency-rates/currency-trend';
+import { CurrencyRateValueModel } from '../../../domain/models/rates/currency-rate-value.model';
 import { CurrencyRateGroupModel } from '../../../domain/models/rates/currency-rates-group.model';
 import { CurrencyGridRateModel } from '../models/currency-grid-rate.model';
 
@@ -34,15 +35,15 @@ export class PresentationRatesMappingProfile extends Profile {
 			},
 			officialRate: opt => {
 				opt.preCondition(src => !_.isNil(src.rateValues));
-				opt.mapFrom(src => _.first(src.rateValues)?.officialRate);
+				opt.mapFrom(src => PresentationRatesMappingProfile.getLatestRateValue(src)?.officialRate);
 			},
 			updateDate: opt => {
 				opt.preCondition(src => !_.isNil(src.rateValues));
-				opt.mapFrom(src => _.first(src.rateValues)?.updateDate);
+				opt.mapFrom(src => PresentationRatesMappingProfile.getLatestRateValue(src)?.updateDate);
 			},
 			ratePerUnit: opt => {
 				opt.preCondition(src => !_.isNil(src.rateValues));
-				opt.mapFrom(src => _.first(src.rateValues)?.ratePerUnit);
+				opt.mapFrom(src => PresentationRatesMappingProfile.getLatestRateValue(src)?.ratePerUnit);
 			},
 			currencyTrend: opt => {
 				opt.mapFrom(() => CurrencyTrend.notChanged);
@@ -51,5 +52,9 @@ export class PresentationRatesMappingProfile extends Profile {
 				opt.mapFrom(() => '0');
 			},
 		});
+	}
+
+	private static getLatestRateValue(rateGroup: CurrencyRateGroupModel): CurrencyRateValueModel | undefined {
+		return _.maxBy(rateGroup.rateValues, rateValue => rateValue.updateDate?.getTime() ?? 0);
 	}
 }
