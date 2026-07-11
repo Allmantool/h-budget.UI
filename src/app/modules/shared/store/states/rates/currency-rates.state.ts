@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
 
 import { Action, State, StateContext } from '@ngxs/store';
+import { format } from 'date-fns';
 import { catchError, EMPTY, take, tap, throwError } from 'rxjs';
 
 import {
@@ -17,6 +18,7 @@ import { ICurrencyRatesStateModel } from './models/currency-rates-state.model';
 import { NationalBankCurrenciesProvider } from '../../../../../../data/providers/rates/national-bank-currencies.provider';
 import { CurrencyRateValueModel } from '../../../../../../domain/models/rates/currency-rate-value.model';
 import { CurrencyRateGroupModel } from '../../../../../../domain/models/rates/currency-rates-group.model';
+import { DateFormats } from '../../../constants/date-formats';
 
 @State<ICurrencyRatesStateModel>({
 	name: 'currencyState',
@@ -29,7 +31,7 @@ import { CurrencyRateGroupModel } from '../../../../../../domain/models/rates/cu
 })
 @Injectable()
 export class CurrencyRatesState {
-	constructor(private readonly currencyRateProvider: NationalBankCurrenciesProvider) { }
+	constructor(private readonly currencyRateProvider: NationalBankCurrenciesProvider) {}
 
 	@Action(AddCurrencyGroups)
 	addCurrencyGroups(
@@ -42,20 +44,14 @@ export class CurrencyRatesState {
 	}
 
 	@Action(FetchTodayCurrencyRates)
-	fetchTodayCurrencyRates({
-		getState,
-		patchState,
-	}: StateContext<ICurrencyRatesStateModel>) {
+	fetchTodayCurrencyRates({ getState, patchState }: StateContext<ICurrencyRatesStateModel>) {
 		return this.currencyRateProvider.getTodayCurrencies().pipe(
 			take(1),
 			tap(todayRateGroups => {
 				const mappedTodayRateGroups = this.mapRateGroups(todayRateGroups);
 
 				patchState({
-					rateGroups: this.mergeRateGroups(
-						getState().rateGroups,
-						mappedTodayRateGroups
-					),
+					rateGroups: this.mergeRateGroups(getState().rateGroups, mappedTodayRateGroups),
 				});
 			})
 		);
@@ -111,10 +107,7 @@ export class CurrencyRatesState {
 		incomingRateGroups: CurrencyRateGroupModel[]
 	): CurrencyRateGroupModel[] {
 		const groupsByCurrencyId = new Map<number, CurrencyRateGroupModel>(
-			existingRateGroups.map(group => [
-				this.getRequiredCurrencyId(group),
-				group,
-			] as const)
+			existingRateGroups.map(group => [this.getRequiredCurrencyId(group), this.cloneRateGroup(group)] as const)
 		);
 
 		for (const incomingGroup of incomingRateGroups) {
@@ -122,25 +115,15 @@ export class CurrencyRatesState {
 			const existingGroup = groupsByCurrencyId.get(currencyId);
 
 			if (!existingGroup) {
-				groupsByCurrencyId.set(currencyId, {
-					...incomingGroup,
-					rateValues: this.orderRateValues(incomingGroup.rateValues ?? []),
-				});
+				groupsByCurrencyId.set(currencyId, this.cloneRateGroup(incomingGroup));
 
 				continue;
 			}
 
-			const mergedRateValues = _.unionWith(
-				incomingGroup.rateValues ?? [],
-				existingGroup.rateValues ?? [],
-				(left, right) =>
-					this.getRateTimestamp(left) === this.getRateTimestamp(right)
-			);
-
 			groupsByCurrencyId.set(currencyId, {
 				...existingGroup,
 				...incomingGroup,
-				rateValues: this.orderRateValues(mergedRateValues),
+				rateValues: this.mergeRateValues(existingGroup.rateValues ?? [], incomingGroup.rateValues ?? []),
 			});
 		}
 
@@ -151,18 +134,32 @@ export class CurrencyRatesState {
 		const { currencyId } = group;
 
 		if (currencyId === undefined) {
-			throw new Error(
-				'Cannot add a currency-rate group without a currency identifier.'
-			);
+			throw new Error('Cannot add a currency-rate group without a currency identifier.');
 		}
 
 		return currencyId;
 	}
 
-	private orderRateValues(
-		rateValues: CurrencyRateValueModel[]
-	): CurrencyRateValueModel[] {
+	private orderRateValues(rateValues: CurrencyRateValueModel[]): CurrencyRateValueModel[] {
 		return _.orderBy(rateValues, rate => this.getRateTimestamp(rate));
+	}
+
+	private mergeRateValues(
+		existingRateValues: CurrencyRateValueModel[],
+		incomingRateValues: CurrencyRateValueModel[]
+	): CurrencyRateValueModel[] {
+		const ratesByBusinessDate = new Map<string, CurrencyRateValueModel>();
+
+		for (const rate of existingRateValues) {
+			ratesByBusinessDate.set(this.getRateBusinessDate(rate), this.cloneRateValue(rate));
+		}
+
+		for (const rate of incomingRateValues) {
+			// Incoming values are authoritative; repeated incoming dates use the final value.
+			ratesByBusinessDate.set(this.getRateBusinessDate(rate), this.cloneRateValue(rate));
+		}
+
+		return this.orderRateValues(Array.from(ratesByBusinessDate.values()));
 	}
 
 	private getRateTimestamp(rate: CurrencyRateValueModel): number {
@@ -175,15 +172,32 @@ export class CurrencyRatesState {
 		return Date.parse(String(updateDate));
 	}
 
-	private mapRateGroups(
-		currencyRateGroups: CurrencyRateGroupModel[]
-	): CurrencyRateGroupModel[] {
-		return currencyRateGroups.map(rateGroup => ({
-			currencyId: rateGroup.currencyId,
-			name: rateGroup.name,
-			abbreviation: rateGroup.abbreviation,
-			scale: rateGroup.scale,
-			rateValues: this.orderRateValues(rateGroup.rateValues ?? []),
-		}));
+	private getRateBusinessDate(rate: CurrencyRateValueModel): string {
+		const updateDate = rate.updateDate;
+
+		if (!(updateDate instanceof Date) || Number.isNaN(updateDate.getTime())) {
+			throw new Error('Cannot merge a currency rate without a valid update date.');
+		}
+
+		return format(updateDate, DateFormats.ApiRequest);
+	}
+
+	private cloneRateGroup(rateGroup: CurrencyRateGroupModel): CurrencyRateGroupModel {
+		return {
+			...rateGroup,
+			rateValues: this.orderRateValues((rateGroup.rateValues ?? []).map(rate => this.cloneRateValue(rate))),
+		};
+	}
+
+	private cloneRateValue(rate: CurrencyRateValueModel): CurrencyRateValueModel {
+		return new CurrencyRateValueModel({
+			officialRate: rate.officialRate,
+			ratePerUnit: rate.ratePerUnit,
+			updateDate: rate.updateDate ? new Date(rate.updateDate) : undefined,
+		});
+	}
+
+	private mapRateGroups(currencyRateGroups: CurrencyRateGroupModel[]): CurrencyRateGroupModel[] {
+		return currencyRateGroups.map(rateGroup => this.cloneRateGroup(rateGroup));
 	}
 }

@@ -225,6 +225,15 @@ describe('currency rates dashboard component', () => {
 
 	it('should render the grid loading overlay while today rates are loading', async () => {
 		const todayRatesSubject = new Subject<CurrencyRateGroupModel[]>();
+		const currencyRatesGridService = TestBed.inject(CurrencyRatesGridService);
+		const getTodayCurrenciesAsync = currencyRatesGridService.getTodayCurrenciesAsync.bind(currencyRatesGridService);
+		let todayRatesLoad: Promise<CurrencyRateGroupModel[]> | undefined;
+
+		spyOn(currencyRatesGridService, 'getTodayCurrenciesAsync').and.callFake(() => {
+			todayRatesLoad = getTodayCurrenciesAsync();
+
+			return todayRatesLoad;
+		});
 		currencyRateProviderSpy.getTodayCurrencies.and.returnValue(todayRatesSubject);
 		currencyRateProviderSpy.getCurrencies.and.returnValue(of(sampleRateGroups));
 		seedPopulatedCurrencyState();
@@ -245,6 +254,12 @@ describe('currency rates dashboard component', () => {
 
 		todayRatesSubject.next(sampleRateGroups);
 		todayRatesSubject.complete();
+
+		if (!todayRatesLoad) {
+			throw new Error('Expected the today-rates request to start.');
+		}
+
+		await todayRatesLoad;
 		await settleDashboard();
 
 		expect(getNativeElement().querySelector('.currency-rates-grid__loading-overlay progress-spinner')).toBeNull();
@@ -262,12 +277,11 @@ describe('currency rates dashboard component', () => {
 	async function renderDashboard(): Promise<void> {
 		fixture.detectChanges();
 		await settleDashboard();
-		await settleDashboard();
 	}
 
 	async function settleDashboard(): Promise<void> {
 		await fixture.whenStable();
-		await new Promise<void>(resolve => setTimeout(resolve));
+		await Promise.resolve();
 		fixture.detectChanges();
 	}
 
