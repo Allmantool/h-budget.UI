@@ -18,3 +18,11 @@ export class Edit {
 export class FetchAllCurrencyRates {
 	static readonly type = '[CURR-RATES-GROUP] Fetch All currency groups';
 }
+
+export class FetchTodayCurrencyRates {
+	static readonly type = '[Currency Rates] Fetch today currency rates';
+}
+
+export class EnsurePersistedCurrencyRatesLoaded {
+	static readonly type = '[CURR-RATES-GROUP] Ensure persisted currency groups loaded';
+}

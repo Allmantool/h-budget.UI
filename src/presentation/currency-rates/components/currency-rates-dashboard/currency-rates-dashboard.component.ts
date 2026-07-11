@@ -6,32 +6,20 @@ import { Title } from '@angular/platform-browser';
 
 import * as _ from 'lodash';
 
-import { Select } from '@ngxs/store';
-import {
-	ApexAxisChartSeries,
-	ApexChart,
-	ApexDataLabels,
-	ApexFill,
-	ApexGrid,
-	ApexLegend,
-	ApexNonAxisChartSeries,
-	ApexPlotOptions,
-	ApexResponsive,
-	ApexStroke,
-	ApexTooltip,
-	ApexXAxis,
-	ApexYAxis,
-	NgApexchartsModule,
-} from 'ng-apexcharts';
+import { Select, Store } from '@ngxs/store';
+import { NgApexchartsModule } from 'ng-apexcharts';
 import { Observable } from 'rxjs';
 
 import { ICurrencyTableOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-table-options';
+import { EnsurePersistedCurrencyRatesLoaded } from '../../../../app/modules/shared/store/states/rates/actions/currency.actions';
 import { getCurrencyTableOptions } from '../../../../app/modules/shared/store/states/rates/selectors/currency-table-options.selectors';
 import { getRates } from '../../../../app/modules/shared/store/states/rates/selectors/currency.selectors';
 import { CurrencyRateValueModel } from '../../../../domain/models/rates/currency-rate-value.model';
 import { CurrencyRateGroupModel } from '../../../../domain/models/rates/currency-rates-group.model';
 import { CurrencyRatesGridComponent } from '../currency-rates-grid/currency-rates-grid.component';
 import { CurrencyRatesLineChartComponent } from '../currency-rates-line-chart/currency-rates-line-chart.component';
+import { MarketShareChartOptions } from 'presentation/currency-rates/types/market-share-chart.options';
+import { TrendBarChartOptions } from 'presentation/currency-rates/types/trend-bar-chart.options';
 
 interface CurrencyTrendComparison {
 	currencyId: number;
@@ -45,30 +33,6 @@ interface CrossRatePoint {
 	updateDate: Date;
 	rate: number;
 }
-
-type TrendBarChartOptions = {
-	series: ApexAxisChartSeries;
-	chart: ApexChart;
-	plotOptions: ApexPlotOptions;
-	dataLabels: ApexDataLabels;
-	xaxis: ApexXAxis;
-	yaxis: ApexYAxis;
-	grid: ApexGrid;
-	tooltip: ApexTooltip;
-	fill: ApexFill;
-};
-
-type MarketShareChartOptions = {
-	series: ApexNonAxisChartSeries;
-	chart: ApexChart;
-	labels: string[];
-	legend: ApexLegend;
-	plotOptions: ApexPlotOptions;
-	stroke: ApexStroke;
-	fill: ApexFill;
-	tooltip: ApexTooltip;
-	responsive: ApexResponsive[];
-};
 
 @Component({
 	selector: 'currency-rates-dashboard.component',
@@ -374,7 +338,10 @@ export class CurrencyRatesDashboardComponent implements OnInit {
 		};
 	});
 
-	constructor(private readonly title: Title) {
+	constructor(
+		private readonly title: Title,
+		private readonly store: Store
+	) {
 		this.tableOptionsSignal = toSignal(this.currencyTableOptions$, {
 			initialValue: {
 				selectedItem: {
@@ -396,5 +363,6 @@ export class CurrencyRatesDashboardComponent implements OnInit {
 
 	ngOnInit(): void {
 		this.title.setTitle('H-Budget rates');
+		this.store.dispatch(new EnsurePersistedCurrencyRatesLoaded());
 	}
 }

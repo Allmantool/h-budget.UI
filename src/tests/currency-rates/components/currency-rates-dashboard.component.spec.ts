@@ -137,6 +137,38 @@ describe('currency rates dashboard component', () => {
 		expect(getText()).toContain('Market position donut');
 	});
 
+	it('should provide complete chart options for empty dashboard data', () => {
+		const trendChart = component.trendLeaderboardChartSignal();
+		const marketPositionChart = component.marketPositionChartSignal();
+
+		expect(trendChart.chart.type).toBe('bar');
+		expect(trendChart.series[0].data).toEqual([]);
+		expect(trendChart.xaxis.categories).toEqual([]);
+		expect(trendChart.plotOptions).toBeDefined();
+		expect(trendChart.dataLabels).toBeDefined();
+
+		expect(marketPositionChart.chart.type).toBe('donut');
+		expect(marketPositionChart.series).toEqual([0, 0]);
+		expect(marketPositionChart.labels).toEqual(['Behind active', 'Ahead of active']);
+		expect(marketPositionChart.series.length).toBe(marketPositionChart.labels.length);
+		expect(marketPositionChart.legend).toBeDefined();
+		expect(marketPositionChart.plotOptions).toBeDefined();
+	});
+
+	it('should load and render persisted rates on initial render without requesting today rates', async () => {
+		await renderDashboard();
+
+		const pageText = getText();
+
+		expect(currencyRateProviderSpy.getCurrencies.calls.count()).toBe(1);
+		expect(currencyRateProviderSpy.getTodayCurrencies.calls.any()).toBeFalse();
+		expect(getRenderedRows().length).toBe(2);
+		expect(pageText).toContain('US Dollar [USD]');
+		expect(pageText).toContain('Euro [EUR]');
+		expect(pageText).toContain('3.2');
+		expect(pageText).toContain('3.8');
+	});
+
 	it('should render state-backed selected currency, comparison, grid, and chart content', async () => {
 		seedPopulatedCurrencyState();
 
@@ -193,6 +225,15 @@ describe('currency rates dashboard component', () => {
 
 	it('should render the grid loading overlay while today rates are loading', async () => {
 		const todayRatesSubject = new Subject<CurrencyRateGroupModel[]>();
+		const currencyRatesGridService = TestBed.inject(CurrencyRatesGridService);
+		const getTodayCurrenciesAsync = currencyRatesGridService.getTodayCurrenciesAsync.bind(currencyRatesGridService);
+		let todayRatesLoad: Promise<CurrencyRateGroupModel[]> | undefined;
+
+		spyOn(currencyRatesGridService, 'getTodayCurrenciesAsync').and.callFake(() => {
+			todayRatesLoad = getTodayCurrenciesAsync();
+
+			return todayRatesLoad;
+		});
 		currencyRateProviderSpy.getTodayCurrencies.and.returnValue(todayRatesSubject);
 		currencyRateProviderSpy.getCurrencies.and.returnValue(of(sampleRateGroups));
 		seedPopulatedCurrencyState();
@@ -213,6 +254,12 @@ describe('currency rates dashboard component', () => {
 
 		todayRatesSubject.next(sampleRateGroups);
 		todayRatesSubject.complete();
+
+		if (!todayRatesLoad) {
+			throw new Error('Expected the today-rates request to start.');
+		}
+
+		await todayRatesLoad;
 		await settleDashboard();
 
 		expect(getNativeElement().querySelector('.currency-rates-grid__loading-overlay progress-spinner')).toBeNull();
@@ -230,12 +277,11 @@ describe('currency rates dashboard component', () => {
 	async function renderDashboard(): Promise<void> {
 		fixture.detectChanges();
 		await settleDashboard();
-		await settleDashboard();
 	}
 
 	async function settleDashboard(): Promise<void> {
 		await fixture.whenStable();
-		await new Promise<void>(resolve => setTimeout(resolve));
+		await Promise.resolve();
 		fixture.detectChanges();
 	}
 

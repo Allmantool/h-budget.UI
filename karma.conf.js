@@ -36,7 +36,7 @@ module.exports = function (config) {
 			suppressAll: true, // removes the duplicated traces
 		},
 		sonarqubeReporter: {
-			basePath: 'src/app', // test files folder
+			basePath: 'src', // test files folder
 			filePattern: '**/*spec.ts', // test files glob pattern
 			encoding: 'utf-8', // test files encoding
 			outputFolder: 'reports', // report destination

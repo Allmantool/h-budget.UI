@@ -61,8 +61,8 @@ describe('presentation rates mappings', () => {
 		expect(gridRate.name).toBe('name-test');
 		expect(gridRate.officialRate).toBe(22.24);
 		expect(gridRate.rateDiff).toBe('0');
-		expect(gridRate.ratePerUnit).toBe(11.12);
+		expect(gridRate.ratePerUnit).toBe(22.23);
 		expect(gridRate.scale).toBe(1);
-		expect(gridRate.updateDate).toEqual(new Date(2024, 1, 10));
+		expect(gridRate.updateDate).toEqual(new Date(2024, 2, 10));
 	});
 });

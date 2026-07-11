@@ -8,7 +8,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 
 import { Select, Store } from '@ngxs/store';
-import { combineLatest, Observable, Subject } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 
 import { RatesDialogService } from './../../services/rates-dialog.service';
 import { ProgressSpinnerComponent } from '../../../../app/modules/shared/components/progress-spinner/progress-spinner.component';
@@ -25,7 +25,6 @@ import {
 	getCurrencyRatesFromPreviousDay,
 	getRates,
 } from '../../../../app/modules/shared/store/states/rates/selectors/currency.selectors';
-import { CurrencyRateValueModel } from '../../../../domain/models/rates/currency-rate-value.model';
 import { CurrencyRateGroupModel } from '../../../../domain/models/rates/currency-rates-group.model';
 import { RatesGridColumnOptions } from '../../constants/rates-grid-options';
 import { CurrencyGridRateModel } from '../../models/currency-grid-rate.model';
@@ -53,15 +52,13 @@ export class CurrencyRatesGridComponent implements OnInit {
 	public tableOptionsSignal: Signal<ICurrencyTableOptions>;
 
 	@Select(getRates)
-	public rates$!: Observable<CurrencyRateValueModel[]>;
+	public rates$!: Observable<CurrencyRateGroupModel[]>;
 
 	@Select(getCurrencyTableOptions)
 	public currencyTableOptions$!: Observable<ICurrencyTableOptions>;
 
 	@Select(getCurrencyRatesFromPreviousDay)
 	public previousDayRates$!: Observable<IPreviousDayCurrencyRate[]>;
-
-	public todayCurrencyRateGroups$: Subject<CurrencyRateGroupModel[]> = new Subject<CurrencyRateGroupModel[]>();
 
 	public todayRatesTableDataSource = new MatTableDataSource<CurrencyGridRateModel>([]);
 	public todayRatesTableSelection = new SelectionModel<CurrencyGridRateModel>(false, []);
@@ -78,23 +75,16 @@ export class CurrencyRatesGridComponent implements OnInit {
 	}
 
 	ngOnInit(): void {
-		this.todayCurrencyRateGroups$
+		combineLatest([this.previousDayRates$, this.rates$, this.currencyTableOptions$])
 			.pipe(takeUntilDestroyed(this.destroyRef))
-			.subscribe((todayRateGroups: CurrencyRateGroupModel[]) => {
-				this.todayRatesTableDataSource = this.currencyRatesGridService.GetDataSource(todayRateGroups);
-
-				this.todayRatesTableSelection = this.currencyRatesGridService.GetTableSelection(
-					todayRateGroups,
-					this.tableOptionsSignal().selectedItem.currencyId
-				);
-			});
-
-		combineLatest([this.previousDayRates$, this.todayCurrencyRateGroups$])
-			.pipe(takeUntilDestroyed(this.destroyRef))
-			.subscribe(([previousDayRates, todayRateGroups]) => {
+			.subscribe(([previousDayRates, rateGroups, tableOptions]) => {
 				this.todayRatesTableDataSource = this.currencyRatesGridService.enrichWithTrend(
 					previousDayRates,
-					todayRateGroups
+					rateGroups
+				);
+				this.todayRatesTableSelection = this.currencyRatesGridService.GetTableSelection(
+					rateGroups,
+					tableOptions.selectedItem.currencyId
 				);
 			});
 	}
@@ -105,7 +95,7 @@ export class CurrencyRatesGridComponent implements OnInit {
 
 	public async getTodayCurrencyRatesAsync(): Promise<void> {
 		await this.loaderService.withLoader(async () => {
-			this.todayCurrencyRateGroups$.next(await this.currencyRatesGridService.getTodayCurrenciesAsync());
+			await this.currencyRatesGridService.getTodayCurrenciesAsync();
 		});
 	}
 

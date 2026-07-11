@@ -7,7 +7,6 @@ import {
 	DestroyRef,
 	inject,
 	Input,
-	OnInit,
 	Signal,
 	ViewChild,
 } from '@angular/core';
@@ -15,14 +14,13 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 
 import * as _ from 'lodash';
 
-import { Select, Store } from '@ngxs/store';
+import { Select } from '@ngxs/store';
 import { ChartComponent, NgApexchartsModule } from 'ng-apexcharts';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { ProgressSpinnerComponent } from '../../../../app/modules/shared/components/progress-spinner/progress-spinner.component';
 import { ICurrencyTableOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-table-options';
-import { FetchAllCurrencyRates } from '../../../../app/modules/shared/store/states/rates/actions/currency.actions';
 import { getCurrencyTableOptions } from '../../../../app/modules/shared/store/states/rates/selectors/currency-table-options.selectors';
 import { getCurrencyRatesGroupByCurrencyId } from '../../../../app/modules/shared/store/states/rates/selectors/currency.selectors';
 import { CurrencyRateGroupModel } from '../../../../domain/models/rates/currency-rates-group.model';
@@ -39,7 +37,7 @@ import { LineChartService } from '../../services/line-chart.service';
 	standalone: true,
 	imports: [AsyncPipe, NgApexchartsModule, ProgressSpinnerComponent],
 })
-export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
+export class CurrencyRatesLineChartComponent implements AfterViewInit {
 	private readonly destroyRef = inject(DestroyRef);
 
 	public tableOptionsSignal: Signal<ICurrencyTableOptions>;
@@ -60,10 +58,7 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
 
 	private lineChartOptions: LineChartOptions;
 
-	constructor(
-		private store: Store,
-		private lineChartService: LineChartService
-	) {
+	constructor(private lineChartService: LineChartService) {
 		this.lineChartOptions = {
 			height: this.chartHeight,
 			width: this.chartWidth,
@@ -75,10 +70,6 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit, OnInit {
 	}
 	public ngAfterViewInit(): void {
 		this.InitializeChart();
-	}
-
-	public ngOnInit(): void {
-		this.store.dispatch(new FetchAllCurrencyRates());
 	}
 
 	private InitializeChart(): void {
