@@ -1,0 +1,28 @@
+{
+	"search.useIgnoreFiles": true,
+	"editor.formatOnSave": false,
+	"eslint.validate": [
+		"typescript",
+		"html"
+	],
+	"editor.codeActionsOnSave": {
+		"source.fixAll": "explicit"
+	},
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"cSpell.words": [
+		"Apexcharts",
+		"commitlint",
+		"counterparties",
+		"DOCKERHUB",
+		"Financies",
+		"fintech",
+		"keycodes",
+		"nameof",
+		"ngxs",
+		"sidenav",
+		"sonarqube",
+		"stylelint",
+		"uuidv",
+		"yaxis"
+	]
+}

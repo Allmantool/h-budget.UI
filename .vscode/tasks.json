@@ -1,0 +1,185 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "SPA: Start Debug Server",
+			"type": "npm",
+			"script": "start:debug",
+			"isBackground": true,
+			"problemMatcher": {
+				"owner": "angular",
+				"pattern": {
+					"regexp": "a^"
+				},
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "^> Building\\.\\.\\.$",
+					"endsPattern": ".*Application bundle generation complete\\..*"
+				}
+			},
+			"presentation": {
+				"reveal": "always",
+				"focus": false,
+				"panel": "dedicated",
+				"group": "spa-development",
+				"clear": true
+			},
+			"runOptions": {
+				"instanceLimit": 1
+			}
+		},
+		{
+			"label": "SPA: Start Development Server",
+			"type": "npm",
+			"script": "start",
+			"isBackground": true,
+			"problemMatcher": {
+				"owner": "angular",
+				"pattern": {
+					"regexp": "a^"
+				},
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "^> Building\\.\\.\\.$",
+					"endsPattern": ".*Application bundle generation complete\\..*"
+				}
+			},
+			"presentation": {
+				"reveal": "always",
+				"focus": false,
+				"panel": "dedicated",
+				"group": "spa-development",
+				"clear": true
+			},
+			"runOptions": {
+				"instanceLimit": 1
+			}
+		},
+		{
+			"label": "SPA: Unit Tests",
+			"type": "npm",
+			"script": "test",
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"clear": true
+			}
+		},
+		{
+			"label": "SPA: Unit Tests - Watch",
+			"type": "npm",
+			"script": "test:watch",
+			"isBackground": true,
+			"problemMatcher": {
+				"owner": "karma",
+				"pattern": {
+					"regexp": "a^"
+				},
+				"background": {
+					"activeOnStart": true,
+					"endsPattern": ".*Karma.*server started.*"
+				}
+			},
+			"presentation": {
+				"reveal": "always",
+				"focus": false,
+				"panel": "dedicated",
+				"group": "spa-tests",
+				"clear": true
+			},
+			"runOptions": {
+				"instanceLimit": 1
+			}
+		},
+		{
+			"label": "SPA: Unit Tests - Coverage",
+			"type": "npm",
+			"script": "test",
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"clear": true
+			}
+		},
+		{
+			"label": "SPA: Lint",
+			"type": "npm",
+			"script": "lint",
+			"problemMatcher": "$eslint-stylish",
+			"presentation": {
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"clear": true
+			}
+		},
+		{
+			"label": "SPA: Format Check",
+			"type": "npm",
+			"script": "format:check",
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"clear": true
+			}
+		},
+		{
+			"label": "SPA: Type Check",
+			"type": "npm",
+			"script": "typecheck",
+			"problemMatcher": "$tsc",
+			"presentation": {
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"clear": true
+			}
+		},
+		{
+			"label": "SPA: Build Development",
+			"type": "npm",
+			"script": "build",
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"clear": true
+			}
+		},
+		{
+			"label": "SPA: Build Production",
+			"type": "npm",
+			"script": "build:prod",
+			"problemMatcher": [],
+			"presentation": {
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared",
+				"clear": true
+			}
+		},
+		{
+			"label": "SPA: Verify",
+			"dependsOn": [
+				"SPA: Type Check",
+				"SPA: Lint",
+				"SPA: Format Check",
+				"SPA: Unit Tests",
+				"SPA: Build Production"
+			],
+			"dependsOrder": "sequence",
+			"presentation": {
+				"reveal": "always",
+				"focus": false,
+				"panel": "shared"
+			}
+		}
+	]
+}

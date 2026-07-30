@@ -12,6 +12,26 @@ Run `ng generate component component-name` to generate a new component. You can 
 
 Run `npm run build` for a development build or `npm run build:prod` for a production build. The build artifacts will be stored in the `dist/` directory.
 
+## Start and debug the SPA in VS Code
+
+Prerequisites: use Node.js 24+ and npm 11+ and ensure the development TLS certificate configured in `project.json` is available. Google Chrome is the configured debug browser.
+
+1. Open **Run and Debug**.
+2. Select **SPA: Start and Debug**.
+3. Set a breakpoint in an Angular TypeScript file.
+4. Press `F5`.
+
+VS Code starts `npm run start:debug`, waits for the Angular server at `https://localhost:4200`, and launches Chrome with the built-in JavaScript debugger. The debug-only browser session accepts the locally configured development certificate; it does not change your normal Chrome profile. Stop the debug session to stop the server task.
+
+Use **Terminal → Run Task** to run the remaining workflows:
+
+- **SPA: Start Debug Server** or **SPA: Start Development Server** for the HTTPS development server.
+- **SPA: Unit Tests**, **SPA: Unit Tests - Watch**, and **SPA: Unit Tests - Coverage** for Karma/Jasmine tests; use **SPA: Debug Unit Tests** from Run and Debug to set breakpoints in tests or application code.
+- **SPA: Lint**, **SPA: Format Check**, **SPA: Type Check**, **SPA: Build Development**, and **SPA: Build Production** for individual checks.
+- **SPA: Verify** for type checking, linting, formatting verification, unit tests, and a production build.
+
+The equivalent command-line verification workflow is `npm run verify`. To attach to an already running Chrome instance, start Chrome with `--remote-debugging-port=9222 --user-data-dir=<temporary-directory>` and select **SPA: Attach to Browser**.
+
 ## Running unit tests
 
 Run `npm run test` or `npm run test:ci` to execute the unit tests via [Karma](https://karma-runner.github.io).

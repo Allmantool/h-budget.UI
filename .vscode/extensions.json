@@ -13,7 +13,6 @@
     "christian-kohler.npm-intellisense",
     "formulahendry.auto-rename-tag",
     "pranaygp.vscode-css-peek",
-    "vitest.explorer",
 
     "ms-dotnettools.csdevkit",
     "ms-dotnettools.csharp",
@@ -61,6 +60,7 @@
     "aeschli.vscode-css-formatter",
     "clemenspeters.format-json",
     "flowtype.flow-for-vscode",
-    "ms-vscode.vscode-typescript-next"
+    "ms-vscode.vscode-typescript-next",
+    "msjsdiag.debugger-for-chrome"
   ]
 }

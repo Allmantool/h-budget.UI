@@ -1,0 +1,62 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "chrome",
+			"request": "launch",
+			"name": "SPA: Start and Debug",
+			"url": "https://localhost:4200/",
+			"preLaunchTask": "SPA: Start Debug Server",
+			"webRoot": "${workspaceFolder}",
+			"sourceMaps": true,
+			"smartStep": true,
+			"userDataDir": "${workspaceFolder}/.vscode/.chrome-debug",
+			"resolveSourceMapLocations": [
+				"${workspaceFolder}/**",
+				"!**/node_modules/**"
+			],
+			"skipFiles": [
+				"<node_internals>/**",
+				"**/node_modules/**"
+			],
+			"runtimeArgs": [
+				"--ignore-certificate-errors"
+			]
+		},
+		{
+			"type": "chrome",
+			"request": "attach",
+			"name": "SPA: Attach to Browser",
+			"port": 9222,
+			"webRoot": "${workspaceFolder}",
+			"sourceMaps": true,
+			"smartStep": true,
+			"resolveSourceMapLocations": [
+				"${workspaceFolder}/**",
+				"!**/node_modules/**"
+			],
+			"skipFiles": [
+				"<node_internals>/**",
+				"**/node_modules/**"
+			]
+		},
+		{
+			"type": "chrome",
+			"request": "launch",
+			"name": "SPA: Debug Unit Tests",
+			"url": "http://localhost:9876/debug.html",
+			"preLaunchTask": "SPA: Unit Tests - Watch",
+			"webRoot": "${workspaceFolder}",
+			"sourceMaps": true,
+			"smartStep": true,
+			"resolveSourceMapLocations": [
+				"${workspaceFolder}/**",
+				"!**/node_modules/**"
+			],
+			"skipFiles": [
+				"<node_internals>/**",
+				"**/node_modules/**"
+			]
+		}
+	]
+}
