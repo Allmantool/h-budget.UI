@@ -14,23 +14,30 @@ Run `npm run build` for a development build or `npm run build:prod` for a produc
 
 ## Start and debug the SPA in VS Code
 
-Prerequisites: use Node.js 24+ and npm 11+ and ensure the development TLS certificate configured in `project.json` is available. Google Chrome is the configured debug browser.
+Prerequisites: use Node.js 24+ and npm 11+, ensure the development TLS certificate configured in `project.json` is available, and use trusted workspace mode.
 
 1. Open **Run and Debug**.
 2. Select **SPA: Start and Debug**.
 3. Set a breakpoint in an Angular TypeScript file.
 4. Press `F5`.
 
-VS Code starts `npm run start:debug`, waits for the Angular server at `https://localhost:4200`, and launches Chrome with the built-in JavaScript debugger. The debug-only browser session accepts the locally configured development certificate; it does not change your normal Chrome profile. Stop the debug session to stop the server task.
+VS Code starts `npm run start:debug`, waits for the server to print its `Local: https://localhost:4200/` listener line, then opens `https://localhost:4200` in the VS Code integrated browser with the JavaScript debugger already attached. Stop the debug session to close that integrated browser tab; terminate the server task separately if it remains running.
+
+If the development certificate has not yet been trusted in the integrated browser, use its one-time certificate warning to open **Advanced** and continue to `localhost`. Do not disable certificate validation globally.
 
 Use **Terminal → Run Task** to run the remaining workflows:
 
 - **SPA: Start Debug Server** or **SPA: Start Development Server** for the HTTPS development server.
-- **SPA: Unit Tests**, **SPA: Unit Tests - Watch**, and **SPA: Unit Tests - Coverage** for Karma/Jasmine tests; use **SPA: Debug Unit Tests** from Run and Debug to set breakpoints in tests or application code.
+- **SPA: Unit Tests**, **SPA: Unit Tests - Watch**, and **SPA: Unit Tests - Coverage** for the normal Karma/Jasmine workflows.
+- **SPA: Debug Unit Tests** to start Karma's dedicated visible Chrome instance with a temporary profile and attach VS Code to it. Use this only for test debugging; do not start another browser on port 9222 at the same time.
 - **SPA: Lint**, **SPA: Format Check**, **SPA: Type Check**, **SPA: Build Development**, and **SPA: Build Production** for individual checks.
 - **SPA: Verify** for type checking, linting, formatting verification, unit tests, and a production build.
 
-The equivalent command-line verification workflow is `npm run verify`. To attach to an already running Chrome instance, start Chrome with `--remote-debugging-port=9222 --user-data-dir=<temporary-directory>` and select **SPA: Attach to Browser**.
+The equivalent command-line verification workflow is `npm run verify`. **SPA: Debug in Edge** is an optional alternative that starts a VS Code-managed Edge debug profile. It can be unavailable on machines where Edge remote debugging is restricted; the integrated-browser configuration remains the normal F5 workflow. Do not close ordinary Edge windows before using the primary workflow.
+
+## Angular Language Service recovery
+
+This workspace does not pin a TypeScript SDK in VS Code. If Angular Language Service reports `write EPIPE`, first update or reinstall the official **Angular Language Service** extension so its major version matches the Angular 21 workspace, and disable any duplicate Angular extensions. Then run **Developer: Restart Extension Host**, **TypeScript: Restart TS Server**, and reload the folder in trusted workspace mode. Do not configure a user- or workspace-specific TypeScript SDK unless a compatible version is verified.
 
 ## Running unit tests
 

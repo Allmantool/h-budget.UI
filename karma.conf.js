@@ -14,6 +14,10 @@ module.exports = function (config) {
 			require('karma-sonarqube-reporter'),
 		],
 		customLaunchers: {
+			ChromeDebugging: {
+				base: 'Chrome',
+				flags: ['--remote-debugging-port=9222'],
+			},
 			Chrome_without_security: {
 				base: 'ChromeHeadless',
 				flags: ['--no-sandbox'],

@@ -15,6 +15,7 @@
     "test": "nx test --code-coverage --verbose",
     "test:ci": "nx test --watch=false --code-coverage --source-map=false --browsers=ChromiumNoSandbox",
     "test:watch": "nx test --watch=true",
+    "test:debug": "nx test --watch=true --browsers=ChromeDebugging",
     "lint": "nx lint",
     "lint:fix": "nx lint --fix --verbose",
     "lint:css": "stylelint \"**/*.css\" --ignore-path .gitignore",

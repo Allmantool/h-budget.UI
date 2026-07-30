@@ -3,18 +3,18 @@
 	"tasks": [
 		{
 			"label": "SPA: Start Debug Server",
-			"type": "npm",
-			"script": "start:debug",
+			"type": "shell",
+			"command": "npm",
+			"args": ["run", "start:debug"],
+			"options": { "cwd": "${workspaceFolder}" },
 			"isBackground": true,
 			"problemMatcher": {
-				"owner": "angular",
-				"pattern": {
-					"regexp": "a^"
-				},
+				"owner": "spa-dev-server",
+				"pattern": { "regexp": "a^" },
 				"background": {
 					"activeOnStart": true,
-					"beginsPattern": "^> Building\\.\\.\\.$",
-					"endsPattern": ".*Application bundle generation complete\\..*"
+					"beginsPattern": "Building\\.\\.\\.",
+					"endsPattern": "Local:\\s+https://localhost:4200/?"
 				}
 			},
 			"presentation": {
@@ -24,24 +24,22 @@
 				"group": "spa-development",
 				"clear": true
 			},
-			"runOptions": {
-				"instanceLimit": 1
-			}
+			"runOptions": { "instanceLimit": 1 }
 		},
 		{
 			"label": "SPA: Start Development Server",
-			"type": "npm",
-			"script": "start",
+			"type": "shell",
+			"command": "npm",
+			"args": ["run", "start"],
+			"options": { "cwd": "${workspaceFolder}" },
 			"isBackground": true,
 			"problemMatcher": {
-				"owner": "angular",
-				"pattern": {
-					"regexp": "a^"
-				},
+				"owner": "spa-dev-server",
+				"pattern": { "regexp": "a^" },
 				"background": {
 					"activeOnStart": true,
-					"beginsPattern": "^> Building\\.\\.\\.$",
-					"endsPattern": ".*Application bundle generation complete\\..*"
+					"beginsPattern": "Building\\.\\.\\.",
+					"endsPattern": "Local:\\s+https://localhost:4200/?"
 				}
 			},
 			"presentation": {
@@ -51,36 +49,28 @@
 				"group": "spa-development",
 				"clear": true
 			},
-			"runOptions": {
-				"instanceLimit": 1
-			}
+			"runOptions": { "instanceLimit": 1 }
 		},
 		{
 			"label": "SPA: Unit Tests",
-			"type": "npm",
-			"script": "test",
+			"type": "shell",
+			"command": "npm",
+			"args": ["run", "test"],
+			"options": { "cwd": "${workspaceFolder}" },
 			"problemMatcher": [],
-			"presentation": {
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared",
-				"clear": true
-			}
+			"presentation": { "reveal": "always", "focus": false, "panel": "shared", "clear": true }
 		},
 		{
 			"label": "SPA: Unit Tests - Watch",
-			"type": "npm",
-			"script": "test:watch",
+			"type": "shell",
+			"command": "npm",
+			"args": ["run", "test:watch"],
+			"options": { "cwd": "${workspaceFolder}" },
 			"isBackground": true,
 			"problemMatcher": {
 				"owner": "karma",
-				"pattern": {
-					"regexp": "a^"
-				},
-				"background": {
-					"activeOnStart": true,
-					"endsPattern": ".*Karma.*server started.*"
-				}
+				"pattern": { "regexp": "a^" },
+				"background": { "activeOnStart": true, "endsPattern": "Karma.*server started" }
 			},
 			"presentation": {
 				"reveal": "always",
@@ -89,97 +79,88 @@
 				"group": "spa-tests",
 				"clear": true
 			},
-			"runOptions": {
-				"instanceLimit": 1
-			}
+			"runOptions": { "instanceLimit": 1 }
+		},
+		{
+			"label": "SPA: Unit Tests - Debug Watch",
+			"type": "shell",
+			"command": "npm",
+			"args": ["run", "test:debug"],
+			"options": { "cwd": "${workspaceFolder}" },
+			"isBackground": true,
+			"problemMatcher": {
+				"owner": "karma",
+				"pattern": { "regexp": "a^" },
+				"background": { "activeOnStart": true, "endsPattern": "Connected on socket.*Chrome" }
+			},
+			"presentation": {
+				"reveal": "always",
+				"focus": false,
+				"panel": "dedicated",
+				"group": "spa-tests",
+				"clear": true
+			},
+			"runOptions": { "instanceLimit": 1 }
 		},
 		{
 			"label": "SPA: Unit Tests - Coverage",
-			"type": "npm",
-			"script": "test",
+			"type": "shell",
+			"command": "npm",
+			"args": ["run", "test"],
+			"options": { "cwd": "${workspaceFolder}" },
 			"problemMatcher": [],
-			"presentation": {
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared",
-				"clear": true
-			}
+			"presentation": { "reveal": "always", "focus": false, "panel": "shared", "clear": true }
 		},
 		{
 			"label": "SPA: Lint",
-			"type": "npm",
-			"script": "lint",
+			"type": "shell",
+			"command": "npm",
+			"args": ["run", "lint"],
+			"options": { "cwd": "${workspaceFolder}" },
 			"problemMatcher": "$eslint-stylish",
-			"presentation": {
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared",
-				"clear": true
-			}
+			"presentation": { "reveal": "always", "focus": false, "panel": "shared", "clear": true }
 		},
 		{
 			"label": "SPA: Format Check",
-			"type": "npm",
-			"script": "format:check",
+			"type": "shell",
+			"command": "npm",
+			"args": ["run", "format:check"],
+			"options": { "cwd": "${workspaceFolder}" },
 			"problemMatcher": [],
-			"presentation": {
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared",
-				"clear": true
-			}
+			"presentation": { "reveal": "always", "focus": false, "panel": "shared", "clear": true }
 		},
 		{
 			"label": "SPA: Type Check",
-			"type": "npm",
-			"script": "typecheck",
+			"type": "shell",
+			"command": "npm",
+			"args": ["run", "typecheck"],
+			"options": { "cwd": "${workspaceFolder}" },
 			"problemMatcher": "$tsc",
-			"presentation": {
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared",
-				"clear": true
-			}
+			"presentation": { "reveal": "always", "focus": false, "panel": "shared", "clear": true }
 		},
 		{
 			"label": "SPA: Build Development",
-			"type": "npm",
-			"script": "build",
+			"type": "shell",
+			"command": "npm",
+			"args": ["run", "build"],
+			"options": { "cwd": "${workspaceFolder}" },
 			"problemMatcher": [],
-			"presentation": {
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared",
-				"clear": true
-			}
+			"presentation": { "reveal": "always", "focus": false, "panel": "shared", "clear": true }
 		},
 		{
 			"label": "SPA: Build Production",
-			"type": "npm",
-			"script": "build:prod",
+			"type": "shell",
+			"command": "npm",
+			"args": ["run", "build:prod"],
+			"options": { "cwd": "${workspaceFolder}" },
 			"problemMatcher": [],
-			"presentation": {
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared",
-				"clear": true
-			}
+			"presentation": { "reveal": "always", "focus": false, "panel": "shared", "clear": true }
 		},
 		{
 			"label": "SPA: Verify",
-			"dependsOn": [
-				"SPA: Type Check",
-				"SPA: Lint",
-				"SPA: Format Check",
-				"SPA: Unit Tests",
-				"SPA: Build Production"
-			],
+			"dependsOn": ["SPA: Type Check", "SPA: Lint", "SPA: Format Check", "SPA: Unit Tests", "SPA: Build Production"],
 			"dependsOrder": "sequence",
-			"presentation": {
-				"reveal": "always",
-				"focus": false,
-				"panel": "shared"
-			}
+			"presentation": { "reveal": "always", "focus": false, "panel": "shared" }
 		}
 	]
 }
