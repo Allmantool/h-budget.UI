@@ -1,5 +1,12 @@
 # 📦 Changelog
 
+## <small>1.1.57 (2026-07-30)</small>
+
+* Merge pull request #676 from Allmantool/fix/today-and-dashboard-currencies-should-load-correctly ([63866ecfa24d80c7e5b2b29368aadcd821308a10](https://github.com/Allmantool/h-budget.UI/commit/63866ecfa24d80c7e5b2b29368aadcd821308a10)), closes [#676](https://github.com/Allmantool/h-budget.UI/issues/676)
+* chore: enhance IDE ([a1732516abf756be8570dd1d33621dbbc7ee1b6d](https://github.com/Allmantool/h-budget.UI/commit/a1732516abf756be8570dd1d33621dbbc7ee1b6d))
+* chore: fix the rates load issue ([0581fa16b75e4ead40d42994e3dabea570a2677e](https://github.com/Allmantool/h-budget.UI/commit/0581fa16b75e4ead40d42994e3dabea570a2677e))
+* chore: self review ([4e20f7ef56fcb1d2368dc515ac791dbe609d5783](https://github.com/Allmantool/h-budget.UI/commit/4e20f7ef56fcb1d2368dc515ac791dbe609d5783))
+
 ## <small>1.1.56 (2026-07-11)</small>
 
 * Merge pull request #675 from Allmantool/tech/enhance-codex-standards ([fbcefd8b981181b34c693c682cfce6a671335ee8](https://github.com/Allmantool/h-budget.UI/commit/fbcefd8b981181b34c693c682cfce6a671335ee8)), closes [#675](https://github.com/Allmantool/h-budget.UI/issues/675)
