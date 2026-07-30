@@ -1,6 +1,14 @@
 import { SelectionModel } from '@angular/cdk/collections';
 import { DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, Signal } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	ChangeDetectorRef,
+	Component,
+	DestroyRef,
+	inject,
+	OnInit,
+	Signal,
+} from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
@@ -69,7 +77,8 @@ export class CurrencyRatesGridComponent implements OnInit {
 		private readonly store: Store,
 		private readonly ratesDialogService: RatesDialogService,
 		private readonly currencyRatesGridService: CurrencyRatesGridService,
-		public readonly loaderService: LoaderService
+		public readonly loaderService: LoaderService,
+		private readonly changeDetectorRef: ChangeDetectorRef
 	) {
 		this.tableOptionsSignal = toSignal(this.currencyTableOptions$, { initialValue: {} as ICurrencyTableOptions });
 	}
@@ -86,6 +95,7 @@ export class CurrencyRatesGridComponent implements OnInit {
 					rateGroups,
 					tableOptions.selectedItem.currencyId
 				);
+				this.changeDetectorRef.markForCheck();
 			});
 	}
 

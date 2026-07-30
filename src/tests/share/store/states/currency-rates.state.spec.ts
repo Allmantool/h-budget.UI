@@ -18,6 +18,7 @@ import {
 	AddCurrencyGroups,
 	EnsurePersistedCurrencyRatesLoaded,
 	FetchAllCurrencyRates,
+	InitializeCurrencyRates,
 } from '../../../../app/modules/shared/store/states/rates/actions/currency.actions';
 import { CurrencyChartState } from '../../../../app/modules/shared/store/states/rates/currency-chart.state';
 import { CurrencyRatesState } from '../../../../app/modules/shared/store/states/rates/currency-rates.state';
@@ -64,6 +65,7 @@ describe('currency rates store', () => {
 	beforeEach(() => {
 		currencyRateProviderSpy = jasmine.createSpyObj<NationalBankCurrenciesProvider>('currencyRateProvider', [
 			'getCurrencies',
+			'getTodayCurrencies',
 		]);
 
 		TestBed.configureTestingModule({
@@ -346,6 +348,144 @@ describe('currency rates store', () => {
 		expect(currencyState.hasLoadedPersistedRates).toBeTrue();
 		expect(currencyState.isLoadingPersistedRates).toBeFalse();
 		expect(currencyState.rateGroups.length).toBe(2);
+	});
+
+	it('initializes once when duplicate callers arrive while persisted rates are loading', () => {
+		const snapshot = store.snapshot();
+		const persistedRatesSubject = new Subject<CurrencyRateGroupModel[]>();
+		const todayRatesSubject = new Subject<CurrencyRateGroupModel[]>();
+		const todayRateGroups = [
+			new CurrencyRateGroupModel({
+				currencyId: 1,
+				abbreviation: 'USD',
+				rateValues: [new CurrencyRateValueModel({ ratePerUnit: 3.2, updateDate: new Date(2024, 0, 3) })],
+			}),
+		];
+
+		store.reset({
+			...snapshot,
+			currencyState: {
+				...snapshot.currencyState,
+				rateGroups: [],
+				hasLoadedPersistedRates: false,
+				hasInitializedRates: false,
+				isLoadingPersistedRates: false,
+			},
+		});
+		currencyRateProviderSpy.getCurrencies.and.returnValue(persistedRatesSubject);
+		currencyRateProviderSpy.getTodayCurrencies.and.returnValue(todayRatesSubject);
+
+		store.dispatch(new InitializeCurrencyRates());
+		store.dispatch(new InitializeCurrencyRates());
+
+		expect(currencyRateProviderSpy.getCurrencies.calls.count()).toBe(1);
+		expect(currencyRateProviderSpy.getTodayCurrencies.calls.any()).toBeFalse();
+
+		persistedRatesSubject.next(createInitialStoreRateGroups());
+		persistedRatesSubject.complete();
+
+		expect(currencyRateProviderSpy.getTodayCurrencies.calls.count()).toBe(1);
+
+		todayRatesSubject.next(todayRateGroups);
+		todayRatesSubject.complete();
+
+		const currencyState = store.selectSnapshot(state => state.currencyState);
+		const usdRates = currencyState.rateGroups.find(
+			(group: CurrencyRateGroupModel) => group.currencyId === 1
+		)?.rateValues;
+
+		expect(currencyState.hasInitializedRates).toBeTrue();
+		expect(usdRates?.map((rate: CurrencyRateValueModel) => rate.ratePerUnit)).toEqual([14, 16, 3.2]);
+	});
+
+	it('waits for an already in-flight persisted load before fetching today', () => {
+		const snapshot = store.snapshot();
+		const persistedRatesSubject = new Subject<CurrencyRateGroupModel[]>();
+		const todayRatesSubject = new Subject<CurrencyRateGroupModel[]>();
+
+		store.reset({
+			...snapshot,
+			currencyState: {
+				...snapshot.currencyState,
+				rateGroups: [],
+				hasLoadedPersistedRates: false,
+				hasInitializedRates: false,
+				isLoadingPersistedRates: false,
+			},
+		});
+		currencyRateProviderSpy.getCurrencies.and.returnValue(persistedRatesSubject);
+		currencyRateProviderSpy.getTodayCurrencies.and.returnValue(todayRatesSubject);
+
+		store.dispatch(new EnsurePersistedCurrencyRatesLoaded());
+		store.dispatch(new InitializeCurrencyRates());
+
+		expect(currencyRateProviderSpy.getCurrencies.calls.count()).toBe(1);
+		expect(currencyRateProviderSpy.getTodayCurrencies.calls.any()).toBeFalse();
+
+		persistedRatesSubject.next([]);
+		persistedRatesSubject.complete();
+
+		expect(currencyRateProviderSpy.getTodayCurrencies.calls.count()).toBe(1);
+
+		todayRatesSubject.next([]);
+		todayRatesSubject.complete();
+
+		expect(store.selectSnapshot(state => state.currencyState.hasInitializedRates)).toBeTrue();
+	});
+
+	it('keeps persisted history and allows initialization retry after a today request error', () => {
+		const snapshot = store.snapshot();
+		const persistedRateGroups = createInitialStoreRateGroups();
+		const todayRateGroups = [
+			new CurrencyRateGroupModel({
+				currencyId: 1,
+				rateValues: [new CurrencyRateValueModel({ ratePerUnit: 17, updateDate: new Date(2022, 1, 5) })],
+			}),
+		];
+		let initializationError: unknown;
+
+		store.reset({
+			...snapshot,
+			currencyState: {
+				...snapshot.currencyState,
+				rateGroups: [],
+				hasLoadedPersistedRates: false,
+				hasInitializedRates: false,
+				isLoadingPersistedRates: false,
+			},
+		});
+		currencyRateProviderSpy.getCurrencies.and.returnValue(of(persistedRateGroups));
+		currencyRateProviderSpy.getTodayCurrencies.and.returnValues(
+			throwError(() => new Error('today load failed')),
+			of(todayRateGroups)
+		);
+
+		store.dispatch(new InitializeCurrencyRates()).subscribe({
+			error: error => {
+				initializationError = error;
+			},
+		});
+
+		let currencyState = store.selectSnapshot(state => state.currencyState);
+
+		expect(initializationError).toEqual(jasmine.any(Error));
+		expect(currencyState.hasLoadedPersistedRates).toBeTrue();
+		expect(currencyState.hasInitializedRates).toBeFalse();
+		expect(currencyState.rateGroups).toEqual(jasmine.any(Array));
+		expect(currencyState.rateGroups.length).toBe(2);
+
+		store.dispatch(new InitializeCurrencyRates());
+
+		currencyState = store.selectSnapshot(state => state.currencyState);
+
+		expect(currencyRateProviderSpy.getCurrencies.calls.count()).toBe(1);
+		expect(currencyRateProviderSpy.getTodayCurrencies.calls.count()).toBe(2);
+		expect(currencyState.hasInitializedRates).toBeTrue();
+		expect(
+			currencyState.rateGroups
+				.find((group: CurrencyRateGroupModel) => group.currencyId === 1)
+				?.rateValues?.map((rate: CurrencyRateValueModel) => rate.ratePerUnit)
+		).toEqual([14, 16, 17]);
 	});
 
 	it('it "EnsurePersistedCurrencyRatesLoaded": resets loading state after provider errors', () => {

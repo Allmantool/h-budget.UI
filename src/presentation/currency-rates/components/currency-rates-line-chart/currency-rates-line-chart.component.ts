@@ -16,7 +16,7 @@ import * as _ from 'lodash';
 
 import { Select } from '@ngxs/store';
 import { ChartComponent, NgApexchartsModule } from 'ng-apexcharts';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
 import { ProgressSpinnerComponent } from '../../../../app/modules/shared/components/progress-spinner/progress-spinner.component';
@@ -73,11 +73,11 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit {
 	}
 
 	private InitializeChart(): void {
-		this.currencyRatesGroupByCurrencyId$
+		combineLatest([this.currencyRatesGroupByCurrencyId$, this.currencyTableOptions$])
 			.pipe(
 				takeUntilDestroyed(this.destroyRef),
-				map(ratesGroupByCurrencyId =>
-					ratesGroupByCurrencyId(this.tableOptionsSignal().selectedItem.currencyId)
+				map(([ratesGroupByCurrencyId, tableOptions]) =>
+					ratesGroupByCurrencyId(tableOptions.selectedItem.currencyId)
 				),
 				filter(ratesGroup => !_.isEmpty(ratesGroup?.rateValues)),
 				map(ratesGroup => ratesGroup.rateValues ?? [])
@@ -101,10 +101,7 @@ export class CurrencyRatesLineChartComponent implements AfterViewInit {
 					chartOptions.series[0].data as number[]
 				);
 
-				if (_.isNil(this.chartOptions.chart)) {
-					this.chartOptions = chartOptions;
-				}
-
+				this.chartOptions = chartOptions;
 				void this.chart?.updateOptions(chartOptions);
 
 				this.isChartInitialized$.next(true);

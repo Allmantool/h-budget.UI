@@ -23,6 +23,10 @@ export class FetchTodayCurrencyRates {
 	static readonly type = '[Currency Rates] Fetch today currency rates';
 }
 
+export class InitializeCurrencyRates {
+	static readonly type = '[Currency Rates] Initialize currency rates';
+}
+
 export class EnsurePersistedCurrencyRatesLoaded {
 	static readonly type = '[CURR-RATES-GROUP] Ensure persisted currency groups loaded';
 }

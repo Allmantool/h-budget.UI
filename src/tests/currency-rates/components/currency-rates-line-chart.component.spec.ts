@@ -134,4 +134,29 @@ describe('currency rates line chart component', () => {
 		expect(sut.chartOptions.yaxis?.max).toBe(17);
 		expect(element.querySelector('apx-chart')).not.toBeNull();
 	});
+
+	it('should update the chart when the table selection changes without another rates emission', () => {
+		const secondCurrencyRateGroup = new CurrencyRateGroupModel({
+			currencyId: 13,
+			name: 'currency-b',
+			abbreviation: 'cur-b',
+			scale: 1,
+			rateValues: [
+				new CurrencyRateValueModel({ ratePerUnit: 5, updateDate: new Date(2022, 1, 3) }),
+				new CurrencyRateValueModel({ ratePerUnit: 6, updateDate: new Date(2022, 2, 3) }),
+			],
+		});
+
+		fixture.detectChanges();
+		store.dispatch(new SetCurrencyDateRange(48, new Date(2024, 3, 10)));
+		store.dispatch(new AddCurrencyGroups([...updatedCurrencyRateGroups, secondCurrencyRateGroup]));
+		store.dispatch(new SetActiveCurrency(12, 'cur-a'));
+		fixture.detectChanges();
+
+		store.dispatch(new SetActiveCurrency(13, 'cur-b'));
+		fixture.detectChanges();
+
+		expect(sut.chartOptions.series?.[0].name).toBe('cur-b');
+		expect(sut.chartOptions.series?.[0].data).toEqual([5, 6]);
+	});
 });

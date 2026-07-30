@@ -11,7 +11,7 @@ import { NgApexchartsModule } from 'ng-apexcharts';
 import { Observable } from 'rxjs';
 
 import { ICurrencyTableOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-table-options';
-import { EnsurePersistedCurrencyRatesLoaded } from '../../../../app/modules/shared/store/states/rates/actions/currency.actions';
+import { InitializeCurrencyRates } from '../../../../app/modules/shared/store/states/rates/actions/currency.actions';
 import { getCurrencyTableOptions } from '../../../../app/modules/shared/store/states/rates/selectors/currency-table-options.selectors';
 import { getRates } from '../../../../app/modules/shared/store/states/rates/selectors/currency.selectors';
 import { CurrencyRateValueModel } from '../../../../domain/models/rates/currency-rate-value.model';
@@ -363,6 +363,6 @@ export class CurrencyRatesDashboardComponent implements OnInit {
 
 	ngOnInit(): void {
 		this.title.setTitle('H-Budget rates');
-		this.store.dispatch(new EnsurePersistedCurrencyRatesLoaded());
+		this.store.dispatch(new InitializeCurrencyRates());
 	}
 }

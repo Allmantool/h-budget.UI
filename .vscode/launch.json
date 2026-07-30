@@ -1,0 +1,40 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "editor-browser",
+			"request": "launch",
+			"name": "SPA: Start and Debug",
+			"url": "https://localhost:4200",
+			"preLaunchTask": "SPA: Start Debug Server",
+			"webRoot": "${workspaceFolder}",
+			"sourceMaps": true,
+			"smartStep": true,
+			"skipFiles": ["<node_internals>/**"]
+		},
+		{
+			"type": "msedge",
+			"request": "launch",
+			"name": "SPA: Debug in Edge",
+			"url": "https://localhost:4200",
+			"preLaunchTask": "SPA: Start Debug Server",
+			"webRoot": "${workspaceFolder}",
+			"sourceMaps": true,
+			"runtimeExecutable": "stable",
+			"userDataDir": true,
+			"runtimeArgs": ["--allow-insecure-localhost"],
+			"trace": true
+		},
+		{
+			"type": "chrome",
+			"request": "attach",
+			"name": "SPA: Debug Unit Tests",
+			"port": 9222,
+			"preLaunchTask": "SPA: Unit Tests - Debug Watch",
+			"webRoot": "${workspaceFolder}",
+			"sourceMaps": true,
+			"smartStep": true,
+			"skipFiles": ["<node_internals>/**"]
+		}
+	]
+}

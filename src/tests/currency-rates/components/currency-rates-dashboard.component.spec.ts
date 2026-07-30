@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { Title } from '@angular/platform-browser';
 
 import { MapperModule } from '@dynamic-mapper/angular';
@@ -17,12 +18,15 @@ import { AddCurrencyGroups } from '../../../app/modules/shared/store/states/rate
 import { CurrencyChartState } from '../../../app/modules/shared/store/states/rates/currency-chart.state';
 import { CurrencyRatesState } from '../../../app/modules/shared/store/states/rates/currency-rates.state';
 import { CurrencyTableState } from '../../../app/modules/shared/store/states/rates/currency-table.state';
+import { ICurrencyRatesStateModel } from '../../../app/modules/shared/store/states/rates/models/currency-rates-state.model';
 import { ICurrencyTableStateModel } from '../../../app/modules/shared/store/states/rates/models/currency-table-state.model';
 import { DataRatesMappingProfile } from '../../../data/providers/rates/mappers/data-rates-mapping.profiler';
 import { NationalBankCurrenciesProvider } from '../../../data/providers/rates/national-bank-currencies.provider';
 import { CurrencyRateValueModel } from '../../../domain/models/rates/currency-rate-value.model';
 import { CurrencyRateGroupModel } from '../../../domain/models/rates/currency-rates-group.model';
 import { CurrencyRatesDashboardComponent } from '../../../presentation/currency-rates/components/currency-rates-dashboard/currency-rates-dashboard.component';
+import { CurrencyRatesGridComponent } from '../../../presentation/currency-rates/components/currency-rates-grid/currency-rates-grid.component';
+import { CurrencyRatesLineChartComponent } from '../../../presentation/currency-rates/components/currency-rates-line-chart/currency-rates-line-chart.component';
 import { PresentationRatesMappingProfile } from '../../../presentation/currency-rates/mappers/presentation-rates-mapping.profiler';
 import { CurrencyRatesGridService } from '../../../presentation/currency-rates/services/currency-rates-grid.service';
 import { LineChartService } from '../../../presentation/currency-rates/services/line-chart.service';
@@ -155,18 +159,71 @@ describe('currency rates dashboard component', () => {
 		expect(marketPositionChart.plotOptions).toBeDefined();
 	});
 
-	it('should load and render persisted rates on initial render without requesting today rates', async () => {
+	it('should load persisted and today rates through the dashboard initialization flow', async () => {
 		await renderDashboard();
 
 		const pageText = getText();
 
 		expect(currencyRateProviderSpy.getCurrencies.calls.count()).toBe(1);
-		expect(currencyRateProviderSpy.getTodayCurrencies.calls.any()).toBeFalse();
+		expect(currencyRateProviderSpy.getTodayCurrencies.calls.count()).toBe(1);
 		expect(getRenderedRows().length).toBe(2);
 		expect(pageText).toContain('US Dollar [USD]');
 		expect(pageText).toContain('Euro [EUR]');
 		expect(pageText).toContain('3.2');
 		expect(pageText).toContain('3.8');
+	});
+
+	it('should load persisted history before today and expose complete selected-currency chart data', async () => {
+		const persistedRatesSubject = new Subject<CurrencyRateGroupModel[]>();
+		const todayRatesSubject = new Subject<CurrencyRateGroupModel[]>();
+		const persistedRates = [
+			createRateGroup(1, 'USD', [
+				[2026, 6, 27, 2.8],
+				[2026, 6, 28, 2.85],
+				[2026, 6, 29, 2.9],
+			]),
+			createRateGroup(451, 'EUR', [[2026, 6, 29, 3.4]]),
+		];
+		const todayRates = [
+			createRateGroup(1, 'USD', [[2026, 6, 30, 2.9063]]),
+			createRateGroup(451, 'EUR', [[2026, 6, 30, 3.45]]),
+		];
+
+		currencyRateProviderSpy.getCurrencies.and.returnValue(persistedRatesSubject);
+		currencyRateProviderSpy.getTodayCurrencies.and.returnValue(todayRatesSubject);
+		store.dispatch(new SetCurrencyDateRange(1, new Date(2026, 6, 30)));
+		store.dispatch(new SetActiveCurrency(1, 'USD'));
+
+		fixture.detectChanges();
+
+		expect(currencyRateProviderSpy.getCurrencies.calls.count()).toBe(1);
+		expect(currencyRateProviderSpy.getTodayCurrencies.calls.any()).toBeFalse();
+
+		persistedRatesSubject.next(persistedRates);
+		persistedRatesSubject.complete();
+
+		expect(currencyRateProviderSpy.getTodayCurrencies.calls.count()).toBe(1);
+
+		todayRatesSubject.next(todayRates);
+		todayRatesSubject.complete();
+		await settleDashboard();
+
+		const stateRates = store.selectSnapshot(
+			(state: { currencyState: ICurrencyRatesStateModel }) => state.currencyState.rateGroups
+		);
+		const usdRateValues = stateRates.find(rateGroup => rateGroup.currencyId === 1)?.rateValues ?? [];
+		const lineChartComponent = fixture.debugElement.query(By.directive(CurrencyRatesLineChartComponent))
+			.componentInstance as CurrencyRatesLineChartComponent;
+		const gridComponent = fixture.debugElement.query(By.directive(CurrencyRatesGridComponent))
+			.componentInstance as CurrencyRatesGridComponent;
+
+		expect(usdRateValues.map(rate => rate.ratePerUnit)).toEqual([2.8, 2.85, 2.9, 2.9063]);
+		expect(lineChartComponent.chartOptions.series?.[0].data).toEqual([2.8, 2.85, 2.9, 2.906]);
+		expect(gridComponent.todayRatesTableDataSource.data.length).toBe(2);
+		expect(gridComponent.todayRatesTableDataSource.data.find(rate => rate.currencyId === 1)?.ratePerUnit).toBe(
+			2.9063
+		);
+		expect(getText()).toContain('2.9063');
 	});
 
 	it('should render state-backed selected currency, comparison, grid, and chart content', async () => {
@@ -324,3 +381,24 @@ describe('currency rates dashboard component', () => {
 		return nativeElement;
 	}
 });
+
+function createRateGroup(
+	currencyId: number,
+	abbreviation: string,
+	rates: Array<[year: number, month: number, day: number, ratePerUnit: number]>
+): CurrencyRateGroupModel {
+	return new CurrencyRateGroupModel({
+		currencyId,
+		abbreviation,
+		name: abbreviation,
+		scale: 1,
+		rateValues: rates.map(
+			([year, month, day, ratePerUnit]) =>
+				new CurrencyRateValueModel({
+					officialRate: ratePerUnit,
+					ratePerUnit,
+					updateDate: new Date(year, month, day),
+				})
+		),
+	});
+}
