@@ -1,13 +1,14 @@
-import { Component, createEnvironmentInjector, EnvironmentInjector, Provider } from '@angular/core';
+import { Component, createEnvironmentInjector, EnvironmentInjector, Provider, Type } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { MatDialogConfig } from '@angular/material/dialog';
 import { Title } from '@angular/platform-browser';
+import { By } from '@angular/platform-browser';
 import { provideRouter, Routes } from '@angular/router';
 import { RouterTestingHarness } from '@angular/router/testing';
 
 import { Mapper } from '@dynamic-mapper/angular';
 import { NgxsModule, Store } from '@ngxs/store';
-import { of, Subject } from 'rxjs';
+import { of, Subject, take } from 'rxjs';
 
 import { DateRangeDialogComponent } from '../../app/modules/shared/components/dialog/dates-rage/dates-range-dialog.component';
 import { RatesGridDefaultOptions } from '../../app/modules/shared/constants/rates-grid-default-options';
@@ -16,6 +17,8 @@ import { DialogProvider } from '../../app/modules/shared/providers/dialog-provid
 import { LoaderService } from '../../app/modules/shared/services/loader-service';
 import { ngxsConfig } from '../../app/modules/shared/store/ngxs.config';
 import { AddCurrencyGroups } from '../../app/modules/shared/store/states/rates/actions/currency.actions';
+import { ICurrencyTableOptions } from '../../app/modules/shared/store/models/currency-rates/currency-table-options';
+import { IPreviousDayCurrencyRate } from '../../app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
 import { ICurrencyChartStateModel } from '../../app/modules/shared/store/states/rates/models/currency-chart-state.model';
 import { ICurrencyRatesStateModel } from '../../app/modules/shared/store/states/rates/models/currency-rates-state.model';
 import { ICurrencyTableStateModel } from '../../app/modules/shared/store/states/rates/models/currency-table-state.model';
@@ -24,6 +27,8 @@ import { DaysRangePayload } from '../../domain/models/dates-range-payload.model'
 import { CurrencyRateValueModel } from '../../domain/models/rates/currency-rate-value.model';
 import { CurrencyRateGroupModel } from '../../domain/models/rates/currency-rates-group.model';
 import { currencyRatesRoutes } from '../../presentation/currency-rates/currency-rates.routes';
+import { CurrencyRatesGridComponent } from '../../presentation/currency-rates/components/currency-rates-grid/currency-rates-grid.component';
+import { CurrencyRatesLineChartComponent } from '../../presentation/currency-rates/components/currency-rates-line-chart/currency-rates-line-chart.component';
 import { PresentationRatesMappingProfile } from '../../presentation/currency-rates/mappers/presentation-rates-mapping.profiler';
 import { CurrencyGridRateModel } from '../../presentation/currency-rates/models/currency-grid-rate.model';
 import { CurrencyRatesGridService } from '../../presentation/currency-rates/services/currency-rates-grid.service';
@@ -225,11 +230,11 @@ describe('currency rates lazy route activation', () => {
 		expect(getHarnessText(harness)).toContain('USD selected');
 		expect(getHarnessText(harness)).toContain('US Dollar');
 		expect(currencyRateProviderSpy.getCurrencies.calls.count()).toBe(1);
-		expect(currencyRateProviderSpy.getTodayCurrencies.calls.any()).toBeFalse();
+		expect(currencyRateProviderSpy.getTodayCurrencies.calls.count()).toBe(1);
 
 		getTodayCurrencyRatesButton(harness).click();
 
-		expect(currencyRateProviderSpy.getTodayCurrencies.calls.any()).toBeTrue();
+		expect(currencyRateProviderSpy.getTodayCurrencies.calls.count()).toBe(2);
 
 		await harness.navigateByUrl('/dashboard');
 		await harness.navigateByUrl('/dashboard/currency-rates');
@@ -238,6 +243,89 @@ describe('currency rates lazy route activation', () => {
 		expect(getHarnessText(harness)).toContain('USD selected');
 		expect(getHarnessText(harness)).toContain('US Dollar');
 		expect(currencyRateProviderSpy.getCurrencies.calls.count()).toBe(1);
+		expect(currencyRateProviderSpy.getTodayCurrencies.calls.count()).toBe(2);
+	});
+
+	it('loads persisted history and today rates into the real Daily Board table on initial route activation', async () => {
+		const persistedRatesSubject = new Subject<CurrencyRateGroupModel[]>();
+		const todayRatesSubject = new Subject<CurrencyRateGroupModel[]>();
+		const persistedRates = [
+			createRateGroup(RatesGridDefaultOptions.CURRENCY_ID, 'USD', [
+				[2026, 6, 27, 2.8],
+				[2026, 6, 28, 2.85],
+				[2026, 6, 29, 2.9],
+			]),
+			createRateGroup(451, 'EUR', [[2026, 6, 29, 3.4]]),
+		];
+		const todayRates = [
+			createRateGroup(RatesGridDefaultOptions.CURRENCY_ID, 'USD', [[2026, 6, 30, 2.9063]]),
+			createRateGroup(451, 'EUR', [[2026, 6, 30, 3.45]]),
+		];
+		const ratesEmissions: CurrencyRateGroupModel[][] = [];
+		const previousDayRatesEmissions: IPreviousDayCurrencyRate[][] = [];
+		const tableOptionsEmissions: ICurrencyTableOptions[] = [];
+
+		currencyRateProviderSpy.getCurrencies.and.returnValue(persistedRatesSubject);
+		currencyRateProviderSpy.getTodayCurrencies.and.returnValue(todayRatesSubject);
+
+		const harness = await RouterTestingHarness.create('/dashboard/currency-rates');
+		const grid = getRouteComponent(harness, CurrencyRatesGridComponent);
+		const chart = getRouteComponent(harness, CurrencyRatesLineChartComponent);
+		const gridService = harness.routeDebugElement?.injector.get(CurrencyRatesGridService);
+
+		if (!gridService) {
+			throw new Error('Expected the route injector to provide CurrencyRatesGridService.');
+		}
+
+		const enrichWithTrendSpy = spyOn(gridService, 'enrichWithTrend').and.callThrough();
+		grid.rates$.pipe(take(3)).subscribe(rateGroups => ratesEmissions.push(rateGroups));
+		grid.previousDayRates$
+			.pipe(take(3))
+			.subscribe(previousDayRates => previousDayRatesEmissions.push(previousDayRates));
+		grid.currencyTableOptions$.pipe(take(1)).subscribe(tableOptions => tableOptionsEmissions.push(tableOptions));
+		harness.detectChanges();
+		await Promise.resolve();
+
+		expect(currencyRateProviderSpy.getCurrencies.calls.count()).toBe(1);
+		expect(currencyRateProviderSpy.getTodayCurrencies.calls.count()).toBe(0);
+
+		persistedRatesSubject.next(persistedRates);
+		persistedRatesSubject.complete();
+
+		expect(currencyRateProviderSpy.getTodayCurrencies.calls.count()).toBe(1);
+
+		todayRatesSubject.next(todayRates);
+		todayRatesSubject.complete();
+
+		await harness.fixture.whenStable();
+		await Promise.resolve();
+		harness.detectChanges();
+
+		const stateRates = TestBed.inject(Store).selectSnapshot(
+			(state: CurrencyRatesFeatureState) => state.currencyState.rateGroups
+		);
+		const usdRates =
+			stateRates.find(rateGroup => rateGroup.currencyId === RatesGridDefaultOptions.CURRENCY_ID)?.rateValues ??
+			[];
+		const renderedRows = harness.routeNativeElement?.querySelectorAll('app-currency-rates-grid tbody tr') ?? [];
+
+		expect(stateRates.length).toBe(2);
+		expect(usdRates.map(rate => rate.ratePerUnit)).toEqual([2.8, 2.85, 2.9, 2.9063]);
+		expect(ratesEmissions.length).toBeGreaterThan(1);
+		expect(ratesEmissions.some(rateGroups => rateGroups.length === 2)).toBeTrue();
+		expect(previousDayRatesEmissions.length).toBeGreaterThan(1);
+		expect(previousDayRatesEmissions.some(previousDayRates => previousDayRates.length === 2)).toBeTrue();
+		expect(tableOptionsEmissions.length).toBeGreaterThan(0);
+		expect(enrichWithTrendSpy).toHaveBeenCalled();
+		expect(grid.todayRatesTableDataSource.data.length).toBe(2);
+		expect(
+			grid.todayRatesTableDataSource.data.find(rate => rate.currencyId === RatesGridDefaultOptions.CURRENCY_ID)
+				?.ratePerUnit
+		).toBe(2.9063);
+		expect(renderedRows.length).toBe(2);
+		expect(harness.routeNativeElement?.textContent).toContain('US Dollar [USD]');
+		expect(harness.routeNativeElement?.textContent).toContain('Euro [EUR]');
+		expect(chart.chartOptions.series?.[0].data).toEqual([2.8, 2.85, 2.9, 2.906]);
 	});
 
 	function getTestCurrencyRatesRoutes(): Routes {
@@ -302,6 +390,16 @@ function getTodayCurrencyRatesButton(harness: RouterTestingHarness): HTMLButtonE
 	return button;
 }
 
+function getRouteComponent<T>(harness: RouterTestingHarness, componentType: Type<T>): T {
+	const component: unknown = harness.routeDebugElement?.query(By.directive(componentType)).componentInstance;
+
+	if (!(component instanceof componentType)) {
+		throw new Error('Expected the route to render the requested component.');
+	}
+
+	return component;
+}
+
 const sampleRateGroups: CurrencyRateGroupModel[] = [
 	new CurrencyRateGroupModel({
 		currencyId: RatesGridDefaultOptions.CURRENCY_ID,
@@ -317,3 +415,24 @@ const sampleRateGroups: CurrencyRateGroupModel[] = [
 		],
 	}),
 ];
+
+function createRateGroup(
+	currencyId: number,
+	abbreviation: string,
+	rates: Array<[year: number, month: number, day: number, ratePerUnit: number]>
+): CurrencyRateGroupModel {
+	return new CurrencyRateGroupModel({
+		currencyId,
+		abbreviation,
+		name: abbreviation === 'USD' ? 'US Dollar' : 'Euro',
+		scale: 1,
+		rateValues: rates.map(
+			([year, month, day, ratePerUnit]) =>
+				new CurrencyRateValueModel({
+					officialRate: ratePerUnit,
+					ratePerUnit,
+					updateDate: new Date(year, month, day),
+				})
+		),
+	});
+}

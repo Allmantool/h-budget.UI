@@ -3,5 +3,6 @@ import { CurrencyRateGroupModel } from 'domain/models/rates/currency-rates-group
 export interface ICurrencyRatesStateModel {
 	rateGroups: CurrencyRateGroupModel[];
 	hasLoadedPersistedRates: boolean;
+	hasInitializedRates: boolean;
 	isLoadingPersistedRates: boolean;
 }

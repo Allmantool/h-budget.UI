@@ -4,13 +4,14 @@ import * as _ from 'lodash';
 
 import { Action, State, StateContext } from '@ngxs/store';
 import { format } from 'date-fns';
-import { catchError, EMPTY, take, tap, throwError } from 'rxjs';
+import { catchError, concatMap, finalize, map, Observable, of, shareReplay, take, tap, throwError } from 'rxjs';
 
 import {
 	AddCurrencyGroups,
 	EnsurePersistedCurrencyRatesLoaded,
 	FetchAllCurrencyRates,
 	FetchTodayCurrencyRates,
+	InitializeCurrencyRates,
 } from './actions/currency.actions';
 import { CurrencyChartState } from './currency-chart.state';
 import { CurrencyTableState } from './currency-table.state';
@@ -25,12 +26,17 @@ import { DateFormats } from '../../../constants/date-formats';
 	defaults: {
 		rateGroups: [],
 		hasLoadedPersistedRates: false,
+		hasInitializedRates: false,
 		isLoadingPersistedRates: false,
 	},
 	children: [CurrencyTableState, CurrencyChartState],
 })
 @Injectable()
 export class CurrencyRatesState {
+	private initializationRequest$?: Observable<void>;
+
+	private persistedRatesRequest$?: Observable<void>;
+
 	constructor(private readonly currencyRateProvider: NationalBankCurrenciesProvider) {}
 
 	@Action(AddCurrencyGroups)
@@ -71,19 +77,48 @@ export class CurrencyRatesState {
 		);
 	}
 
+	@Action(InitializeCurrencyRates)
+	initializeCurrencyRates(ctx: StateContext<ICurrencyRatesStateModel>): Observable<void> {
+		if (ctx.getState().hasInitializedRates) {
+			return of(undefined);
+		}
+
+		if (this.initializationRequest$) {
+			return this.initializationRequest$;
+		}
+
+		const initializationRequest$ = ctx.dispatch(new EnsurePersistedCurrencyRatesLoaded()).pipe(
+			concatMap(() => ctx.dispatch(new FetchTodayCurrencyRates())),
+			tap(() => ctx.patchState({ hasInitializedRates: true })),
+			map(() => undefined),
+			finalize(() => {
+				this.initializationRequest$ = undefined;
+			}),
+			shareReplay({ bufferSize: 1, refCount: false })
+		);
+
+		this.initializationRequest$ = initializationRequest$;
+
+		return initializationRequest$;
+	}
+
 	@Action(EnsurePersistedCurrencyRatesLoaded)
-	ensurePersistedCurrencyRatesLoaded(ctx: StateContext<ICurrencyRatesStateModel>) {
+	ensurePersistedCurrencyRatesLoaded(ctx: StateContext<ICurrencyRatesStateModel>): Observable<void> {
 		const state = ctx.getState();
 
-		if (state.hasLoadedPersistedRates || state.isLoadingPersistedRates) {
-			return EMPTY;
+		if (state.hasLoadedPersistedRates) {
+			return of(undefined);
+		}
+
+		if (this.persistedRatesRequest$) {
+			return this.persistedRatesRequest$;
 		}
 
 		ctx.patchState({
 			isLoadingPersistedRates: true,
 		});
 
-		return this.currencyRateProvider.getCurrencies().pipe(
+		const persistedRatesRequest$ = this.currencyRateProvider.getCurrencies().pipe(
 			take(1),
 			tap(currencyRateGroups =>
 				ctx.patchState({
@@ -92,14 +127,23 @@ export class CurrencyRatesState {
 					isLoadingPersistedRates: false,
 				})
 			),
+			map(() => undefined),
 			catchError((error: unknown) => {
 				ctx.patchState({
 					isLoadingPersistedRates: false,
 				});
 
 				return throwError(() => error);
-			})
+			}),
+			finalize(() => {
+				this.persistedRatesRequest$ = undefined;
+			}),
+			shareReplay({ bufferSize: 1, refCount: false })
 		);
+
+		this.persistedRatesRequest$ = persistedRatesRequest$;
+
+		return persistedRatesRequest$;
 	}
 
 	private mergeRateGroups(
