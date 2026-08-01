@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.58 (2026-08-01)</small>
+
+* Merge pull request #677 from Allmantool/chore/deps-patch-upgrade ([e3ed50e932506f859fb3f76a05a198d03b303cff](https://github.com/Allmantool/h-budget.UI/commit/e3ed50e932506f859fb3f76a05a198d03b303cff)), closes [#677](https://github.com/Allmantool/h-budget.UI/issues/677)
+* build(deps): safe patch dependency upgrade ([dba9e517c888ca7ed6664879b5c33091fb41693b](https://github.com/Allmantool/h-budget.UI/commit/dba9e517c888ca7ed6664879b5c33091fb41693b))
+
 ## <small>1.1.57 (2026-07-30)</small>
 
 * Merge pull request #676 from Allmantool/fix/today-and-dashboard-currencies-should-load-correctly ([63866ecfa24d80c7e5b2b29368aadcd821308a10](https://github.com/Allmantool/h-budget.UI/commit/63866ecfa24d80c7e5b2b29368aadcd821308a10)), closes [#676](https://github.com/Allmantool/h-budget.UI/issues/676)
