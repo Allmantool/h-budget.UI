@@ -94,7 +94,7 @@
     "@sentry/angular": "^10.45.0",
     "@sentry/cli": "^2.58.6",
     "@sentry/tracing": "^7.120.4",
-    "@types/lodash": "^4.17.24",
+    "@types/lodash": "^4.17.25",
     "@types/uuid": "^11.0.0",
     "apexcharts": "^5.10.6",
     "date-fns": "^4.1.0",
