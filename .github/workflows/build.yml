@@ -1,154 +1,164 @@
 name: Build UI Application
 
 on:
-  workflow_call:
-    inputs:
-      last_tag:
-        required: false
-        type: string
-      pr_number:
-        required: false
-        type: string
-      is_merged:
-        required: false
-        type: boolean
-  workflow_dispatch:
-  push:
-    tags: ["v*.*.*"]
+    workflow_call:
+        inputs:
+            last_tag:
+                required: false
+                type: string
+            pr_number:
+                required: false
+                type: string
+            is_merged:
+                required: false
+                type: boolean
+    workflow_dispatch:
+    push:
+        tags: ['v*.*.*']
 
-  release:
-    types: [published]
+    release:
+        types: [published]
 
-  pull_request:
-    branches:
-      - master
-      - developed
-      - feature/*
-      - test/*
-      - hotfix/*
-      - fix/*
-      - tech/
-    types: [opened, synchronize]
+    pull_request:
+        branches:
+            - master
+            - developed
+            - feature/*
+            - test/*
+            - hotfix/*
+            - fix/*
+            - tech/
+        types: [opened, reopened, synchronize]
+
+permissions:
+    contents: read
+    pull-requests: read
 
 env:
-  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-  SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
-  DOCKERHUB_USERNAME: ${{secrets.DOCKERHUB_USERNAME}}
-  DOCKERHUB_TOKEN: ${{secrets.DOCKERHUB_TOKEN}}
-  EVENT_NAME: ${{ github.event_name }}
-  EVENT_ACTION: ${{ github.event.action }}
-  EVENT_PULL_REQUEST_STATE: ${{ github.event.pull_request.state }}
-  EVENT_PULL_REQUEST_MERGED: ${{ github.event.pull_request.merged }}
-  BRANCH_REF: ${{ github.ref }}
-  BRANCH_BASE_REF: ${{ github.base_ref }}
-  IS_MERGED: "${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}"
+    EVENT_NAME: ${{ github.event_name }}
+    EVENT_ACTION: ${{ github.event.action }}
+    EVENT_PULL_REQUEST_STATE: ${{ github.event.pull_request.state }}
+    EVENT_PULL_REQUEST_MERGED: ${{ github.event.pull_request.merged }}
+    BRANCH_REF: ${{ github.ref }}
+    BRANCH_BASE_REF: ${{ github.base_ref }}
+    IS_MERGED: "${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}"
 
 jobs:
-  build-ui:
-    name: Build Angular UI
-    runs-on: ubuntu-latest
-    outputs:
-      last_tag: ${{ steps.last_tag.outputs.TARGET_TAG }}
-      pr_number: ${{ steps.findPr.outputs.pr }}
-      is_merged: ${{ env.IS_MERGED }}
-      should_build_docker: ${{ steps.check_docker_trigger.outputs.should_build_docker }}
-    defaults:
-      run:
-        working-directory: .
-    steps:
-      - name: Check Docker build trigger
-        id: check_docker_trigger
-        run: |
-          # Run Docker build for tag pushes (manual tags) AND published releases
-          # Skip for PRs and other events
-          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref }}" == refs/tags/* ]]; then
-            echo "should_build_docker=true" >> $GITHUB_OUTPUT
-            echo "Trigger: Manual tag push"
-          elif [[ "${{ github.event_name }}" == "release" && "${{ github.event.action }}" == "published" ]]; then
-            echo "should_build_docker=true" >> $GITHUB_OUTPUT
-            echo "Trigger: Published release"
-          elif [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "should_build_docker=true" >> $GITHUB_OUTPUT
-            echo "Trigger: Manual workflow dispatch"
-          elif [[ "${{ github.event_name }}" == "workflow_call" ]]; then
-            echo "should_build_docker=true" >> $GITHUB_OUTPUT
-            echo "Trigger: Workflow call"
-          else
-            echo "should_build_docker=false" >> $GITHUB_OUTPUT
-            echo "Trigger: PR or other event - skipping Docker build"
-          fi
-      - name: Check out code
-        uses: actions/checkout@v6
+    build-ui:
+        name: Build Angular UI
+        runs-on: ubuntu-latest
+        timeout-minutes: 120
+        outputs:
+            last_tag: ${{ steps.last_tag.outputs.TARGET_TAG }}
+            pr_number: ${{ steps.findPr.outputs.pr }}
+            is_merged: ${{ env.IS_MERGED }}
+            should_build_docker: ${{ steps.check_docker_trigger.outputs.should_build_docker }}
+        defaults:
+            run:
+                working-directory: .
+        steps:
+            - name: Check Docker build trigger
+              id: check_docker_trigger
+              run: |
+                  # Run Docker build for tag pushes (manual tags) AND published releases
+                  # Skip for PRs and other events
+                  if [[ "$EVENT_NAME" == 'push' && "$BRANCH_REF" == refs/tags/* ]]; then
+                    echo "should_build_docker=true" >> $GITHUB_OUTPUT
+                    echo "Trigger: Manual tag push"
+                  elif [[ "$EVENT_NAME" == 'release' && "$EVENT_ACTION" == 'published' ]]; then
+                    echo "should_build_docker=true" >> $GITHUB_OUTPUT
+                    echo "Trigger: Published release"
+                  elif [[ "$EVENT_NAME" == 'workflow_dispatch' ]]; then
+                    echo "should_build_docker=true" >> $GITHUB_OUTPUT
+                    echo "Trigger: Manual workflow dispatch"
+                  elif [[ "$EVENT_NAME" == 'workflow_call' ]]; then
+                    echo "should_build_docker=true" >> $GITHUB_OUTPUT
+                    echo "Trigger: Workflow call"
+                  else
+                    echo "should_build_docker=false" >> $GITHUB_OUTPUT
+                    echo "Trigger: PR or other event - skipping Docker build"
+                  fi
+            - name: Check out code
+              uses: actions/checkout@v6
+              with:
+                  fetch-depth: 0
+
+            - name: Use Node.js 24.x
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+                  cache: 'npm'
+                  cache-dependency-path: package-lock.json
+
+            - name: Install UI dependencies
+              run: |
+                  npm ci --strict-peer-deps --engine-strict
+
+            - name: Validate root dependency graph
+              run: npm ls --depth=0
+
+            - name: Validate dependency policy
+              run: npm run deps:guard
+
+            - name: Verify framework dependency constraints
+              run: npm run deps:verify:framework
+
+            - name: Lint the codebase
+              run: npm run lint
+
+            - name: Build UI project
+              run: |
+                  npm run build:prod
+
+            - name: Run UI tests
+              run: |
+                  npm run test:ci
+
+            - name: Run SonarQube analysis
+              if: github.event_name != 'pull_request'
+              env:
+                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+              run: |
+                  npm run sonar -Dsonar.login="$SONAR_TOKEN"
+
+            - name: Enquire last git Tag
+              id: last_tag
+              shell: bash
+              run: |
+                  tag_v=$(git describe --tags $(git rev-list --tags --max-count=1))
+                  tag=$(echo $tag_v | sed 's/v//')
+                  echo "TARGET_TAG=${tag}" >> $GITHUB_OUTPUT
+
+            - name: Set up 'Find Current Pull Request'
+              uses: jwalton/gh-find-current-pr@v1
+              id: findPr
+              with:
+                  state: open
+
+    build-docker:
+        name: Build & Upload docker image and accomplish deployment
+        needs: ['build-ui']
+        if: ${{ needs.build-ui.outputs.should_build_docker == 'true' }}
+        uses: ./.github/workflows/github-deployment.yml
         with:
-          fetch-depth: 0
+            last_tag: ${{ needs.build-ui.outputs.last_tag }}
+            pr_number: ${{ needs.build-ui.outputs.pr_number }}
+            is_merged: ${{ needs.build-ui.outputs.should_build_docker == 'true' }}
+        secrets: inherit
 
-      - name: Use Node.js 24.x
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: "npm"
-          cache-dependency-path: package-lock.json
-
-      - name: Install UI dependencies
-        run: |
-          npm ci
-
-      - name: Lint the codebase
-        run: npm run lint
-        continue-on-error: true
-
-      - name: Build UI project
-        run: |
-          npm run build-prod --if-present
-
-      - name: Run UI tests
-        run: |
-          npm run test:ci
-
-      - name: Run SonarQube analysis
-        env:
-          SONAR_TOKEN: ${{ env.SONAR_TOKEN }}
-        run: |
-          npm run sonar -Dsonar.login=${{ env.SONAR_TOKEN }}
-
-      - name: Enquire last git Tag
-        id: last_tag
-        shell: bash
-        run: |
-          tag_v=$(git describe --tags $(git rev-list --tags --max-count=1))
-          tag=$(echo $tag_v | sed 's/v//')
-          echo "TARGET_TAG=${tag}" >> $GITHUB_OUTPUT
-
-      - name: Set up 'Find Current Pull Request'
-        uses: jwalton/gh-find-current-pr@v1
-        id: findPr
-        with:
-          state: open
-
-  build-docker:
-    name: Build & Upload docker image and accomplish deployment
-    needs: ["build-ui"]
-    if: ${{ needs.build-ui.outputs.should_build_docker == 'true' }}
-    uses: ./.github/workflows/github-deployment.yml
-    with:
-      last_tag: ${{ needs.build-ui.outputs.last_tag }}
-      pr_number: ${{ needs.build-ui.outputs.pr_number }}
-      is_merged: ${{ needs.build-ui.outputs.should_build_docker == 'true' }}
-    secrets: inherit
-
-  skip-docker:
-    name: Skip Docker Build
-    needs: ["build-ui"]
-    if: ${{ always() && needs.build-ui.outputs.should_build_docker != 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Skip Docker build message
-        run: |
-          echo "Skipping Docker build - this is a PR or branch push event."
-          echo "Docker builds only run on:"
-          echo "  - Tag pushes (manual tags)"
-          echo "  - Published releases"
-          echo "  - Manual workflow triggers"
-          echo "Event: ${{ github.event_name }}"
-          echo "Action: ${{ github.event.action }}"
-          echo "Ref: ${{ github.ref }}"
+    skip-docker:
+        name: Skip Docker Build
+        needs: ['build-ui']
+        if: ${{ always() && needs.build-ui.outputs.should_build_docker != 'true' }}
+        runs-on: ubuntu-latest
+        steps:
+            - name: Skip Docker build message
+              run: |
+                  echo "Skipping Docker build - this is a PR or branch push event."
+                  echo "Docker builds only run on:"
+                  echo "  - Tag pushes (manual tags)"
+                  echo "  - Published releases"
+                  echo "  - Manual workflow triggers"
+                  echo "Event: $EVENT_NAME"
+                  echo "Action: $EVENT_ACTION"
+                  echo "Ref: $BRANCH_REF"

@@ -1,194 +1,193 @@
-name: Safe NPM Dependency Upgrade
+name: Safe npm Dependency Update
 
 on:
-  schedule:
-    - cron: "0 1 * * *" # Daily conservative patch updates
-    - cron: "0 3 * * 0" # Weekly allowlisted minor updates
-  workflow_dispatch:
-    inputs:
-      migration_target:
-        description: "Angular/Nx migration target passed to nx migrate"
-        required: false
-        default: "latest"
+    workflow_dispatch:
+        inputs:
+            mode:
+                description: Dependency update mode
+                required: true
+                type: choice
+                options:
+                    - patch
+                    - minor
+                    - major
+    schedule:
+        - cron: '17 3 * * 1,3,5'
+        - cron: '23 4 * * 6'
+        - cron: '37 5 1 * *'
 
 permissions:
-  contents: write
-  pull-requests: write
+    contents: read
+
+concurrency:
+    group: safe-npm-dependency-update
+    cancel-in-progress: false
 
 jobs:
-  daily-patch:
-    name: Daily Patch Update
-    if: github.event_name == 'schedule' && github.event.schedule == '0 1 * * *'
-    runs-on: ubuntu-latest
+    resolve-mode:
+        name: Resolve dependency update mode
+        runs-on: ubuntu-latest
+        outputs:
+            mode: ${{ steps.resolve.outputs.mode }}
+        steps:
+            - id: resolve
+              name: Resolve scheduled or manual mode
+              shell: bash
+              env:
+                  EVENT_NAME: ${{ github.event_name }}
+                  EVENT_SCHEDULE: ${{ github.event.schedule }}
+                  DISPATCH_MODE: ${{ inputs.mode }}
+              run: |
+                  set -euo pipefail
+                  if [[ "$EVENT_NAME" == 'workflow_dispatch' ]]; then
+                    mode="$DISPATCH_MODE"
+                  else
+                    case "$EVENT_SCHEDULE" in
+                      '17 3 * * 1,3,5') mode='patch' ;;
+                      '23 4 * * 6') mode='minor' ;;
+                      '37 5 1 * *') mode='major' ;;
+                      *) echo "Unsupported schedule: $EVENT_SCHEDULE" >&2; exit 1 ;;
+                    esac
+                  fi
+                  case "$mode" in patch|minor|major) ;; *) echo "Invalid update mode" >&2; exit 1 ;; esac
+                  echo "mode=$mode" >> "$GITHUB_OUTPUT"
 
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
+    update-dependencies:
+        name: Safe ${{ needs.resolve-mode.outputs.mode }} dependency update
+        needs: resolve-mode
+        runs-on: ubuntu-latest
+        timeout-minutes: 120
+        permissions:
+            contents: read
+        env:
+            MODE: ${{ needs.resolve-mode.outputs.mode }}
+            BRANCH_PREFIX: automation/deps
+        steps:
+            - name: Create dependency-updater GitHub App token
+              id: app-token
+              uses: actions/create-github-app-token@v2
+              with:
+                  app-id: ${{ secrets.DEPENDENCY_UPDATER_APP_ID }}
+                  private-key: ${{ secrets.DEPENDENCY_UPDATER_APP_PRIVATE_KEY }}
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: package-lock.json
+            - name: Check out the default branch
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.event.repository.default_branch }}
+                  fetch-depth: 0
+                  token: ${{ steps.app-token.outputs.token }}
 
-      - name: Install baseline dependencies
-        run: npm ci
+            - name: Use Node.js 24.x
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+                  cache: npm
+                  cache-dependency-path: package-lock.json
 
-      - name: Apply safe patch updates
-        run: npm run deps:update:patch:safe
+            - name: Check for an existing automation PR
+              id: existing
+              shell: bash
+              env:
+                  GH_TOKEN: ${{ steps.app-token.outputs.token }}
+              run: |
+                  set -euo pipefail
+                  branch="$BRANCH_PREFIX/$MODE"
+                  gh pr list --base "${{ github.event.repository.default_branch }}" --head "$branch" --state open \
+                    --json number,author,body,url --limit 2 > existing-prs.json
+                  bot_login="$(gh api user --jq .login)"
+                  node tools/deps/ci-state.mjs check-open-pr --mode "$MODE" --bot-login "$bot_login" \
+                    --input existing-prs.json --output "$GITHUB_OUTPUT"
 
-      - name: Detect dependency changes
-        id: changes
-        run: node tools/deps/changed.mjs --type patch --github-output "$GITHUB_OUTPUT" --summary-file dependency-update-summary.md
+            - name: Install baseline dependencies
+              if: steps.existing.outputs.should_run == 'true'
+              run: npm ci --strict-peer-deps --engine-strict
 
-      # PR creation is intentionally gated behind clean verification.
-      # Unsafe dependency sets fail here and never reach create-pull-request.
-      - name: Verify updated dependency set
-        if: steps.changes.outputs.changed == 'true'
-        run: npm run deps:verify
+            - name: Run the verified safe dependency updater
+              id: updater
+              if: steps.existing.outputs.should_run == 'true'
+              continue-on-error: true
+              shell: bash
+              run: |
+                  set +e
+                  npm run "deps:update:${MODE}:safe"
+                  exit_code=$?
+                  echo "exit_code=$exit_code" >> "$GITHUB_OUTPUT"
+                  exit 0
 
-      - name: Refresh PR summary
-        if: steps.changes.outputs.changed == 'true'
-        run: node tools/deps/changed.mjs --type patch --summary-file dependency-update-summary.md
+            - name: Validate updater state and dependency diff
+              id: outcome
+              if: steps.existing.outputs.should_run == 'true'
+              run: >-
+                  node tools/deps/ci-state.mjs evaluate --state .dependency-upgrade/state.json
+                  --exit-code "${{ steps.updater.outputs.exit_code }}" --output "$GITHUB_OUTPUT"
 
-      - name: Upload dependency upgrade diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: dependency-upgrade-patch-diagnostics
-          path: |
-            dependency-update-summary.md
-            logs/dependency-upgrade/**
-            .dependency-upgrade/**
-          if-no-files-found: ignore
+            - name: Generate pull request body
+              if: steps.outcome.outputs.decision == 'create-pr'
+              env:
+                  GITHUB_WORKFLOW_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+              run: >-
+                  node tools/deps/ci-state.mjs write-pr-body --mode "$MODE"
+                  --state .dependency-upgrade/state.json --output dependency-update-pr.md
 
-      - name: Create PR
-        if: steps.changes.outputs.changed == 'true'
-        uses: peter-evans/create-pull-request@v7
-        with:
-          branch: chore/deps-patch-upgrade
-          title: "build(deps): safe patch dependency upgrade"
-          commit-message: "build(deps): safe patch dependency upgrade"
-          body-path: dependency-update-summary.md
-          delete-branch: true
+            - name: Commit and push dependency-only changes
+              if: steps.outcome.outputs.decision == 'create-pr'
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  branch="$BRANCH_PREFIX/$MODE"
+                  if git ls-remote --exit-code --heads origin "refs/heads/$branch" >/dev/null; then
+                    echo "Automation branch $branch exists without an open owned PR; refusing to overwrite it." >&2
+                    exit 1
+                  fi
+                  git config user.name 'github-actions[bot]'
+                  git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+                  git switch --create "$branch"
+                  git add -- package.json package-lock.json
+                  git diff --cached --check
+                  git diff --cached --quiet && { echo 'No staged dependency diff.' >&2; exit 1; }
+                  git commit -m "chore(deps): apply safe $MODE updates"
+                  git push origin "HEAD:refs/heads/$branch"
 
-  weekly-minor:
-    name: Weekly Minor Update (Safe Libraries)
-    if: github.event_name == 'schedule' && github.event.schedule == '0 3 * * 0'
-    runs-on: ubuntu-latest
+            - name: Create dependency update pull request
+              id: create-pr
+              if: steps.outcome.outputs.decision == 'create-pr'
+              shell: bash
+              env:
+                  GH_TOKEN: ${{ steps.app-token.outputs.token }}
+              run: |
+                  set -euo pipefail
+                  branch="$BRANCH_PREFIX/$MODE"
+                  pr_url="$(gh pr create --base "${{ github.event.repository.default_branch }}" --head "$branch" \
+                    --title "chore(deps): apply safe $MODE dependency updates" --body-file dependency-update-pr.md)"
+                  echo "url=$pr_url" >> "$GITHUB_OUTPUT"
+                  for label in dependencies automated "${MODE}-update"; do
+                    if gh label list --search "$label" --json name --jq '.[].name' | grep -Fxq "$label"; then
+                      gh pr edit "$pr_url" --add-label "$label" || echo "Could not apply optional label: $label"
+                    fi
+                  done
 
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
+            - name: Write pull request summary
+              if: always()
+              shell: bash
+              run: |
+                  if [[ "${{ steps.existing.outputs.should_run }}" == 'false' ]]; then
+                    echo '## Safe npm Dependency Update' >> "$GITHUB_STEP_SUMMARY"
+                    echo '' >> "$GITHUB_STEP_SUMMARY"
+                    echo "Existing automation PR retained: ${{ steps.existing.outputs.existing_pr }}" >> "$GITHUB_STEP_SUMMARY"
+                  elif [[ -n "${{ steps.create-pr.outputs.url }}" ]]; then
+                    echo "- Pull request: ${{ steps.create-pr.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"
+                    echo "- Branch: \`$BRANCH_PREFIX/$MODE\`" >> "$GITHUB_STEP_SUMMARY"
+                  fi
 
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: package-lock.json
-
-      - name: Install baseline dependencies
-        run: npm ci
-
-      - name: Apply allowlisted minor updates
-        run: npm run deps:update:minor:safe
-
-      - name: Detect dependency changes
-        id: changes
-        run: node tools/deps/changed.mjs --type minor --github-output "$GITHUB_OUTPUT" --summary-file dependency-update-summary.md
-
-      # PR creation is intentionally gated behind clean verification.
-      # Unsafe dependency sets fail here and never reach create-pull-request.
-      - name: Verify updated dependency set
-        if: steps.changes.outputs.changed == 'true'
-        run: npm run deps:verify
-
-      - name: Refresh PR summary
-        if: steps.changes.outputs.changed == 'true'
-        run: node tools/deps/changed.mjs --type minor --summary-file dependency-update-summary.md
-
-      - name: Upload dependency upgrade diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: dependency-upgrade-minor-diagnostics
-          path: |
-            dependency-update-summary.md
-            logs/dependency-upgrade/**
-            .dependency-upgrade/**
-          if-no-files-found: ignore
-
-      - name: Create PR
-        if: steps.changes.outputs.changed == 'true'
-        uses: peter-evans/create-pull-request@v7
-        with:
-          branch: chore/deps-minor-upgrade
-          title: "build(deps): safe minor dependency upgrade"
-          commit-message: "build(deps): safe minor dependency upgrade"
-          body-path: dependency-update-summary.md
-          delete-branch: true
-
-  angular-nx-migrate:
-    name: Angular / Nx Migration (Manual)
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: package-lock.json
-
-      - name: Install baseline dependencies
-        run: npm ci
-
-      - name: Run Angular/Nx migration
-        run: |
-          npx nx migrate "${{ inputs.migration_target }}"
-          npm install
-          if [ -f migrations.json ]; then
-            npx nx migrate --run-migrations
-            npm install
-          fi
-
-      - name: Detect dependency changes
-        id: changes
-        run: node tools/deps/changed.mjs --type angular-nx-migration --github-output "$GITHUB_OUTPUT" --summary-file dependency-update-summary.md
-
-      # Framework migrations are manual, but still gated. No green verification means no PR.
-      - name: Verify migrated dependency set
-        if: steps.changes.outputs.changed == 'true'
-        run: npm run deps:verify:framework
-
-      - name: Refresh PR summary
-        if: steps.changes.outputs.changed == 'true'
-        run: node tools/deps/changed.mjs --type angular-nx-migration --summary-file dependency-update-summary.md
-
-      - name: Upload dependency migration diagnostics
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: dependency-upgrade-angular-nx-diagnostics
-          path: |
-            dependency-update-summary.md
-            logs/dependency-upgrade/**
-            .dependency-upgrade/**
-            migrations.json
-          if-no-files-found: ignore
-
-      - name: Create PR
-        if: steps.changes.outputs.changed == 'true'
-        uses: peter-evans/create-pull-request@v7
-        with:
-          branch: chore/deps-angular-nx-migration
-          title: "build(deps): Angular/Nx framework migration"
-          commit-message: "build(deps): Angular/Nx framework migration"
-          body-path: dependency-update-summary.md
-          delete-branch: true
+            - name: Upload dependency update evidence
+              if: always() && steps.existing.outputs.should_run == 'true'
+              uses: actions/upload-artifact@v4
+              with:
+                  name: safe-dependency-update-${{ needs.resolve-mode.outputs.mode }}-${{ github.run_id }}
+                  path: |
+                      .dependency-upgrade/state.json
+                      .dependency-upgrade/lock-contention-*.json
+                      logs/dependency-upgrade/**
+                      dependency-update-pr.md
+                  if-no-files-found: ignore
+                  retention-days: 14
