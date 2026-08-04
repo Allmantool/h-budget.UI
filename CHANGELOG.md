@@ -1,5 +1,10 @@
 # 📦 Changelog
 
+## <small>1.1.59 (2026-08-04)</small>
+
+* Merge pull request #678 from Allmantool/tech/improve-npm-packages-auto-update ([cbe5c6a1db0c9ed71ee48d65bc81460cdb2cacb5](https://github.com/Allmantool/h-budget.UI/commit/cbe5c6a1db0c9ed71ee48d65bc81460cdb2cacb5)), closes [#678](https://github.com/Allmantool/h-budget.UI/issues/678)
+* tech: improve npm package auto update ([00523f6ef04d590b5df748cb2ae80452b5e11d9c](https://github.com/Allmantool/h-budget.UI/commit/00523f6ef04d590b5df748cb2ae80452b5e11d9c))
+
 ## <small>1.1.58 (2026-08-01)</small>
 
 * Merge pull request #677 from Allmantool/chore/deps-patch-upgrade ([e3ed50e932506f859fb3f76a05a198d03b303cff](https://github.com/Allmantool/h-budget.UI/commit/e3ed50e932506f859fb3f76a05a198d03b303cff)), closes [#677](https://github.com/Allmantool/h-budget.UI/issues/677)
