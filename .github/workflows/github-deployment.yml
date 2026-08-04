@@ -1,103 +1,120 @@
 name: Deployment on environment (GitHub)
 
 on:
-  workflow_call:
-    inputs:
-      last_tag:
-        required: true
-        type: string
-      pr_number:
-        required: false
-        type: string
-      is_merged:
-        required: true
-        type: boolean
+    workflow_call:
+        inputs:
+            image_tag:
+                required: true
+                type: string
+            release_tag:
+                required: true
+                type: string
 
-env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-  DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+permissions:
+    contents: read
 
 jobs:
-  build-docker:
-    name: Build and Push Docker Image
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://hub.docker.com/r/${{ env.DOCKERHUB_USERNAME }}/homebudget-ui
+    build-docker:
+        name: Build and Push Docker Image
+        runs-on: ubuntu-latest
+        environment: production
+        concurrency:
+            group: h-budget-ui-production
+            cancel-in-progress: false
+        permissions:
+            contents: read
+        env:
+            IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/homebudget-ui
+            IMAGE_TAG: ${{ inputs.image_tag }}
+            IMAGE_SHA_TAG: sha-${{ github.sha }}
+            RELEASE_TAG: ${{ inputs.release_tag }}
 
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ inputs.release_tag }}
+                  fetch-depth: 0
 
-      - name: Create Deployment
-        uses: actions/github-script@v7
-        id: create-deployment
-        with:
-          script: |
-            const deployment = await github.rest.repos.createDeployment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              ref: context.ref,
-              auto_merge: false,
-              required_contexts: [],
-              environment: 'production',
-              transient_environment: false,
-              production_environment: true,
-              description: "Deploying Docker image for tag ${{ inputs.last_tag }}"
-            });
-            return deployment.data.id;
+            - name: Verify deployment ref integrity
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  expected_commit="$(git rev-parse "$RELEASE_TAG^{commit}")"
+                  actual_commit="$(git rev-parse HEAD)"
+                  if [[ "$actual_commit" != "$expected_commit" || "$GITHUB_SHA" != "$expected_commit" ]]; then
+                    echo "Workflow SHA or checked-out commit does not match release tag $RELEASE_TAG." >&2
+                    exit 1
+                  fi
 
-      - name: Build Docker image
-        run: |
-          echo "Building Docker image for tag: ${{ inputs.last_tag }}"
-          docker build \
-            --target publish \
-            -t "${{ env.DOCKERHUB_USERNAME }}/homebudget-ui:${{ inputs.last_tag }}" \
-            --build-arg PULL_REQUEST_ID="${{ inputs.pr_number }}" \
-            --build-arg PULL_REQUEST_SOURCE_BRANCH="${{ github.ref }}" \
-            --build-arg PULL_REQUEST_TARGET_BRANCH="refs/heads/master" \
-            --build-arg GITHUB_RUN_ID="${{ github.run_id }}" \
-            --build-arg SONAR_TOKEN="${{ env.SONAR_TOKEN }}" \
-            .
+            - name: Build Docker image
+              run: |
+                  echo "Building Docker image for release tag: $RELEASE_TAG"
+                  docker build \
+                    --target publish \
+                    -t "$IMAGE_NAME:$IMAGE_TAG" \
+                    -t "$IMAGE_NAME:$IMAGE_SHA_TAG" \
+                    --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+                    --label "org.opencontainers.image.version=$IMAGE_TAG" \
+                    --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+                    --label "org.opencontainers.image.ref.name=$RELEASE_TAG" \
+                    .
 
-      - name: Login to Docker Hub
-        if: ${{ inputs.is_merged == true }}
-        uses: docker/login-action@v3
-        with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
-          password: ${{ env.DOCKERHUB_TOKEN }}
+            - name: Login to Docker Hub
+              uses: docker/login-action@v4
+              with:
+                  username: ${{ secrets.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Push Docker image
-        if: ${{ inputs.is_merged == true }}
-        run: |
-          echo "Pushing image to Docker Hub..."
-          docker push "${{ env.DOCKERHUB_USERNAME }}/homebudget-ui:${{ inputs.last_tag }}"
+            - name: Validate immutable Docker tags
+              id: immutable-tags
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  validate_tag() {
+                    local image_tag="$1"
+                    local expected_version="$2"
+                    local output_name="$3"
+                    inspection_output=''
+                    if inspection_output="$(docker manifest inspect "$IMAGE_NAME:$image_tag" 2>&1)"; then
+                      docker pull "$IMAGE_NAME:$image_tag" >/dev/null
+                      remote_revision="$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}' "$IMAGE_NAME:$image_tag")"
+                      if [[ "$remote_revision" != "$GITHUB_SHA" ]]; then
+                        echo "Existing Docker image tag points to a different commit: $IMAGE_NAME:$image_tag" >&2
+                        exit 1
+                      fi
 
-      - name: Update Deployment Status - Success
-        if: success()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            await github.rest.repos.createDeploymentStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              deployment_id: ${{ steps.create-deployment.outputs.result }},
-              state: 'success',
-              environment_url: 'https://hub.docker.com/r/${{ env.DOCKERHUB_USERNAME }}/homebudget-ui'
-            });
+                      if [[ -n "$expected_version" ]]; then
+                        remote_version="$(docker image inspect --format '{{ index .Config.Labels "org.opencontainers.image.version" }}' "$IMAGE_NAME:$image_tag")"
+                        if [[ "$remote_version" != "$expected_version" ]]; then
+                          echo "Existing Docker image tag has a different release version: $IMAGE_NAME:$image_tag" >&2
+                          exit 1
+                        fi
+                      fi
 
-      - name: Update Deployment Status - Failure
-        if: failure()
-        uses: actions/github-script@v7
-        with:
-          script: |
-            await github.rest.repos.createDeploymentStatus({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              deployment_id: ${{ steps.create-deployment.outputs.result }},
-              state: 'failure'
-            });
+                      echo "$output_name=false" >> "$GITHUB_OUTPUT"
+                    elif [[ "$inspection_output" != *'no such manifest'* && "$inspection_output" != *'manifest unknown'* ]]; then
+                      echo "Unable to confirm that Docker image tag is unused: $IMAGE_NAME:$image_tag" >&2
+                      exit 1
+                    else
+                      echo "$output_name=true" >> "$GITHUB_OUTPUT"
+                    fi
+                  }
+
+                  validate_tag "$IMAGE_TAG" "$IMAGE_TAG" 'push_version_tag'
+                  validate_tag "$IMAGE_SHA_TAG" '' 'push_sha_tag'
+
+            - name: Push Docker image
+              run: |
+                  set -euo pipefail
+                  if [[ "${{ steps.immutable-tags.outputs.push_version_tag }}" == 'true' ]]; then
+                    docker push "$IMAGE_NAME:$IMAGE_TAG"
+                  else
+                    echo "Verified existing immutable Docker image tag: $IMAGE_NAME:$IMAGE_TAG"
+                  fi
+
+                  if [[ "${{ steps.immutable-tags.outputs.push_sha_tag }}" == 'true' ]]; then
+                    docker push "$IMAGE_NAME:$IMAGE_SHA_TAG"
+                  else
+                    echo "Verified existing immutable Docker image tag: $IMAGE_NAME:$IMAGE_SHA_TAG"
+                  fi

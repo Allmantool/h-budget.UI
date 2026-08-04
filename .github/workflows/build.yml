@@ -27,12 +27,11 @@ on:
             - test/*
             - hotfix/*
             - fix/*
-            - tech/
+            - tech/**
         types: [opened, reopened, synchronize]
 
 permissions:
     contents: read
-    pull-requests: read
 
 env:
     EVENT_NAME: ${{ github.event_name }}
@@ -40,8 +39,11 @@ env:
     EVENT_PULL_REQUEST_STATE: ${{ github.event.pull_request.state }}
     EVENT_PULL_REQUEST_MERGED: ${{ github.event.pull_request.merged }}
     BRANCH_REF: ${{ github.ref }}
+    BRANCH_REF_NAME: ${{ github.ref_name }}
+    BRANCH_REF_TYPE: ${{ github.ref_type }}
     BRANCH_BASE_REF: ${{ github.base_ref }}
-    IS_MERGED: "${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}"
+    RELEASE_TAG: ${{ github.event.release.tag_name }}
+    CALLER_LAST_TAG: ${{ inputs.last_tag }}
 
 jobs:
     build-ui:
@@ -49,9 +51,8 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 120
         outputs:
-            last_tag: ${{ steps.last_tag.outputs.TARGET_TAG }}
-            pr_number: ${{ steps.findPr.outputs.pr }}
-            is_merged: ${{ env.IS_MERGED }}
+            image_tag: ${{ steps.release_tag.outputs.image_tag }}
+            release_tag: ${{ steps.release_tag.outputs.release_tag }}
             should_build_docker: ${{ steps.check_docker_trigger.outputs.should_build_docker }}
         defaults:
             run:
@@ -68,19 +69,44 @@ jobs:
                   elif [[ "$EVENT_NAME" == 'release' && "$EVENT_ACTION" == 'published' ]]; then
                     echo "should_build_docker=true" >> $GITHUB_OUTPUT
                     echo "Trigger: Published release"
-                  elif [[ "$EVENT_NAME" == 'workflow_dispatch' ]]; then
+                  elif [[ "$EVENT_NAME" == 'workflow_dispatch' && "$BRANCH_REF_TYPE" == 'tag' ]]; then
                     echo "should_build_docker=true" >> $GITHUB_OUTPUT
-                    echo "Trigger: Manual workflow dispatch"
-                  elif [[ "$EVENT_NAME" == 'workflow_call' ]]; then
+                    echo "Trigger: Manual workflow dispatch for tag $BRANCH_REF"
+                  elif [[ "$EVENT_NAME" == 'workflow_call' && -n "$CALLER_LAST_TAG" ]]; then
                     echo "should_build_docker=true" >> $GITHUB_OUTPUT
-                    echo "Trigger: Workflow call"
+                    echo "Trigger: Workflow call for tag $CALLER_LAST_TAG"
                   else
                     echo "should_build_docker=false" >> $GITHUB_OUTPUT
-                    echo "Trigger: PR or other event - skipping Docker build"
+                    echo "Trigger: PR, branch, or unversioned workflow call - skipping Docker build"
                   fi
+
+            - name: Resolve release tag
+              id: release_tag
+              if: steps.check_docker_trigger.outputs.should_build_docker == 'true'
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  if [[ "$EVENT_NAME" == 'release' ]]; then
+                    release_tag="$RELEASE_TAG"
+                  elif [[ "$EVENT_NAME" == 'workflow_call' ]]; then
+                    release_tag="$CALLER_LAST_TAG"
+                  else
+                    release_tag="$BRANCH_REF_NAME"
+                  fi
+
+                  if [[ ! "$release_tag" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
+                    echo "Release tag must be a v-prefixed semantic version: $release_tag" >&2
+                    exit 1
+                  fi
+
+                  release_tag="v${release_tag#v}"
+                  echo "release_tag=$release_tag" >> "$GITHUB_OUTPUT"
+                  echo "image_tag=${release_tag#v}" >> "$GITHUB_OUTPUT"
+
             - name: Check out code
               uses: actions/checkout@v6
               with:
+                  ref: ${{ steps.release_tag.outputs.release_tag || github.ref }}
                   fetch-depth: 0
 
             - name: Use Node.js 24.x
@@ -121,19 +147,17 @@ jobs:
               run: |
                   npm run sonar -Dsonar.login="$SONAR_TOKEN"
 
-            - name: Enquire last git Tag
-              id: last_tag
+            - name: Verify checked-out release ref
+              if: steps.check_docker_trigger.outputs.should_build_docker == 'true'
               shell: bash
               run: |
-                  tag_v=$(git describe --tags $(git rev-list --tags --max-count=1))
-                  tag=$(echo $tag_v | sed 's/v//')
-                  echo "TARGET_TAG=${tag}" >> $GITHUB_OUTPUT
-
-            - name: Set up 'Find Current Pull Request'
-              uses: jwalton/gh-find-current-pr@v1
-              id: findPr
-              with:
-                  state: open
+                  set -euo pipefail
+                  expected_commit="$(git rev-parse "${{ steps.release_tag.outputs.release_tag }}^{commit}")"
+                  actual_commit="$(git rev-parse HEAD)"
+                  if [[ "$actual_commit" != "$expected_commit" || "$GITHUB_SHA" != "$expected_commit" ]]; then
+                    echo "Workflow SHA or checked-out commit does not match release tag ${{ steps.release_tag.outputs.release_tag }}." >&2
+                    exit 1
+                  fi
 
     build-docker:
         name: Build & Upload docker image and accomplish deployment
@@ -141,9 +165,8 @@ jobs:
         if: ${{ needs.build-ui.outputs.should_build_docker == 'true' }}
         uses: ./.github/workflows/github-deployment.yml
         with:
-            last_tag: ${{ needs.build-ui.outputs.last_tag }}
-            pr_number: ${{ needs.build-ui.outputs.pr_number }}
-            is_merged: ${{ needs.build-ui.outputs.should_build_docker == 'true' }}
+            image_tag: ${{ needs.build-ui.outputs.image_tag }}
+            release_tag: ${{ needs.build-ui.outputs.release_tag }}
         secrets: inherit
 
     skip-docker:
