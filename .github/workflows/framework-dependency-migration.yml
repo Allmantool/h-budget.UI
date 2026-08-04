@@ -1,0 +1,101 @@
+name: Manual Framework Dependency Migration
+
+on:
+    workflow_dispatch:
+        inputs:
+            migration_target:
+                description: Angular or Nx migration target for nx migrate
+                required: true
+                default: latest
+                type: string
+
+permissions:
+    contents: read
+
+concurrency:
+    group: manual-framework-dependency-migration
+    cancel-in-progress: false
+
+jobs:
+    migrate:
+        name: Run manual framework migration
+        runs-on: ubuntu-latest
+        timeout-minutes: 120
+        permissions:
+            contents: read
+        env:
+            MIGRATION_TARGET: ${{ inputs.migration_target }}
+            BRANCH_NAME: automation/deps/framework-migration
+        steps:
+            - name: Create migration GitHub App token
+              id: app-token
+              uses: actions/create-github-app-token@v2
+              with:
+                  app-id: ${{ secrets.DEPENDENCY_UPDATER_APP_ID }}
+                  private-key: ${{ secrets.DEPENDENCY_UPDATER_APP_PRIVATE_KEY }}
+
+            - name: Check out the default branch
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.event.repository.default_branch }}
+                  fetch-depth: 0
+                  token: ${{ steps.app-token.outputs.token }}
+
+            - name: Use Node.js 24.x
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+                  cache: npm
+                  cache-dependency-path: package-lock.json
+
+            - name: Install baseline dependencies
+              run: npm ci --strict-peer-deps --engine-strict
+
+            - name: Run explicit Angular or Nx migration
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  if [[ "$MIGRATION_TARGET" == -* || "$MIGRATION_TARGET" =~ [[:space:]] ]]; then
+                    echo 'Migration target must be a single package specification, not an option or shell expression.' >&2
+                    exit 1
+                  fi
+                  npx nx migrate "$MIGRATION_TARGET"
+                  npm install --strict-peer-deps --engine-strict
+                  if [[ -f migrations.json ]]; then
+                    npx nx migrate --run-migrations
+                    npm install --strict-peer-deps --engine-strict
+                  fi
+
+            - name: Verify migrated dependency set
+              run: npm run deps:verify:framework
+
+            - name: Check migration diff integrity
+              run: |
+                  git diff --check
+                  git diff --quiet && { echo 'Migration produced no changes.' >&2; exit 1; }
+
+            - name: Create manual migration pull request
+              uses: peter-evans/create-pull-request@v7
+              with:
+                  token: ${{ steps.app-token.outputs.token }}
+                  branch: ${{ env.BRANCH_NAME }}
+                  delete-branch: true
+                  commit-message: 'chore(deps): apply manual framework migration'
+                  title: 'chore(deps): apply manual framework migration'
+                  body: |
+                      This PR was created by the manual Angular/Nx migration workflow.
+
+                      The migration was requested with `${{ inputs.migration_target }}` and passed framework dependency verification before PR creation.
+
+                      Automatic safe dependency updates intentionally defer framework majors to this reviewed workflow.
+
+            - name: Upload migration diagnostics
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: manual-framework-dependency-migration-${{ github.run_id }}
+                  path: |
+                      migrations.json
+                      logs/dependency-upgrade/**
+                  if-no-files-found: ignore
+                  retention-days: 14
