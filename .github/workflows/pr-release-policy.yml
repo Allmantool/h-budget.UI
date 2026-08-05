@@ -1,0 +1,47 @@
+name: PR Release Policy
+
+on:
+    pull_request:
+        branches: [master]
+        types: [opened, reopened, synchronize, edited, ready_for_review]
+
+permissions:
+    contents: read
+
+concurrency:
+    group: pr-release-policy-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+jobs:
+    validate:
+        name: Validate branch and Conventional Commits
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check out PR head
+              uses: actions/checkout@v6
+              with:
+                  ref: ${{ github.event.pull_request.head.sha }}
+                  fetch-depth: 0
+                  persist-credentials: false
+
+            - name: Use Node.js 24.10.0
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 24.10.0
+                  cache: npm
+                  cache-dependency-path: package-lock.json
+
+            - name: Install dependencies
+              run: npm ci --strict-peer-deps --engine-strict
+
+            - name: Validate branch intent and PR title
+              env:
+                  PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+                  PR_TITLE: ${{ github.event.pull_request.title }}
+              run: node tools/ci/release-policy.mjs --branch "$PR_BRANCH" --title "$PR_TITLE"
+
+            - name: Validate PR commit messages
+              env:
+                  BASE_SHA: ${{ github.event.pull_request.base.sha }}
+                  HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+              run: npx --no-install commitlint --from "$BASE_SHA" --to "$HEAD_SHA" --verbose

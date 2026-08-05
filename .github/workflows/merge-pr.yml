@@ -1,16 +1,91 @@
-name: Release - Generate Tag and Changelog
+name: Release
 
 on:
     push:
-        branches:
-            - master
+        branches: [master]
 
-env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+permissions:
+    contents: read
+
+concurrency:
+    group: semantic-release-master
+    cancel-in-progress: false
 
 jobs:
-    semantic-release:
-        name: Generate Semantic Tag and Change log
-        uses: ./.github/workflows/sem-release.yml
+    release:
+        name: Verify and publish release
+        runs-on: ubuntu-latest
+        timeout-minutes: 120
+        outputs:
+            release_tag: ${{ steps.publish.outputs.release_tag }}
+        permissions:
+            contents: write
+        steps:
+            - name: Check out master with tags
+              uses: actions/checkout@v6
+              with:
+                  fetch-depth: 0
+
+            - name: Use Node.js 24.10.0
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 24.10.0
+                  cache: npm
+                  cache-dependency-path: package-lock.json
+
+            - name: Install dependencies
+              run: npm ci --strict-peer-deps --engine-strict
+
+            - name: Validate root dependency graph
+              run: npm ls --depth=0
+
+            - name: Validate dependency policy
+              run: npm run deps:guard
+
+            - name: Verify dependency registry metadata
+              run: npm run deps:guard:online
+
+            - name: Verify framework dependency constraints
+              run: npm run deps:verify:framework
+
+            - name: Lint
+              run: npm run lint
+
+            - name: Test
+              run: npm run test:ci
+
+            - name: Run SonarQube analysis
+              env:
+                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+              run: npm run sonar -Dsonar.login="$SONAR_TOKEN"
+
+            - name: Build production application
+              run: npm run build:prod
+
+            - id: publish
+              name: Publish GitHub Release and immutable tag
+              env:
+                  GITHUB_TOKEN: ${{ github.token }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  git tag --points-at HEAD --list 'v*' | sort > tags-before.txt
+                  npx --no-install semantic-release
+                  git tag --points-at HEAD --list 'v*' | sort > tags-after.txt
+                  release_tag="$(comm -13 tags-before.txt tags-after.txt)"
+                  if [[ -n "$release_tag" && ! "$release_tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                    echo "semantic-release created an invalid stable tag: $release_tag" >&2
+                    exit 1
+                  fi
+                  if [[ -n "$release_tag" ]]; then
+                    echo "release_tag=$release_tag" >> "$GITHUB_OUTPUT"
+                  fi
+
+    deploy:
+        name: Deploy newly published release
+        needs: release
+        if: needs.release.outputs.release_tag != ''
+        uses: ./.github/workflows/github-deployment.yml
+        with:
+            release_tag: ${{ needs.release.outputs.release_tag }}
         secrets: inherit

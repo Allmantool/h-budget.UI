@@ -1,124 +1,40 @@
-name: Build UI Application
+name: CI
 
 on:
-    workflow_call:
-        inputs:
-            last_tag:
-                required: false
-                type: string
-            pr_number:
-                required: false
-                type: string
-            is_merged:
-                required: false
-                type: boolean
-    workflow_dispatch:
-    push:
-        tags: ['v*.*.*']
-
-    release:
-        types: [published]
-
     pull_request:
-        branches:
-            - master
-            - developed
-            - feature/*
-            - test/*
-            - hotfix/*
-            - fix/*
-            - tech/**
-        types: [opened, reopened, synchronize]
+        branches: [master, developed, feature/*, test/*, hotfix/*, fix/*, tech/**]
+        types: [opened, reopened, synchronize, ready_for_review]
+    workflow_dispatch:
 
 permissions:
     contents: read
 
-env:
-    EVENT_NAME: ${{ github.event_name }}
-    EVENT_ACTION: ${{ github.event.action }}
-    EVENT_PULL_REQUEST_STATE: ${{ github.event.pull_request.state }}
-    EVENT_PULL_REQUEST_MERGED: ${{ github.event.pull_request.merged }}
-    BRANCH_REF: ${{ github.ref }}
-    BRANCH_REF_NAME: ${{ github.ref_name }}
-    BRANCH_REF_TYPE: ${{ github.ref_type }}
-    BRANCH_BASE_REF: ${{ github.base_ref }}
-    RELEASE_TAG: ${{ github.event.release.tag_name }}
-    CALLER_LAST_TAG: ${{ inputs.last_tag }}
+concurrency:
+    group: ci-${{ github.event.pull_request.number || github.ref }}
+    cancel-in-progress: true
 
 jobs:
-    build-ui:
-        name: Build Angular UI
+    verify:
+        name: Verify Angular UI
         runs-on: ubuntu-latest
         timeout-minutes: 120
-        outputs:
-            image_tag: ${{ steps.release_tag.outputs.image_tag }}
-            release_tag: ${{ steps.release_tag.outputs.release_tag }}
-            should_build_docker: ${{ steps.check_docker_trigger.outputs.should_build_docker }}
-        defaults:
-            run:
-                working-directory: .
         steps:
-            - name: Check Docker build trigger
-              id: check_docker_trigger
-              run: |
-                  # Run Docker build for tag pushes (manual tags) AND published releases
-                  # Skip for PRs and other events
-                  if [[ "$EVENT_NAME" == 'push' && "$BRANCH_REF" == refs/tags/* ]]; then
-                    echo "should_build_docker=true" >> $GITHUB_OUTPUT
-                    echo "Trigger: Manual tag push"
-                  elif [[ "$EVENT_NAME" == 'release' && "$EVENT_ACTION" == 'published' ]]; then
-                    echo "should_build_docker=true" >> $GITHUB_OUTPUT
-                    echo "Trigger: Published release"
-                  elif [[ "$EVENT_NAME" == 'workflow_dispatch' && "$BRANCH_REF_TYPE" == 'tag' ]]; then
-                    echo "should_build_docker=true" >> $GITHUB_OUTPUT
-                    echo "Trigger: Manual workflow dispatch for tag $BRANCH_REF"
-                  elif [[ "$EVENT_NAME" == 'workflow_call' && -n "$CALLER_LAST_TAG" ]]; then
-                    echo "should_build_docker=true" >> $GITHUB_OUTPUT
-                    echo "Trigger: Workflow call for tag $CALLER_LAST_TAG"
-                  else
-                    echo "should_build_docker=false" >> $GITHUB_OUTPUT
-                    echo "Trigger: PR, branch, or unversioned workflow call - skipping Docker build"
-                  fi
-
-            - name: Resolve release tag
-              id: release_tag
-              if: steps.check_docker_trigger.outputs.should_build_docker == 'true'
-              shell: bash
-              run: |
-                  set -euo pipefail
-                  if [[ "$EVENT_NAME" == 'release' ]]; then
-                    release_tag="$RELEASE_TAG"
-                  elif [[ "$EVENT_NAME" == 'workflow_call' ]]; then
-                    release_tag="$CALLER_LAST_TAG"
-                  else
-                    release_tag="$BRANCH_REF_NAME"
-                  fi
-
-                  if [[ ! "$release_tag" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
-                    echo "Release tag must be a v-prefixed semantic version: $release_tag" >&2
-                    exit 1
-                  fi
-
-                  release_tag="v${release_tag#v}"
-                  echo "release_tag=$release_tag" >> "$GITHUB_OUTPUT"
-                  echo "image_tag=${release_tag#v}" >> "$GITHUB_OUTPUT"
-
-            - name: Check out code
+            - name: Check out source
               uses: actions/checkout@v6
               with:
-                  ref: ${{ steps.release_tag.outputs.release_tag || github.ref }}
+                  ref: ${{ github.event.pull_request.head.sha || github.sha }}
                   fetch-depth: 0
+                  persist-credentials: false
 
-            - name: Use Node.js 24.x
+            - name: Use Node.js 24.10.0
               uses: actions/setup-node@v6
               with:
-                  node-version: 24
-                  cache: 'npm'
+                  node-version: 24.10.0
+                  cache: npm
                   cache-dependency-path: package-lock.json
 
-            - name: Install UI dependencies
-              run: |
-                  npm ci --strict-peer-deps --engine-strict
+            - name: Install dependencies
+              run: npm ci --strict-peer-deps --engine-strict
 
             - name: Validate root dependency graph
               run: npm ls --depth=0
@@ -129,59 +45,11 @@ jobs:
             - name: Verify framework dependency constraints
               run: npm run deps:verify:framework
 
-            - name: Lint the codebase
+            - name: Lint
               run: npm run lint
 
-            - name: Build UI project
-              run: |
-                  npm run build:prod
+            - name: Test
+              run: npm run test:ci
 
-            - name: Run UI tests
-              run: |
-                  npm run test:ci
-
-            - name: Run SonarQube analysis
-              if: github.event_name != 'pull_request'
-              env:
-                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-              run: |
-                  npm run sonar -Dsonar.login="$SONAR_TOKEN"
-
-            - name: Verify checked-out release ref
-              if: steps.check_docker_trigger.outputs.should_build_docker == 'true'
-              shell: bash
-              run: |
-                  set -euo pipefail
-                  expected_commit="$(git rev-parse "${{ steps.release_tag.outputs.release_tag }}^{commit}")"
-                  actual_commit="$(git rev-parse HEAD)"
-                  if [[ "$actual_commit" != "$expected_commit" || "$GITHUB_SHA" != "$expected_commit" ]]; then
-                    echo "Workflow SHA or checked-out commit does not match release tag ${{ steps.release_tag.outputs.release_tag }}." >&2
-                    exit 1
-                  fi
-
-    build-docker:
-        name: Build & Upload docker image and accomplish deployment
-        needs: ['build-ui']
-        if: ${{ needs.build-ui.outputs.should_build_docker == 'true' }}
-        uses: ./.github/workflows/github-deployment.yml
-        with:
-            image_tag: ${{ needs.build-ui.outputs.image_tag }}
-            release_tag: ${{ needs.build-ui.outputs.release_tag }}
-        secrets: inherit
-
-    skip-docker:
-        name: Skip Docker Build
-        needs: ['build-ui']
-        if: ${{ always() && needs.build-ui.outputs.should_build_docker != 'true' }}
-        runs-on: ubuntu-latest
-        steps:
-            - name: Skip Docker build message
-              run: |
-                  echo "Skipping Docker build - this is a PR or branch push event."
-                  echo "Docker builds only run on:"
-                  echo "  - Tag pushes (manual tags)"
-                  echo "  - Published releases"
-                  echo "  - Manual workflow triggers"
-                  echo "Event: $EVENT_NAME"
-                  echo "Action: $EVENT_ACTION"
-                  echo "Ref: $BRANCH_REF"
+            - name: Build production application
+              run: npm run build:prod

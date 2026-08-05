@@ -6,7 +6,8 @@
 	--app-muted: #617089;
 	--app-accent: #0e7490;
 	--app-shadow: 0 18px 48px rgba(15, 23, 42, 0.1);
-	display: grid;
+	display: flex;
+	flex-direction: column;
 	gap: 1rem;
 	min-height: 100%;
 	padding: 1rem;
@@ -90,6 +91,7 @@
 	flex-wrap: wrap;
 	gap: 0.75rem;
 	padding: 0.75rem;
+	max-height: fit-content;
 }
 
 .app-shell__nav-item {
@@ -107,6 +109,10 @@
 		transform 180ms ease,
 		border-color 180ms ease,
 		background-color 180ms ease;
+}
+
+.app-shell__nav-item > .material-icons {
+	width: 1em;
 }
 
 .app-shell__nav-item:hover,
