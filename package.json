@@ -1,6 +1,6 @@
 {
   "name": "h-budget",
-  "version": "0.214.68",
+  "version": "0.0.0-development",
   "private": true,
   "scripts": {
     "ng": "ng",
@@ -64,8 +64,11 @@
     "deps:verify:framework": "node tools/deps/verify.mjs --allow-framework-updates",
     "verify:flag-icons": "node tools/build/verify-flag-icons-assets.mjs",
     "deps:changed": "node tools/deps/changed.mjs",
+    "commitlint": "commitlint",
+    "release:validate": "node --test tools/ci/release-policy.spec.mjs",
+    "release:dry-run": "node tools/ci/semantic-release-dry-run.mjs",
     "ci:verify": "npm run deps:verify",
-    "preinstall": "node -e \"const v=require('child_process').execSync('npm -v').toString().trim(); if (parseInt(v.split('.')[0],10) < 11) { console.error('❌ npm v11+ required. Current:', v); process.exit(1); }\""
+    "preinstall": "node -e \"const match=/^npm\\/(\\d+)\\./.exec(process.env.npm_config_user_agent ?? ''); if (!match || Number(match[1]) < 11) { console.error('❌ npm v11+ required. Current:', process.env.npm_config_user_agent ?? 'unknown'); process.exit(1); }\""
   },
   "dependencies": {
     "@angular/animations": "21.2.16",
@@ -130,16 +133,14 @@
     "@angular/build": "21.2.16",
     "@angular/cli": "21.2.16",
     "@angular/compiler-cli": "21.2.16",
-    "@commitlint/cli": "^20.5.3",
-    "@commitlint/config-conventional": "^20.5.3",
+    "@commitlint/cli": "^21.2.1",
+    "@commitlint/config-conventional": "^21.2.0",
     "@nx/angular": "22.7.5",
     "@nx/eslint": "22.7.5",
     "@nx/workspace": "22.7.5",
     "@schematics/angular": "21.2.16",
-    "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
-    "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^12.0.8",
+    "@semantic-release/github": "^12.0.9",
     "@semantic-release/release-notes-generator": "^14.1.1",
     "@types/jasmine": "~5.1.15",
     "@types/node": "^24.13.3",
@@ -164,7 +165,8 @@
     "npm-run-all": "^4.1.5",
     "nx": "22.7.5",
     "prettier": "^3.8.3",
-    "semantic-release": "^25.0.3",
+    "conventional-changelog-conventionalcommits": "^10.2.1",
+    "semantic-release": "^25.0.8",
     "sonarqube-scanner": "^4.3.8",
     "stylelint-prettier": "^5.0.3",
     "typescript": "~5.9.3"
@@ -172,7 +174,7 @@
   "nx": {},
   "packageManager": "npm",
   "engines": {
-    "node": ">=24.0.0",
+    "node": ">=24.10.0",
     "npm": ">=11.0.0"
   }
 }

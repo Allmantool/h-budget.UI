@@ -1,0 +1,5 @@
+#!/bin/sh
+
+[ "$CI" = "true" ] && exit 0
+
+npx --no-install commitlint --edit "$1"

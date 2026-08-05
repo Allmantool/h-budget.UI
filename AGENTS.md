@@ -53,6 +53,15 @@ Use the validation levels in [review and validation standards](.codex/skills/ang
 
 For non-trivial work, report the objective/result, design reasoning, principles applied, files changed, validation evidence, self-review corrections, preserved unrelated changes, remaining risks/exceptions, and the next safe action. Do not claim completion or compliance without evidence.
 
+## Release engineering policy
+
+- Use Conventional Commits 1.0.0 for all new commit and pull-request titles: `<type>(<scope>): <description>`.
+- `feat` releases MINOR; `fix`, `perf`, and `revert` release PATCH; a `!` marker or `BREAKING CHANGE:` footer releases MAJOR. `build`, `chore`, `ci`, `docs`, `refactor`, `style`, and `test` do not release by default.
+- Branch names validate development intent only: `feature|feat/* -> feat`, `bug|bugfix|fix|hotfix/* -> fix`, and the remaining supported prefixes map to their matching Conventional Commit type. Never calculate a release version from a branch name.
+- `master` is the only stable release branch. semantic-release derives `vMAJOR.MINOR.PATCH` from reachable Conventional Commit history and publishes the immutable GitHub release/tag after CI passes.
+- GitHub Releases are the canonical generated release history. Do not manually bump the private SPA package version, create release tags, or commit generated changelog entries.
+- Production image work must be triggered by a published stable release and must build the exact release tag; preserve its release SHA and immutable image tags.
+
 ## Governance map
 
 - [Governance package guide](.codex/README.md)

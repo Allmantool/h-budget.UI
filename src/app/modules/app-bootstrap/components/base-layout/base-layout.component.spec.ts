@@ -94,6 +94,54 @@ describe('BaseLayoutComponent', () => {
 		expect(activeLink?.textContent).toContain('Rates');
 	});
 
+	it('keeps the primary navigation and active tile heights stable across workspace routes', async () => {
+		const router = TestBed.inject(Router);
+		const shell = (fixture.nativeElement as HTMLElement).querySelector('.app-shell') as HTMLElement;
+		const routes = ['/dashboard', '/dashboard/currency-rates', '/dashboard/accounting'];
+		const viewportWidths = [1920, 1440, 1024];
+
+		fixture.detectChanges();
+
+		for (const viewportWidth of viewportWidths) {
+			shell.style.width = `${viewportWidth}px`;
+			const dimensions: Array<{ navigation: number; activeTile: number }> = [];
+
+			for (const route of routes) {
+				await router.navigateByUrl(route);
+				fixture.detectChanges();
+				await fixture.whenStable();
+				fixture.detectChanges();
+
+				const nativeElement = fixture.nativeElement as HTMLElement;
+				const navigation = nativeElement.querySelector('.app-shell__nav') as HTMLElement;
+				const activeTile = nativeElement.querySelector('.app-shell__nav-item--active') as HTMLElement;
+				const subtitles = nativeElement.querySelectorAll<HTMLElement>('.app-shell__nav-copy small');
+
+				expect(activeTile).withContext(`Expected an active tile for ${route}`).not.toBeNull();
+				expect(subtitles.length).withContext(`Expected all subtitles for ${route}`).toBe(3);
+				subtitles.forEach(subtitle => {
+					expect(subtitle.scrollWidth)
+						.withContext(`Expected the subtitle to fit within its tile for ${route} at ${viewportWidth}px`)
+						.toBeLessThanOrEqual(subtitle.clientWidth);
+				});
+
+				dimensions.push({
+					navigation: navigation.getBoundingClientRect().height,
+					activeTile: activeTile.getBoundingClientRect().height,
+				});
+			}
+
+			for (const dimension of dimensions.slice(1)) {
+				expect(Math.abs(dimension.navigation - dimensions[0].navigation))
+					.withContext(`Expected navigation height stability at ${viewportWidth}px`)
+					.toBeLessThanOrEqual(0.5);
+				expect(Math.abs(dimension.activeTile - dimensions[0].activeTile))
+					.withContext(`Expected active tile height stability at ${viewportWidth}px`)
+					.toBeLessThanOrEqual(0.5);
+			}
+		}
+	});
+
 	it('updates loader state from the NGXS processing state', () => {
 		const store = TestBed.inject(Store);
 
