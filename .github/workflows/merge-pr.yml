@@ -36,8 +36,14 @@ jobs:
             - name: Install dependencies
               run: npm ci --strict-peer-deps --engine-strict
 
+            - name: Validate root dependency graph
+              run: npm ls --depth=0
+
             - name: Validate dependency policy
               run: npm run deps:guard
+
+            - name: Verify dependency registry metadata
+              run: npm run deps:guard:online
 
             - name: Verify framework dependency constraints
               run: npm run deps:verify:framework
@@ -47,6 +53,11 @@ jobs:
 
             - name: Test
               run: npm run test:ci
+
+            - name: Run SonarQube analysis
+              env:
+                  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+              run: npm run sonar -Dsonar.login="$SONAR_TOKEN"
 
             - name: Build production application
               run: npm run build:prod

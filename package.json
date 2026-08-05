@@ -65,7 +65,7 @@
     "verify:flag-icons": "node tools/build/verify-flag-icons-assets.mjs",
     "deps:changed": "node tools/deps/changed.mjs",
     "commitlint": "commitlint",
-    "release:validate": "node --test tools/ci/release-policy.spec.mjs",
+    "release:validate": "node --test tools/ci/release-policy.spec.mjs tools/ci/workflow-contract.spec.mjs",
     "release:dry-run": "node tools/ci/semantic-release-dry-run.mjs",
     "ci:verify": "npm run deps:verify",
     "preinstall": "node -e \"const match=/^npm\\/(\\d+)\\./.exec(process.env.npm_config_user_agent ?? ''); if (!match || Number(match[1]) < 11) { console.error('❌ npm v11+ required. Current:', process.env.npm_config_user_agent ?? 'unknown'); process.exit(1); }\""
