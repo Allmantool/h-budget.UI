@@ -1,4 +1,4 @@
-import { RELEASE_NOTE_TYPES, RELEASE_RULES } from './tools/ci/release-policy.mjs';
+import { RELEASE_NOTE_TYPES, RELEASE_NOTE_WRITER_OPTIONS, RELEASE_RULES } from './tools/ci/release-policy.mjs';
 
 const parserOpts = {
 	noteKeywords: ['BREAKING CHANGE', 'BREAKING CHANGES'],
@@ -14,7 +14,12 @@ export default {
 		],
 		[
 			'@semantic-release/release-notes-generator',
-			{ preset: 'conventionalcommits', parserOpts, presetConfig: { types: RELEASE_NOTE_TYPES } },
+			{
+				preset: 'conventionalcommits',
+				parserOpts,
+				presetConfig: { types: RELEASE_NOTE_TYPES },
+				writerOpts: RELEASE_NOTE_WRITER_OPTIONS,
+			},
 		],
 		[
 			'@semantic-release/github',

@@ -18,28 +18,47 @@ export const RELEASE_RULES = Object.freeze([
 	{ type: 'fix', release: 'patch' },
 	{ type: 'perf', release: 'patch' },
 	{ type: 'revert', release: 'patch' },
-	{ type: 'build', release: false },
-	{ type: 'chore', release: false },
-	{ type: 'ci', release: false },
+	{ type: 'refactor', release: 'patch' },
+	{ type: 'chore', release: 'patch' },
+	{ type: 'build', release: 'patch' },
+	{ type: 'ci', release: 'patch' },
 	{ type: 'docs', release: false },
-	{ type: 'refactor', release: false },
 	{ type: 'style', release: false },
 	{ type: 'test', release: false },
 ]);
 
 export const RELEASE_NOTE_TYPES = Object.freeze([
-	{ type: 'feat', section: 'Features', hidden: false },
-	{ type: 'fix', section: 'Bug Fixes', hidden: false },
-	{ type: 'perf', section: 'Performance Improvements', hidden: false },
-	{ type: 'revert', section: 'Reverts', hidden: false },
-	{ type: 'build', hidden: true },
-	{ type: 'chore', hidden: true },
-	{ type: 'ci', hidden: true },
-	{ type: 'docs', hidden: true },
-	{ type: 'refactor', hidden: true },
-	{ type: 'style', hidden: true },
-	{ type: 'test', hidden: true },
+	{ type: 'feat', section: 'Features', effect: 'bump' },
+	{ type: 'fix', section: 'Bug Fixes', effect: 'bump' },
+	{ type: 'perf', section: 'Performance Improvements', effect: 'bump' },
+	{ type: 'revert', section: 'Reverts', effect: 'bump' },
+	{ type: 'refactor', section: 'Refactoring', effect: 'bump' },
+	{ type: 'chore', section: 'Maintenance', effect: 'bump' },
+	{ type: 'build', section: 'Build System', effect: 'bump' },
+	{ type: 'ci', section: 'Continuous Integration', effect: 'bump' },
+	{ type: 'docs', effect: 'hidden' },
+	{ type: 'style', effect: 'hidden' },
+	{ type: 'test', effect: 'hidden' },
 ]);
+
+export const RELEASE_NOTE_WRITER_OPTIONS = Object.freeze({
+	mainTemplate: `{{> header}}
+{{#each noteGroups}}
+### ⚠ {{title}}
+{{#each notes}}
+* {{text}}
+{{/each}}
+{{/each}}
+{{#each commitGroups}}
+### {{title}}
+{{#each commits}}
+{{> commit root=@root}}
+{{/each}}
+{{/each}}`,
+	headerPartial: '## {{version}} ({{date}})\n\n',
+	commitPartial: '* {{header}}{{#if hash}} ({{hash}}){{/if}}\n',
+	footerPartial: '',
+});
 
 const BRANCH_RULES = Object.freeze([
 	{ pattern: /^(?:feature|feat)\/.+/, type: 'feat' },
