@@ -56,7 +56,7 @@ For non-trivial work, report the objective/result, design reasoning, principles 
 ## Release engineering policy
 
 - Use Conventional Commits 1.0.0 for all new commit and pull-request titles: `<type>(<scope>): <description>`.
-- `feat` releases MINOR; `fix`, `perf`, and `revert` release PATCH; a `!` marker or `BREAKING CHANGE:` footer releases MAJOR. `build`, `chore`, `ci`, `docs`, `refactor`, `style`, and `test` do not release by default.
+- h-budget uses application SemVer: `feat` is MINOR; a `!` marker or `BREAKING CHANGE:` footer is MAJOR; `fix`, `perf`, `revert`, `refactor`, `chore`, `build`, and `ci` are PATCH; `docs`, `test`, and `style` are no-release. This is intentional operational traceability for deployable code, dependencies, build, release, and CI/CD changes. Keep accurate Conventional Commit types; do not misuse `fix` solely to obtain a version.
 - Branch names validate development intent only: `feature|feat/* -> feat`, `bug|bugfix|fix|hotfix/* -> fix`, and the remaining supported prefixes map to their matching Conventional Commit type. Never calculate a release version from a branch name.
 - `master` is the only stable release branch. semantic-release derives `vMAJOR.MINOR.PATCH` from reachable Conventional Commit history and publishes the immutable GitHub release/tag after CI passes.
 - GitHub Releases are the canonical generated release history. Do not manually bump the private SPA package version, create release tags, or commit generated changelog entries.
