@@ -32,9 +32,48 @@ describe('release workflow compatibility contracts', () => {
 
 		assert.match(workflow, /workflow_dispatch:/);
 		assert.match(workflow, /description: Existing immutable vMAJOR\.MINOR\.PATCH tag to rebuild and deploy\./);
+		assert.match(
+			workflow,
+			/run-name: \$\{\{ inputs\.redeploy && 'Redeploy' \|\| 'Deploy' \}\} \$\{\{ inputs\.release_tag \}\}/
+		);
+		assert.match(workflow, /default: true\s+required: false\s+type: boolean/);
 		assert.match(workflow, /ref: \$\{\{ inputs\.release_tag \}\}/);
 		assert.match(workflow, /\^v\[0-9\]\+\\\.\[0-9\]\+\\\.\[0-9\]\+\$/);
 		assert.match(workflow, /git show-ref --verify --quiet "refs\/tags\/\$RELEASE_TAG"/);
 		assert.match(workflow, /git rev-parse "refs\/tags\/\$RELEASE_TAG\^\{commit\}"/);
+		assert.match(workflow, /\$EXPECTED_RELEASE_SHA" != "\$release_sha/);
+	});
+
+	it('dispatches deployment only for a semantic-release tag and publishes release observability data', async () => {
+		const workflow = await readWorkflow('merge-pr.yml');
+
+		assert.match(workflow, /actions: write/);
+		assert.match(
+			workflow,
+			/outputs:\s+release_tag: \$\{\{ steps\.publish\.outputs\.release_tag \}\}\s+release_sha: \$\{\{ steps\.publish\.outputs\.release_sha \}\}/
+		);
+		assert.match(workflow, /release_tag=\$release_tag/);
+		assert.match(workflow, /release_sha=\$release_sha/);
+		assert.match(workflow, /if: steps\.publish\.outputs\.release_tag != ''/);
+		assert.match(workflow, /gh workflow run github-deployment\.yml --ref master/);
+		assert.match(workflow, /--field release_tag="\$RELEASE_TAG" --field release_sha="\$RELEASE_SHA"/);
+		assert.match(workflow, /# 🚀 Release \$RELEASE_TAG/);
+		assert.match(workflow, /# No Release Required/);
+		assert.match(workflow, /View GitHub Release/);
+	});
+
+	it('makes the exact deployment result traceable without a PAT or duplicate release trigger', async () => {
+		const [releaseWorkflow, deploymentWorkflow] = await Promise.all([
+			readWorkflow('merge-pr.yml'),
+			readWorkflow('github-deployment.yml'),
+		]);
+
+		assert.match(deploymentWorkflow, /name: Write deployment summary/);
+		assert.match(deploymentWorkflow, /\| Tag \|/);
+		assert.match(deploymentWorkflow, /\| Commit \|/);
+		assert.match(deploymentWorkflow, /\$IMAGE_NAME:\$\{VERSION:-unavailable\}/);
+		assert.doesNotMatch(releaseWorkflow, /PAT/);
+		assert.doesNotMatch(deploymentWorkflow, /^\s*(push|release|workflow_run|repository_dispatch):/m);
+		assert.doesNotMatch(deploymentWorkflow, /semantic-release/);
 	});
 });

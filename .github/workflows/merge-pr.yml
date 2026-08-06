@@ -18,7 +18,9 @@ jobs:
         timeout-minutes: 120
         outputs:
             release_tag: ${{ steps.publish.outputs.release_tag }}
+            release_sha: ${{ steps.publish.outputs.release_sha }}
         permissions:
+            actions: write
             contents: write
         steps:
             - name: Check out master with tags
@@ -70,6 +72,7 @@ jobs:
               run: |
                   set -euo pipefail
                   git tag --points-at HEAD --list 'v*' | sort > tags-before.txt
+                  previous_tag="$(git tag --merged HEAD --list 'v*' --sort=-version:refname | head -n 1)"
                   npx --no-install semantic-release
                   git tag --points-at HEAD --list 'v*' | sort > tags-after.txt
                   release_tag="$(comm -13 tags-before.txt tags-after.txt)"
@@ -78,14 +81,61 @@ jobs:
                     exit 1
                   fi
                   if [[ -n "$release_tag" ]]; then
-                    echo "release_tag=$release_tag" >> "$GITHUB_OUTPUT"
+                    release_sha="$(git rev-parse "refs/tags/$release_tag^{commit}")"
+                    if [[ "$release_sha" != "$(git rev-parse HEAD)" ]]; then
+                      echo "semantic-release tag $release_tag does not point at the release commit." >&2
+                      exit 1
+                    fi
+                    {
+                      echo "release_tag=$release_tag"
+                      echo "release_sha=$release_sha"
+                      echo "previous_tag=$previous_tag"
+                    } >> "$GITHUB_OUTPUT"
                   fi
 
-    deploy:
-        name: Deploy newly published release
-        needs: release
-        if: needs.release.outputs.release_tag != ''
-        uses: ./.github/workflows/github-deployment.yml
-        with:
-            release_tag: ${{ needs.release.outputs.release_tag }}
-        secrets: inherit
+            - name: Dispatch versioned deployment
+              if: steps.publish.outputs.release_tag != ''
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  RELEASE_TAG: ${{ steps.publish.outputs.release_tag }}
+                  RELEASE_SHA: ${{ steps.publish.outputs.release_sha }}
+              run: >-
+                  gh workflow run github-deployment.yml --ref master
+                  --field release_tag="$RELEASE_TAG" --field release_sha="$RELEASE_SHA"
+                  --field redeploy=false
+
+            - name: Write release summary
+              if: always()
+              env:
+                  PUBLISH_OUTCOME: ${{ steps.publish.outcome }}
+                  RELEASE_TAG: ${{ steps.publish.outputs.release_tag }}
+                  RELEASE_SHA: ${{ steps.publish.outputs.release_sha }}
+                  PREVIOUS_TAG: ${{ steps.publish.outputs.previous_tag }}
+              shell: bash
+              run: |
+                  if [[ "$PUBLISH_OUTCOME" != 'success' ]]; then
+                    echo '# Release publication failed' >> "$GITHUB_STEP_SUMMARY"
+                    exit 0
+                  fi
+                  if [[ -z "$RELEASE_TAG" ]]; then
+                    {
+                      echo '# No Release Required'
+                      echo ''
+                      echo 'No release-producing Conventional Commits were found since the previous stable release.'
+                    } >> "$GITHUB_STEP_SUMMARY"
+                    exit 0
+                  fi
+                  {
+                    echo "# 🚀 Release $RELEASE_TAG"
+                    echo ''
+                    echo '| Property | Value |'
+                    echo '|---|---|'
+                    echo "| Version | \`${RELEASE_TAG#v}\` |"
+                    echo "| Tag | \`$RELEASE_TAG\` |"
+                    echo "| Commit | \`$RELEASE_SHA\` |"
+                    echo "| Previous release | \`${PREVIOUS_TAG:-none}\` |"
+                    echo "| Branch | \`master\` |"
+                    echo '| Deployment | dispatched |'
+                    echo ''
+                    echo "[View GitHub Release]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$RELEASE_TAG)"
+                  } >> "$GITHUB_STEP_SUMMARY"
