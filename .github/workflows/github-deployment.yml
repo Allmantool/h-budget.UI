@@ -1,24 +1,29 @@
 name: Deployment on environment (GitHub)
+run-name: ${{ inputs.redeploy && 'Redeploy' || 'Deploy' }} ${{ inputs.release_tag }}
 
 on:
-    workflow_call:
-        inputs:
-            release_tag:
-                required: true
-                type: string
     workflow_dispatch:
         inputs:
             release_tag:
                 description: Existing immutable vMAJOR.MINOR.PATCH tag to rebuild and deploy.
                 required: true
                 type: string
+            release_sha:
+                description: Immutable commit SHA expected for an automatically dispatched release.
+                required: false
+                type: string
+            redeploy:
+                description: Distinguish a manual stable-tag redeploy from initial release deployment.
+                default: true
+                required: false
+                type: boolean
 
 permissions:
     contents: read
 
 jobs:
     build-docker:
-        name: Build and push Docker image
+        name: ${{ inputs.redeploy && 'Redeploy' || 'Deploy' }} ${{ inputs.release_tag }}
         runs-on: ubuntu-latest
         environment: production
         concurrency:
@@ -29,6 +34,7 @@ jobs:
         env:
             IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/homebudget-ui
             RELEASE_TAG: ${{ inputs.release_tag }}
+            EXPECTED_RELEASE_SHA: ${{ inputs.release_sha }}
         steps:
             - name: Check out immutable release tag
               uses: actions/checkout@v6
@@ -53,6 +59,10 @@ jobs:
                   actual_sha="$(git rev-parse HEAD)"
                   if [[ "$actual_sha" != "$release_sha" ]]; then
                     echo "Checked-out commit does not match release tag $RELEASE_TAG." >&2
+                    exit 1
+                  fi
+                  if [[ -n "$EXPECTED_RELEASE_SHA" && "$EXPECTED_RELEASE_SHA" != "$release_sha" ]]; then
+                    echo "Supplied release SHA does not match release tag $RELEASE_TAG." >&2
                     exit 1
                   fi
                   echo "sha=$release_sha" >> "$GITHUB_OUTPUT"
@@ -121,3 +131,35 @@ jobs:
                   set -euo pipefail
                   if [[ "${{ steps.immutable-tags.outputs.push_version_tag }}" == true ]]; then docker push "$IMAGE_NAME:$IMAGE_TAG"; fi
                   if [[ "${{ steps.immutable-tags.outputs.push_sha_tag }}" == true ]]; then docker push "$IMAGE_NAME:sha-$RELEASE_SHA"; fi
+
+            - name: Write deployment summary
+              if: always()
+              env:
+                  RELEASE_SHA: ${{ steps.release-ref.outputs.sha }}
+                  VERSION: ${{ steps.release-ref.outputs.version }}
+                  JOB_STATUS: ${{ job.status }}
+                  DEPLOYMENT_ACTION: ${{ inputs.redeploy && 'Redeployed' || 'Deployed' }}
+              shell: bash
+              run: |
+                  if [[ "$JOB_STATUS" == "success" ]]; then
+                    status_icon="✅"
+                  else
+                    status_icon="❌"
+                  fi
+                  {
+                    echo "# $status_icon $DEPLOYMENT_ACTION $RELEASE_TAG"
+                    echo ''
+                    echo '| Property | Value |'
+                    echo '|---|---|'
+                    echo "| Tag | \`$RELEASE_TAG\` |"
+                    echo "| Commit | \`${RELEASE_SHA:-unavailable}\` |"
+                    echo "| Environment | \`production\` |"
+                    echo "| Result | \`$JOB_STATUS\` |"
+                    echo ''
+                    echo '### Docker'
+                    echo ''
+                    echo "- \`$IMAGE_NAME:${VERSION:-unavailable}\`"
+                    echo "- \`$IMAGE_NAME:sha-${RELEASE_SHA:-unavailable}\`"
+                    echo ''
+                    echo "[View GitHub Release]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$RELEASE_TAG)"
+                  } >> "$GITHUB_STEP_SUMMARY"
