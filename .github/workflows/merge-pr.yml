@@ -26,7 +26,27 @@ jobs:
             - name: Check out master with tags
               uses: actions/checkout@v6
               with:
+                  ref: ${{ github.sha }}
                   fetch-depth: 0
+
+            - name: Verify triggering master revision
+              env:
+                  TRIGGERING_REF: ${{ github.ref }}
+                  TRIGGERING_SHA: ${{ github.sha }}
+              shell: bash
+              run: |
+                  set -euo pipefail
+                  head_sha="$(git rev-parse HEAD)"
+                  if [[ "$head_sha" != "$TRIGGERING_SHA" ]]; then
+                    echo "Release checkout does not match the triggering master revision." >&2
+                    exit 1
+                  fi
+                  echo "triggering_ref=$TRIGGERING_REF"
+                  echo "triggering_sha=$TRIGGERING_SHA"
+                  echo "head_sha=$head_sha"
+                  echo "origin_master_sha=$(git rev-parse origin/master)"
+                  echo "describe=$(git describe --tags --always)"
+                  git log -5 --oneline --decorate
 
             - name: Use Node.js 24.10.0
               uses: actions/setup-node@v6
