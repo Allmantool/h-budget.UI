@@ -27,6 +27,24 @@ describe('release workflow compatibility contracts', () => {
 		assert.ok(workflow.indexOf('name: Test') < sonarStep, 'Karma must produce coverage before Sonar runs.');
 	});
 
+	it('releases every master push from its triggering revision with complete Git history', async () => {
+		const workflow = await readWorkflow('merge-pr.yml');
+
+		assert.match(workflow, /on:\s+push:\s+branches: \[master\]/);
+		assert.match(
+			workflow,
+			/name: Check out master with tags\s+uses: actions\/checkout@v6\s+with:\s+ref: \$\{\{ github\.sha \}\}\s+fetch-depth: 0/
+		);
+		assert.match(workflow, /name: Verify triggering master revision/);
+		assert.match(workflow, /TRIGGERING_REF: \$\{\{ github\.ref \}\}/);
+		assert.match(workflow, /TRIGGERING_SHA: \$\{\{ github\.sha \}\}/);
+		assert.match(workflow, /git rev-parse HEAD/);
+		assert.match(workflow, /\$head_sha" != "\$TRIGGERING_SHA/);
+		assert.match(workflow, /git rev-parse origin\/master/);
+		assert.match(workflow, /git describe --tags --always/);
+		assert.match(workflow, /git log -5 --oneline --decorate/);
+	});
+
 	it('retains a manual redeploy path limited to an explicit immutable release tag', async () => {
 		const workflow = await readWorkflow('github-deployment.yml');
 
@@ -55,6 +73,17 @@ describe('release workflow compatibility contracts', () => {
 		assert.match(workflow, /release_tag=\$release_tag/);
 		assert.match(workflow, /release_sha=\$release_sha/);
 		assert.match(workflow, /if: steps\.publish\.outputs\.release_tag != ''/);
+		assert.match(
+			workflow,
+			/previous_tag="\$\(git tag --merged HEAD --list 'v\*' --sort=-version:refname \| head -n 1\)"/
+		);
+		assert.ok(
+			workflow.indexOf('npx --no-install semantic-release') >
+				workflow.indexOf('previous_tag="$(git tag --merged HEAD'),
+			'Semantic-release must analyze commits after the last stable tag reachable from the checked-out revision.'
+		);
+		assert.match(workflow, /release_sha="\$\(git rev-parse "refs\/tags\/\$release_tag\^\{commit\}"\)"/);
+		assert.match(workflow, /\$release_sha" != "\$\(git rev-parse HEAD\)/);
 		assert.match(workflow, /gh workflow run github-deployment\.yml --ref master/);
 		assert.match(workflow, /--field release_tag="\$RELEASE_TAG" --field release_sha="\$RELEASE_SHA"/);
 		assert.match(workflow, /# 🚀 Release \$RELEASE_TAG/);
