@@ -52,6 +52,10 @@ export class AppFormFieldComponent implements ControlValueAccessor {
 
 	@Input() public numberInputPrefix: string = '';
 
+	@Input() public describedBy: string = '';
+
+	@Input() public errorMessage: string = '';
+
 	@Input() public defaultValue: FormInput;
 
 	// eslint-disable-next-line @angular-eslint/no-output-on-prefix

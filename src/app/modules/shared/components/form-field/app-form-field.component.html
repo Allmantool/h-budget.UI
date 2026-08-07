@@ -21,10 +21,14 @@
 			min="0"
 			step="1"
 			placeholder="0.00"
+			[attr.aria-describedby]="describedBy || null"
 			(input)="updateValue($event.target)"
 			[value]="(data$ | async) | accountingCurrencyFormat"
 		/>
 		<span matPrefix>{{ numberInputPrefix }}</span>
+		@if (errorMessage) {
+		<mat-error [id]="describedBy">{{ errorMessage }}</mat-error>
+		}
 	</mat-form-field>
 </ng-template>
 
@@ -33,6 +37,7 @@
 		<mat-label>{{ title }}</mat-label>
 		<mat-select
 			[disabled]="disabled"
+			[attr.aria-describedby]="describedBy || null"
 			[value]="data$ | async"
 			(selectionChange)="updateValue($event)"
 		>
@@ -40,6 +45,9 @@
 			<mat-option [value]="option.value ?? option">{{ option.description ?? option }}</mat-option>
 			}
 		</mat-select>
+		@if (errorMessage) {
+		<mat-error [id]="describedBy">{{ errorMessage }}</mat-error>
+		}
 	</mat-form-field>
 </ng-template>
 
@@ -48,9 +56,13 @@
 		<mat-label>{{ title }}</mat-label>
 		<textarea
 			[disabled]="disabled"
+			[attr.aria-describedby]="describedBy || null"
 			matInput
 			[value]="data$ | async"
 			(input)="updateValue($event.target)"
 		></textarea>
+		@if (errorMessage) {
+		<mat-error [id]="describedBy">{{ errorMessage }}</mat-error>
+		}
 	</mat-form-field>
 </ng-template>

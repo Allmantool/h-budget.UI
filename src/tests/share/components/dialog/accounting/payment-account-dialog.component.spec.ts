@@ -2,10 +2,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatStepper } from '@angular/material/stepper';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { NgxsModule, Store } from '@ngxs/store';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject, throwError } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
 import { PaymentAccountDialogComponent } from '../../../../../app/modules/shared/components/dialog/payment-account/payment-account-dialog.component';
@@ -36,7 +37,6 @@ describe('payment-account-dialog.component', () => {
 		emitter: 'test-emitter',
 		description: 'test-description',
 	};
-
 	const savedAccount: IPaymentAccountModel = {
 		key: Guid.parse('cfed08e4-5a64-4935-a073-7c0a2a2f8e7a'),
 		type: AccountTypes.Credit,
@@ -49,11 +49,9 @@ describe('payment-account-dialog.component', () => {
 	let component: PaymentAccountDialogComponent;
 	let fixture: ComponentFixture<PaymentAccountDialogComponent>;
 	let store: Store;
-	let sut: PaymentAccountDialogService;
-
+	let service: PaymentAccountDialogService;
 	let dialogRefSpy: jasmine.SpyObj<MatDialogRef<PaymentAccountDialogComponent>>;
 	let dialogProviderSpy: jasmine.SpyObj<DialogProvider>;
-	let paymentAccountsProviderSpy: jasmine.SpyObj<DefaultPaymentAccountsProvider>;
 	let submitSpy: jasmine.Spy<
 		(operationResult: Result<IPaymentAccountModel>) => Observable<Result<IPaymentAccountModel>>
 	>;
@@ -64,17 +62,7 @@ describe('payment-account-dialog.component', () => {
 		activePaymentAccountId: string = ''
 	): Promise<void> {
 		dialogRefSpy = jasmine.createSpyObj<MatDialogRef<PaymentAccountDialogComponent>>('MatDialogRef', ['close']);
-
-		dialogProviderSpy = jasmine.createSpyObj<DialogProvider>('dialogProvider', {
-			openDialog: undefined,
-		});
-
-		paymentAccountsProviderSpy = jasmine.createSpyObj<DefaultPaymentAccountsProvider>('paymentAccountsProvider', {
-			savePaymentAccount: of(new Result<string>({ payload: savedAccount.key!.toString(), isSucceeded: true })),
-			getById: of(savedAccount),
-			updatePaymentAccount: of(new Result<string>({ payload: savedAccount.key!.toString(), isSucceeded: true })),
-		});
-
+		dialogProviderSpy = jasmine.createSpyObj<DialogProvider>('dialogProvider', { openDialog: undefined });
 		submitSpy = jasmine
 			.createSpy<
 				(operationResult: Result<IPaymentAccountModel>) => Observable<Result<IPaymentAccountModel>>
@@ -89,109 +77,145 @@ describe('payment-account-dialog.component', () => {
 			],
 			providers: [
 				PaymentAccountDialogService,
-				{
-					provide: MatDialogRef,
-					useValue: dialogRefSpy,
-				},
+				{ provide: MatDialogRef, useValue: dialogRefSpy },
 				{
 					provide: MAT_DIALOG_DATA,
 					useValue: {
-						title: 'Payment account: (Add new)',
+						title: 'Add payment account',
 						onSubmit: submitSpy,
 						...dialogConfiguration,
 					} as DialogContainer<Result<IPaymentAccountModel>, Result<IPaymentAccountModel>>,
 				},
-				{
-					provide: DialogProvider,
-					useValue: dialogProviderSpy,
-				},
+				{ provide: DialogProvider, useValue: dialogProviderSpy },
 				{
 					provide: DefaultPaymentAccountsProvider,
-					useValue: paymentAccountsProviderSpy,
+					useValue: jasmine.createSpyObj<DefaultPaymentAccountsProvider>('paymentAccountsProvider', {
+						savePaymentAccount: of(
+							new Result<string>({ payload: savedAccount.key!.toString(), isSucceeded: true })
+						),
+						getById: of(savedAccount),
+						updatePaymentAccount: of(
+							new Result<string>({ payload: savedAccount.key!.toString(), isSucceeded: true })
+						),
+					}),
 				},
 			],
 		}).compileComponents();
 
 		store = TestBed.inject(Store);
 		store.dispatch(new SetInitialPaymentAccounts(paymentAccounts));
-
 		if (activePaymentAccountId !== '') {
 			store.dispatch(new SetActivePaymentAccount(activePaymentAccountId));
 		}
 
-		sut = TestBed.inject(PaymentAccountDialogService);
+		service = TestBed.inject(PaymentAccountDialogService);
 		fixture = TestBed.createComponent(PaymentAccountDialogComponent);
 		component = fixture.componentInstance;
+		fixture.detectChanges();
 	}
 
-	it('should create as a standalone TestBed import with the existing form structure and initial values', async () => {
-		await configureComponent();
+	function getStepper(): MatStepper {
+		return fixture.debugElement.query(de => de.componentInstance instanceof MatStepper)
+			.componentInstance as MatStepper;
+	}
 
-		fixture.detectChanges();
+	function getRenderedText(): string {
+		return (fixture.nativeElement as HTMLElement).textContent ?? '';
+	}
+
+	it('opens on the compact three-step workflow with required account details and optional notes', async () => {
+		await configureComponent();
 
 		expect(component).toBeTruthy();
-		expect(component.title).toBe('Payment account: (Add new)');
-		expect(component.accountTypeStepFg.contains('accountTypeCtrl')).toBeTrue();
-		expect(component.currencyStepFg.contains('currencyCtrl')).toBeTrue();
-		expect(component.balanceStepFg.contains('balanceCtrl')).toBeTrue();
-		expect(component.additionalInfoStepFg.contains('emitterCtrl')).toBeTrue();
-		expect(component.additionalInfoStepFg.contains('descriptionCtrl')).toBeTrue();
-		expect(component.accountTypeStepFg.get('accountTypeCtrl')?.value).toBe('WalletCache');
-		expect(component.currencyStepFg.get('currencyCtrl')?.value).toBe('USD');
-		expect(component.balanceStepFg.get('balanceCtrl')?.value).toBe(0);
-		expect(component.additionalInfoStepFg.get('emitterCtrl')?.value).toBe('');
-		expect(component.additionalInfoStepFg.get('descriptionCtrl')?.value).toBe('');
-	});
-
-	it('should preserve the current no-validator form eligibility and opening balance behavior', async () => {
-		await configureComponent();
-
-		component.balanceStepFg.get('balanceCtrl')?.setValue(-100);
-		component.additionalInfoStepFg.reset();
-
-		expect(component.accountTypeStepFg.valid).toBeTrue();
-		expect(component.currencyStepFg.valid).toBeTrue();
-		expect(component.balanceStepFg.valid).toBeTrue();
+		expect(component.selectedStepIndexSignal()).toBe(0);
+		expect(component.accountDetailsStepFg.contains('accountTypeCtrl')).toBeTrue();
+		expect(component.accountDetailsStepFg.contains('currencyCtrl')).toBeTrue();
+		expect(component.accountDetailsStepFg.contains('balanceCtrl')).toBeTrue();
 		expect(component.additionalInfoStepFg.valid).toBeTrue();
+		expect(getRenderedText()).toContain('Review & create');
+		expect(getRenderedText()).toContain('Next');
 	});
 
-	it('should patch existing payment account data in update mode', async () => {
-		await configureComponent(
-			{
-				title: 'Payment account: (Update)',
-				operationType: DialogOperationTypes.Update,
-			},
-			[existingAccount],
-			existingAccountId.toString()
-		);
-
-		expect(component.title).toBe('Payment account: (Update)');
-		expect(component.accountTypeStepFg.get('accountTypeCtrl')?.value).toEqual(
-			jasmine.objectContaining({ value: 'Loan' })
-		);
-		expect(component.currencyStepFg.get('currencyCtrl')?.value).toBe('USD');
-		expect(component.balanceStepFg.get('balanceCtrl')?.value).toBe(11.2);
-		expect(component.additionalInfoStepFg.get('emitterCtrl')?.value).toBe('test-emitter');
-		expect(component.additionalInfoStepFg.get('descriptionCtrl')?.value).toBe('test-description');
-	});
-
-	it('should submit the create payload, dispatch the added account, reset loading, and close', async () => {
+	it('prevents progression when account details are invalid and marks the affected fields as touched', async () => {
 		await configureComponent();
-		const dispatchSpy = spyOn(store, 'dispatch').and.callThrough();
+		const stepper = getStepper();
+		component.accountDetailsStepFg.patchValue({ accountTypeCtrl: null, currencyCtrl: null, balanceCtrl: null });
 
-		component.accountTypeStepFg.get('accountTypeCtrl')?.setValue(component.getAccountsTypes()[AccountTypes.Credit]);
-		component.currencyStepFg.get('currencyCtrl')?.setValue(component.getCurrencyTypes()[1]);
-		component.balanceStepFg.get('balanceCtrl')?.setValue(42.75);
+		component.next(stepper);
+
+		expect(stepper.selectedIndex).toBe(0);
+		expect(component.accountDetailsStepFg.controls.accountTypeCtrl.touched).toBeTrue();
+		expect(component.accountDetailsStepFg.controls.currencyCtrl.touched).toBeTrue();
+		expect(component.accountDetailsStepFg.controls.balanceCtrl.touched).toBeTrue();
+	});
+
+	it('retains valid account details and optional data while navigating back and forward', async () => {
+		await configureComponent();
+		const stepper = getStepper();
+		component.accountDetailsStepFg.patchValue({
+			accountTypeCtrl: component.getAccountsTypes()[AccountTypes.Credit],
+			currencyCtrl: component.getCurrencyTypes()[1],
+			balanceCtrl: 42.75,
+		});
+
+		component.next(stepper);
+		component.additionalInfoStepFg.patchValue({
+			emitterCtrl: 'saved-emitter',
+			descriptionCtrl: 'saved-description',
+		});
+		component.previous(stepper);
+
+		expect(stepper.selectedIndex).toBe(0);
+		expect(component.accountDetailsStepFg.controls.balanceCtrl.value).toBe(42.75);
+		component.next(stepper);
+		component.next(stepper);
+
+		expect(stepper.selectedIndex).toBe(2);
+		expect(component.additionalInfoSignal()).toBe('saved-emitter | saved-description');
+		expect(component.currencyDescriptionSignal()).toBe('BYN — Belarusian ruble');
+	});
+
+	it('shows each review value separately and edits the matching step without losing form state', async () => {
+		await configureComponent();
+		const stepper = getStepper();
+		component.accountDetailsStepFg.patchValue({ balanceCtrl: 12.5 });
+		component.next(stepper);
+		component.next(stepper);
+		fixture.detectChanges();
+
+		expect(getRenderedText()).toContain('Account type');
+		expect(getRenderedText()).toContain('Currency');
+		expect(getRenderedText()).toContain('Initial balance');
+		expect(getRenderedText()).toContain('Additional information');
+		expect(getRenderedText()).toContain('Not provided');
+
+		component.editStep(stepper, 0);
+
+		expect(stepper.selectedIndex).toBe(0);
+		expect(component.accountDetailsStepFg.controls.balanceCtrl.value).toBe(12.5);
+	});
+
+	it('preserves the existing create request, dispatches once, and prevents duplicate submissions while pending', async () => {
+		await configureComponent();
+		const submission = new Subject<Result<IPaymentAccountModel>>();
+		submitSpy.and.returnValue(submission);
+		const dispatchSpy = spyOn(store, 'dispatch').and.callThrough();
+		component.accountDetailsStepFg.patchValue({
+			accountTypeCtrl: component.getAccountsTypes()[AccountTypes.Credit],
+			currencyCtrl: component.getCurrencyTypes()[1],
+			balanceCtrl: 42.75,
+		});
 		component.additionalInfoStepFg.patchValue({
 			emitterCtrl: 'saved-emitter',
 			descriptionCtrl: 'saved-description',
 		});
 
 		component.applyChanges();
+		component.applyChanges();
 
+		expect(submitSpy).toHaveBeenCalledTimes(1);
 		expect(submitSpy).toHaveBeenCalledWith(
 			jasmine.objectContaining({
-				isSucceeded: true,
 				payload: {
 					type: AccountTypes.Credit,
 					currency: 'BYN',
@@ -201,44 +225,56 @@ describe('payment-account-dialog.component', () => {
 				},
 			})
 		);
+
+		submission.next(new Result<IPaymentAccountModel>({ payload: savedAccount, isSucceeded: true }));
+		submission.complete();
+
 		expect(dispatchSpy.calls.mostRecent().args[0]).toEqual(new AddPaymentAccount(savedAccount));
-		expect(component.isLoadingSignal()).toBeFalse();
 		expect(dialogRefSpy.close).toHaveBeenCalled();
+		expect(component.isLoadingSignal()).toBeFalse();
 	});
 
-	it('should dispatch an updated account in update mode', async () => {
+	it('keeps entered values and enables a retry when submission fails', async () => {
+		await configureComponent();
+		submitSpy.and.returnValue(throwError(() => new Error('Request failed')));
+		component.accountDetailsStepFg.patchValue({ balanceCtrl: 42.75 });
+		component.additionalInfoStepFg.patchValue({ emitterCtrl: 'saved-emitter' });
+
+		component.applyChanges();
+
+		expect(component.isLoadingSignal()).toBeFalse();
+		expect(component.accountDetailsStepFg.controls.balanceCtrl.value).toBe(42.75);
+		expect(component.additionalInfoStepFg.controls.emitterCtrl.value).toBe('saved-emitter');
+		expect(dialogRefSpy.close).not.toHaveBeenCalled();
+	});
+
+	it('patches existing account data and retains update dispatch semantics', async () => {
 		await configureComponent(
-			{
-				operationType: DialogOperationTypes.Update,
-			},
+			{ operationType: DialogOperationTypes.Update },
 			[existingAccount],
 			existingAccountId.toString()
 		);
 		const dispatchSpy = spyOn(store, 'dispatch').and.callThrough();
 
-		component.accountTypeStepFg.get('accountTypeCtrl')?.setValue(component.getAccountsTypes()[AccountTypes.Credit]);
-		component.currencyStepFg.get('currencyCtrl')?.setValue(component.getCurrencyTypes()[1]);
+		expect(component.title).toBe('Add payment account');
+		expect(component.accountDetailsStepFg.controls.accountTypeCtrl.value).toEqual(
+			jasmine.objectContaining({ value: 'Loan' })
+		);
+		expect(component.accountDetailsStepFg.controls.currencyCtrl.value).toBe('USD');
+		expect(component.accountDetailsStepFg.controls.balanceCtrl.value).toBe(11.2);
 
 		component.applyChanges();
 
 		expect(dispatchSpy.calls.mostRecent().args[0]).toEqual(new UpdatePaymentAccount(savedAccount));
-		expect(component.isLoadingSignal()).toBeFalse();
 		expect(dialogRefSpy.close).toHaveBeenCalled();
 	});
 
-	it('should close the dialog on cancel', async () => {
+	it('closes on cancel and keeps the dialog service integration intact', async () => {
 		await configureComponent();
-
 		component.close();
+		service.openForSave();
 
 		expect(dialogRefSpy.close).toHaveBeenCalled();
-	});
-
-	it('should keep the dialog service opening this standalone component through DialogProvider', async () => {
-		await configureComponent();
-
-		sut.openForSave();
-
 		expect(dialogProviderSpy.openDialog).toHaveBeenCalledWith(
 			PaymentAccountDialogComponent,
 			jasmine.objectContaining({ disableClose: true })

@@ -47,6 +47,10 @@ describe('payments account dialog service', () => {
 		sut.openForSave();
 
 		expect(dialogProviderSpy.openDialog).toHaveBeenCalled();
+		expect(dialogProviderSpy.openDialog).toHaveBeenCalledWith(
+			jasmine.anything(),
+			jasmine.objectContaining({ data: jasmine.objectContaining({ title: 'Add payment account' }) })
+		);
 		done();
 	});
 
@@ -54,6 +58,10 @@ describe('payments account dialog service', () => {
 		sut.openForUpdate('test payment account id');
 
 		expect(dialogProviderSpy.openDialog).toHaveBeenCalled();
+		expect(dialogProviderSpy.openDialog).toHaveBeenCalledWith(
+			jasmine.anything(),
+			jasmine.objectContaining({ data: jasmine.objectContaining({ title: 'Edit payment account' }) })
+		);
 		done();
 	});
 });
