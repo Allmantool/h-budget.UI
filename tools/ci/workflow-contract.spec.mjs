@@ -15,6 +15,74 @@ describe('release workflow compatibility contracts', () => {
 		assert.match(workflow, /name: Validate root dependency graph\s+run: npm ls --depth=0/);
 	});
 
+	it('keeps mandatory pull-request quality gates enabled without optional outcomes', async () => {
+		const [ciWorkflow, policyWorkflow, codeqlWorkflow] = await Promise.all([
+			readWorkflow('build.yml'),
+			readWorkflow('pr-release-policy.yml'),
+			readWorkflow('codeql-analysis.yml'),
+		]);
+
+		assert.match(ciWorkflow, /on:\s+pull_request:/);
+		assert.match(ciWorkflow, /run: npm ci --strict-peer-deps --engine-strict/);
+		assert.match(ciWorkflow, /run: npm run deps:guard/);
+		assert.match(ciWorkflow, /run: npm run lint/);
+		assert.match(ciWorkflow, /run: npm run test:ci/);
+		assert.match(ciWorkflow, /run: npm run build:prod/);
+		assert.match(policyWorkflow, /on:\s+pull_request:\s+branches: \[master\]/);
+		assert.match(policyWorkflow, /run: node tools\/ci\/release-policy\.mjs/);
+		assert.match(codeqlWorkflow, /push:\s+branches: \[master\]/);
+		assert.match(
+			codeqlWorkflow,
+			/pull_request:\s+# The branches below must be a subset of the branches above\s+branches: \[master\]/
+		);
+		assert.match(codeqlWorkflow, /github\/codeql-action\/init@v3/);
+		assert.match(codeqlWorkflow, /github\/codeql-action\/analyze@v3/);
+		assert.match(codeqlWorkflow, /security-events: write/);
+
+		for (const workflow of [ciWorkflow, policyWorkflow, codeqlWorkflow]) {
+			assert.doesNotMatch(workflow, /continue-on-error:/);
+		}
+	});
+
+	it('uses GitHub App authentication for dependency-update PRs and preserves their quality gates', async () => {
+		const [dependencyWorkflow, ciWorkflow, policyWorkflow, codeqlWorkflow] = await Promise.all([
+			readWorkflow('update_npm_packages.yml'),
+			readWorkflow('build.yml'),
+			readWorkflow('pr-release-policy.yml'),
+			readWorkflow('codeql-analysis.yml'),
+		]);
+
+		assert.match(dependencyWorkflow, /workflow_dispatch:\s+inputs:\s+mode:/);
+		assert.match(dependencyWorkflow, /schedule:\s+- cron: '17 3 \* \* 1,3,5'/);
+		assert.match(dependencyWorkflow, /BRANCH_PREFIX: automation\/deps/);
+		assert.match(
+			dependencyWorkflow,
+			/name: Validate dependency updater GitHub App configuration\s+shell: bash\s+env:\s+APP_ID: \$\{\{ secrets\.DEPENDENCY_UPDATER_APP_ID \}\}\s+PRIVATE_KEY: \$\{\{ secrets\.DEPENDENCY_UPDATER_APP_PRIVATE_KEY \}\}\s+run: \|\s+if \[\[ -z "\$APP_ID" \|\| -z "\$PRIVATE_KEY" \]\]; then\s+echo 'Dependency updater GitHub App configuration is unavailable\.' >&2/
+		);
+		assert.match(
+			dependencyWorkflow,
+			/name: Create dependency-updater GitHub App token\s+id: app-token\s+uses: actions\/create-github-app-token@v2\s+with:\s+app-id: \$\{\{ secrets\.DEPENDENCY_UPDATER_APP_ID \}\}\s+private-key: \$\{\{ secrets\.DEPENDENCY_UPDATER_APP_PRIVATE_KEY \}\}/
+		);
+		assert.ok(
+			dependencyWorkflow.indexOf('name: Validate dependency updater GitHub App configuration') <
+				dependencyWorkflow.indexOf('name: Create dependency-updater GitHub App token'),
+			'Configuration validation must run before GitHub App token creation.'
+		);
+		assert.match(dependencyWorkflow, /token: \$\{\{ steps\.app-token\.outputs\.token \}\}/);
+		assert.match(dependencyWorkflow, /GH_TOKEN: \$\{\{ steps\.app-token\.outputs\.token \}\}/);
+		assert.match(dependencyWorkflow, /gh pr create --base/);
+		assert.match(dependencyWorkflow, /chore\(deps\): apply safe \$MODE dependency updates/);
+		assert.doesNotMatch(dependencyWorkflow, /(?:secrets\.GITHUB_TOKEN|github\.token|GH_PAT|PERSONAL_ACCESS_TOKEN)/);
+		assert.doesNotMatch(dependencyWorkflow, /(?:gh pr merge|auto-merge)/);
+
+		assert.match(ciWorkflow, /on:\s+pull_request:\s+branches: \[master,/);
+		assert.match(policyWorkflow, /on:\s+pull_request:\s+branches: \[master\]/);
+		assert.match(
+			codeqlWorkflow,
+			/pull_request:\s+# The branches below must be a subset of the branches above\s+branches: \[master\]/
+		);
+	});
+
 	it('runs Sonar with the existing secret and generated coverage before release publication', async () => {
 		const workflow = await readWorkflow('merge-pr.yml');
 		const sonarStep = workflow.indexOf('name: Run SonarQube analysis');
