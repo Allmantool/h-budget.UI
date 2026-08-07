@@ -63,6 +63,17 @@ jobs:
             MODE: ${{ needs.resolve-mode.outputs.mode }}
             BRANCH_PREFIX: automation/deps
         steps:
+            - name: Validate dependency updater GitHub App configuration
+              shell: bash
+              env:
+                  APP_ID: ${{ secrets.DEPENDENCY_UPDATER_APP_ID }}
+                  PRIVATE_KEY: ${{ secrets.DEPENDENCY_UPDATER_APP_PRIVATE_KEY }}
+              run: |
+                  if [[ -z "$APP_ID" || -z "$PRIVATE_KEY" ]]; then
+                    echo 'Dependency updater GitHub App configuration is unavailable.' >&2
+                    exit 1
+                  fi
+
             - name: Create dependency-updater GitHub App token
               id: app-token
               uses: actions/create-github-app-token@v2
