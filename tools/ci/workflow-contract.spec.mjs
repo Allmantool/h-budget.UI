@@ -15,6 +15,35 @@ describe('release workflow compatibility contracts', () => {
 		assert.match(workflow, /name: Validate root dependency graph\s+run: npm ls --depth=0/);
 	});
 
+	it('keeps mandatory pull-request quality gates enabled without optional outcomes', async () => {
+		const [ciWorkflow, policyWorkflow, codeqlWorkflow] = await Promise.all([
+			readWorkflow('build.yml'),
+			readWorkflow('pr-release-policy.yml'),
+			readWorkflow('codeql-analysis.yml'),
+		]);
+
+		assert.match(ciWorkflow, /on:\s+pull_request:/);
+		assert.match(ciWorkflow, /run: npm ci --strict-peer-deps --engine-strict/);
+		assert.match(ciWorkflow, /run: npm run deps:guard/);
+		assert.match(ciWorkflow, /run: npm run lint/);
+		assert.match(ciWorkflow, /run: npm run test:ci/);
+		assert.match(ciWorkflow, /run: npm run build:prod/);
+		assert.match(policyWorkflow, /on:\s+pull_request:\s+branches: \[master\]/);
+		assert.match(policyWorkflow, /run: node tools\/ci\/release-policy\.mjs/);
+		assert.match(codeqlWorkflow, /push:\s+branches: \[master\]/);
+		assert.match(
+			codeqlWorkflow,
+			/pull_request:\s+# The branches below must be a subset of the branches above\s+branches: \[master\]/
+		);
+		assert.match(codeqlWorkflow, /github\/codeql-action\/init@v3/);
+		assert.match(codeqlWorkflow, /github\/codeql-action\/analyze@v3/);
+		assert.match(codeqlWorkflow, /security-events: write/);
+
+		for (const workflow of [ciWorkflow, policyWorkflow, codeqlWorkflow]) {
+			assert.doesNotMatch(workflow, /continue-on-error:/);
+		}
+	});
+
 	it('runs Sonar with the existing secret and generated coverage before release publication', async () => {
 		const workflow = await readWorkflow('merge-pr.yml');
 		const sonarStep = workflow.indexOf('name: Run SonarQube analysis');
