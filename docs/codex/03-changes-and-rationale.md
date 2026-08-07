@@ -6,6 +6,7 @@
 - `.codex/skills/angular-spa/` is the one authoritative Angular/Nx skill. Its topic files prevent a single giant context document while keeping required standards one link away.
 - `.codex/prompts/` are short reusable task starters. They do not own engineering policy.
 - `.codex/checklists/` support execution and self-review without replacing standards.
+- `skills/angular-spa/styling-and-ui.md` is the focused owner for BEM and UI implementation detail; its workflow and checklist are linked from the skill and general review process rather than copied into root guidance.
 - `docs/codex/` records inventory, hierarchy, summary, and the reason this package exists.
 
 ## Consolidation

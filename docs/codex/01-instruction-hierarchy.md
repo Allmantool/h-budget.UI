@@ -19,4 +19,4 @@ Narrower instructions may add local detail but must not silently weaken security
 3. For Angular/Nx work, load [the Angular/Nx skill](../../.codex/skills/angular-spa/SKILL.md).
 4. Load its applicable topic standards, then use checklists/templates as execution aids.
 
-The root document owns mandatory workflow. The skill owns Angular/Nx standards. Supporting files own their subject-specific detail. Prompts and legacy documents must link to authority rather than duplicate it.
+The root document owns mandatory workflow. The skill owns Angular/Nx standards. Supporting files own their subject-specific detail: `styling-and-ui.md` is the sole detailed owner of BEM and HTML/CSS/SCSS UI standards. Prompts and legacy documents must link to authority rather than duplicate it.

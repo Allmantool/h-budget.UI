@@ -17,7 +17,8 @@ Treat the first implementation as a draft. Before finalizing:
 1. Run `git status --short`, `git diff --stat`, `git diff --check`, and inspect the complete relevant diff (including staged changes where relevant).
 2. Review every changed file for task scope, unintended dirty-file overlap, architecture boundaries, API/data-contract compatibility, state ownership, loading/error behavior, lifecycle teardown, type safety, accessibility, security, performance, and tests.
 3. Search the changed diff contextually for `TODO`, `FIXME`, `HACK`, `TEMP`, `any`, `@ts-ignore`, `@ts-expect-error`, `eslint-disable`, `console.log`, `bypassSecurityTrust`, `innerHTML`, `subscribe(`, `setTimeout`, and `setInterval`.
-4. Correct violations the review finds, then rerun affected validation.
+4. When a UI diff changes `.html`, `.css`, or `.scss`, apply the required UI diff review in [styling, UI, and template standards](styling-and-ui.md).
+5. Correct violations the review finds, then rerun affected validation.
 
 ## Exception format
 

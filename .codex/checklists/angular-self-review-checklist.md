@@ -5,6 +5,7 @@
 - [ ] Confirm public behavior, routes, contracts, validation, permissions, telemetry, and errors remain intentional.
 - [ ] Confirm layer boundaries, provider lifetime, state ownership, mappings, concurrency, cleanup, and retry/error behavior are sound.
 - [ ] Confirm containers/presentational components, templates, forms, semantics, keyboard access, focus, labels, and state feedback are appropriate.
+- [ ] For changed `.html`, `.css`, or `.scss`, complete the UI diff review in `skills/angular-spa/styling-and-ui.md` and correct findings.
 - [ ] Confirm strict typing; review all `any`, assertions, suppressions, logs, DOM/sanitizer use, timers, and subscriptions in context.
 - [ ] Confirm file/complexity limits or record a narrow exception.
 - [ ] Confirm meaningful behavior tests and validation match the changed risk.
