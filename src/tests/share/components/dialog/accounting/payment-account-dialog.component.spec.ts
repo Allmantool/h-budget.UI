@@ -203,7 +203,7 @@ describe('payment-account-dialog.component', () => {
 		component.accountDetailsStepFg.patchValue({
 			accountTypeCtrl: component.getAccountsTypes()[AccountTypes.Credit],
 			currencyCtrl: component.getCurrencyTypes()[1],
-			balanceCtrl: 42.75,
+			balanceCtrl: '42.75',
 		});
 		component.additionalInfoStepFg.patchValue({
 			emitterCtrl: 'saved-emitter',

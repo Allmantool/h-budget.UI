@@ -2,119 +2,119 @@
 	display: block;
 }
 
-.dialog-content {
-	width: min(38rem, calc(100vw - 2rem));
+.payment-account-dialog {
+	width: min(50rem, calc(100vw - 2rem));
 	max-height: 85vh;
 	display: flex;
 	flex-direction: column;
 }
 
-.dialog-body {
+.payment-account-dialog__body {
 	margin: 0;
 	padding: 1rem 1.5rem;
 	overflow: auto;
 }
 
-.step-form,
-.review-step {
+.payment-account-dialog__form,
+.payment-account-dialog__review {
 	padding: 1rem 0 0;
 }
 
-h2 {
+.payment-account-dialog__heading {
 	margin: 0 0 1rem;
 	font-size: 1.125rem;
 }
 
-app-form-field {
+.payment-account-dialog__field {
 	width: 100%;
 }
 
-.form-hint {
+.payment-account-dialog__hint {
 	margin: -0.5rem 0 0;
 	font-size: 0.875rem;
 }
 
-.section-heading,
-.dialog-actions,
-.step-actions,
-.review-item {
+.payment-account-dialog__section-heading,
+.payment-account-dialog__actions,
+.payment-account-dialog__step-actions,
+.payment-account-dialog__review-item {
 	display: flex;
 	align-items: center;
 }
 
-.section-heading,
-.dialog-actions,
-.review-item {
+.payment-account-dialog__section-heading,
+.payment-account-dialog__actions,
+.payment-account-dialog__review-item {
 	justify-content: space-between;
 }
 
-.section-heading span {
+.payment-account-dialog__optional-label {
 	font-size: 0.875rem;
 }
 
-.additional-info-fields {
+.payment-account-dialog__additional-fields {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: 1rem;
 }
 
-.review-list {
+.payment-account-dialog__review-list {
 	margin: 0;
 }
 
-.review-item {
+.payment-account-dialog__review-item {
 	gap: 1rem;
 	padding: 0.75rem 0;
 	border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
 
-.review-item dt {
+.payment-account-dialog__review-label {
 	font-weight: 500;
 }
 
-.review-item dd {
+.payment-account-dialog__review-value {
 	margin: 0 0 0 auto;
 	text-align: right;
 }
 
-.dialog-actions {
+.payment-account-dialog__actions {
 	min-height: 4rem;
 	margin: 0;
 	padding: 0.5rem 1.5rem;
 }
 
-.step-actions {
+.payment-account-dialog__step-actions {
 	gap: 0.5rem;
 }
 
 @media (max-width: 599px) {
-	.dialog-content {
+	.payment-account-dialog {
 		width: calc(100vw - 1rem);
 		max-height: 90vh;
 	}
 
-	.dialog-body,
-	.dialog-actions {
+	.payment-account-dialog__body,
+	.payment-account-dialog__actions {
 		padding-right: 1rem;
 		padding-left: 1rem;
 	}
 
-	.additional-info-fields {
+	.payment-account-dialog__additional-fields {
 		grid-template-columns: 1fr;
 	}
 
-	.review-item {
+	.payment-account-dialog__review-item {
 		align-items: flex-start;
 		flex-wrap: wrap;
 	}
 
-	.review-item dd {
+	.payment-account-dialog__review-value {
 		width: 100%;
 		margin: 0;
 		text-align: left;
 	}
 
-	.review-item button {
+	.payment-account-dialog__review-edit {
 		margin-left: auto;
 	}
 }

@@ -1,8 +1,8 @@
-<div class="dialog-content">
+<div class="payment-account-dialog">
 	<h1 mat-dialog-title>{{ title }}</h1>
 	<mat-divider></mat-divider>
 
-	<mat-dialog-content class="dialog-body">
+	<mat-dialog-content class="payment-account-dialog__body">
 		<mat-stepper
 			[linear]="true"
 			[orientation]="stepperOrientationSignal()"
@@ -20,28 +20,31 @@
 				<ng-template matStepLabel>Account details</ng-template>
 				<form
 					[formGroup]="accountDetailsStepFg"
-					class="step-form"
+					class="payment-account-dialog__form"
 				>
-					<h2>Account details</h2>
+					<h2 class="payment-account-dialog__heading">Account details</h2>
 					<app-form-field
+						class="payment-account-dialog__field"
 						formControlName="accountTypeCtrl"
 						[fieldType]="'SELECT'"
 						[title]="'Account type *'"
-						[defaultValue]="accountTypeSignal()"
+						[defaultValue]="accountTypeSignal() ?? undefined"
 						[selectOptions]="getAccountsTypes()"
 						[describedBy]="'account-type-error'"
 						[errorMessage]="accountDetailsStepFg.controls.accountTypeCtrl.touched && accountDetailsStepFg.controls.accountTypeCtrl.invalid ? 'Choose an account type.' : ''"
 					></app-form-field>
 					<app-form-field
+						class="payment-account-dialog__field"
 						formControlName="currencyCtrl"
 						[fieldType]="'SELECT'"
 						[title]="'Currency *'"
-						[defaultValue]="currencySignal()"
+						[defaultValue]="currencySignal() ?? undefined"
 						[selectOptions]="getCurrencyTypes()"
 						[describedBy]="'currency-error'"
 						[errorMessage]="accountDetailsStepFg.controls.currencyCtrl.touched && accountDetailsStepFg.controls.currencyCtrl.invalid ? 'Choose a currency.' : ''"
 					></app-form-field>
 					<app-form-field
+						class="payment-account-dialog__field"
 						formControlName="balanceCtrl"
 						[fieldType]="'INPUT'"
 						[title]="'Initial balance *'"
@@ -49,7 +52,9 @@
 						[describedBy]="'initial-balance-error'"
 						[errorMessage]="accountDetailsStepFg.controls.balanceCtrl.touched && accountDetailsStepFg.controls.balanceCtrl.invalid ? 'Enter an initial balance.' : ''"
 					></app-form-field>
-					<p class="form-hint">Enter the current balance of this account. Use 0 if the account is empty.</p>
+					<p class="payment-account-dialog__hint">
+						Enter the current balance of this account. Use 0 if the account is empty.
+					</p>
 				</form>
 			</mat-step>
 
@@ -57,19 +62,21 @@
 				<ng-template matStepLabel>Additional information</ng-template>
 				<form
 					[formGroup]="additionalInfoStepFg"
-					class="step-form"
+					class="payment-account-dialog__form"
 				>
-					<div class="section-heading">
-						<h2>Additional information</h2>
-						<span>Optional</span>
+					<div class="payment-account-dialog__section-heading">
+						<h2 class="payment-account-dialog__heading">Additional information</h2>
+						<span class="payment-account-dialog__optional-label">Optional</span>
 					</div>
-					<div class="additional-info-fields">
+					<div class="payment-account-dialog__additional-fields">
 						<app-form-field
+							class="payment-account-dialog__field"
 							formControlName="emitterCtrl"
 							[fieldType]="'TEXT_AREA'"
 							[title]="'Emitter information'"
 						></app-form-field>
 						<app-form-field
+							class="payment-account-dialog__field"
 							formControlName="descriptionCtrl"
 							[fieldType]="'TEXT_AREA'"
 							[title]="'Description'"
@@ -80,13 +87,16 @@
 
 			<mat-step>
 				<ng-template matStepLabel>Review &amp; create</ng-template>
-				<section class="review-step">
-					<h2>{{ isUpdateMode() ? 'Review & update' : 'Review & create' }}</h2>
-					<dl class="review-list">
-						<div class="review-item">
-							<dt>Account type</dt>
-							<dd>{{ accountTypeDescriptionSignal() }}</dd>
+				<section class="payment-account-dialog__review">
+					<h2 class="payment-account-dialog__heading">
+						{{ isUpdateMode() ? 'Review & update' : 'Review & create' }}
+					</h2>
+					<dl class="payment-account-dialog__review-list">
+						<div class="payment-account-dialog__review-item">
+							<dt class="payment-account-dialog__review-label">Account type</dt>
+							<dd class="payment-account-dialog__review-value">{{ accountTypeDescriptionSignal() }}</dd>
 							<button
+								class="payment-account-dialog__review-edit"
 								mat-button
 								type="button"
 								(click)="editStep(stepper, 0)"
@@ -94,10 +104,11 @@
 								Edit
 							</button>
 						</div>
-						<div class="review-item">
-							<dt>Currency</dt>
-							<dd>{{ currencyDescriptionSignal() }}</dd>
+						<div class="payment-account-dialog__review-item">
+							<dt class="payment-account-dialog__review-label">Currency</dt>
+							<dd class="payment-account-dialog__review-value">{{ currencyDescriptionSignal() }}</dd>
 							<button
+								class="payment-account-dialog__review-edit"
 								mat-button
 								type="button"
 								(click)="editStep(stepper, 0)"
@@ -105,10 +116,13 @@
 								Edit
 							</button>
 						</div>
-						<div class="review-item">
-							<dt>Initial balance</dt>
-							<dd>{{ balanceSignal() }} {{ getOptionValue(currencySignal()) }}</dd>
+						<div class="payment-account-dialog__review-item">
+							<dt class="payment-account-dialog__review-label">Initial balance</dt>
+							<dd class="payment-account-dialog__review-value">
+								{{ balanceSignal() }} {{ getOptionValue(currencySignal()) }}
+							</dd>
 							<button
+								class="payment-account-dialog__review-edit"
 								mat-button
 								type="button"
 								(click)="editStep(stepper, 0)"
@@ -116,10 +130,11 @@
 								Edit
 							</button>
 						</div>
-						<div class="review-item">
-							<dt>Additional information</dt>
-							<dd>{{ additionalInfoSignal() }}</dd>
+						<div class="payment-account-dialog__review-item">
+							<dt class="payment-account-dialog__review-label">Additional information</dt>
+							<dd class="payment-account-dialog__review-value">{{ additionalInfoSignal() }}</dd>
 							<button
+								class="payment-account-dialog__review-edit"
 								mat-button
 								type="button"
 								(click)="editStep(stepper, 1)"
@@ -136,7 +151,7 @@
 	<mat-divider></mat-divider>
 	<div
 		mat-dialog-actions
-		class="dialog-actions"
+		class="payment-account-dialog__actions"
 	>
 		<button
 			mat-button
@@ -146,7 +161,7 @@
 		>
 			Cancel
 		</button>
-		<div class="step-actions">
+		<div class="payment-account-dialog__step-actions">
 			@if (selectedStepIndexSignal() > 0) {
 			<button
 				mat-button
