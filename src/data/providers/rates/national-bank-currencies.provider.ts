@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { ApiRequestOptions } from 'app/modules/shared/constants/api-request-options';
 
 import { Mapper } from '@dynamic-mapper/angular';
 import { format } from 'date-fns';
@@ -15,7 +16,6 @@ import { DaysRangePayload } from '../../../domain/models/dates-range-payload.mod
 import { CurrencyRateGroupModel } from '../../../domain/models/rates/currency-rates-group.model';
 import { IBankCurrenciesProvider } from '../../../domain/providers/rates/bank-currencies.provider';
 import { CurrencyGridRateModel } from '../../../presentation/currency-rates/models/currency-grid-rate.model';
-import { ApiRequestOptions } from 'app/modules/shared/constants/api-request-options';
 
 @Injectable()
 export class NationalBankCurrenciesProvider implements IBankCurrenciesProvider {

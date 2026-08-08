@@ -15,10 +15,10 @@ import { RatesGridDefaultOptions } from '../../app/modules/shared/constants/rate
 import { DialogContainer } from '../../app/modules/shared/models/dialog-container';
 import { DialogProvider } from '../../app/modules/shared/providers/dialog-provider';
 import { LoaderService } from '../../app/modules/shared/services/loader-service';
-import { ngxsConfig } from '../../app/modules/shared/store/ngxs.config';
-import { AddCurrencyGroups } from '../../app/modules/shared/store/states/rates/actions/currency.actions';
 import { ICurrencyTableOptions } from '../../app/modules/shared/store/models/currency-rates/currency-table-options';
 import { IPreviousDayCurrencyRate } from '../../app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
+import { ngxsConfig } from '../../app/modules/shared/store/ngxs.config';
+import { AddCurrencyGroups } from '../../app/modules/shared/store/states/rates/actions/currency.actions';
 import { ICurrencyChartStateModel } from '../../app/modules/shared/store/states/rates/models/currency-chart-state.model';
 import { ICurrencyRatesStateModel } from '../../app/modules/shared/store/states/rates/models/currency-rates-state.model';
 import { ICurrencyTableStateModel } from '../../app/modules/shared/store/states/rates/models/currency-table-state.model';
@@ -26,9 +26,9 @@ import { NationalBankCurrenciesProvider } from '../../data/providers/rates/natio
 import { DaysRangePayload } from '../../domain/models/dates-range-payload.model';
 import { CurrencyRateValueModel } from '../../domain/models/rates/currency-rate-value.model';
 import { CurrencyRateGroupModel } from '../../domain/models/rates/currency-rates-group.model';
-import { currencyRatesRoutes } from '../../presentation/currency-rates/currency-rates.routes';
 import { CurrencyRatesGridComponent } from '../../presentation/currency-rates/components/currency-rates-grid/currency-rates-grid.component';
 import { CurrencyRatesLineChartComponent } from '../../presentation/currency-rates/components/currency-rates-line-chart/currency-rates-line-chart.component';
+import { currencyRatesRoutes } from '../../presentation/currency-rates/currency-rates.routes';
 import { PresentationRatesMappingProfile } from '../../presentation/currency-rates/mappers/presentation-rates-mapping.profiler';
 import { CurrencyGridRateModel } from '../../presentation/currency-rates/models/currency-grid-rate.model';
 import { CurrencyRatesGridService } from '../../presentation/currency-rates/services/currency-rates-grid.service';

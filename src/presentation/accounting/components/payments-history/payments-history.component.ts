@@ -21,12 +21,12 @@ import { BehaviorSubject, filter, forkJoin, Observable, of, tap } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
 import { Guid } from 'typescript-guid';
 
+import { AccountingCurrencyFormatPipe } from '../../../../app/modules/shared/pipes/accounting-currency.pipe';
 import { IAccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
 import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
 import { getAccountPayments } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import { getActivePaymentAccountId } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
-import { AccountingCurrencyFormatPipe } from '../../../../app/modules/shared/pipes/accounting-currency.pipe';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
 import { IPaymentRepresentationModel } from '../../models/operation-record';
 import { AccountsService } from '../../services/accounts.service';

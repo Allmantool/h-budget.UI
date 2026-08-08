@@ -25,8 +25,8 @@ import { getCurrencyTableOptions } from '../../../app/modules/shared/store/state
 import { CurrencyRateValueModel } from '../../../domain/models/rates/currency-rate-value.model';
 import { ChartOptions } from '../models/chart-options';
 import { LineChartOptions } from '../models/line-chart-options';
-import { DataPoint } from '../types/data-point.type';
 import { ApexZoomRange } from '../types/apex-zoom-range.type';
+import { DataPoint } from '../types/data-point.type';
 
 @Injectable()
 export class LineChartService {

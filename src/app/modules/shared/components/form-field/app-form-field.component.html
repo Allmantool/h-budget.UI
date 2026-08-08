@@ -10,7 +10,7 @@
 	<mat-form-field
 		appearance="outline"
 		floatLabel="always"
-        class="form-inputNumbers-area"
+		class="form-inputNumbers-area"
 	>
 		<mat-label>{{ title }}</mat-label>
 		<input
@@ -26,7 +26,12 @@
 			(input)="updateValue($event.target)"
 			[value]="(data$ | async) | accountingCurrencyFormat"
 		/>
-		<span matPrefix class="input-number-prefix">{{ numberInputPrefix }}</span>
+		<span
+			matPrefix
+			class="input-number-prefix"
+		>
+			{{ numberInputPrefix }}
+		</span>
 		@if (errorMessage) {
 		<mat-error [id]="describedBy">{{ errorMessage }}</mat-error>
 		}
@@ -34,7 +39,10 @@
 </ng-template>
 
 <ng-template #select>
-	<mat-form-field appearance="outline" class="form-select-area">
+	<mat-form-field
+		appearance="outline"
+		class="form-select-area"
+	>
 		<mat-label>{{ title }}</mat-label>
 		<mat-select
 			[disabled]="disabled"
@@ -53,7 +61,10 @@
 </ng-template>
 
 <ng-template #textarea>
-	<mat-form-field appearance="outline" class="form-textarea-area">
+	<mat-form-field
+		appearance="outline"
+		class="form-textarea-area"
+	>
 		<mat-label>{{ title }}</mat-label>
 		<textarea
 			[disabled]="disabled"
