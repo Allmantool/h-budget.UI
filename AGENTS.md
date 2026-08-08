@@ -28,7 +28,7 @@ Before editing, Codex must:
 
 1. Verify the repository root and read this file plus every applicable nested `AGENTS.md`.
 2. Classify the task as implementation, bug fix, refactoring, architecture audit, PR review, or standards-only.
-3. For any Angular/Nx task, read [the authoritative Angular/Nx skill](.codex/skills/angular-spa/SKILL.md) and every supporting standard it directs for the affected concern.
+3. For any Angular/Nx task, read [the authoritative Angular/Nx skill](.codex/skills/angular-spa/SKILL.md) and every supporting standard it directs for the affected concern. UI templates or styles must apply the [styling, UI, and template standard](.codex/skills/angular-spa/styling-and-ui.md), which is the authoritative BEM/HTML/CSS/SCSS policy.
 4. Inspect nearby implementation, tests, DI/provider registration, routes, state, models, mappings, and public contracts that the change could affect.
 5. Run `git status --short`, identify pre-existing changes, and preserve unrelated user work.
 6. Discover actual validation scripts and project targets before editing. Do not invent commands or targets.
@@ -66,6 +66,7 @@ For non-trivial work, report the objective/result, design reasoning, principles 
 
 - [Governance package guide](.codex/README.md)
 - [Angular/Nx skill](.codex/skills/angular-spa/SKILL.md)
+- [Styling, UI, and template standard](.codex/skills/angular-spa/styling-and-ui.md)
 - [Pre-change checklist](.codex/checklists/angular-pre-change-checklist.md)
 - [Self-review checklist](.codex/checklists/angular-self-review-checklist.md)
 - [Instruction hierarchy](docs/codex/01-instruction-hierarchy.md)

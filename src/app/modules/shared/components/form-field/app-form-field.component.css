@@ -12,3 +12,19 @@
 .input-value::-webkit-inner-spin-button {
 	display: none;
 }
+
+.form-inputNumbers-area {
+	width: 60%;
+}
+
+.form-select-area {
+	width: 60%;
+}
+
+.form-textarea-area {
+	width: 98%;
+}
+
+.input-number-prefix {
+	padding-left: 1em;
+}

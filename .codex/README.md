@@ -10,6 +10,8 @@ Read [the root entry point](../AGENTS.md) first. For Angular/Nx work, then read 
 
 The files are intentionally layered: root instructions define workflow and precedence; the skill routes work to the detailed rules; supporting standards own the details. Do not create another competing rule hierarchy. Update the owning file and its links when a standard changes.
 
+For UI work, `skills/angular-spa/styling-and-ui.md` is the sole detailed owner of BEM, semantic HTML, CSS/SCSS architecture, Material presentation, and UI diff-review standards.
+
 ## Required use
 
 Use this package for implementation, refactoring, bug-fix, architecture-audit, PR-review, test-improvement, and dependency/framework-migration tasks in this Angular/Nx workspace. For standards-only tasks, use the governance scope rules in the root file.

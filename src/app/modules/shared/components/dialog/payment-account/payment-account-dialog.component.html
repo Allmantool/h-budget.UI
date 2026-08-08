@@ -1,187 +1,198 @@
-<div class="dialog-content">
+<div class="payment-account-dialog">
 	<h1 mat-dialog-title>{{ title }}</h1>
-
 	<mat-divider></mat-divider>
 
-	<mat-dialog-content class="dialog-body">
+	<mat-dialog-content class="payment-account-dialog__body">
 		<mat-stepper
-			orientation="vertical"
 			[linear]="true"
+			[orientation]="stepperOrientationSignal()"
+			(selectionChange)="selectedStepIndexSignal.set($event.selectedIndex)"
 			#stepper
 		>
-			<mat-step [stepControl]="accountTypeStepFg">
+			<ng-template matStepperIcon="edit">
+				<mat-icon aria-hidden="true">done</mat-icon>
+			</ng-template>
+			<ng-template matStepperIcon="done">
+				<mat-icon aria-hidden="true">done</mat-icon>
+			</ng-template>
+
+			<mat-step [stepControl]="accountDetailsStepFg">
+				<ng-template matStepLabel>Account details</ng-template>
 				<form
-					[formGroup]="accountTypeStepFg"
-					class="stepperForm"
+					[formGroup]="accountDetailsStepFg"
+					class="payment-account-dialog__form"
 				>
-					<ng-template matStepLabel>
-						Pick out an account type:
-						<span>{{ accountTypeSignal().description}}</span>
-					</ng-template>
+					<h2 class="payment-account-dialog__heading">Account details</h2>
 					<app-form-field
+						class="payment-account-dialog__field"
 						formControlName="accountTypeCtrl"
 						[fieldType]="'SELECT'"
-						[title]="'Payment account type:'"
-						[defaultValue]="accountTypeSignal()"
+						[title]="'Account type *'"
+						[defaultValue]="accountTypeSignal() ?? undefined"
 						[selectOptions]="getAccountsTypes()"
+						[describedBy]="'account-type-error'"
+						[errorMessage]="accountDetailsStepFg.controls.accountTypeCtrl.touched && accountDetailsStepFg.controls.accountTypeCtrl.invalid ? 'Choose an account type.' : ''"
 					></app-form-field>
-					<div>
-						<button
-							mat-button
-							matStepperNext
-						>
-							Next
-						</button>
-					</div>
-				</form>
-			</mat-step>
-			<mat-step [stepControl]="currencyStepFg">
-				<form
-					[formGroup]="currencyStepFg"
-					class="stepperForm"
-				>
-					<ng-template matStepLabel>
-						Pick out a currency type:
-						<span
-							class="abbreviation-flag fi fi-{{currencySignal().value!| currencyAbbreviationToFlagFormat}}"
-						></span>
-					</ng-template>
 					<app-form-field
+						class="payment-account-dialog__field"
 						formControlName="currencyCtrl"
 						[fieldType]="'SELECT'"
-						[title]="'Currency type:'"
-						[defaultValue]="currencySignal()"
+						[title]="'Currency *'"
+						[defaultValue]="currencySignal() ?? undefined"
 						[selectOptions]="getCurrencyTypes()"
+						[describedBy]="'currency-error'"
+						[errorMessage]="accountDetailsStepFg.controls.currencyCtrl.touched && accountDetailsStepFg.controls.currencyCtrl.invalid ? 'Choose a currency.' : ''"
 					></app-form-field>
-					<div>
-						<button
-							mat-button
-							matStepperPrevious
-						>
-							Back
-						</button>
-						<button
-							mat-button
-							matStepperNext
-						>
-							Next
-						</button>
-					</div>
+					<app-form-field
+						class="payment-account-dialog__field"
+						formControlName="balanceCtrl"
+						[fieldType]="'INPUT'"
+						[title]="'Initial balance *'"
+						[numberInputPrefix]="getOptionValue(currencySignal()) ?? ''"
+						[describedBy]="'initial-balance-error'"
+						[errorMessage]="accountDetailsStepFg.controls.balanceCtrl.touched && accountDetailsStepFg.controls.balanceCtrl.invalid ? 'Enter an initial balance.' : ''"
+					></app-form-field>
+					<p class="payment-account-dialog__hint">
+						Enter the current balance of this account. Use 0 if the account is empty.
+					</p>
 				</form>
 			</mat-step>
-			<mat-step [stepControl]="balanceStepFg">
-				<form
-					[formGroup]="balanceStepFg"
-					class="stepperForm"
-				>
-					<ng-template matStepLabel>
-						Provide account initial balance:
-						<span>{{ balanceSignal()}}</span>
-					</ng-template>
-					<div>
-						<app-form-field
-							formControlName="balanceCtrl"
-							[fieldType]="'INPUT'"
-							[title]="'Balance:'"
-							[numberInputPrefix]="currencySignal().value!"
-						></app-form-field>
-					</div>
-					<div>
-						<button
-							mat-button
-							matStepperPrevious
-						>
-							Back
-						</button>
-						<button
-							mat-button
-							matStepperNext
-						>
-							Next
-						</button>
-					</div>
-				</form>
-			</mat-step>
+
 			<mat-step [stepControl]="additionalInfoStepFg">
+				<ng-template matStepLabel>Additional information</ng-template>
 				<form
 					[formGroup]="additionalInfoStepFg"
-					class="stepperForm"
+					class="payment-account-dialog__form"
 				>
-					<ng-template matStepLabel>Provide addtional information:</ng-template>
-					<div class="step--addtional-info">
+					<div class="payment-account-dialog__section-heading">
+						<h2 class="payment-account-dialog__heading">Additional information</h2>
+						<span class="payment-account-dialog__optional-label">Optional</span>
+					</div>
+					<div class="payment-account-dialog__additional-fields">
 						<app-form-field
+							class="payment-account-dialog__field"
 							formControlName="emitterCtrl"
 							[fieldType]="'TEXT_AREA'"
-							[title]="'Emitter information:'"
+							[title]="'Emitter information'"
 						></app-form-field>
 						<app-form-field
+							class="payment-account-dialog__field"
 							formControlName="descriptionCtrl"
 							[fieldType]="'TEXT_AREA'"
-							[title]="'Description:'"
+							[title]="'Description'"
 						></app-form-field>
-					</div>
-					<div>
-						<button
-							mat-button
-							matStepperPrevious
-						>
-							Back
-						</button>
-						<button
-							mat-button
-							matStepperNext
-						>
-							Next
-						</button>
 					</div>
 				</form>
 			</mat-step>
+
 			<mat-step>
-				<ng-template matStepLabel>[Summary] Save the payment account:</ng-template>
-				<mat-list>
-					<mat-list-item>
-						<mat-icon matListItemIcon>done</mat-icon>
-						Account type: {{accountTypeSignal().description}}
-					</mat-list-item>
-					<mat-divider></mat-divider>
-					<mat-list-item>
-						<mat-icon matListItemIcon>done</mat-icon>
-						Initial balance: {{balanceSignal()}} {{currencySignal().description}}
-					</mat-list-item>
-					<mat-divider></mat-divider>
-					<mat-list-item>
-						<mat-icon matListItemIcon>done</mat-icon>
-						Addtional: {{additionalInfoSignal()}}
-					</mat-list-item>
-				</mat-list>
-				<div>
-					<button
-						mat-raised-button
-						matStepperPrevious
-					>
-						Back
-					</button>
-					<button
-						mat-raised-button
-						color="primary"
-						(click)="applyChanges()"
-					>
-						Apply
-					</button>
-				</div>
+				<ng-template matStepLabel>Review &amp; create</ng-template>
+				<section class="payment-account-dialog__review">
+					<h2 class="payment-account-dialog__heading">
+						{{ isUpdateMode() ? 'Review & update' : 'Review & create' }}
+					</h2>
+					<dl class="payment-account-dialog__review-list">
+						<div class="payment-account-dialog__review-item">
+							<dt class="payment-account-dialog__review-label">Account type</dt>
+							<dd class="payment-account-dialog__review-value">{{ accountTypeDescriptionSignal() }}</dd>
+							<button
+								class="payment-account-dialog__review-edit"
+								mat-button
+								type="button"
+								(click)="editStep(stepper, 0)"
+							>
+								Edit
+							</button>
+						</div>
+						<div class="payment-account-dialog__review-item">
+							<dt class="payment-account-dialog__review-label">Currency</dt>
+							<dd class="payment-account-dialog__review-value">{{ currencyDescriptionSignal() }}</dd>
+							<button
+								class="payment-account-dialog__review-edit"
+								mat-button
+								type="button"
+								(click)="editStep(stepper, 0)"
+							>
+								Edit
+							</button>
+						</div>
+						<div class="payment-account-dialog__review-item">
+							<dt class="payment-account-dialog__review-label">Initial balance</dt>
+							<dd class="payment-account-dialog__review-value">
+								{{ balanceSignal() }} {{ getOptionValue(currencySignal()) }}
+							</dd>
+							<button
+								class="payment-account-dialog__review-edit"
+								mat-button
+								type="button"
+								(click)="editStep(stepper, 0)"
+							>
+								Edit
+							</button>
+						</div>
+						<div class="payment-account-dialog__review-item">
+							<dt class="payment-account-dialog__review-label">Additional information</dt>
+							<dd class="payment-account-dialog__review-value">{{ additionalInfoSignal() }}</dd>
+							<button
+								class="payment-account-dialog__review-edit"
+								mat-button
+								type="button"
+								(click)="editStep(stepper, 1)"
+							>
+								Edit
+							</button>
+						</div>
+					</dl>
+				</section>
 			</mat-step>
 		</mat-stepper>
 	</mat-dialog-content>
 
 	<mat-divider></mat-divider>
-	<div mat-dialog-actions>
+	<div
+		mat-dialog-actions
+		class="payment-account-dialog__actions"
+	>
 		<button
-			mat-raised-button
-			mat-dialog-close
+			mat-button
+			type="button"
+			[disabled]="isLoadingSignal()"
 			(click)="close()"
 		>
-			Close
+			Cancel
 		</button>
+		<div class="payment-account-dialog__step-actions">
+			@if (selectedStepIndexSignal() > 0) {
+			<button
+				mat-button
+				type="button"
+				[disabled]="isLoadingSignal()"
+				(click)="previous(stepper)"
+			>
+				Back
+			</button>
+			} @if (selectedStepIndexSignal() < 2) {
+			<button
+				mat-raised-button
+				color="primary"
+				type="button"
+				[disabled]="isLoadingSignal()"
+				(click)="next(stepper)"
+			>
+				Next
+			</button>
+			} @else {
+			<button
+				mat-raised-button
+				color="primary"
+				type="button"
+				[disabled]="isLoadingSignal()"
+				(click)="applyChanges()"
+			>
+				{{ isUpdateMode() ? 'Update account' : 'Create account' }}
+			</button>
+			}
+		</div>
 	</div>
 </div>
 

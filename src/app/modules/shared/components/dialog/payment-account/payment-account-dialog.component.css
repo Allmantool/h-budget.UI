@@ -1,16 +1,120 @@
-.dialog-content {
-	width: 45em;
-	min-height: 43em;
-	max-height: 56em;
-	z-index: 150s;
+:host {
+	display: block;
 }
 
-.stepperForm {
-	margin-top: 1em;
-}
-
-.step--addtional-info {
+.payment-account-dialog {
+	width: min(50rem, calc(100vw - 2rem));
+	max-height: 85vh;
 	display: flex;
-	flex-direction: row;
-	justify-content: space-evenly;
+	flex-direction: column;
+}
+
+.payment-account-dialog__body {
+	margin: 0;
+	padding: 1rem 1.5rem;
+	overflow: auto;
+}
+
+.payment-account-dialog__form,
+.payment-account-dialog__review {
+	padding: 1rem 0 0;
+}
+
+.payment-account-dialog__heading {
+	margin: 0 0 1rem;
+	font-size: 1.125rem;
+}
+
+.payment-account-dialog__field {
+	width: 100%;
+}
+
+.payment-account-dialog__hint {
+	margin: -0.5rem 0 0;
+	font-size: 0.875rem;
+}
+
+.payment-account-dialog__section-heading,
+.payment-account-dialog__actions,
+.payment-account-dialog__step-actions,
+.payment-account-dialog__review-item {
+	display: flex;
+	align-items: center;
+}
+
+.payment-account-dialog__section-heading,
+.payment-account-dialog__actions,
+.payment-account-dialog__review-item {
+	justify-content: space-between;
+}
+
+.payment-account-dialog__optional-label {
+	font-size: 0.875rem;
+}
+
+.payment-account-dialog__additional-fields {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 1rem;
+}
+
+.payment-account-dialog__review-list {
+	margin: 0;
+}
+
+.payment-account-dialog__review-item {
+	gap: 1rem;
+	padding: 0.75rem 0;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.payment-account-dialog__review-label {
+	font-weight: 500;
+}
+
+.payment-account-dialog__review-value {
+	margin: 0 0 0 auto;
+	text-align: right;
+}
+
+.payment-account-dialog__actions {
+	min-height: 4rem;
+	margin: 0;
+	padding: 0.5rem 1.5rem;
+}
+
+.payment-account-dialog__step-actions {
+	gap: 0.5rem;
+}
+
+@media (max-width: 599px) {
+	.payment-account-dialog {
+		width: calc(100vw - 1rem);
+		max-height: 90vh;
+	}
+
+	.payment-account-dialog__body,
+	.payment-account-dialog__actions {
+		padding-right: 1rem;
+		padding-left: 1rem;
+	}
+
+	.payment-account-dialog__additional-fields {
+		grid-template-columns: 1fr;
+	}
+
+	.payment-account-dialog__review-item {
+		align-items: flex-start;
+		flex-wrap: wrap;
+	}
+
+	.payment-account-dialog__review-value {
+		width: 100%;
+		margin: 0;
+		text-align: left;
+	}
+
+	.payment-account-dialog__review-edit {
+		margin-left: auto;
+	}
 }

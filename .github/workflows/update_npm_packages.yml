@@ -12,9 +12,9 @@ on:
                     - minor
                     - major
     schedule:
-        - cron: '17 3 * * 1,3,5'
-        - cron: '23 4 * * 6'
-        - cron: '37 5 1 * *'
+        - cron: "17 3 * * 1,3,5"
+        - cron: "23 4 * * 6"
+        - cron: "37 5 1 * *"
 
 permissions:
     contents: read
@@ -100,14 +100,29 @@ jobs:
               shell: bash
               env:
                   GH_TOKEN: ${{ steps.app-token.outputs.token }}
+                  APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
               run: |
                   set -euo pipefail
+
                   branch="$BRANCH_PREFIX/$MODE"
-                  gh pr list --base "${{ github.event.repository.default_branch }}" --head "$branch" --state open \
-                    --json number,author,body,url --limit 2 > existing-prs.json
-                  bot_login="$(gh api user --jq .login)"
-                  node tools/deps/ci-state.mjs check-open-pr --mode "$MODE" --bot-login "$bot_login" \
-                    --input existing-prs.json --output "$GITHUB_OUTPUT"
+
+                  gh pr list \
+                      --base "${{ github.event.repository.default_branch }}" \
+                      --head "$branch" \
+                      --state open \
+                      --json number,author,body,url \
+                      --limit 2 \
+                      > existing-prs.json
+
+                  bot_login="${APP_SLUG}[bot]"
+
+                  echo "Dependency updater bot: $bot_login"
+
+                  node tools/deps/ci-state.mjs check-open-pr \
+                      --mode "$MODE" \
+                      --bot-login "$bot_login" \
+                      --input existing-prs.json \
+                      --output "$GITHUB_OUTPUT"
 
             - name: Install baseline dependencies
               if: steps.existing.outputs.should_run == 'true'

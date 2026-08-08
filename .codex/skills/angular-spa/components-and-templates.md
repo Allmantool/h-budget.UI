@@ -6,7 +6,7 @@ Container components may read route state, select/dispatch NGXS, coordinate data
 
 Presentational components must receive typed data through inputs, emit semantic outputs such as `saveRequested`, `accountSelected`, or `dialogClosed`, and own only local view state. They must not inject the global store, API clients, `HttpClient`, feature repositories, or route orchestration. Do not emit raw DOM events when the parent needs a business event.
 
-Use `ChangeDetectionStrategy.OnPush` for presentational and most feature components unless the local pattern has a documented reason otherwise. Use semantic HTML, native buttons for actions, anchors for navigation, and accessible names for icon-only controls.
+Use `ChangeDetectionStrategy.OnPush` for presentational and most feature components unless the local pattern has a documented reason otherwise. Use semantic HTML, native buttons for actions, anchors for navigation, and accessible names for icon-only controls. Apply [styling, UI, and template standards](styling-and-ui.md) for BEM, CSS/SCSS architecture, Material presentation, responsive behavior, and the UI diff review.
 
 ## Decomposition signals
 

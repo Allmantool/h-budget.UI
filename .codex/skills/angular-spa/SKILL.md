@@ -26,6 +26,7 @@ description: Govern implementation, refactoring, bug-fix, audit, review, testing
 
 - Always: [architecture](architecture.md), [TypeScript](typescript.md), and [review and validation](review-and-validation.md).
 - Components, directives, pipes, templates, forms, or styles: [components and templates](components-and-templates.md).
+- User-facing templates, CSS/SCSS, Angular Material presentation, or UI/UX behavior: [styling, UI, and template standards](styling-and-ui.md).
 - NGXS, signals, RxJS, APIs, providers, mappings, or errors: [state, RxJS, and data access](state-rxjs-and-data-access.md).
 - Tests or changed behavior: [testing](testing.md).
 - User input, DOM, auth/permissions, telemetry, charts, performance, or user-facing UI: [security, accessibility, and performance](security-accessibility-performance.md).

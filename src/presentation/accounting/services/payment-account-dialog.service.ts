@@ -51,7 +51,7 @@ export class PaymentAccountDialogService {
 		};
 
 		config.data = {
-			title: 'Payment account: (Add new)',
+			title: 'Add payment account',
 			onSubmit: onSave,
 		};
 
@@ -92,7 +92,7 @@ export class PaymentAccountDialogService {
 		};
 
 		config.data = {
-			title: 'Payment account: (Update)',
+			title: 'Edit payment account',
 			operationType: DialogOperationTypes.Update,
 			onSubmit: onUpdate,
 		} as DialogContainer<Result<IPaymentAccountModel>, Result<IPaymentAccountModel>>;

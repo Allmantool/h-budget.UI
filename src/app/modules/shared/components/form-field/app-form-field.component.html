@@ -10,6 +10,7 @@
 	<mat-form-field
 		appearance="outline"
 		floatLabel="always"
+		class="form-inputNumbers-area"
 	>
 		<mat-label>{{ title }}</mat-label>
 		<input
@@ -21,18 +22,31 @@
 			min="0"
 			step="1"
 			placeholder="0.00"
+			[attr.aria-describedby]="describedBy || null"
 			(input)="updateValue($event.target)"
 			[value]="(data$ | async) | accountingCurrencyFormat"
 		/>
-		<span matPrefix>{{ numberInputPrefix }}</span>
+		<span
+			matPrefix
+			class="input-number-prefix"
+		>
+			{{ numberInputPrefix }}
+		</span>
+		@if (errorMessage) {
+		<mat-error [id]="describedBy">{{ errorMessage }}</mat-error>
+		}
 	</mat-form-field>
 </ng-template>
 
 <ng-template #select>
-	<mat-form-field appearance="outline">
+	<mat-form-field
+		appearance="outline"
+		class="form-select-area"
+	>
 		<mat-label>{{ title }}</mat-label>
 		<mat-select
 			[disabled]="disabled"
+			[attr.aria-describedby]="describedBy || null"
 			[value]="data$ | async"
 			(selectionChange)="updateValue($event)"
 		>
@@ -40,17 +54,27 @@
 			<mat-option [value]="option.value ?? option">{{ option.description ?? option }}</mat-option>
 			}
 		</mat-select>
+		@if (errorMessage) {
+		<mat-error [id]="describedBy">{{ errorMessage }}</mat-error>
+		}
 	</mat-form-field>
 </ng-template>
 
 <ng-template #textarea>
-	<mat-form-field appearance="outline">
+	<mat-form-field
+		appearance="outline"
+		class="form-textarea-area"
+	>
 		<mat-label>{{ title }}</mat-label>
 		<textarea
 			[disabled]="disabled"
+			[attr.aria-describedby]="describedBy || null"
 			matInput
 			[value]="data$ | async"
 			(input)="updateValue($event.target)"
 		></textarea>
+		@if (errorMessage) {
+		<mat-error [id]="describedBy">{{ errorMessage }}</mat-error>
+		}
 	</mat-form-field>
 </ng-template>

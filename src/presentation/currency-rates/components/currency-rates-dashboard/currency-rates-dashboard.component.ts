@@ -3,6 +3,8 @@ import { ChangeDetectionStrategy, Component, computed, OnInit, Signal } from '@a
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
 import { Title } from '@angular/platform-browser';
+import { MarketShareChartOptions } from 'presentation/currency-rates/types/market-share-chart.options';
+import { TrendBarChartOptions } from 'presentation/currency-rates/types/trend-bar-chart.options';
 
 import * as _ from 'lodash';
 
@@ -18,8 +20,6 @@ import { CurrencyRateValueModel } from '../../../../domain/models/rates/currency
 import { CurrencyRateGroupModel } from '../../../../domain/models/rates/currency-rates-group.model';
 import { CurrencyRatesGridComponent } from '../currency-rates-grid/currency-rates-grid.component';
 import { CurrencyRatesLineChartComponent } from '../currency-rates-line-chart/currency-rates-line-chart.component';
-import { MarketShareChartOptions } from 'presentation/currency-rates/types/market-share-chart.options';
-import { TrendBarChartOptions } from 'presentation/currency-rates/types/trend-bar-chart.options';
 
 interface CurrencyTrendComparison {
 	currencyId: number;
