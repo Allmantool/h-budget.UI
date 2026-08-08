@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import * as _ from 'lodash';
 
@@ -20,7 +21,7 @@ import { PaymentAccountDialogService } from '../../services/payment-account-dial
 	styleUrls: ['./payment-account-crud.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [MatButtonModule, MatIconModule, MatListModule],
+	imports: [MatButtonModule, MatIconModule, MatListModule, MatTooltipModule],
 })
 export class PaymentAccountCrudComponent {
 	public activePaymentAccountGuidSignal: Signal<string>;
@@ -38,7 +39,7 @@ export class PaymentAccountCrudComponent {
 		});
 	}
 
-	public get isAnyPaymentAccountSelected(): boolean {
+	public get isPaymentAccountSelectionMissing(): boolean {
 		return _.isEmpty(this.activePaymentAccountGuidSignal());
 	}
 

@@ -113,6 +113,12 @@ export class PaymentAccountComponent implements OnInit {
 	}
 
 	public async navigateToOperations(): Promise<void> {
+		const accountingWorkspaceRoute = this.route.parent?.parent;
+
+		if (_.isNil(accountingWorkspaceRoute)) {
+			return;
+		}
+
 		await this.router.navigate(
 			[
 				{
@@ -122,7 +128,7 @@ export class PaymentAccountComponent implements OnInit {
 					},
 				},
 			],
-			{ relativeTo: this.route }
+			{ relativeTo: accountingWorkspaceRoute }
 		);
 	}
 

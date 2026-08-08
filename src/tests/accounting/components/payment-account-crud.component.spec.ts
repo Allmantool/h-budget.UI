@@ -89,8 +89,10 @@ describe('payment account CRUD component', () => {
 
 	it('should reflect the existing no-active-account disabled state', () => {
 		expect(component.activePaymentAccountGuidSignal()).toBe('');
-		expect(component.isAnyPaymentAccountSelected).toBeTrue();
+		expect(component.isPaymentAccountSelectionMissing).toBeTrue();
 		expect(getMenuItemsWithDisabledState()).toEqual([false, true, true]);
+		expect(getButtonByLabel('Delete the payment account')?.disabled).toBeTrue();
+		expect(getButtonByLabel('Edit the payment account')?.disabled).toBeTrue();
 	});
 
 	it('should open the create dialog without requiring a selected account', () => {

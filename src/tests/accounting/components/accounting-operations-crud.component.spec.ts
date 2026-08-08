@@ -150,9 +150,9 @@ describe('accounting operations CRUD component', () => {
 		expect(getNativeText()).toContain('Edit record');
 		expect(getNativeText()).toContain('Contractor:');
 		expect(getNativeText()).toContain('Category:');
-		expect(getButtonTexts()).toContain(jasmine.stringContaining('Save changes'));
-		expect(getButtonTexts()).toContain(jasmine.stringContaining('New record'));
-		expect(getButtonTexts()).toContain(jasmine.stringContaining('Delete record'));
+		expect(getButtonTexts()).toContain(jasmine.stringContaining('Save payment operation changes'));
+		expect(getButtonTexts()).toContain(jasmine.stringContaining('Add payment operation'));
+		expect(getButtonTexts()).toContain(jasmine.stringContaining('Delete payment operation'));
 	});
 
 	it('should patch the selected history record into the local disabled form', () => {
@@ -169,8 +169,8 @@ describe('accounting operations CRUD component', () => {
 		await fixture.whenStable();
 
 		expect(component.isNotReadyForSaveSignal()).toBeTrue();
-		expect(getButtonDisabledState('Save changes')).toBeTrue();
-		expect(getButtonDisabledState('Delete record')).toBeTrue();
+		expect(getButtonDisabledState('Save payment operation changes')).toBeTrue();
+		expect(getButtonDisabledState('Delete payment operation')).toBeTrue();
 	});
 
 	it('should preserve expense and income amount branch rendering', async () => {

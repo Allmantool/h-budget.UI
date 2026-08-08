@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
+import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 
 import { NgxsModule, Store } from '@ngxs/store';
 import { of, Subject } from 'rxjs';
@@ -38,6 +38,9 @@ describe('payments dashboard component', () => {
 	let component: PaymentsDashboardComponent;
 	let store: Store;
 	let router: Router;
+	const accountingWorkspaceRouteStub = {} as ActivatedRoute;
+	const providerRouteStub = { parent: accountingWorkspaceRouteStub } as ActivatedRoute;
+	const activatedRouteStub = { parent: providerRouteStub } as ActivatedRoute;
 
 	let accountsTransferServiceSpy: jasmine.SpyObj<CrossAccountsTransferService>;
 	let handbooksServiceSpy: jasmine.SpyObj<HandbooksService>;
@@ -113,6 +116,7 @@ describe('payments dashboard component', () => {
 			],
 			providers: [
 				provideRouter([]),
+				{ provide: ActivatedRoute, useValue: activatedRouteStub },
 				{
 					provide: CrossAccountsTransferService,
 					useValue: accountsTransferServiceSpy,
@@ -198,7 +202,17 @@ describe('payments dashboard component', () => {
 		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid).toBeUndefined();
 		expect(store.selectSnapshot(getActivePaymentAccount)).toBeUndefined();
 		expect(store.selectSnapshot(getPaymentAccounts)).toEqual([activeAccount, replacementAccount]);
-		expect(navigateSpy.calls.mostRecent().args).toEqual([['/dashboard/accounting'], { relativeTo: null }]);
+		expect(navigateSpy.calls.mostRecent().args).toEqual([
+			[
+				{
+					outlets: {
+						primary: null,
+						right_sidebar: null,
+					},
+				},
+			],
+			{ relativeTo: accountingWorkspaceRouteStub },
+		]);
 
 		store.dispatch(new SetActivePaymentAccount(replacementAccountId));
 		fixture.detectChanges();
@@ -227,7 +241,17 @@ describe('payments dashboard component', () => {
 		await fixture.whenStable();
 		fixture.detectChanges();
 
-		expect(navigateSpy.calls.mostRecent().args).toEqual([['/dashboard/accounting'], { relativeTo: null }]);
+		expect(navigateSpy.calls.mostRecent().args).toEqual([
+			[
+				{
+					outlets: {
+						primary: null,
+						right_sidebar: null,
+					},
+				},
+			],
+			{ relativeTo: accountingWorkspaceRouteStub },
+		]);
 		expect(getNativeText()).toContain('Select a payment account');
 		expect(getNativeElement().querySelector('payments-history')).toBeNull();
 		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(0);

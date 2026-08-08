@@ -116,13 +116,18 @@ describe('accounting route providers', () => {
 		expect(providerParent.providers).toBeDefined();
 		expect(childRoutes).toEqual([
 			jasmine.objectContaining({ path: 'operations', component: PaymentsDashboardComponent }),
-			jasmine.objectContaining({ path: '', component: PaymentAccountComponent }),
+			jasmine.objectContaining({ path: '', component: PaymentAccountComponent, pathMatch: 'full' }),
 			jasmine.objectContaining({
 				path: 'operations',
 				component: AccountingOperationsCrudComponent,
 				outlet: 'right_sidebar',
 			}),
-			jasmine.objectContaining({ path: '', component: PaymentAccountCrudComponent, outlet: 'right_sidebar' }),
+			jasmine.objectContaining({
+				path: '',
+				component: PaymentAccountCrudComponent,
+				outlet: 'right_sidebar',
+				pathMatch: 'full',
+			}),
 		]);
 		expect(childRoutes.every(route => route.providers === undefined)).toBeTrue();
 	});
@@ -345,7 +350,7 @@ describe('accounting lazy route and named-outlet activation', () => {
 				path: '',
 				children: [
 					jasmine.objectContaining({ path: 'operations', component: PaymentsDashboardComponent }),
-					jasmine.objectContaining({ path: '', component: PaymentAccountComponent }),
+					jasmine.objectContaining({ path: '', component: PaymentAccountComponent, pathMatch: 'full' }),
 					jasmine.objectContaining({
 						path: 'operations',
 						outlet: 'right_sidebar',
@@ -355,6 +360,7 @@ describe('accounting lazy route and named-outlet activation', () => {
 						path: '',
 						outlet: 'right_sidebar',
 						component: PaymentAccountCrudComponent,
+						pathMatch: 'full',
 					}),
 				],
 			})

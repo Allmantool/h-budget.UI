@@ -12,34 +12,39 @@
 				color="primary"
 				(click)="createNewPaymentAccount()"
 				aria-label="Add a payment account"
+				matTooltip="Add payment account"
 			>
 				<mat-icon>add</mat-icon>
 			</button>
 		</mat-list-item>
 		<mat-list-item
-			[disabled]="isAnyPaymentAccountSelected"
+			[disabled]="isPaymentAccountSelectionMissing"
 			role="listitem"
 			class="payment-accounts-menu--item"
 		>
 			<button
 				mat-fab
 				color="warn"
+				[disabled]="isPaymentAccountSelectionMissing"
 				(click)="removePaymentAccount()"
 				aria-label="Delete the payment account"
+				matTooltip="Delete payment account"
 			>
 				<mat-icon>delete</mat-icon>
 			</button>
 		</mat-list-item>
 		<mat-list-item
-			[disabled]="isAnyPaymentAccountSelected"
+			[disabled]="isPaymentAccountSelectionMissing"
 			role="listitem"
 			class="payment-accounts-menu--item"
 		>
 			<button
 				mat-fab
 				color="accent"
+				[disabled]="isPaymentAccountSelectionMissing"
 				(click)="updatePaymentAccount()"
 				aria-label="Edit the payment account"
+				matTooltip="Edit payment account"
 			>
 				<mat-icon>edit</mat-icon>
 			</button>

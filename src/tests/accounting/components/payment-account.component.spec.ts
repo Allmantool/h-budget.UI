@@ -26,7 +26,9 @@ describe('payment account component', () => {
 	let paymentAccountsProviderSpy: jasmine.SpyObj<DefaultPaymentAccountsProvider>;
 	let routerSpy: jasmine.SpyObj<Router>;
 
-	const activatedRouteStub = {} as ActivatedRoute;
+	const accountingWorkspaceRouteStub = {} as ActivatedRoute;
+	const providerRouteStub = { parent: accountingWorkspaceRouteStub } as ActivatedRoute;
+	const activatedRouteStub = { parent: providerRouteStub } as ActivatedRoute;
 	const walletAccountId = '24a07833-5cf5-4885-b09d-32c089fac4dd';
 	const virtualAccountId = '0879167a-a6e8-4518-9850-4dd87a4e5be6';
 	const loanAccountId = 'fe19b48a-5510-481f-9cde-2fb29c9dd209';
@@ -163,7 +165,7 @@ describe('payment account component', () => {
 					},
 				},
 			],
-			{ relativeTo: activatedRouteStub },
+			{ relativeTo: accountingWorkspaceRouteStub },
 		]);
 	});
 
