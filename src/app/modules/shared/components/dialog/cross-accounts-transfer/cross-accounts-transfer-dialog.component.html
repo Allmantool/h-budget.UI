@@ -1,106 +1,244 @@
-<!-- eslint-disable prettier/prettier -->
-<div class="dialog-content">
-	<h1
-		mat-dialog-title
-		class="transfer-dialog-title"
-	>
-		{{ title }}
-		<span (click)="close()">
-			<mat-icon>close</mat-icon>
-		</span>
-	</h1>
-	<mat-dialog-content class="dialog-body">
+<div class="cross-account-transfer-dialog">
+	<h1 mat-dialog-title>{{ title }}</h1>
+	<mat-divider></mat-divider>
+
+	<mat-dialog-content class="cross-account-transfer-dialog__body">
 		<mat-stepper
-			labelPosition="bottom"
 			[linear]="true"
+			(selectionChange)="selectedStepIndexSignal.set($event.selectedIndex)"
 			#stepper
 		>
-			<mat-step [stepControl]="baseTransferStepFg">
+			<mat-step [stepControl]="transferDetailsStepFg">
+				<ng-template matStepLabel>Transfer details</ng-template>
 				<form
-					[formGroup]="baseTransferStepFg"
-					class="initial-transfer-dialog-form"
+					[formGroup]="transferDetailsStepFg"
+					class="cross-account-transfer-dialog__form"
 				>
-					<ng-template matStepLabel>Fill initial transfer details in</ng-template>
-					<app-form-field
-						formControlName="transferDirections"
-						[fieldType]="'SELECT'"
-						[title]="'Transfer direction:'"
-						[defaultValue]="getTransferDirections()[0]"
-						[selectOptions]="getTransferDirections()"
-						class="form-input-item"
-					></app-form-field>
+					<h2 class="cross-account-transfer-dialog__heading">Transfer details</h2>
+					@if (activePaymentAccountSignal(); as activeAccount) {
+					<section
+						class="cross-account-transfer-dialog__account-context"
+						aria-labelledby="current-account-heading"
+					>
+						<div>
+							<h3
+								id="current-account-heading"
+								class="cross-account-transfer-dialog__context-label"
+							>
+								Current account
+							</h3>
+							<strong>{{ activeAccount.emitter }}</strong>
+							<span>{{ getAccountTypeLabel(activeAccount) }} · {{ activeAccount.currency }}</span>
+						</div>
+						<div class="cross-account-transfer-dialog__balance">
+							<span>Balance</span>
+							<strong>{{ activeAccount.balance }} {{ activeAccount.currency }}</strong>
+						</div>
+					</section>
+					}
 
-					<div class="transfer-date-section">
-						<app-datepicker
-							formControlName="operationDate"
-							[disabled]="false"
-							placeholder="Choose a opeation date"
-							(onDateChanged)="updateTransferDate($event)"
-						></app-datepicker>
+					<fieldset class="cross-account-transfer-dialog__direction">
+						<legend>Direction</legend>
+						<mat-button-toggle-group
+							formControlName="transferDirection"
+							aria-label="Transfer direction"
+						>
+							<mat-button-toggle value="In">Send from current account</mat-button-toggle>
+							<mat-button-toggle value="Out">Receive into current account</mat-button-toggle>
+						</mat-button-toggle-group>
+					</fieldset>
+
+					<div class="cross-account-transfer-dialog__fields">
+						<mat-form-field
+							appearance="outline"
+							class="cross-account-transfer-dialog__field cross-account-transfer-dialog__field--counterpart"
+						>
+							<mat-label>{{ counterpartAccountLabelSignal() }}</mat-label>
+							<mat-select formControlName="targetAccountId">
+								@for (account of availableAccountsSignal(); track account.key?.toString()) {
+								<mat-option [value]="account.key?.toString()">
+									{{ getAccountLabel(account) }}
+								</mat-option>
+								}
+							</mat-select>
+							@if (transferDetailsStepFg.controls.targetAccountId.touched &&
+							transferDetailsStepFg.controls.targetAccountId.invalid) {
+							<mat-error>Choose another payment account.</mat-error>
+							}
+						</mat-form-field>
+
+						<mat-form-field
+							appearance="outline"
+							class="cross-account-transfer-dialog__field"
+						>
+							<mat-label>Amount *</mat-label>
+							<input
+								matInput
+								type="number"
+								step="any"
+								formControlName="transferAmount"
+							/>
+							@if (fromAccountSignal(); as fromAccount) {
+							<span matTextSuffix>{{ fromAccount.currency }}</span>
+							} @if (transferDetailsStepFg.controls.transferAmount.touched &&
+							transferDetailsStepFg.controls.transferAmount.invalid) {
+							<mat-error>Enter a transfer amount.</mat-error>
+							}
+						</mat-form-field>
+
+						<mat-form-field
+							appearance="outline"
+							class="cross-account-transfer-dialog__field"
+						>
+							<mat-label>Transfer date *</mat-label>
+							<input
+								matInput
+								[matDatepicker]="picker"
+								formControlName="operationDate"
+							/>
+							<mat-datepicker-toggle
+								matIconSuffix
+								[for]="picker"
+							></mat-datepicker-toggle>
+							<mat-datepicker #picker></mat-datepicker>
+							@if (transferDetailsStepFg.controls.operationDate.touched &&
+							transferDetailsStepFg.controls.operationDate.invalid) {
+							<mat-error>Choose a transfer date.</mat-error>
+							}
+						</mat-form-field>
 					</div>
 
-					<app-form-field
-						formControlName="targetAccount"
-						[fieldType]="'SELECT'"
-						[title]="'Target payment account:'"
-						[defaultValue]="targetPaymentAccountTitlesSignal()[0]"
-						[selectOptions]="targetPaymentAccountTitlesSignal()"
-						class="form-input-item"
-					></app-form-field>
+					@if (fromAccountSignal(); as fromAccount) { @if (toAccountSignal(); as toAccount) {
+					<section
+						class="cross-account-transfer-dialog__account-flow"
+						aria-label="Transfer account flow"
+					>
+						<div>
+							<span>From</span>
+							<strong>{{ fromAccount.emitter }}</strong>
+							<small>{{ fromAccount.currency }}</small>
+						</div>
+						<mat-icon
+							class="cross-account-transfer-dialog__flow-arrow"
+							aria-hidden="true"
+						>
+							arrow_forward
+						</mat-icon>
+						<div>
+							<span>To</span>
+							<strong>{{ toAccount.emitter }}</strong>
+							<small>{{ toAccount.currency }}</small>
+						</div>
+					</section>
+					} }
 				</form>
-				<div>
-					<button
-						mat-button
-						matStepperNext
-						(click)="getMultiplier()"
-					>
-						Next
-					</button>
-				</div>
 			</mat-step>
-			<mat-step [stepControl]="confirmStepFg">
-				<ng-template matStepLabel>Confirm transfer</ng-template>
-				<div>
-					<form
-						[formGroup]="confirmStepFg"
-						class="confirm-transfer-dialog-form"
-					>
-						<app-form-field
-							formControlName="currencyRate"
-							[fieldType]="'INPUT'"
-							[title]="'Currency rate:'"
-							class="form-input-item"
-						></app-form-field>
-						<app-form-field
-							formControlName="transferAmount"
-							[fieldType]="'INPUT'"
-							[title]="'Transfer amount:'"
-							class="form-input-item"
-						></app-form-field>
-					</form>
-					<div class="transfer-summary">
-						@for (item of this.transferSummarySignal(); track item) {
-						<span>{{item}}</span>
+
+			<mat-step>
+				<ng-template matStepLabel>Review &amp; transfer</ng-template>
+				<section class="cross-account-transfer-dialog__review">
+					<h2 class="cross-account-transfer-dialog__heading">Review transfer</h2>
+					@if (fromAccountSignal(); as fromAccount) { @if (toAccountSignal(); as toAccount) {
+					<div class="cross-account-transfer-dialog__review-flow">
+						<div>
+							<span>From</span>
+							<strong>{{ fromAccount.emitter }}</strong>
+							<small>{{ getAccountTypeLabel(fromAccount) }} · {{ fromAccount.currency }}</small>
+						</div>
+						<mat-icon
+							class="cross-account-transfer-dialog__flow-arrow"
+							aria-hidden="true"
+						>
+							arrow_forward
+						</mat-icon>
+						<div>
+							<span>To</span>
+							<strong>{{ toAccount.emitter }}</strong>
+							<small>{{ getAccountTypeLabel(toAccount) }} · {{ toAccount.currency }}</small>
+						</div>
+					</div>
+					<dl class="cross-account-transfer-dialog__review-list">
+						<div>
+							<dt>Amount</dt>
+							<dd>{{ transferAmountSignal() }} {{ fromAccount.currency }}</dd>
+						</div>
+						@if (fromAccount.currency !== toAccount.currency && destinationAmountSignal() !== null) {
+						<div>
+							<dt>Exchange rate</dt>
+							<dd>
+								1 {{ fromAccount.currency }} = {{ currencyMultiplierSignal() }} {{ toAccount.currency }}
+							</dd>
+						</div>
+						<div>
+							<dt>Received</dt>
+							<dd>{{ destinationAmountSignal() }} {{ toAccount.currency }}</dd>
+						</div>
 						}
-					</div>
-					<div class="confirm-transfer-buttons">
-						<button
-							mat-button
-							matStepperPrevious
-						>
-							Back
-						</button>
-						<button
-							mat-button
-							(click)="applyTransfer()"
-						>
-							Confirm transfer
-						</button>
-					</div>
-				</div>
+						<div>
+							<dt>Transfer date</dt>
+							<dd>{{ operationDateSignal() | date: 'd MMM y' }}</dd>
+						</div>
+					</dl>
+					} }
+				</section>
 			</mat-step>
 		</mat-stepper>
 	</mat-dialog-content>
+
+	@if (errorMessageSignal()) {
+	<div
+		class="cross-account-transfer-dialog__error"
+		role="alert"
+	>
+		{{ errorMessageSignal() }}
+	</div>
+	}
+	<mat-divider></mat-divider>
+	<div
+		mat-dialog-actions
+		class="cross-account-transfer-dialog__actions"
+	>
+		<button
+			mat-button
+			type="button"
+			[disabled]="isLoadingSignal() || isPreparingSignal()"
+			(click)="close()"
+		>
+			Cancel
+		</button>
+		<div class="cross-account-transfer-dialog__step-actions">
+			@if (selectedStepIndexSignal() > 0) {
+			<button
+				mat-button
+				type="button"
+				[disabled]="isLoadingSignal()"
+				(click)="previous(stepper)"
+			>
+				Back
+			</button>
+			} @if (selectedStepIndexSignal() === 0) {
+			<button
+				mat-raised-button
+				color="primary"
+				type="button"
+				[disabled]="isPreparingSignal()"
+				(click)="next(stepper)"
+			>
+				{{ isPreparingSignal() ? 'Preparing…' : 'Next' }}
+			</button>
+			} @else {
+			<button
+				mat-raised-button
+				color="primary"
+				type="button"
+				[disabled]="isLoadingSignal()"
+				(click)="applyTransfer()"
+			>
+				{{ isLoadingSignal() ? 'Transferring…' : 'Transfer' }}
+			</button>
+			}
+		</div>
+	</div>
 </div>
 
 <progress-bar [isLoading]="isLoadingSignal()"></progress-bar>

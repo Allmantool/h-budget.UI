@@ -1,39 +1,51 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { ENTER } from '@angular/cdk/keycodes';
-import { ChangeDetectionStrategy, Component, computed, Inject, signal, Signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { MatStepperModule } from '@angular/material/stepper';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
+import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 
 import _ from 'lodash';
 
-import { Select, Store } from '@ngxs/store';
-import { map, Observable, switchMap, take, tap } from 'rxjs';
+import { Store } from '@ngxs/store';
+import { EMPTY, finalize, switchMap, take } from 'rxjs';
 
 import { Result } from '../../../../../../core/result';
 import { PaymentsHistoryProvider } from '../../../../../../data/providers/accounting/payments-history.provider';
 import { CurrencyExchangeService } from '../../../../../../data/providers/rates/currency-exchange.service';
+import { AccountTypes } from '../../../../../../domain/models/accounting/account-types';
 import { ICrossAccountsTransferModel } from '../../../../../../domain/models/accounting/cross-accounts-transfer.model';
-import { MoneyTransferDirections } from '../../../../../../domain/models/accounting/money-transfer-directions';
 import { IPaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';
 import { ICrossAccountsTransferResponse } from '../../../../../../domain/models/accounting/responses/cross-accounts-transfer.response';
 import { OperationTypes } from '../../../../../../domain/types/operation.types';
-import { CurrencyAbbreviations } from '../../../constants/rates-abbreviations';
-import { RatesGridDefaultOptions } from '../../../constants/rates-grid-default-options';
 import { DialogContainer } from '../../../models/dialog-container';
-import { SelectDropdownOptions } from '../../../models/select-dropdown-options';
 import { Add } from '../../../store/states/accounting/actions/payment-operation.actions';
 import {
 	getActivePaymentAccount,
 	getActivePaymentAccountId,
 	getPaymentAccounts,
 } from '../../../store/states/accounting/selectors/payment-account.selector';
-import { DatepickerComponent } from '../../datepicker/app-datepicker.component';
-import { AppFormFieldComponent } from '../../form-field/app-form-field.component';
 import { ProgressBarComponent } from '../../progress-bar/progress-bar.component';
+
+type TransferDirection = 'In' | 'Out';
+
+type TransferDetailsFormControls = {
+	transferDirection: FormControl<TransferDirection>;
+	targetAccountId: FormControl<string | null>;
+	operationDate: FormControl<Date | null>;
+	transferAmount: FormControl<number | null>;
+};
+
+const requiredTransferField: ValidatorFn = control => Validators.required(control);
 
 @Component({
 	selector: 'cross-accounts-transfer-dialog',
@@ -42,238 +54,207 @@ import { ProgressBarComponent } from '../../progress-bar/progress-bar.component'
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
 	imports: [
-		AppFormFieldComponent,
-		DatepickerComponent,
+		DatePipe,
 		MatButtonModule,
+		MatButtonToggleModule,
+		MatDatepickerModule,
 		MatDialogModule,
+		MatDividerModule,
+		MatFormFieldModule,
 		MatIconModule,
+		MatInputModule,
+		MatNativeDateModule,
+		MatSelectModule,
 		MatStepperModule,
 		ProgressBarComponent,
 		ReactiveFormsModule,
 	],
 })
 export class CrossAccountsTransferDialogComponent {
-	private dialogConfiguration: DialogContainer<ICrossAccountsTransferModel, Result<ICrossAccountsTransferResponse>>;
-	public isLoadingSignal = signal<boolean>(false);
+	private readonly store = inject(Store);
+	private readonly exchangeService = inject(CurrencyExchangeService);
+	private readonly paymentHistoryService = inject(PaymentsHistoryProvider);
+	private readonly dialogRef = inject(MatDialogRef<CrossAccountsTransferDialogComponent>);
+	private readonly dialogConfiguration =
+		inject<DialogContainer<ICrossAccountsTransferModel, Result<ICrossAccountsTransferResponse>>>(MAT_DIALOG_DATA);
 
-	public readonly separatorKeysCodes: number[] = [ENTER];
-	public isSaveDisabled: boolean = true;
-	public title: string;
-	public baseTransferStepFg: UntypedFormGroup = this.fb.group({
-		transferDirections: new UntypedFormControl(),
-		targetAccount: new UntypedFormControl(),
-		operationDate: new UntypedFormControl(new Date()),
+	public readonly title = this.dialogConfiguration.title;
+	public readonly isLoadingSignal = signal(false);
+	public readonly isPreparingSignal = signal(false);
+	public readonly selectedStepIndexSignal = signal(0);
+	public readonly errorMessageSignal = signal('');
+	public readonly currencyMultiplierSignal = signal<number | null>(null);
+	public readonly transferDetailsStepFg = new FormGroup<TransferDetailsFormControls>({
+		transferDirection: new FormControl<TransferDirection>('In', {
+			nonNullable: true,
+			validators: requiredTransferField,
+		}),
+		targetAccountId: new FormControl<string | null>(null, requiredTransferField),
+		operationDate: new FormControl<Date | null>(new Date(), requiredTransferField),
+		transferAmount: new FormControl<number | null>(null, requiredTransferField),
+	});
+	public readonly paymentAccountsSignal = toSignal(this.store.select(getPaymentAccounts), { initialValue: [] });
+	public readonly activePaymentAccountIdSignal = toSignal(this.store.select(getActivePaymentAccountId), {
+		initialValue: '',
+	});
+	public readonly activePaymentAccountSignal = toSignal(this.store.select(getActivePaymentAccount), {
+		initialValue: undefined,
+	});
+	public readonly transferDirectionSignal = toSignal(
+		this.transferDetailsStepFg.controls.transferDirection.valueChanges,
+		{
+			initialValue: this.transferDetailsStepFg.controls.transferDirection.value,
+		}
+	);
+	public readonly targetAccountIdSignal = toSignal(this.transferDetailsStepFg.controls.targetAccountId.valueChanges, {
+		initialValue: this.transferDetailsStepFg.controls.targetAccountId.value,
+	});
+	public readonly operationDateSignal = toSignal(this.transferDetailsStepFg.controls.operationDate.valueChanges, {
+		initialValue: this.transferDetailsStepFg.controls.operationDate.value,
+	});
+	public readonly transferAmountSignal = toSignal(this.transferDetailsStepFg.controls.transferAmount.valueChanges, {
+		initialValue: this.transferDetailsStepFg.controls.transferAmount.value,
+	});
+	public readonly counterpartAccountSignal = computed(() =>
+		this.paymentAccountsSignal().find(account => account.key?.toString() === this.targetAccountIdSignal())
+	);
+	public readonly availableAccountsSignal = computed(() =>
+		this.paymentAccountsSignal().filter(account => account.key?.toString() !== this.activePaymentAccountIdSignal())
+	);
+	public readonly isSendingFromActiveAccountSignal = computed(() => this.transferDirectionSignal() === 'In');
+	public readonly fromAccountSignal = computed(() =>
+		this.isSendingFromActiveAccountSignal() ? this.activePaymentAccountSignal() : this.counterpartAccountSignal()
+	);
+	public readonly toAccountSignal = computed(() =>
+		this.isSendingFromActiveAccountSignal() ? this.counterpartAccountSignal() : this.activePaymentAccountSignal()
+	);
+	public readonly counterpartAccountLabelSignal = computed(() =>
+		this.isSendingFromActiveAccountSignal() ? 'Transfer to *' : 'Transfer from *'
+	);
+	public readonly destinationAmountSignal = computed(() => {
+		const amount = this.transferAmountSignal();
+		const multiplier = this.currencyMultiplierSignal();
+
+		return amount === null || multiplier === null ? null : _.round(amount * multiplier, 3);
 	});
 
-	public confirmStepFg: UntypedFormGroup;
-
-	@Select(getPaymentAccounts)
-	paymentAccounts$!: Observable<IPaymentAccountModel[]>;
-
-	@Select(getActivePaymentAccountId)
-	paymentAccountId$!: Observable<string>;
-
-	@Select(getActivePaymentAccount)
-	activePaymentAccount$!: Observable<IPaymentAccountModel>;
-
-	public targetPaymentAccountTitlesSignal: Signal<SelectDropdownOptions[]>;
-	public paymentAccountsSignal: Signal<IPaymentAccountModel[]>;
-	public paymentAccountIdSignal: Signal<string>;
-	public activePaymentAccountSignal: Signal<IPaymentAccountModel>;
-	public targetPaymentAccountSignal: Signal<IPaymentAccountModel | undefined>;
-
-	public targetPaymentAccountOptionSignal: Signal<SelectDropdownOptions | undefined>;
-
-	public transferAmountSignal: Signal<number>;
-
-	public currencyMultiplierSignal: Signal<number>;
-
-	public transferDirectionsOptionSignal: Signal<SelectDropdownOptions | null | undefined>;
-
-	public transferSummarySignal: Signal<string[]>;
-
-	public operationDateSignal: Signal<Date>;
-
-	public inSenderSignal: Signal<boolean>;
-
-	constructor(
-		private readonly store: Store,
-		private readonly fb: UntypedFormBuilder,
-		private readonly exchangeService: CurrencyExchangeService,
-		private readonly paymentHistoryService: PaymentsHistoryProvider,
-		private dialogRef: MatDialogRef<CrossAccountsTransferDialogComponent>,
-		@Inject(MAT_DIALOG_DATA)
-		dialogConfiguration: DialogContainer<ICrossAccountsTransferModel, Result<ICrossAccountsTransferResponse>>
-	) {
-		this.title = dialogConfiguration.title;
-		this.dialogConfiguration = dialogConfiguration;
-		this.paymentAccountsSignal = toSignal(this.paymentAccounts$, { initialValue: [] });
-		this.paymentAccountIdSignal = toSignal(this.paymentAccountId$, { initialValue: '' });
-		this.activePaymentAccountSignal = toSignal(this.activePaymentAccount$, {
-			initialValue: {} as IPaymentAccountModel,
-		});
-
-		this.confirmStepFg = this.fb.group({
-			currencyRate: new UntypedFormControl(),
-			transferAmount: new UntypedFormControl(),
-		});
-
-		this.inSenderSignal = computed(() => this.transferDirectionsOptionSignal()?.value === 'In');
-
-		this.targetPaymentAccountTitlesSignal = computed(() =>
-			_.chain(this.paymentAccountsSignal())
-				.filter(acc => acc.key?.toString() !== this.paymentAccountIdSignal())
-				.map(
-					acc =>
-						new SelectDropdownOptions({
-							description: `[${acc.currency}] ${acc.emitter} | ${acc.description}`,
-							value: acc.key?.toString(),
-						})
-				)
-				.value()
-		);
-
-		this.targetPaymentAccountSignal = computed(() =>
-			_.chain(this.paymentAccountsSignal())
-				.find(acc => acc.key?.toString() === this.targetPaymentAccountOptionSignal()?.value)
-				.value()
-		);
-
-		this.transferSummarySignal = computed(() => {
-			const activePaymentAccount = this.activePaymentAccountSignal();
-			const targetPaymentAccount = this.targetPaymentAccountSignal();
-
-			if (!activePaymentAccount?.currency || !targetPaymentAccount?.currency) {
-				return [];
-			}
-
-			const transferDirection = this.inSenderSignal()
-				? `Conversion from '${activePaymentAccount.currency}' to '${targetPaymentAccount.currency}'`
-				: `Conversion from '${targetPaymentAccount.currency}' to '${activePaymentAccount.currency}'`;
-
-			const originPaymentAccountInfo = `'${activePaymentAccount.emitter} | ${activePaymentAccount.description}'
-				after: '${_.round(activePaymentAccount.balance - this.transferAmountSignal(), RatesGridDefaultOptions.RATE_DIFF_PRECISION)}' ('${activePaymentAccount.currency}')`;
-
-			const targetCurrencyTransferAmount = _.round(
-				this.currencyMultiplierSignal() * this.transferAmountSignal(),
-				3
-			);
-
-			const targetPaymentAccountInfo = `'${targetPaymentAccount.emitter} | ${targetPaymentAccount.description}'
-				after: '${_.round(targetPaymentAccount.balance + targetCurrencyTransferAmount, RatesGridDefaultOptions.RATE_DIFF_PRECISION)}' ('${targetPaymentAccount.currency}')`;
-
-			return [
-				transferDirection,
-				`Transfer amount ${targetCurrencyTransferAmount} ('${targetPaymentAccount.currency}')`,
-				`Sender ${this.inSenderSignal() ? originPaymentAccountInfo : targetPaymentAccountInfo}`,
-				`Receiver ${this.inSenderSignal() ? targetPaymentAccountInfo : originPaymentAccountInfo}`,
-			];
-		});
-
-		this.transferDirectionsOptionSignal = toSignal(
-			this.baseTransferStepFg.get('transferDirections')!.valueChanges,
-			{
-				initialValue: this.getTransferDirections()[0],
-			}
-		);
-
-		this.operationDateSignal = toSignal(this.baseTransferStepFg.get('operationDate')!.valueChanges, {
-			initialValue: this.baseTransferStepFg.get('operationDate')!.value,
-		});
-
-		this.targetPaymentAccountOptionSignal = toSignal(this.baseTransferStepFg.get('targetAccount')!.valueChanges, {
-			initialValue: this.targetPaymentAccountTitlesSignal()[0],
-		});
-
-		this.transferAmountSignal = toSignal(this.confirmStepFg.get('transferAmount')!.valueChanges, {
-			initialValue: 0,
-		});
-
-		this.currencyMultiplierSignal = toSignal(this.confirmStepFg.get('currencyRate')!.valueChanges, {
-			initialValue: 0,
-		});
-	}
-
-	public getTransferDirections(): SelectDropdownOptions[] {
-		return _.map(
-			Object.keys(MoneyTransferDirections).filter(v => isNaN(Number(v))),
-			i => new SelectDropdownOptions({ value: i, description: i })
-		);
-	}
-
-	public close() {
+	public close(): void {
 		this.dialogRef.close();
 	}
 
-	public updateTransferDate(operationDate: Date | null) {
-		this.exchangeService
-			.getExchange({
-				operationDate: operationDate!,
-				originCurrency: this.activePaymentAccountSignal().currency,
-				targetCurrency: CurrencyAbbreviations.USD,
-				amount: 11.22,
-			})
-			.pipe(tap(response => console.log(response)))
-			.subscribe();
-	}
-
-	public getMultiplier(): void {
-		const targetPaymentAccount = this.targetPaymentAccountSignal();
-
-		if (!targetPaymentAccount) {
+	public next(stepper: MatStepper): void {
+		if (this.isPreparingSignal() || this.transferDetailsStepFg.invalid) {
+			this.transferDetailsStepFg.markAllAsTouched();
 			return;
 		}
 
+		const sourceAccount = this.fromAccountSignal();
+		const destinationAccount = this.toAccountSignal();
+		const operationDate = this.operationDateSignal();
+
+		if (!sourceAccount || !destinationAccount || !operationDate) {
+			this.transferDetailsStepFg.markAllAsTouched();
+			return;
+		}
+
+		this.errorMessageSignal.set('');
+		this.isPreparingSignal.set(true);
 		this.exchangeService
 			.getExchangeMultiplier({
-				originCurrency: this.inSenderSignal()
-					? this.activePaymentAccountSignal().currency
-					: targetPaymentAccount.currency,
-				targetCurrency: this.inSenderSignal()
-					? targetPaymentAccount.currency
-					: this.activePaymentAccountSignal().currency,
-				operationDate: this.operationDateSignal(),
+				originCurrency: sourceAccount.currency,
+				targetCurrency: destinationAccount.currency,
+				operationDate,
 			})
-			.pipe(take(1))
-			.subscribe(response => this.confirmStepFg.patchValue({ currencyRate: response.payload }));
+			.pipe(
+				take(1),
+				finalize(() => this.isPreparingSignal.set(false))
+			)
+			.subscribe({
+				next: response => {
+					if (!response.isSucceeded) {
+						this.errorMessageSignal.set('Unable to prepare the transfer. Please try again.');
+						return;
+					}
+
+					this.currencyMultiplierSignal.set(response.payload);
+					stepper.next();
+				},
+				error: () => this.errorMessageSignal.set('Unable to prepare the transfer. Please try again.'),
+			});
+	}
+
+	public previous(stepper: MatStepper): void {
+		stepper.previous();
 	}
 
 	public applyTransfer(): void {
-		const targetPaymentAccount = this.targetPaymentAccountSignal();
-
-		if (!targetPaymentAccount) {
+		if (this.isLoadingSignal()) {
 			return;
 		}
 
-		this.isLoadingSignal.set(true);
+		const transfer = this.createTransfer();
 
+		if (!transfer) {
+			this.transferDetailsStepFg.markAllAsTouched();
+			return;
+		}
+
+		this.errorMessageSignal.set('');
+		this.isLoadingSignal.set(true);
 		this.dialogConfiguration
-			.onSubmit({
-				sender: this.inSenderSignal() ? this.activePaymentAccountSignal().key : targetPaymentAccount.key,
-				recipient: this.inSenderSignal() ? targetPaymentAccount.key : this.activePaymentAccountSignal().key,
-				amount: this.transferAmountSignal(),
-				multiplier: this.currencyMultiplierSignal(),
-				operationAt: this.operationDateSignal(),
-			} as ICrossAccountsTransferModel)
+			.onSubmit(transfer)
 			.pipe(
 				take(1),
-				map(responseResult => responseResult.payload),
-				switchMap(transferResponse =>
-					this.paymentHistoryService.GetHistoryOperationById(
-						this.activePaymentAccountSignal().key!,
-						transferResponse.paymentOperationId
-					)
-				)
+				switchMap(response => {
+					if (!response.isSucceeded) {
+						this.errorMessageSignal.set('Unable to complete the transfer. Please try again.');
+						return EMPTY;
+					}
+
+					const activePaymentAccountId = this.activePaymentAccountSignal()?.key;
+
+					if (!activePaymentAccountId) {
+						this.errorMessageSignal.set('Unable to complete the transfer. Please try again.');
+						return EMPTY;
+					}
+
+					return this.paymentHistoryService.GetHistoryOperationById(
+						activePaymentAccountId,
+						response.payload.paymentOperationId
+					);
+				}),
+				finalize(() => this.isLoadingSignal.set(false))
 			)
-			.subscribe(operationHistoryRecord => {
-				this.isLoadingSignal.set(false);
-
-				const transferOperation = operationHistoryRecord.record;
-				transferOperation.operationType = OperationTypes.Transfer;
-
-				this.store.dispatch(new Add(transferOperation));
-
-				this.dialogRef.close();
+			.subscribe({
+				next: operationHistoryRecord => {
+					const transferOperation = operationHistoryRecord.record;
+					transferOperation.operationType = OperationTypes.Transfer;
+					this.store.dispatch(new Add(transferOperation));
+					this.dialogRef.close();
+				},
+				error: () => this.errorMessageSignal.set('Unable to complete the transfer. Please try again.'),
 			});
+	}
+
+	public getAccountLabel(account: IPaymentAccountModel): string {
+		return `${account.emitter} · ${account.description} · ${account.currency}`;
+	}
+
+	public getAccountTypeLabel(account: IPaymentAccountModel): string {
+		return account.type === AccountTypes.WalletCache ? 'Wallet / cash' : AccountTypes[account.type];
+	}
+
+	private createTransfer(): ICrossAccountsTransferModel | undefined {
+		const sender = this.fromAccountSignal()?.key;
+		const recipient = this.toAccountSignal()?.key;
+		const amount = this.transferAmountSignal();
+		const multiplier = this.currencyMultiplierSignal();
+		const operationAt = this.operationDateSignal();
+
+		if (!sender || !recipient || amount === null || multiplier === null || !operationAt) {
+			return undefined;
+		}
+
+		return { sender, recipient, amount, multiplier, operationAt };
 	}
 }

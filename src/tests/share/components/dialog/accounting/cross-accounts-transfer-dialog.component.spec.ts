@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { TestBed } from '@angular/core/testing';
+
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatStepper } from '@angular/material/stepper';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { NgxsModule, Store } from '@ngxs/store';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subject, throwError } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
 import { CrossAccountsTransferDialogComponent } from '../../../../../app/modules/shared/components/dialog/cross-accounts-transfer/cross-accounts-transfer-dialog.component';
@@ -33,28 +34,26 @@ describe('cross-accounts-transfer-dialog.component', () => {
 	const transferOperationId = Guid.parse('24a07833-5cf5-4885-b09d-32c089fac4dd');
 	const operationDate = new Date(2024, 0, 11);
 
-	const paymentAccounts: IPaymentAccountModel[] = [
-		{
-			key: sourceAccountId,
-			type: AccountTypes.Virtual,
-			currency: 'BYN',
-			balance: 100,
-			emitter: 'Source bank',
-			description: 'Source account',
-		},
-		{
-			key: targetAccountId,
-			type: AccountTypes.Virtual,
-			currency: 'USD',
-			balance: 25,
-			emitter: 'Target bank',
-			description: 'Target account',
-		},
-	];
+	const sourceAccount: IPaymentAccountModel = {
+		key: sourceAccountId,
+		type: AccountTypes.Virtual,
+		currency: 'BYN',
+		balance: 100,
+		emitter: 'Source bank',
+		description: 'Source account',
+	};
+	const targetAccount: IPaymentAccountModel = {
+		key: targetAccountId,
+		type: AccountTypes.Virtual,
+		currency: 'USD',
+		balance: 25,
+		emitter: 'Target bank',
+		description: 'Target account',
+	};
 
+	let fixture: ComponentFixture<CrossAccountsTransferDialogComponent>;
 	let component: CrossAccountsTransferDialogComponent;
 	let store: Store;
-
 	let dialogRefSpy: jasmine.SpyObj<MatDialogRef<CrossAccountsTransferDialogComponent>>;
 	let exchangeServiceSpy: jasmine.SpyObj<CurrencyExchangeService>;
 	let paymentHistoryProviderSpy: jasmine.SpyObj<PaymentsHistoryProvider>;
@@ -66,12 +65,9 @@ describe('cross-accounts-transfer-dialog.component', () => {
 		dialogRefSpy = jasmine.createSpyObj<MatDialogRef<CrossAccountsTransferDialogComponent>>('MatDialogRef', [
 			'close',
 		]);
-
 		exchangeServiceSpy = jasmine.createSpyObj<CurrencyExchangeService>('exchangeService', {
-			getExchange: of(new Result<number>({ payload: 1 })),
-			getExchangeMultiplier: of(new Result<number>({ payload: 2.5 })),
+			getExchangeMultiplier: of(new Result<number>({ isSucceeded: true, payload: 2.5 })),
 		});
-
 		paymentHistoryProviderSpy = jasmine.createSpyObj<PaymentsHistoryProvider>('paymentHistoryProvider', {
 			GetHistoryOperationById: of({
 				balance: 125,
@@ -87,7 +83,6 @@ describe('cross-accounts-transfer-dialog.component', () => {
 				},
 			}),
 		});
-
 		submitSpy = jasmine
 			.createSpy<
 				(payload: ICrossAccountsTransferModel) => Observable<Result<ICrossAccountsTransferResponse>>
@@ -95,6 +90,7 @@ describe('cross-accounts-transfer-dialog.component', () => {
 			.and.returnValue(
 				of(
 					new Result<ICrossAccountsTransferResponse>({
+						isSucceeded: true,
 						payload: {
 							paymentAccountIds: [sourceAccountId, targetAccountId],
 							paymentOperationId: transferOperationId,
@@ -113,92 +109,108 @@ describe('cross-accounts-transfer-dialog.component', () => {
 				),
 			],
 			providers: [
-				{
-					provide: MatDialogRef,
-					useValue: dialogRefSpy,
-				},
+				{ provide: MatDialogRef, useValue: dialogRefSpy },
 				{
 					provide: MAT_DIALOG_DATA,
 					useValue: {
-						title: 'Cross accounts transfer',
+						title: 'Transfer money',
 						onSubmit: submitSpy,
 					} as DialogContainer<ICrossAccountsTransferModel, Result<ICrossAccountsTransferResponse>>,
 				},
-				{
-					provide: CurrencyExchangeService,
-					useValue: exchangeServiceSpy,
-				},
-				{
-					provide: PaymentsHistoryProvider,
-					useValue: paymentHistoryProviderSpy,
-				},
+				{ provide: CurrencyExchangeService, useValue: exchangeServiceSpy },
+				{ provide: PaymentsHistoryProvider, useValue: paymentHistoryProviderSpy },
 			],
 		}).compileComponents();
 
 		store = TestBed.inject(Store);
-		store.dispatch(new SetInitialPaymentAccounts(paymentAccounts));
+		store.dispatch(new SetInitialPaymentAccounts([sourceAccount, targetAccount]));
 		store.dispatch(new SetActivePaymentAccount(sourceAccountId.toString()));
 
-		component = TestBed.createComponent(CrossAccountsTransferDialogComponent).componentInstance;
+		fixture = TestBed.createComponent(CrossAccountsTransferDialogComponent);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
 	});
 
-	it('should create as a standalone TestBed import with the existing form structure', () => {
-		expect(component).toBeTruthy();
-		expect(component.title).toBe('Cross accounts transfer');
-		expect(component.baseTransferStepFg.contains('transferDirections')).toBeTrue();
-		expect(component.baseTransferStepFg.contains('targetAccount')).toBeTrue();
-		expect(component.baseTransferStepFg.contains('operationDate')).toBeTrue();
-		expect(component.confirmStepFg.contains('currencyRate')).toBeTrue();
-		expect(component.confirmStepFg.contains('transferAmount')).toBeTrue();
+	it('opens on transfer details with current account context and no final action', () => {
+		const text = getText();
+
+		expect(component.title).toBe('Transfer money');
+		expect(component.selectedStepIndexSignal()).toBe(0);
+		expect(component.transferDetailsStepFg.controls.transferDirection.value).toBe('In');
+		expect(component.transferDetailsStepFg.controls.operationDate.value).toEqual(jasmine.any(Date));
+		expect(text).toContain('Current account');
+		expect(text).toContain('Source bank');
+		expect(text).toContain('Send from current account');
+		expect(getButtonsByText('Transfer').length).toBe(0);
 	});
 
-	it('should preserve the current no-validator form eligibility', () => {
-		component.baseTransferStepFg.reset();
-		component.confirmStepFg.reset();
+	it('maps the existing In and Out values to the correct derived account flow', () => {
+		component.transferDetailsStepFg.patchValue({ targetAccountId: targetAccountId.toString() });
 
-		expect(component.baseTransferStepFg.valid).toBeTrue();
-		expect(component.confirmStepFg.valid).toBeTrue();
+		expect(component.fromAccountSignal()?.key?.toString()).toBe(sourceAccountId.toString());
+		expect(component.toAccountSignal()?.key?.toString()).toBe(targetAccountId.toString());
+		expect(component.counterpartAccountLabelSignal()).toBe('Transfer to *');
+
+		component.transferDetailsStepFg.patchValue({ transferDirection: 'Out' });
+
+		expect(component.fromAccountSignal()?.key?.toString()).toBe(targetAccountId.toString());
+		expect(component.toAccountSignal()?.key?.toString()).toBe(sourceAccountId.toString());
+		expect(component.counterpartAccountLabelSignal()).toBe('Transfer from *');
 	});
 
-	it('should exclude the active source account from target account options', () => {
-		const targetOptions = component.targetPaymentAccountTitlesSignal();
+	it('excludes the active account from counterpart options and requires transfer details before review', () => {
+		const stepperSpy = jasmine.createSpyObj<MatStepper>('MatStepper', ['next']);
 
-		expect(targetOptions.length).toBe(1);
-		expect(targetOptions[0].value).toBe(targetAccountId.toString());
+		expect(component.availableAccountsSignal().map(account => account.key?.toString())).toEqual([
+			targetAccountId.toString(),
+		]);
+
+		component.next(stepperSpy);
+
+		expect(stepperSpy.next).not.toHaveBeenCalled();
+		expect(component.transferDetailsStepFg.controls.targetAccountId.touched).toBeTrue();
+		expect(component.transferDetailsStepFg.controls.transferAmount.touched).toBeTrue();
 	});
 
-	it('should patch the exchange multiplier for the selected transfer direction and accounts', () => {
-		component.baseTransferStepFg.patchValue({
-			transferDirections: component.getTransferDirections()[0],
-			targetAccount: component.targetPaymentAccountTitlesSignal()[0],
-			operationDate,
-		});
+	it('prepares the multiplier and preserves the incoming request semantics before review', () => {
+		const stepperSpy = jasmine.createSpyObj<MatStepper>('MatStepper', ['next']);
+		setTransferDetails();
 
-		component.getMultiplier();
+		component.next(stepperSpy);
 
 		expect(exchangeServiceSpy.getExchangeMultiplier).toHaveBeenCalledWith({
 			originCurrency: 'BYN',
 			targetCurrency: 'USD',
 			operationDate,
 		});
-		expect(component.confirmStepFg.get('currencyRate')?.value).toBe(2.5);
+		expect(component.currencyMultiplierSignal()).toBe(2.5);
+		expect(component.destinationAmountSignal()).toBe(25);
+		expect(stepperSpy.next).toHaveBeenCalledTimes(1);
 	});
 
-	it('should submit the transfer payload, load history, dispatch the transfer record, and close', () => {
-		const dispatchSpy = spyOn(store, 'dispatch').and.callThrough();
+	it('shows the current transfer values on review and keeps details when returning', () => {
+		setTransferDetails();
+		component.currencyMultiplierSignal.set(2.5);
+		component.selectedStepIndexSignal.set(1);
+		fixture.detectChanges();
 
-		component.baseTransferStepFg.patchValue({
-			transferDirections: component.getTransferDirections()[0],
-			targetAccount: component.targetPaymentAccountTitlesSignal()[0],
-			operationDate,
-		});
-		component.confirmStepFg.patchValue({
-			currencyRate: 2.5,
-			transferAmount: 10,
-		});
+		expect(getText()).toContain('Review transfer');
+		expect(getText()).toContain('From');
+		expect(getText()).toContain('To');
+		expect(getText()).toContain('10 BYN');
+		expect(getText()).toContain('1 BYN = 2.5 USD');
+		expect(getText()).toContain('25 USD');
+		expect(component.transferDetailsStepFg.controls.targetAccountId.value).toBe(targetAccountId.toString());
+	});
+
+	it('submits exactly once with the preserved API payload and refreshes the existing active account history', () => {
+		const dispatchSpy = spyOn(store, 'dispatch').and.callThrough();
+		setTransferDetails();
+		component.currencyMultiplierSignal.set(2.5);
 
 		component.applyTransfer();
 
+		expect(submitSpy).toHaveBeenCalledTimes(1);
 		expect(submitSpy).toHaveBeenCalledWith({
 			sender: sourceAccountId,
 			recipient: targetAccountId,
@@ -215,9 +227,55 @@ describe('cross-accounts-transfer-dialog.component', () => {
 		expect(component.isLoadingSignal()).toBeFalse();
 	});
 
-	it('should close the dialog on cancel', () => {
-		component.close();
+	it('clears the loading state and preserves entered details when submission fails', () => {
+		setTransferDetails();
+		component.currencyMultiplierSignal.set(2.5);
+		submitSpy.and.returnValue(throwError(() => new Error('network failure')));
 
-		expect(dialogRefSpy.close).toHaveBeenCalled();
+		component.applyTransfer();
+
+		expect(component.isLoadingSignal()).toBeFalse();
+		expect(component.errorMessageSignal()).toBe('Unable to complete the transfer. Please try again.');
+		expect(component.transferDetailsStepFg.getRawValue()).toEqual({
+			transferDirection: 'In',
+			targetAccountId: targetAccountId.toString(),
+			operationDate,
+			transferAmount: 10,
+		});
 	});
+
+	it('prevents duplicate submission while a request is still pending', () => {
+		const submissionSubject = new Subject<Result<ICrossAccountsTransferResponse>>();
+		setTransferDetails();
+		component.currencyMultiplierSignal.set(2.5);
+		submitSpy.and.returnValue(submissionSubject);
+
+		component.applyTransfer();
+		component.applyTransfer();
+
+		expect(submitSpy).toHaveBeenCalledTimes(1);
+		expect(component.isLoadingSignal()).toBeTrue();
+
+		submissionSubject.error(new Error('network failure'));
+		expect(component.isLoadingSignal()).toBeFalse();
+	});
+
+	function setTransferDetails(): void {
+		component.transferDetailsStepFg.setValue({
+			transferDirection: 'In',
+			targetAccountId: targetAccountId.toString(),
+			operationDate,
+			transferAmount: 10,
+		});
+	}
+
+	function getText(): string {
+		return (fixture.nativeElement as HTMLElement).textContent?.replace(/\s+/g, ' ').trim() ?? '';
+	}
+
+	function getButtonsByText(text: string): HTMLButtonElement[] {
+		return Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button')).filter(
+			button => button.textContent?.replace(/\s+/g, ' ').trim() === text
+		);
+	}
 });

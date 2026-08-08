@@ -12,6 +12,7 @@ import { Observable } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
 import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
+import { SetActivePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
 import { getAccountPayments } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import {
 	getActivePaymentAccount,
@@ -104,6 +105,7 @@ export class PaymentsDashboardComponent implements OnInit {
 	}
 
 	public async navigateToPaymentAccountsAsync(): Promise<void> {
+		this.store.dispatch(new SetActivePaymentAccount(''));
 		this.store.dispatch(new SetActiveAccountingOperation(undefined));
 		await this.router.navigate(['/dashboard/accounting'], { relativeTo: null });
 	}

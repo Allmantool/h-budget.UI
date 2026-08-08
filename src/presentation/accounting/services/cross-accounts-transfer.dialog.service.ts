@@ -25,7 +25,7 @@ export class CrossAccountsTransferService {
 		};
 
 		config.data = {
-			title: 'Cross accounts money transfer',
+			title: 'Transfer money',
 			onSubmit: onSave,
 		};
 
