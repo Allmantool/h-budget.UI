@@ -29,6 +29,29 @@
 			<span>{{ activePaymentAccount.currency }}</span>
 		</div>
 	</div>
+	@if (transferProjectionSynchronizationService.isSynchronizing(activePaymentAccount.key)) {
+	<div
+		class="payments-dashboard__synchronization-status"
+		role="status"
+		aria-live="polite"
+		aria-busy="true"
+	>
+		<mat-progress-bar
+			class="payments-dashboard__synchronization-progress"
+			mode="indeterminate"
+			aria-label="Updating account balance and history"
+		></mat-progress-bar>
+		<span>Transfer completed. Updating balance and history…</span>
+	</div>
+	} @else if (transferProjectionSynchronizationService.isDelayed(activePaymentAccount.key)) {
+	<p
+		class="payments-dashboard__synchronization-status payments-dashboard__synchronization-status--delayed"
+		role="status"
+		aria-live="polite"
+	>
+		Transfer completed. Latest account data may still be updating.
+	</p>
+	}
 	<div class="payments-dashboard__summary">
 		<div class="payments-dashboard__summary-card">
 			<span class="payments-dashboard__summary-label">Operations</span>

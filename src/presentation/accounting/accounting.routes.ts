@@ -16,6 +16,7 @@ import { CrossAccountsTransferService } from './services/cross-accounts-transfer
 import { HandbooksService } from './services/handbooks.service';
 import { PaymentAccountDialogService } from './services/payment-account-dialog.service';
 import { PaymentsHistoryService } from './services/payments-history.service';
+import { TransferProjectionSynchronizationService } from './services/transfer-projection-synchronization.service';
 import { DialogsSharedModule } from '../../app/modules/shared/dialogs.shared.module';
 import { AccountingOperationsTableState } from '../../app/modules/shared/store/states/accounting/accounting-operations-table.state';
 import { PaymentAccountState } from '../../app/modules/shared/store/states/accounting/payment-account.state';
@@ -54,6 +55,7 @@ export const accountingRoutes: Routes = [
 			ContractorsDialogService,
 			PaymentAccountDialogService,
 			CrossAccountsTransferService,
+			TransferProjectionSynchronizationService,
 			AccountingOperationsService,
 			HandbooksService,
 			CurrencyExchangeService,

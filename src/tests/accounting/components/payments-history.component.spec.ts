@@ -32,6 +32,7 @@ import { IPaymentRepresentationModel } from '../../../presentation/accounting/mo
 import { AccountsService } from '../../../presentation/accounting/services/accounts.service';
 import { HandbooksService } from '../../../presentation/accounting/services/handbooks.service';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
+import { TransferProjectionSynchronizationService } from '../../../presentation/accounting/services/transfer-projection-synchronization.service';
 
 describe('payments history component', () => {
 	let fixture: ComponentFixture<PaymentsHistoryComponent>;
@@ -43,6 +44,7 @@ describe('payments history component', () => {
 	let accountsServiceSpy: jasmine.SpyObj<AccountsService>;
 	let sseServiceSpy: jasmine.SpyObj<SseService>;
 	let notificationsSubject: Subject<AccountNotification>;
+	let transferProjectionSynchronizationService: TransferProjectionSynchronizationService;
 
 	let store: Store;
 
@@ -99,7 +101,7 @@ describe('payments history component', () => {
 		});
 
 		accountsServiceSpy = jasmine.createSpyObj<AccountsService>('accountsService', {
-			refreshAccounts: undefined,
+			refreshAccounts: of(undefined),
 		});
 
 		notificationsSubject = new Subject<AccountNotification>();
@@ -125,6 +127,7 @@ describe('payments history component', () => {
 			],
 			providers: [
 				HandbooksService,
+				TransferProjectionSynchronizationService,
 				{
 					provide: DefaultContractorsProvider,
 					useValue: contractorsProviderSpy,
@@ -149,6 +152,7 @@ describe('payments history component', () => {
 		}).compileComponents();
 
 		store = TestBed.inject(Store);
+		transferProjectionSynchronizationService = TestBed.inject(TransferProjectionSynchronizationService);
 		store.dispatch(new SetActivePaymentAccount(activePaymentAccountId));
 		store.dispatch(
 			new SetInitialPaymentAccounts([
@@ -270,6 +274,18 @@ describe('payments history component', () => {
 		]);
 		expect(accountsServiceSpy.refreshAccounts.calls.mostRecent().args).toEqual([activePaymentAccountId]);
 		expect(component.recordsCount).toBe(2);
+	});
+
+	it('completes synchronization only after the matching history and balance refreshes succeed', () => {
+		transferProjectionSynchronizationService.start([Guid.parse(activePaymentAccountId)]);
+
+		notificationsSubject.next({
+			eventId: 'event-id',
+			accountId: activePaymentAccountId,
+			eventType: 'UpdatePaymentAccountBalanceCommand',
+		});
+
+		expect(transferProjectionSynchronizationService.isSynchronizing(activePaymentAccountId)).toBeFalse();
 	});
 
 	function getHeaderTexts(): string[] {

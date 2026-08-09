@@ -65,6 +65,27 @@
 	color: #617089;
 }
 
+.payments-dashboard__synchronization-status {
+	display: grid;
+	gap: 0.5rem;
+	margin: 0;
+	padding: 0.75rem 1rem;
+	border: 1px solid rgba(14, 116, 144, 0.24);
+	border-radius: 12px;
+	background: rgba(236, 254, 255, 0.72);
+	color: #0f4c5c;
+}
+
+.payments-dashboard__synchronization-status--delayed {
+	border-color: rgba(180, 83, 9, 0.25);
+	background: rgba(255, 251, 235, 0.8);
+	color: #92400e;
+}
+
+.payments-dashboard__synchronization-progress {
+	width: 100%;
+}
+
 .payments-dashboard__summary {
 	display: grid;
 	grid-template-columns: repeat(5, minmax(0, 1fr));

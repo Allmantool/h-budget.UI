@@ -245,13 +245,18 @@ describe('cross-accounts-transfer-dialog.component', () => {
 		const submissionSubject = new Subject<Result<ICrossAccountsTransferResponse>>();
 		setTransferDetails();
 		component.currencyMultiplierSignal.set(2.5);
+		component.selectedStepIndexSignal.set(1);
+		fixture.detectChanges();
 		submitSpy.and.returnValue(submissionSubject);
 
 		component.applyTransfer();
 		component.applyTransfer();
+		fixture.detectChanges();
 
 		expect(submitSpy).toHaveBeenCalledTimes(1);
 		expect(component.isLoadingSignal()).toBeTrue();
+		expect(getButtonsByText('Transferring…')[0].disabled).toBeTrue();
+		expect((fixture.nativeElement as HTMLElement).querySelector('mat-progress-bar')).not.toBeNull();
 
 		submissionSubject.error(new Error('network failure'));
 		expect(component.isLoadingSignal()).toBeFalse();
