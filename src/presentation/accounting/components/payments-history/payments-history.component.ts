@@ -17,7 +17,7 @@ import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
 import { isFuture } from 'date-fns';
-import { BehaviorSubject, filter, forkJoin, Observable, of, tap } from 'rxjs';
+import { BehaviorSubject, filter, forkJoin, map, Observable, tap } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
 import { Guid } from 'typescript-guid';
 
@@ -32,6 +32,7 @@ import { IPaymentRepresentationModel } from '../../models/operation-record';
 import { AccountsService } from '../../services/accounts.service';
 import { HandbooksService } from '../../services/handbooks.service';
 import { PaymentsHistoryService } from '../../services/payments-history.service';
+import { TransferProjectionSynchronizationService } from '../../services/transfer-projection-synchronization.service';
 
 @Component({
 	selector: 'payments-history',
@@ -78,7 +79,8 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		private readonly paymentsHistoryService: PaymentsHistoryService,
 		private readonly accountsService: AccountsService,
 		private readonly store: Store,
-		private readonly sseService: SseService
+		private readonly sseService: SseService,
+		private readonly transferProjectionSynchronizationService: TransferProjectionSynchronizationService
 	) {}
 
 	public ngOnInit(): void {
@@ -99,11 +101,7 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 						notification.eventType === 'UpdatePaymentAccountBalanceCommand' &&
 						notification.accountId === this.activePaymentAccountIdSignal().toString()
 				),
-				exhaustMap(() =>
-					this.paymentsHistoryService
-						.refreshPaymentsHistory(this.activePaymentAccountIdSignal())
-						.pipe(tap(() => this.accountsService.refreshAccounts(this.activePaymentAccountIdSignal())))
-				)
+				exhaustMap(() => this.refreshActiveAccountProjection())
 			)
 			.subscribe(payments => this.dataSource$.next(payments));
 	}
@@ -117,7 +115,7 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 						payments: this.paymentsHistoryService.refreshPaymentsHistory(
 							this.activePaymentAccountIdSignal()
 						),
-						balance: of(this.accountsService.refreshAccounts(this.activePaymentAccountIdSignal())),
+						balance: this.accountsService.refreshAccounts(this.activePaymentAccountIdSignal()),
 					})
 				)
 			)
@@ -144,5 +142,17 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 
 	public get futureRecordsCount(): number {
 		return this.historySummarySignal().filter(record => this.isFuturePayment(record)).length;
+	}
+
+	private refreshActiveAccountProjection(): Observable<IPaymentRepresentationModel[]> {
+		const accountId = this.activePaymentAccountIdSignal();
+
+		return forkJoin({
+			payments: this.paymentsHistoryService.refreshPaymentsHistory(accountId),
+			balance: this.accountsService.refreshAccounts(accountId),
+		}).pipe(
+			tap(() => this.transferProjectionSynchronizationService.complete(accountId)),
+			map(payload => payload.payments)
+		);
 	}
 }

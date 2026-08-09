@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, OnInit, signal, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CrossAccountsTransferService } from 'presentation/accounting/services/cross-accounts-transfer.dialog.service';
+import { TransferProjectionSynchronizationService } from 'presentation/accounting/services/transfer-projection-synchronization.service';
 
 import _ from 'lodash';
 
@@ -28,7 +30,7 @@ import { PaymentsHistoryComponent } from '../payments-history/payments-history.c
 	styleUrls: ['./payments-dashboard.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [MatButtonModule, PaymentsHistoryComponent],
+	imports: [MatButtonModule, MatProgressBarModule, PaymentsHistoryComponent],
 })
 export class PaymentsDashboardComponent implements OnInit {
 	public paymentAccountGeneralInfoSignal: Signal<string> = signal('');
@@ -61,7 +63,8 @@ export class PaymentsDashboardComponent implements OnInit {
 		private readonly route: ActivatedRoute,
 		private readonly router: Router,
 		private readonly store: Store,
-		private readonly accountsTransferService: CrossAccountsTransferService
+		private readonly accountsTransferService: CrossAccountsTransferService,
+		public readonly transferProjectionSynchronizationService: TransferProjectionSynchronizationService
 	) {
 		this.paymentAccountGeneralInfoSignal = computed(() => {
 			const activePaymentAccount = this.activePaymentsAccountSignal();

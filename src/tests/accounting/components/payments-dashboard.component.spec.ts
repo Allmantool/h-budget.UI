@@ -32,6 +32,7 @@ import { AccountsService } from '../../../presentation/accounting/services/accou
 import { CrossAccountsTransferService } from '../../../presentation/accounting/services/cross-accounts-transfer.dialog.service';
 import { HandbooksService } from '../../../presentation/accounting/services/handbooks.service';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
+import { TransferProjectionSynchronizationService } from '../../../presentation/accounting/services/transfer-projection-synchronization.service';
 
 describe('payments dashboard component', () => {
 	let fixture: ComponentFixture<PaymentsDashboardComponent>;
@@ -48,6 +49,7 @@ describe('payments dashboard component', () => {
 	let accountsServiceSpy: jasmine.SpyObj<AccountsService>;
 	let sseServiceSpy: jasmine.SpyObj<SseService>;
 	let notificationsSubject: Subject<AccountNotification>;
+	let transferProjectionSynchronizationService: TransferProjectionSynchronizationService;
 
 	const activeAccountId = '24a07833-5cf5-4885-b09d-32c089fac4dd';
 	const replacementAccountId = '613f7824-4a2c-4180-b113-f7c740310f35';
@@ -99,7 +101,7 @@ describe('payments dashboard component', () => {
 			refreshPaymentsHistory: of(historyRows),
 		});
 		accountsServiceSpy = jasmine.createSpyObj<AccountsService>('accountsService', {
-			refreshAccounts: undefined,
+			refreshAccounts: of(undefined),
 		});
 		notificationsSubject = new Subject<AccountNotification>();
 		sseServiceSpy = jasmine.createSpyObj<SseService>('sseService', ['connect', 'disconnect'], {
@@ -116,6 +118,7 @@ describe('payments dashboard component', () => {
 			],
 			providers: [
 				provideRouter([]),
+				TransferProjectionSynchronizationService,
 				{ provide: ActivatedRoute, useValue: activatedRouteStub },
 				{
 					provide: CrossAccountsTransferService,
@@ -142,6 +145,7 @@ describe('payments dashboard component', () => {
 
 		store = TestBed.inject(Store);
 		router = TestBed.inject(Router);
+		transferProjectionSynchronizationService = TestBed.inject(TransferProjectionSynchronizationService);
 
 		store.dispatch(new SetInitialPaymentAccounts([activeAccount, replacementAccount]));
 		store.dispatch(new SetActivePaymentAccount(activeAccountId));
@@ -190,6 +194,15 @@ describe('payments dashboard component', () => {
 		getActionButtons()[0].click();
 
 		expect(accountsTransferServiceSpy.openForTransfer.calls.count()).toBe(1);
+	});
+
+	it('shows projection synchronization without replacing the active account details', () => {
+		transferProjectionSynchronizationService.start([Guid.parse(activeAccountId)]);
+		fixture.detectChanges();
+
+		expect(getNativeText()).toContain('Transfer completed. Updating balance and history…');
+		expect(getNativeText()).toContain('Primary wallet');
+		expect(getNativeElement().querySelector('mat-progress-bar')).not.toBeNull();
 	});
 
 	it('should clear the active account and operation before returning to the existing payment account hub', async () => {
