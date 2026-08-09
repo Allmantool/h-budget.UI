@@ -2,16 +2,16 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { format } from 'date-fns';
-import { Observable, retry, take } from 'rxjs';
+import { Observable, take } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
-import { ApiRequestOptions } from '../../../app/modules/shared/constants/api-request-options';
 import { DateFormats } from '../../../app/modules/shared/constants/date-formats';
 import { AppConfigurationService } from '../../../app/modules/shared/services/app-configuration.service';
 import { Result } from '../../../core/result';
 import { ICrossAccountsTransferModel } from '../../../domain/models/accounting/cross-accounts-transfer.model';
 import { ICrossAccountsTransferRequest } from '../../../domain/models/accounting/requests/cross-accounts-transfer.request';
 import { IRemoveTransferRequest } from '../../../domain/models/accounting/requests/remove-transfer.request';
+import { ICrossAccountsTransferResponse } from '../../../domain/models/accounting/responses/cross-accounts-transfer.response';
 import { ICrossAccountsTransferProvider } from '../../../domain/providers/accounting/cross-accounts-transfer.provider';
 
 @Injectable()
@@ -27,7 +27,7 @@ export class CrossAccountsTransferProvider implements ICrossAccountsTransferProv
 		this.accountingHostUrl = this.appConfigurationService.settings?.gatewayHost;
 	}
 
-	public applyTransfer(payload: ICrossAccountsTransferModel): Observable<Result<Guid>> {
+	public applyTransfer(payload: ICrossAccountsTransferModel): Observable<Result<ICrossAccountsTransferResponse>> {
 		const request: ICrossAccountsTransferRequest = {
 			sender: payload.sender.toString(),
 			recipient: payload.recipient.toString(),
@@ -37,8 +37,10 @@ export class CrossAccountsTransferProvider implements ICrossAccountsTransferProv
 		};
 
 		return this.http
-			.post<Result<Guid>>(`${this.accountingHostUrl}/${this.paymentCrossAccountsTransferApi}`, request)
-			.pipe(retry(ApiRequestOptions.RETRY_AMOUNT), take(1));
+			.post<
+				Result<ICrossAccountsTransferResponse>
+			>(`${this.accountingHostUrl}/${this.paymentCrossAccountsTransferApi}`, request)
+			.pipe(take(1));
 	}
 
 	public deleteById(accountId: Guid, transferOperationId: Guid): Observable<Result<Guid>> {
@@ -51,6 +53,6 @@ export class CrossAccountsTransferProvider implements ICrossAccountsTransferProv
 			.delete<Result<Guid>>(`${this.accountingHostUrl}/${this.paymentCrossAccountsTransferApi}`, {
 				body: request,
 			})
-			.pipe(retry(ApiRequestOptions.RETRY_AMOUNT), take(1));
+			.pipe(take(1));
 	}
 }

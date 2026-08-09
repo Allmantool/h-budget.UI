@@ -17,18 +17,15 @@ import { MatStepper, MatStepperModule } from '@angular/material/stepper';
 import _ from 'lodash';
 
 import { Store } from '@ngxs/store';
-import { EMPTY, finalize, switchMap, take } from 'rxjs';
+import { finalize, take } from 'rxjs';
 
 import { Result } from '../../../../../../core/result';
-import { PaymentsHistoryProvider } from '../../../../../../data/providers/accounting/payments-history.provider';
 import { CurrencyExchangeService } from '../../../../../../data/providers/rates/currency-exchange.service';
 import { AccountTypes } from '../../../../../../domain/models/accounting/account-types';
 import { ICrossAccountsTransferModel } from '../../../../../../domain/models/accounting/cross-accounts-transfer.model';
 import { IPaymentAccountModel } from '../../../../../../domain/models/accounting/payment-account.model';
 import { ICrossAccountsTransferResponse } from '../../../../../../domain/models/accounting/responses/cross-accounts-transfer.response';
-import { OperationTypes } from '../../../../../../domain/types/operation.types';
 import { DialogContainer } from '../../../models/dialog-container';
-import { Add } from '../../../store/states/accounting/actions/payment-operation.actions';
 import {
 	getActivePaymentAccount,
 	getActivePaymentAccountId,
@@ -73,7 +70,6 @@ const requiredTransferField: ValidatorFn = control => Validators.required(contro
 export class CrossAccountsTransferDialogComponent {
 	private readonly store = inject(Store);
 	private readonly exchangeService = inject(CurrencyExchangeService);
-	private readonly paymentHistoryService = inject(PaymentsHistoryProvider);
 	private readonly dialogRef = inject(MatDialogRef<CrossAccountsTransferDialogComponent>);
 	private readonly dialogConfiguration =
 		inject<DialogContainer<ICrossAccountsTransferModel, Result<ICrossAccountsTransferResponse>>>(MAT_DIALOG_DATA);
@@ -205,34 +201,18 @@ export class CrossAccountsTransferDialogComponent {
 			.onSubmit(transfer)
 			.pipe(
 				take(1),
-				switchMap(response => {
-					if (!response.isSucceeded) {
-						this.errorMessageSignal.set('Unable to complete the transfer. Please try again.');
-						return EMPTY;
-					}
-
-					const activePaymentAccountId = this.activePaymentAccountSignal()?.key;
-
-					if (!activePaymentAccountId) {
-						this.errorMessageSignal.set('Unable to complete the transfer. Please try again.');
-						return EMPTY;
-					}
-
-					return this.paymentHistoryService.GetHistoryOperationById(
-						activePaymentAccountId,
-						response.payload.paymentOperationId
-					);
-				}),
 				finalize(() => this.isLoadingSignal.set(false))
 			)
 			.subscribe({
-				next: operationHistoryRecord => {
-					const transferOperation = operationHistoryRecord.record;
-					transferOperation.operationType = OperationTypes.Transfer;
-					this.store.dispatch(new Add(transferOperation));
+				next: response => {
+					if (!response.isSucceeded) {
+						this.handleTransferFailure();
+						return;
+					}
+
 					this.dialogRef.close();
 				},
-				error: () => this.errorMessageSignal.set('Unable to complete the transfer. Please try again.'),
+				error: () => this.handleTransferOutcomeUnknown(),
 			});
 	}
 
@@ -256,5 +236,15 @@ export class CrossAccountsTransferDialogComponent {
 		}
 
 		return { sender, recipient, amount, multiplier, operationAt };
+	}
+
+	private handleTransferFailure(): void {
+		this.errorMessageSignal.set('Unable to complete the transfer. Please try again.');
+	}
+
+	private handleTransferOutcomeUnknown(): void {
+		this.errorMessageSignal.set(
+			'We could not confirm whether the transfer was completed. Check your account before submitting another transfer.'
+		);
 	}
 }

@@ -20,13 +20,11 @@ import {
 import { PaymentAccountState } from '../../../../../app/modules/shared/store/states/accounting/payment-account.state';
 import { AccountingOperationsState } from '../../../../../app/modules/shared/store/states/accounting/payment-operations.state';
 import { Result } from '../../../../../core/result';
-import { PaymentsHistoryProvider } from '../../../../../data/providers/accounting/payments-history.provider';
 import { CurrencyExchangeService } from '../../../../../data/providers/rates/currency-exchange.service';
 import { AccountTypes } from '../../../../../domain/models/accounting/account-types';
 import { ICrossAccountsTransferModel } from '../../../../../domain/models/accounting/cross-accounts-transfer.model';
 import { IPaymentAccountModel } from '../../../../../domain/models/accounting/payment-account.model';
 import { ICrossAccountsTransferResponse } from '../../../../../domain/models/accounting/responses/cross-accounts-transfer.response';
-import { OperationTypes } from '../../../../../domain/types/operation.types';
 
 describe('cross-accounts-transfer-dialog.component', () => {
 	const sourceAccountId = Guid.parse('ad8ec3b4-4fa8-4112-80a8-dac1279c4a85');
@@ -56,7 +54,6 @@ describe('cross-accounts-transfer-dialog.component', () => {
 	let store: Store;
 	let dialogRefSpy: jasmine.SpyObj<MatDialogRef<CrossAccountsTransferDialogComponent>>;
 	let exchangeServiceSpy: jasmine.SpyObj<CurrencyExchangeService>;
-	let paymentHistoryProviderSpy: jasmine.SpyObj<PaymentsHistoryProvider>;
 	let submitSpy: jasmine.Spy<
 		(payload: ICrossAccountsTransferModel) => Observable<Result<ICrossAccountsTransferResponse>>
 	>;
@@ -67,21 +64,6 @@ describe('cross-accounts-transfer-dialog.component', () => {
 		]);
 		exchangeServiceSpy = jasmine.createSpyObj<CurrencyExchangeService>('exchangeService', {
 			getExchangeMultiplier: of(new Result<number>({ isSucceeded: true, payload: 2.5 })),
-		});
-		paymentHistoryProviderSpy = jasmine.createSpyObj<PaymentsHistoryProvider>('paymentHistoryProvider', {
-			GetHistoryOperationById: of({
-				balance: 125,
-				record: {
-					key: transferOperationId,
-					paymentAccountId: sourceAccountId,
-					contractorId: Guid.EMPTY,
-					categoryId: Guid.EMPTY,
-					operationDate,
-					comment: '',
-					amount: 10,
-					operationType: OperationTypes.Payment,
-				},
-			}),
 		});
 		submitSpy = jasmine
 			.createSpy<
@@ -118,7 +100,6 @@ describe('cross-accounts-transfer-dialog.component', () => {
 					} as DialogContainer<ICrossAccountsTransferModel, Result<ICrossAccountsTransferResponse>>,
 				},
 				{ provide: CurrencyExchangeService, useValue: exchangeServiceSpy },
-				{ provide: PaymentsHistoryProvider, useValue: paymentHistoryProviderSpy },
 			],
 		}).compileComponents();
 
@@ -203,8 +184,7 @@ describe('cross-accounts-transfer-dialog.component', () => {
 		expect(component.transferDetailsStepFg.controls.targetAccountId.value).toBe(targetAccountId.toString());
 	});
 
-	it('submits exactly once with the preserved API payload and refreshes the existing active account history', () => {
-		const dispatchSpy = spyOn(store, 'dispatch').and.callThrough();
+	it('closes after one successful command without waiting for the eventually consistent history lookup', () => {
 		setTransferDetails();
 		component.currencyMultiplierSignal.set(2.5);
 
@@ -218,16 +198,30 @@ describe('cross-accounts-transfer-dialog.component', () => {
 			multiplier: 2.5,
 			operationAt: operationDate,
 		});
-		expect(paymentHistoryProviderSpy.GetHistoryOperationById).toHaveBeenCalledWith(
-			sourceAccountId,
-			transferOperationId
-		);
-		expect(dispatchSpy).toHaveBeenCalled();
+		expect(component.errorMessageSignal()).toBe('');
 		expect(dialogRefSpy.close).toHaveBeenCalled();
 		expect(component.isLoadingSignal()).toBeFalse();
 	});
 
-	it('clears the loading state and preserves entered details when submission fails', () => {
+	it('shows a failure and preserves entered details when the command is rejected', () => {
+		setTransferDetails();
+		component.currencyMultiplierSignal.set(2.5);
+		submitSpy.and.returnValue(of(new Result<ICrossAccountsTransferResponse>({ isSucceeded: false })));
+
+		component.applyTransfer();
+
+		expect(component.isLoadingSignal()).toBeFalse();
+		expect(component.errorMessageSignal()).toBe('Unable to complete the transfer. Please try again.');
+		expect(dialogRefSpy.close).not.toHaveBeenCalled();
+		expect(component.transferDetailsStepFg.getRawValue()).toEqual({
+			transferDirection: 'In',
+			targetAccountId: targetAccountId.toString(),
+			operationDate,
+			transferAmount: 10,
+		});
+	});
+
+	it('does not suggest resubmission when the command outcome is unknown', () => {
 		setTransferDetails();
 		component.currencyMultiplierSignal.set(2.5);
 		submitSpy.and.returnValue(throwError(() => new Error('network failure')));
@@ -235,7 +229,10 @@ describe('cross-accounts-transfer-dialog.component', () => {
 		component.applyTransfer();
 
 		expect(component.isLoadingSignal()).toBeFalse();
-		expect(component.errorMessageSignal()).toBe('Unable to complete the transfer. Please try again.');
+		expect(component.errorMessageSignal()).toBe(
+			'We could not confirm whether the transfer was completed. Check your account before submitting another transfer.'
+		);
+		expect(dialogRefSpy.close).not.toHaveBeenCalled();
 		expect(component.transferDetailsStepFg.getRawValue()).toEqual({
 			transferDirection: 'In',
 			targetAccountId: targetAccountId.toString(),
