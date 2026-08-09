@@ -1,49 +1,172 @@
-.dialog-body {
-	width: 35em;
-	height: 31em;
+:host {
+	display: block;
 }
 
-.transfer-dialog-title {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	align-items: flex-end;
-}
-
-.initial-transfer-dialog-form {
-	padding-top: 1em;
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	align-content: space-between;
-	justify-content: space-between;
-}
-
-.transfer-summary {
+.cross-account-transfer-dialog {
+	width: min(44rem, calc(100vw - 2rem));
+	max-height: 85vh;
 	display: flex;
 	flex-direction: column;
 }
 
-.confirm-transfer-dialog-form {
-	padding-top: 1em;
+.cross-account-transfer-dialog__body {
+	margin: 0;
+	padding: 1rem 1.5rem;
+	overflow: auto;
 }
 
-.form-input-item {
-	width: 50%;
+.cross-account-transfer-dialog__form,
+.cross-account-transfer-dialog__review {
+	padding-top: 1rem;
 }
 
-.contractors-chip-list {
-	width: 100%;
+.cross-account-transfer-dialog__heading {
+	margin: 0 0 1rem;
+	font-size: 1.125rem;
 }
 
-.dialog-content {
-	z-index: 150;
+.cross-account-transfer-dialog__account-context,
+.cross-account-transfer-dialog__account-flow,
+.cross-account-transfer-dialog__review-flow,
+.cross-account-transfer-dialog__actions,
+.cross-account-transfer-dialog__step-actions {
+	display: flex;
+	align-items: center;
 }
 
-.confirm-transfer-buttons {
-	padding-top: 1.8em;
+.cross-account-transfer-dialog__account-context,
+.cross-account-transfer-dialog__actions {
+	justify-content: space-between;
 }
 
-form {
-	width: 100%;
+.cross-account-transfer-dialog__account-context {
+	gap: 1rem;
+	padding: 1rem;
+	border: 1px solid rgba(0, 0, 0, 0.12);
+	border-radius: 0.25rem;
+}
+
+.cross-account-transfer-dialog__account-context strong,
+.cross-account-transfer-dialog__account-context span,
+.cross-account-transfer-dialog__account-flow strong,
+.cross-account-transfer-dialog__account-flow small,
+.cross-account-transfer-dialog__review-flow strong,
+.cross-account-transfer-dialog__review-flow small {
+	display: block;
+}
+
+.cross-account-transfer-dialog__context-label,
+.cross-account-transfer-dialog__balance span,
+.cross-account-transfer-dialog__account-flow span,
+.cross-account-transfer-dialog__review-flow span,
+.cross-account-transfer-dialog__review-list dt {
+	font-size: 0.875rem;
+}
+
+.cross-account-transfer-dialog__context-label {
+	margin: 0 0 0.25rem;
+	font-weight: 500;
+}
+
+.cross-account-transfer-dialog__balance {
+	text-align: right;
+}
+
+.cross-account-transfer-dialog__direction {
+	margin: 1rem 0;
+	padding: 0;
+	border: 0;
+}
+
+.cross-account-transfer-dialog__direction legend {
+	margin-bottom: 0.5rem;
+	font-weight: 500;
+}
+
+.cross-account-transfer-dialog__fields {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0 1rem;
+}
+
+.cross-account-transfer-dialog__field--counterpart {
+	grid-column: 1 / -1;
+}
+
+.cross-account-transfer-dialog__account-flow,
+.cross-account-transfer-dialog__review-flow {
+	gap: 1rem;
+	padding: 1rem 0;
+}
+
+.cross-account-transfer-dialog__account-flow > div,
+.cross-account-transfer-dialog__review-flow > div {
+	flex: 1;
+}
+
+.cross-account-transfer-dialog__review-list {
+	margin: 0;
+}
+
+.cross-account-transfer-dialog__review-list > div {
+	display: flex;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.75rem 0;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.cross-account-transfer-dialog__review-list dd {
+	margin: 0;
+	text-align: right;
+}
+
+.cross-account-transfer-dialog__error {
+	padding: 0 1.5rem 0.75rem;
+	color: var(--mat-sys-error, #b3261e);
+}
+
+.cross-account-transfer-dialog__actions {
+	min-height: 4rem;
+	margin: 0;
+	padding: 0.5rem 1.5rem;
+}
+
+.cross-account-transfer-dialog__step-actions {
+	gap: 0.5rem;
+}
+
+@media (max-width: 599px) {
+	.cross-account-transfer-dialog {
+		width: calc(100vw - 1rem);
+		max-height: 90vh;
+	}
+
+	.cross-account-transfer-dialog__body,
+	.cross-account-transfer-dialog__actions,
+	.cross-account-transfer-dialog__error {
+		padding-right: 1rem;
+		padding-left: 1rem;
+	}
+
+	.cross-account-transfer-dialog__fields {
+		grid-template-columns: 1fr;
+	}
+
+	.cross-account-transfer-dialog__account-context,
+	.cross-account-transfer-dialog__account-flow,
+	.cross-account-transfer-dialog__review-flow {
+		align-items: flex-start;
+		flex-wrap: wrap;
+	}
+
+	.cross-account-transfer-dialog__balance {
+		text-align: left;
+	}
+
+	.cross-account-transfer-dialog__flow-arrow {
+		width: 100%;
+		text-align: center;
+		transform: rotate(90deg);
+	}
 }

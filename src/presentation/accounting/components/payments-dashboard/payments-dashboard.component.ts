@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, OnInit, signal, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CrossAccountsTransferService } from 'presentation/accounting/services/cross-accounts-transfer.dialog.service';
 
 import _ from 'lodash';
@@ -12,6 +12,7 @@ import { Observable } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
 import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
+import { SetActivePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
 import { getAccountPayments } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import {
 	getActivePaymentAccount,
@@ -57,6 +58,7 @@ export class PaymentsDashboardComponent implements OnInit {
 	});
 
 	constructor(
+		private readonly route: ActivatedRoute,
 		private readonly router: Router,
 		private readonly store: Store,
 		private readonly accountsTransferService: CrossAccountsTransferService
@@ -104,8 +106,26 @@ export class PaymentsDashboardComponent implements OnInit {
 	}
 
 	public async navigateToPaymentAccountsAsync(): Promise<void> {
+		this.store.dispatch(new SetActivePaymentAccount(''));
 		this.store.dispatch(new SetActiveAccountingOperation(undefined));
-		await this.router.navigate(['/dashboard/accounting'], { relativeTo: null });
+
+		const accountingWorkspaceRoute = this.route.parent?.parent;
+
+		if (_.isNil(accountingWorkspaceRoute)) {
+			return;
+		}
+
+		await this.router.navigate(
+			[
+				{
+					outlets: {
+						primary: null,
+						right_sidebar: null,
+					},
+				},
+			],
+			{ relativeTo: accountingWorkspaceRoute }
+		);
 	}
 
 	public moneyTransfer(): void {

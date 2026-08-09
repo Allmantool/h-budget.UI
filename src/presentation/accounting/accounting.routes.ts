@@ -80,13 +80,18 @@ export const accountingRoutes: Routes = [
 		],
 		children: [
 			{ path: 'operations', component: PaymentsDashboardComponent },
-			{ path: '', component: PaymentAccountComponent },
+			{ path: '', component: PaymentAccountComponent, pathMatch: 'full' },
 			{
 				path: 'operations',
 				component: AccountingOperationsCrudComponent,
 				outlet: 'right_sidebar',
 			},
-			{ path: '', component: PaymentAccountCrudComponent, outlet: 'right_sidebar' },
+			{
+				path: '',
+				component: PaymentAccountCrudComponent,
+				outlet: 'right_sidebar',
+				pathMatch: 'full',
+			},
 		],
 	},
 ];

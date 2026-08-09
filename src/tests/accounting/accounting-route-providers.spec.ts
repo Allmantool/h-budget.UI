@@ -47,6 +47,7 @@ import { ICategoryModel } from '../../domain/models/accounting/category.model';
 import { IContractorModel } from '../../domain/models/accounting/contractor.model.';
 import { IPaymentAccountModel } from '../../domain/models/accounting/payment-account.model';
 import { IPaymentOperationModel } from '../../domain/models/accounting/payment-operation.model';
+import { ICrossAccountsTransferResponse } from '../../domain/models/accounting/responses/cross-accounts-transfer.response';
 import { IPaymentAccountCreateOrUpdateResponse } from '../../domain/models/accounting/responses/payment-account-create-or-update.response';
 import { OperationTypes } from '../../domain/types/operation.types';
 import { AccountNotification } from '../../infrastructure/account-notification';
@@ -116,13 +117,18 @@ describe('accounting route providers', () => {
 		expect(providerParent.providers).toBeDefined();
 		expect(childRoutes).toEqual([
 			jasmine.objectContaining({ path: 'operations', component: PaymentsDashboardComponent }),
-			jasmine.objectContaining({ path: '', component: PaymentAccountComponent }),
+			jasmine.objectContaining({ path: '', component: PaymentAccountComponent, pathMatch: 'full' }),
 			jasmine.objectContaining({
 				path: 'operations',
 				component: AccountingOperationsCrudComponent,
 				outlet: 'right_sidebar',
 			}),
-			jasmine.objectContaining({ path: '', component: PaymentAccountCrudComponent, outlet: 'right_sidebar' }),
+			jasmine.objectContaining({
+				path: '',
+				component: PaymentAccountCrudComponent,
+				outlet: 'right_sidebar',
+				pathMatch: 'full',
+			}),
 		]);
 		expect(childRoutes.every(route => route.providers === undefined)).toBeTrue();
 	});
@@ -297,7 +303,15 @@ describe('accounting lazy route and named-outlet activation', () => {
 			of({ balance: sampleAccount.balance, record: sampleOperation })
 		);
 		crossAccountsTransferProviderSpy.applyTransfer.and.returnValue(
-			of(new Result<Guid>({ isSucceeded: true, payload: sampleOperation.key }))
+			of(
+				new Result<ICrossAccountsTransferResponse>({
+					isSucceeded: true,
+					payload: {
+						paymentAccountIds: [Guid.parse(sampleAccountId), Guid.parse(sampleAccountId)],
+						paymentOperationId: sampleOperation.key,
+					},
+				})
+			)
 		);
 		crossAccountsTransferProviderSpy.deleteById.and.returnValue(
 			of(new Result<Guid>({ isSucceeded: true, payload: sampleOperation.key }))
@@ -345,7 +359,7 @@ describe('accounting lazy route and named-outlet activation', () => {
 				path: '',
 				children: [
 					jasmine.objectContaining({ path: 'operations', component: PaymentsDashboardComponent }),
-					jasmine.objectContaining({ path: '', component: PaymentAccountComponent }),
+					jasmine.objectContaining({ path: '', component: PaymentAccountComponent, pathMatch: 'full' }),
 					jasmine.objectContaining({
 						path: 'operations',
 						outlet: 'right_sidebar',
@@ -355,6 +369,7 @@ describe('accounting lazy route and named-outlet activation', () => {
 						path: '',
 						outlet: 'right_sidebar',
 						component: PaymentAccountCrudComponent,
+						pathMatch: 'full',
 					}),
 				],
 			})

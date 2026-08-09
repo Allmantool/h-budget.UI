@@ -88,7 +88,7 @@
 				[isDisabled]="isNotReadyForSaveSignal()"
 				(click)="saveRecordAsync()"
 				type="fab"
-				[text]="isDraftRecordSignal() ? 'Save record' : 'Save changes'"
+				[text]="isDraftRecordSignal() ? 'Save payment operation' : 'Save payment operation changes'"
 				color="primary"
 				icon="save"
 			></app-button>
@@ -96,7 +96,7 @@
 				[hidden]="false"
 				(click)="addRecordAsync()"
 				type="fab"
-				text="New record"
+				text="Add payment operation"
 				color="accent"
 				icon="add_circle_outline"
 			></app-button>
@@ -104,7 +104,7 @@
 				[isDisabled]="isNotReadyForSaveSignal()"
 				(click)="deleteRecordAsync()"
 				type="fab"
-				[text]="isDraftRecordSignal() ? 'Discard draft' : 'Delete record'"
+				[text]="isDraftRecordSignal() ? 'Discard payment operation draft' : 'Delete payment operation'"
 				color="warn"
 				icon="delete_forever"
 			></app-button>

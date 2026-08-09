@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter, Router } from '@angular/router';
+import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 
 import { NgxsModule, Store } from '@ngxs/store';
 import { of, Subject } from 'rxjs';
@@ -15,6 +15,10 @@ import {
 import { SetInitialPaymentOperations } from '../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
 import { PaymentAccountState } from '../../../app/modules/shared/store/states/accounting/payment-account.state';
 import { AccountingOperationsState } from '../../../app/modules/shared/store/states/accounting/payment-operations.state';
+import {
+	getActivePaymentAccount,
+	getPaymentAccounts,
+} from '../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { getAccountingTableOptions } from '../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { AccountTypes } from '../../../domain/models/accounting/account-types';
 import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
@@ -34,6 +38,9 @@ describe('payments dashboard component', () => {
 	let component: PaymentsDashboardComponent;
 	let store: Store;
 	let router: Router;
+	const accountingWorkspaceRouteStub = {} as ActivatedRoute;
+	const providerRouteStub = { parent: accountingWorkspaceRouteStub } as ActivatedRoute;
+	const activatedRouteStub = { parent: providerRouteStub } as ActivatedRoute;
 
 	let accountsTransferServiceSpy: jasmine.SpyObj<CrossAccountsTransferService>;
 	let handbooksServiceSpy: jasmine.SpyObj<HandbooksService>;
@@ -43,6 +50,7 @@ describe('payments dashboard component', () => {
 	let notificationsSubject: Subject<AccountNotification>;
 
 	const activeAccountId = '24a07833-5cf5-4885-b09d-32c089fac4dd';
+	const replacementAccountId = '613f7824-4a2c-4180-b113-f7c740310f35';
 	const activeOperationId = Guid.parse('0879167a-a6e8-4518-9850-4dd87a4e5be6');
 
 	const activeAccount: IPaymentAccountModel = {
@@ -52,6 +60,14 @@ describe('payments dashboard component', () => {
 		balance: 64.5,
 		emitter: 'Primary wallet',
 		description: 'Household budget',
+	};
+	const replacementAccount: IPaymentAccountModel = {
+		key: Guid.parse(replacementAccountId),
+		type: AccountTypes.WalletCache,
+		currency: 'USD',
+		balance: 40,
+		emitter: 'Travel wallet',
+		description: 'Secondary account',
 	};
 
 	const paymentOperations: IPaymentOperationModel[] = [
@@ -100,6 +116,7 @@ describe('payments dashboard component', () => {
 			],
 			providers: [
 				provideRouter([]),
+				{ provide: ActivatedRoute, useValue: activatedRouteStub },
 				{
 					provide: CrossAccountsTransferService,
 					useValue: accountsTransferServiceSpy,
@@ -126,7 +143,7 @@ describe('payments dashboard component', () => {
 		store = TestBed.inject(Store);
 		router = TestBed.inject(Router);
 
-		store.dispatch(new SetInitialPaymentAccounts([activeAccount]));
+		store.dispatch(new SetInitialPaymentAccounts([activeAccount, replacementAccount]));
 		store.dispatch(new SetActivePaymentAccount(activeAccountId));
 		store.dispatch(new SetInitialPaymentOperations(paymentOperations));
 
@@ -175,7 +192,7 @@ describe('payments dashboard component', () => {
 		expect(accountsTransferServiceSpy.openForTransfer.calls.count()).toBe(1);
 	});
 
-	it('should clear the active operation and navigate to payment accounts when changing account', async () => {
+	it('should clear the active account and operation before returning to the existing payment account hub', async () => {
 		const navigateSpy = spyOn(router, 'navigate').and.resolveTo(true);
 
 		store.dispatch(new SetActiveAccountingOperation(activeOperationId));
@@ -183,7 +200,24 @@ describe('payments dashboard component', () => {
 		await component.navigateToPaymentAccountsAsync();
 
 		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid).toBeUndefined();
-		expect(navigateSpy.calls.mostRecent().args).toEqual([['/dashboard/accounting'], { relativeTo: null }]);
+		expect(store.selectSnapshot(getActivePaymentAccount)).toBeUndefined();
+		expect(store.selectSnapshot(getPaymentAccounts)).toEqual([activeAccount, replacementAccount]);
+		expect(navigateSpy.calls.mostRecent().args).toEqual([
+			[
+				{
+					outlets: {
+						primary: null,
+						right_sidebar: null,
+					},
+				},
+			],
+			{ relativeTo: accountingWorkspaceRouteStub },
+		]);
+
+		store.dispatch(new SetActivePaymentAccount(replacementAccountId));
+		fixture.detectChanges();
+
+		expect(getNativeText()).toContain('Travel wallet');
 	});
 
 	it('should safely return to account selection when operations initialize without an active account', async () => {
@@ -207,7 +241,17 @@ describe('payments dashboard component', () => {
 		await fixture.whenStable();
 		fixture.detectChanges();
 
-		expect(navigateSpy.calls.mostRecent().args).toEqual([['/dashboard/accounting'], { relativeTo: null }]);
+		expect(navigateSpy.calls.mostRecent().args).toEqual([
+			[
+				{
+					outlets: {
+						primary: null,
+						right_sidebar: null,
+					},
+				},
+			],
+			{ relativeTo: accountingWorkspaceRouteStub },
+		]);
 		expect(getNativeText()).toContain('Select a payment account');
 		expect(getNativeElement().querySelector('payments-history')).toBeNull();
 		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(0);
