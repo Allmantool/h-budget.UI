@@ -121,6 +121,64 @@
 	color: #10233c;
 }
 
+.payments-history__transfer-comment {
+	display: grid;
+	gap: 0.35rem;
+}
+
+.payments-history__comment-text {
+	overflow-wrap: anywhere;
+}
+
+.payments-history__conversion {
+	color: #617089;
+	font-size: 0.875rem;
+}
+
+.payments-history__related-transfer-link {
+	display: inline-flex;
+	justify-self: start;
+	align-items: center;
+	gap: 0.35rem;
+	max-width: 100%;
+	padding: 0;
+	border: 0;
+	border-radius: 0.2rem;
+	background: transparent;
+	color: #0e7490;
+	font: inherit;
+	font-weight: 700;
+	text-align: left;
+	text-decoration: underline;
+	text-underline-offset: 0.18rem;
+	cursor: pointer;
+}
+
+.payments-history__related-transfer-link:hover {
+	color: #155e75;
+}
+
+.payments-history__related-transfer-link:focus-visible {
+	outline: 2px solid #0e7490;
+	outline-offset: 0.2rem;
+}
+
+.payments-history__related-transfer-label {
+	font-weight: 400;
+}
+
+.payments-history__row--related-target {
+	outline: 2px solid #0e7490;
+	outline-offset: -2px;
+	background: rgba(14, 116, 144, 0.12);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.payments-history__row--related-target {
+		transition: none;
+	}
+}
+
 @media (max-width: 900px) {
 	.payments-history__header {
 		flex-direction: column;

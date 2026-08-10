@@ -5,6 +5,8 @@ export interface IPaymentOperationEntity {
 	contractorId: string;
 	categoryId: string;
 	paymentAccountId: string;
+	relatedPaymentAccountId?: string;
+	conversionMultiplier?: number;
 	amount: number;
 	transactionType: number;
 }

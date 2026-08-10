@@ -61,6 +61,16 @@ export class PaymentOperationsMappingProfile extends Profile {
 				opt.preCondition(src => !_.isNil(src.paymentAccountId));
 				opt.mapFrom(src => Guid.parse(src.paymentAccountId));
 			},
+			relatedPaymentAccountId: opt => {
+				opt.preCondition(src => !_.isNil(src.relatedPaymentAccountId));
+				opt.mapFrom(src =>
+					src.relatedPaymentAccountId ? Guid.parse(src.relatedPaymentAccountId) : Guid.EMPTY
+				);
+			},
+			conversionMultiplier: opt => {
+				opt.preCondition(src => !_.isNil(src.conversionMultiplier));
+				opt.mapFrom(src => src.conversionMultiplier);
+			},
 			comment: opt => {
 				opt.preCondition(src => !_.isNil(src.comment));
 				opt.mapFrom(src => src.comment);

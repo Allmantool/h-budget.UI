@@ -16,6 +16,7 @@ import { TransferProjectionSynchronizationService } from '../../../presentation/
 describe('cross accounts transfer service', () => {
 	const sourceAccountId = Guid.parse('ad8ec3b4-4fa8-4112-80a8-dac1279c4a85');
 	const targetAccountId = Guid.parse('c596f11b-d44d-425f-8c90-0655c51318ad');
+	const transferOperationId = Guid.parse('38bb228c-9728-48fa-91d2-1d00f4979545');
 
 	let sut: CrossAccountsTransferService;
 	let dialogProviderSpy: jasmine.SpyObj<DialogProvider>;
@@ -36,7 +37,7 @@ describe('cross accounts transfer service', () => {
 								isSucceeded: true,
 								payload: {
 									paymentAccountIds: [sourceAccountId, targetAccountId],
-									paymentOperationId: Guid.create(),
+									paymentOperationId: transferOperationId,
 								},
 							})
 						),
@@ -73,5 +74,9 @@ describe('cross accounts transfer service', () => {
 
 		expect(transferProjectionSynchronizationService.isSynchronizing(sourceAccountId)).toBeTrue();
 		expect(transferProjectionSynchronizationService.isSynchronizing(targetAccountId)).toBeTrue();
+
+		transferProjectionSynchronizationService.completeProjectedOperations(sourceAccountId, [Guid.create()]);
+
+		expect(transferProjectionSynchronizationService.isSynchronizing(sourceAccountId)).toBeTrue();
 	});
 });

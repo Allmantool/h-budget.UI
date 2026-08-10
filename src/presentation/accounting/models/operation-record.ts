@@ -10,4 +10,9 @@ export interface IPaymentRepresentationModel {
 	comment: string;
 	balance: number;
 	operationType: number;
+	relatedPaymentAccountId?: Guid;
+	relatedPaymentAccountName?: string;
+	conversionMultiplier?: number;
+	conversionSourceCurrency?: string;
+	conversionDestinationCurrency?: string;
 }

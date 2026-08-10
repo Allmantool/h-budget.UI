@@ -41,11 +41,22 @@ describe('payment-operations-mapping.profile tests', () => {
 				comment: 'comments',
 				amount: 11.45,
 			} as IPaymentOperationEntity,
+			{
+				key: 'ae393cd9-3b88-4b46-8712-fa1901ddcde3',
+				contractorId: 'a249b2e9-edf0-45f2-a274-92ac310d4008',
+				categoryId: '3b2a138e-f575-425a-8650-a309480a6ece',
+				paymentAccountId: '78f5743a-715b-402b-801b-ed88193c1195',
+				relatedPaymentAccountId: '15d625ab-7cac-41de-b949-1fbca813ca85',
+				conversionMultiplier: 3.1,
+				operationDay: '2024-01-15',
+				comment: 'Transfer to related account',
+				amount: 11.45,
+			} as IPaymentOperationEntity,
 		];
 
 		const result = mapper.map(PaymentOperationsMappingProfile.PaymentOperationEntityToDomain, paymentEntities);
 
-		expect(result.length).toBe(2);
+		expect(result.length).toBe(3);
 
 		const recordEntity: IPaymentOperationModel = _.first(result)!;
 
@@ -56,6 +67,10 @@ describe('payment-operations-mapping.profile tests', () => {
 		expect(recordEntity.contractorId.equals(Guid.parse('a249b2e9-edf0-45f2-a274-92ac310d4008'))).toBeTruthy();
 		expect(recordEntity.paymentAccountId.equals(Guid.parse('78f5743a-715b-402b-801b-ed88193c1195'))).toBeTruthy();
 		expect(recordEntity.key.equals(Guid.parse('b1e65663-cb80-4db9-8f10-24c245655a2e'))).toBeTruthy();
+		expect(
+			result[2].relatedPaymentAccountId?.equals(Guid.parse('15d625ab-7cac-41de-b949-1fbca813ca85'))
+		).toBeTrue();
+		expect(result[2].conversionMultiplier).toBe(3.1);
 	});
 
 	it('should corretly map with "DomainToPaymentOperationSaveRequest" mapping pair', () => {

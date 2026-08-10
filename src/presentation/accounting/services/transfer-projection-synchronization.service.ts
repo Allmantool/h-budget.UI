@@ -1,4 +1,4 @@
-import { Injectable, OnDestroy, signal } from '@angular/core';
+import { Injectable, OnDestroy, signal, WritableSignal } from '@angular/core';
 
 import { Guid } from 'typescript-guid';
 
@@ -6,41 +6,70 @@ const synchronizationTimeoutMs = 30_000;
 
 @Injectable()
 export class TransferProjectionSynchronizationService implements OnDestroy {
-	private readonly synchronizingAccountIdsSignal = signal<ReadonlySet<string>>(new Set());
-	private readonly delayedAccountIdsSignal = signal<ReadonlySet<string>>(new Set());
+	private readonly synchronizingOperationKeysByAccountSignal = signal<ReadonlyMap<string, ReadonlySet<string>>>(
+		new Map()
+	);
+	private readonly delayedOperationKeysByAccountSignal = signal<ReadonlyMap<string, ReadonlySet<string>>>(new Map());
 	private readonly synchronizationTimeouts = new Map<string, ReturnType<typeof setTimeout>>();
 
-	public start(accountIds: readonly Guid[]): void {
+	public start(accountIds: readonly Guid[], operationKey: Guid): void {
 		for (const accountId of accountIds) {
 			const normalizedAccountId = accountId.toString();
+			const normalizedOperationKey = operationKey.toString();
+			const synchronizationKey = this.toSynchronizationKey(normalizedAccountId, normalizedOperationKey);
 
-			this.cancelTimeout(normalizedAccountId);
-			this.updateSynchronizingAccounts(accountIds => {
-				accountIds.add(normalizedAccountId);
-				return true;
-			});
-			this.updateDelayedAccounts(accountIds => accountIds.delete(normalizedAccountId));
-			this.synchronizationTimeouts.set(
+			this.cancelTimeout(synchronizationKey);
+			this.updateOperationKeys(
+				this.synchronizingOperationKeysByAccountSignal,
 				normalizedAccountId,
-				setTimeout(() => this.markAsDelayed(normalizedAccountId), synchronizationTimeoutMs)
+				operationKeys => {
+					operationKeys.add(normalizedOperationKey);
+				}
+			);
+			this.updateOperationKeys(this.delayedOperationKeysByAccountSignal, normalizedAccountId, operationKeys => {
+				operationKeys.delete(normalizedOperationKey);
+			});
+			this.synchronizationTimeouts.set(
+				synchronizationKey,
+				setTimeout(
+					() => this.markAsDelayed(normalizedAccountId, normalizedOperationKey),
+					synchronizationTimeoutMs
+				)
 			);
 		}
 	}
 
-	public complete(accountId: Guid | string): void {
+	public completeProjectedOperations(accountId: Guid | string, operationKeys: readonly Guid[]): void {
 		const normalizedAccountId = accountId.toString();
 
-		this.cancelTimeout(normalizedAccountId);
-		this.updateSynchronizingAccounts(accountIds => accountIds.delete(normalizedAccountId));
-		this.updateDelayedAccounts(accountIds => accountIds.delete(normalizedAccountId));
+		for (const operationKey of operationKeys) {
+			const normalizedOperationKey = operationKey.toString();
+			const synchronizationKey = this.toSynchronizationKey(normalizedAccountId, normalizedOperationKey);
+
+			this.cancelTimeout(synchronizationKey);
+			this.updateOperationKeys(
+				this.synchronizingOperationKeysByAccountSignal,
+				normalizedAccountId,
+				pendingOperationKeys => {
+					pendingOperationKeys.delete(normalizedOperationKey);
+				}
+			);
+			this.updateOperationKeys(
+				this.delayedOperationKeysByAccountSignal,
+				normalizedAccountId,
+				delayedOperationKeys => {
+					delayedOperationKeys.delete(normalizedOperationKey);
+				}
+			);
+		}
 	}
 
 	public isSynchronizing(accountId: Guid | string | undefined): boolean {
-		return !!accountId && this.synchronizingAccountIdsSignal().has(accountId.toString());
+		return !!accountId && this.hasOperationKeys(this.synchronizingOperationKeysByAccountSignal(), accountId);
 	}
 
 	public isDelayed(accountId: Guid | string | undefined): boolean {
-		return !!accountId && this.delayedAccountIdsSignal().has(accountId.toString());
+		return !!accountId && this.hasOperationKeys(this.delayedOperationKeysByAccountSignal(), accountId);
 	}
 
 	public ngOnDestroy(): void {
@@ -51,37 +80,54 @@ export class TransferProjectionSynchronizationService implements OnDestroy {
 		this.synchronizationTimeouts.clear();
 	}
 
-	private markAsDelayed(accountId: string): void {
-		this.synchronizationTimeouts.delete(accountId);
-		this.updateSynchronizingAccounts(accountIds => accountIds.delete(accountId));
-		this.updateDelayedAccounts(accountIds => {
-			accountIds.add(accountId);
-			return true;
+	private markAsDelayed(accountId: string, operationKey: string): void {
+		const synchronizationKey = this.toSynchronizationKey(accountId, operationKey);
+
+		this.synchronizationTimeouts.delete(synchronizationKey);
+		this.updateOperationKeys(this.synchronizingOperationKeysByAccountSignal, accountId, operationKeys => {
+			operationKeys.delete(operationKey);
+		});
+		this.updateOperationKeys(this.delayedOperationKeysByAccountSignal, accountId, operationKeys => {
+			operationKeys.add(operationKey);
 		});
 	}
 
-	private cancelTimeout(accountId: string): void {
-		const timeout = this.synchronizationTimeouts.get(accountId);
+	private cancelTimeout(synchronizationKey: string): void {
+		const timeout = this.synchronizationTimeouts.get(synchronizationKey);
 
 		if (timeout) {
 			globalThis.clearTimeout(timeout);
-			this.synchronizationTimeouts.delete(accountId);
+			this.synchronizationTimeouts.delete(synchronizationKey);
 		}
 	}
 
-	private updateSynchronizingAccounts(update: (accountIds: Set<string>) => boolean): void {
-		const accountIds = new Set(this.synchronizingAccountIdsSignal());
+	private updateOperationKeys(
+		operationKeysByAccountSignal: WritableSignal<ReadonlyMap<string, ReadonlySet<string>>>,
+		accountId: string,
+		update: (operationKeys: Set<string>) => void
+	): void {
+		const operationKeysByAccount = new Map(operationKeysByAccountSignal());
+		const operationKeys = new Set(operationKeysByAccount.get(accountId));
 
-		if (update(accountIds)) {
-			this.synchronizingAccountIdsSignal.set(accountIds);
+		update(operationKeys);
+
+		if (operationKeys.size === 0) {
+			operationKeysByAccount.delete(accountId);
+		} else {
+			operationKeysByAccount.set(accountId, operationKeys);
 		}
+
+		operationKeysByAccountSignal.set(operationKeysByAccount);
 	}
 
-	private updateDelayedAccounts(update: (accountIds: Set<string>) => boolean): void {
-		const accountIds = new Set(this.delayedAccountIdsSignal());
+	private hasOperationKeys(
+		operationKeysByAccount: ReadonlyMap<string, ReadonlySet<string>>,
+		accountId: Guid | string
+	): boolean {
+		return (operationKeysByAccount.get(accountId.toString())?.size ?? 0) > 0;
+	}
 
-		if (update(accountIds)) {
-			this.delayedAccountIdsSignal.set(accountIds);
-		}
+	private toSynchronizationKey(accountId: string, operationKey: string): string {
+		return `${accountId}:${operationKey}`;
 	}
 }
