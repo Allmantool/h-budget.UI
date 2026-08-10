@@ -4,11 +4,11 @@ import { Store } from '@ngxs/store';
 import { forkJoin, map, Observable } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
+import { AccountsService } from './accounts.service';
+import { PaymentsHistoryService } from './payments-history.service';
 import { SetActiveAccountingOperation } from '../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
 import { SetActivePaymentAccount } from '../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
 import { IPaymentRepresentationModel } from '../models/operation-record';
-import { AccountsService } from './accounts.service';
-import { PaymentsHistoryService } from './payments-history.service';
 
 interface IRelatedTransferNavigationTarget {
 	paymentAccountId: Guid;
