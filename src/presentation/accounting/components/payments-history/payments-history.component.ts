@@ -52,7 +52,7 @@ import { TransferProjectionSynchronizationService } from '../../services/transfe
 })
 export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewInit {
 	private readonly destroyRef = inject(DestroyRef);
-	private readonly hostElement = inject(ElementRef<HTMLElement>);
+	private readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef);
 	private readonly relatedTransferNavigationRequests$ = new Subject<IPaymentRepresentationModel>();
 	private relatedOperationHighlightTimeout?: ReturnType<typeof setTimeout>;
 	private highlightedRelatedOperationElement?: HTMLElement;
