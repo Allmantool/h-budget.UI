@@ -1,3 +1,4 @@
+import { signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MapperModule } from '@dynamic-mapper/angular';
@@ -32,6 +33,7 @@ import { IPaymentRepresentationModel } from '../../../presentation/accounting/mo
 import { AccountsService } from '../../../presentation/accounting/services/accounts.service';
 import { HandbooksService } from '../../../presentation/accounting/services/handbooks.service';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
+import { RelatedTransferNavigationService } from '../../../presentation/accounting/services/related-transfer-navigation.service';
 import { TransferProjectionSynchronizationService } from '../../../presentation/accounting/services/transfer-projection-synchronization.service';
 
 describe('payments history component', () => {
@@ -42,6 +44,8 @@ describe('payments history component', () => {
 	let categoriesProviderSpy: jasmine.SpyObj<DefaultCategoriesProvider>;
 	let paymentsHistoryServiceSpy: jasmine.SpyObj<PaymentsHistoryService>;
 	let accountsServiceSpy: jasmine.SpyObj<AccountsService>;
+	let relatedTransferNavigationServiceSpy: jasmine.SpyObj<RelatedTransferNavigationService>;
+	let pendingRelatedOperationKeySignal: WritableSignal<Guid | undefined>;
 	let sseServiceSpy: jasmine.SpyObj<SseService>;
 	let notificationsSubject: Subject<AccountNotification>;
 	let transferProjectionSynchronizationService: TransferProjectionSynchronizationService;
@@ -104,6 +108,23 @@ describe('payments history component', () => {
 			refreshAccounts: of(undefined),
 		});
 
+		relatedTransferNavigationServiceSpy = jasmine.createSpyObj<RelatedTransferNavigationService>(
+			'relatedTransferNavigationService',
+			{
+				completePendingTarget: undefined,
+				getPendingTargetOperationKey: undefined,
+				hasPendingTargetForAccount: false,
+				navigateToRelatedTransfer: of(historyRows),
+			}
+		);
+		pendingRelatedOperationKeySignal = signal<Guid | undefined>(undefined);
+		relatedTransferNavigationServiceSpy.getPendingTargetOperationKey.and.callFake(() =>
+			pendingRelatedOperationKeySignal()
+		);
+		relatedTransferNavigationServiceSpy.completePendingTarget.and.callFake(() =>
+			pendingRelatedOperationKeySignal.set(undefined)
+		);
+
 		notificationsSubject = new Subject<AccountNotification>();
 		sseServiceSpy = jasmine.createSpyObj<SseService>('sseService', ['connect', 'disconnect'], {
 			notifications$: notificationsSubject.asObservable(),
@@ -143,6 +164,10 @@ describe('payments history component', () => {
 				{
 					provide: AccountsService,
 					useValue: accountsServiceSpy,
+				},
+				{
+					provide: RelatedTransferNavigationService,
+					useValue: relatedTransferNavigationServiceSpy,
 				},
 				{
 					provide: SseService,
@@ -276,8 +301,8 @@ describe('payments history component', () => {
 		expect(component.recordsCount).toBe(2);
 	});
 
-	it('completes synchronization only after the matching history and balance refreshes succeed', () => {
-		transferProjectionSynchronizationService.start([Guid.parse(activePaymentAccountId)]);
+	it('completes synchronization only after the submitted transfer is present in refreshed history', () => {
+		transferProjectionSynchronizationService.start([Guid.parse(activePaymentAccountId)], incomeRecordId);
 
 		notificationsSubject.next({
 			eventId: 'event-id',
@@ -286,6 +311,234 @@ describe('payments history component', () => {
 		});
 
 		expect(transferProjectionSynchronizationService.isSynchronizing(activePaymentAccountId)).toBeFalse();
+	});
+
+	it('does not complete synchronization when a refresh excludes the submitted transfer', () => {
+		transferProjectionSynchronizationService.start([Guid.parse(activePaymentAccountId)], Guid.create());
+
+		notificationsSubject.next({
+			eventId: 'event-id',
+			accountId: activePaymentAccountId,
+			eventType: 'UpdatePaymentAccountBalanceCommand',
+		});
+
+		expect(transferProjectionSynchronizationService.isSynchronizing(activePaymentAccountId)).toBeTrue();
+	});
+
+	it('does not access rendered rows when no related operation navigation is pending', async () => {
+		const scrollIntoViewSpy = spyOn(HTMLElement.prototype, 'scrollIntoView');
+
+		fixture.detectChanges();
+		await fixture.whenStable();
+
+		expect(scrollIntoViewSpy).not.toHaveBeenCalled();
+		expect(relatedTransferNavigationServiceSpy.completePendingTarget.calls.count()).toBe(0);
+	});
+
+	it('waits for a target row, then focuses it once and consumes the pending navigation', async () => {
+		const scrollIntoViewSpy = spyOn(HTMLElement.prototype, 'scrollIntoView');
+		const focusSpy = spyOn(HTMLElement.prototype, 'focus');
+
+		component.dataSource$.next([]);
+		fixture.detectChanges();
+		await fixture.whenStable();
+
+		pendingRelatedOperationKeySignal.set(incomeRecordId);
+		fixture.detectChanges();
+		await fixture.whenStable();
+
+		expect(scrollIntoViewSpy).not.toHaveBeenCalled();
+		expect(relatedTransferNavigationServiceSpy.completePendingTarget.calls.count()).toBe(0);
+
+		component.dataSource$.next([historyRows[0]]);
+		fixture.detectChanges();
+		await fixture.whenStable();
+		fixture.detectChanges();
+
+		expect(scrollIntoViewSpy).toHaveBeenCalledTimes(1);
+		expect(focusSpy).toHaveBeenCalledTimes(1);
+		expect(relatedTransferNavigationServiceSpy.completePendingTarget.calls.mostRecent().args).toEqual([
+			activePaymentAccountId,
+			incomeRecordId,
+		]);
+		expect(getRenderedRows()[0].classList).toContain('payments-history__row--related-target');
+
+		fixture.detectChanges();
+
+		expect(scrollIntoViewSpy).toHaveBeenCalledTimes(1);
+		expect(focusSpy).toHaveBeenCalledTimes(1);
+	});
+
+	it('skips a malformed row identity and resolves the matching valid rendered row', async () => {
+		const scrollIntoViewSpy = spyOn(HTMLElement.prototype, 'scrollIntoView');
+		component.dataSource$.next(historyRows);
+		fixture.detectChanges();
+		await fixture.whenStable();
+
+		getRenderedRows()[0].removeAttribute('data-operation-key');
+		pendingRelatedOperationKeySignal.set(expenseRecordId);
+		component.dataSource$.next([...historyRows]);
+		fixture.detectChanges();
+		await fixture.whenStable();
+		fixture.detectChanges();
+
+		expect(scrollIntoViewSpy).toHaveBeenCalledTimes(1);
+		expect(relatedTransferNavigationServiceSpy.completePendingTarget.calls.mostRecent().args).toEqual([
+			activePaymentAccountId,
+			expenseRecordId,
+		]);
+	});
+
+	it('renders an accessible related-transfer action without replacing the transfer comment', async () => {
+		const relatedPaymentAccountId = Guid.parse('8f9f90a8-048f-44a9-b634-b02226724438');
+		const transferRecord: IPaymentRepresentationModel = {
+			key: Guid.parse('db983a99-a222-4083-afcb-af98fac0e846'),
+			operationDate: new Date(2024, 0, 16),
+			contractor: '',
+			category: '',
+			income: 0,
+			expense: 13,
+			comment: 'Transfer to BelarusBank',
+			balance: -2,
+			operationType: 2,
+			relatedPaymentAccountId,
+			relatedPaymentAccountName: 'BelarusBank',
+		};
+
+		component.dataSource$.next([transferRecord]);
+		fixture.detectChanges();
+
+		await fixture.whenStable();
+		fixture.detectChanges();
+
+		const relatedTransferButton = getNativeElement().querySelector<HTMLButtonElement>(
+			'.payments-history__related-transfer-link'
+		);
+
+		expect(relatedTransferButton?.type).toBe('button');
+		expect(relatedTransferButton?.getAttribute('aria-label')).toBe('Open related transfer in BelarusBank');
+		expect(getTableText()).toContain('Transfer to BelarusBank');
+
+		relatedTransferButton?.click();
+
+		expect(relatedTransferNavigationServiceSpy.navigateToRelatedTransfer.calls.count()).toBe(1);
+		expect(relatedTransferNavigationServiceSpy.navigateToRelatedTransfer.calls.mostRecent().args).toEqual([
+			transferRecord,
+		]);
+	});
+
+	it('renders the authoritative cross-currency conversion with its canonical direction', async () => {
+		const relatedPaymentAccountId = Guid.parse('8f9f90a8-048f-44a9-b634-b02226724438');
+		const transferRecord: IPaymentRepresentationModel = {
+			key: Guid.parse('db983a99-a222-4083-afcb-af98fac0e846'),
+			operationDate: new Date(2024, 0, 16),
+			contractor: '',
+			category: '',
+			income: 0,
+			expense: 13,
+			comment: 'Transfer to BelarusBank',
+			balance: -2,
+			operationType: 2,
+			relatedPaymentAccountId,
+			conversionMultiplier: 3.1,
+		};
+
+		store.dispatch(
+			new SetInitialPaymentAccounts([
+				{
+					key: Guid.parse(activePaymentAccountId),
+					description: 'source account',
+					currency: 'USD',
+				} as IPaymentAccountModel,
+				{
+					key: relatedPaymentAccountId,
+					description: 'BelarusBank',
+					currency: 'BYN',
+				} as IPaymentAccountModel,
+			])
+		);
+		paymentsHistoryServiceSpy.refreshPaymentsHistory.and.returnValue(of([transferRecord]));
+		notificationsSubject.next({
+			eventId: 'event-id',
+			accountId: activePaymentAccountId,
+			eventType: 'UpdatePaymentAccountBalanceCommand',
+		});
+		fixture.detectChanges();
+
+		await fixture.whenStable();
+		fixture.detectChanges();
+
+		expect(getTableText()).toContain('Conversion: 1 USD = 3.1 BYN');
+	});
+
+	it('keeps the historical conversion direction canonical for the recipient transfer row', async () => {
+		const sourcePaymentAccountId = Guid.parse('8f9f90a8-048f-44a9-b634-b02226724438');
+		const recipientAccountId = Guid.parse(activePaymentAccountId);
+		const transferRecord: IPaymentRepresentationModel = {
+			key: Guid.parse('db983a99-a222-4083-afcb-af98fac0e846'),
+			operationDate: new Date(2024, 0, 16),
+			contractor: '',
+			category: '',
+			income: 13,
+			expense: 0,
+			comment: 'Transfer from source account',
+			balance: 13,
+			operationType: 2,
+			relatedPaymentAccountId: sourcePaymentAccountId,
+			conversionMultiplier: 3.1,
+		};
+
+		store.dispatch(
+			new SetInitialPaymentAccounts([
+				{
+					key: recipientAccountId,
+					description: 'recipient account',
+					currency: 'BYN',
+				} as IPaymentAccountModel,
+				{
+					key: sourcePaymentAccountId,
+					description: 'source account',
+					currency: 'USD',
+				} as IPaymentAccountModel,
+			])
+		);
+		paymentsHistoryServiceSpy.refreshPaymentsHistory.and.returnValue(of([transferRecord]));
+		notificationsSubject.next({
+			eventId: 'event-id',
+			accountId: activePaymentAccountId,
+			eventType: 'UpdatePaymentAccountBalanceCommand',
+		});
+		fixture.detectChanges();
+
+		await fixture.whenStable();
+		fixture.detectChanges();
+
+		expect(getTableText()).toContain('Conversion: 1 USD = 3.1 BYN');
+	});
+
+	it('does not render conversion metadata for same-currency transfers', async () => {
+		const transferRecord: IPaymentRepresentationModel = {
+			key: Guid.parse('db983a99-a222-4083-afcb-af98fac0e846'),
+			operationDate: new Date(2024, 0, 16),
+			contractor: '',
+			category: '',
+			income: 0,
+			expense: 13,
+			comment: 'Transfer to BelarusBank',
+			balance: -2,
+			operationType: 2,
+			relatedPaymentAccountId: Guid.parse('8f9f90a8-048f-44a9-b634-b02226724438'),
+			relatedPaymentAccountName: 'BelarusBank',
+			conversionMultiplier: 1,
+		};
+
+		component.dataSource$.next([transferRecord]);
+		fixture.detectChanges();
+
+		await fixture.whenStable();
+		fixture.detectChanges();
+
+		expect(getTableText()).not.toContain('Conversion:');
 	});
 
 	function getHeaderTexts(): string[] {

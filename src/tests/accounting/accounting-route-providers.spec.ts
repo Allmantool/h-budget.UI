@@ -66,6 +66,7 @@ import { CrossAccountsTransferService } from '../../presentation/accounting/serv
 import { HandbooksService } from '../../presentation/accounting/services/handbooks.service';
 import { PaymentAccountDialogService } from '../../presentation/accounting/services/payment-account-dialog.service';
 import { PaymentsHistoryService } from '../../presentation/accounting/services/payments-history.service';
+import { RelatedTransferNavigationService } from '../../presentation/accounting/services/related-transfer-navigation.service';
 
 interface AccountingFeatureState {
 	accountingOperations: IAccountingOperationsStateModel & {
@@ -400,6 +401,18 @@ describe('accounting lazy route and named-outlet activation', () => {
 					},
 					{ provide: PaymentsHistoryService, useValue: createPaymentsHistoryServiceSpy() },
 					{
+						provide: RelatedTransferNavigationService,
+						useValue: jasmine.createSpyObj<RelatedTransferNavigationService>(
+							'relatedTransferNavigationService',
+							[
+								'completePendingTarget',
+								'getPendingTargetOperationKey',
+								'hasPendingTargetForAccount',
+								'navigateToRelatedTransfer',
+							]
+						),
+					},
+					{
 						provide: CrossAccountsTransferService,
 						useValue: jasmine.createSpyObj<CrossAccountsTransferService>('crossAccountsTransferService', [
 							'openForTransfer',
@@ -566,6 +579,7 @@ const accountingFeatureProviders: Array<Type<unknown>> = [
 	ContractorsDialogService,
 	PaymentAccountDialogService,
 	CrossAccountsTransferService,
+	RelatedTransferNavigationService,
 	AccountingOperationsService,
 	HandbooksService,
 	CurrencyExchangeService,

@@ -29,7 +29,10 @@ export class CrossAccountsTransferService {
 			return this.transferProvider.applyTransfer(crossAccountsTransfer).pipe(
 				tap(response => {
 					if (response.isSucceeded) {
-						this.transferProjectionSynchronizationService.start(response.payload.paymentAccountIds);
+						this.transferProjectionSynchronizationService.start(
+							response.payload.paymentAccountIds,
+							response.payload.paymentOperationId
+						);
 					}
 				})
 			);

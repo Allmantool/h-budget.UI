@@ -134,7 +134,28 @@
 					mat-cell
 					*matCellDef="let element"
 				>
-					{{ element.comment }}
+					@if (element.relatedPaymentAccountId) {
+					<div class="payments-history__transfer-comment">
+						@if (element.comment) {
+						<span class="payments-history__comment-text">{{ element.comment }}</span>
+						} @if (element.conversionMultiplier !== undefined && element.conversionSourceCurrency &&
+						element.conversionDestinationCurrency) {
+						<span class="payments-history__conversion">
+							Conversion: 1 {{ element.conversionSourceCurrency }} = {{ element.conversionMultiplier |
+							number: '1.0-6' }} {{ element.conversionDestinationCurrency }}
+						</span>
+						}
+						<button
+							type="button"
+							class="payments-history__related-transfer-link"
+							(click)="navigateToRelatedTransfer(element); $event.stopPropagation()"
+							[attr.aria-label]="'Open related transfer in ' + element.relatedPaymentAccountName"
+						>
+							<span class="payments-history__related-transfer-label">Related transfer:</span>
+							<span>{{ element.relatedPaymentAccountName }}</span>
+						</button>
+					</div>
+					} @else { {{ element.comment }} }
 				</td>
 			</ng-container>
 
@@ -143,11 +164,14 @@
 				*matHeaderRowDef="displayedColumns; sticky: true"
 			></tr>
 			<tr
-				class="row"
+				class="row payments-history__row"
 				mat-row
+				[attr.data-operation-key]="row.key.toString()"
+				tabindex="-1"
 				(click)="selectRow(row)"
 				[class.row-is-clicked]="clickedRowGuids.has(row?.key)"
 				[class.future-payment]="isFuturePayment(row)"
+				[class.payments-history__row--related-target]="highlightedRelatedOperationKey === row.key"
 				*matRowDef="let row; columns: displayedColumns;"
 			></tr>
 		</mat-table>

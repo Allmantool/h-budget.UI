@@ -32,6 +32,7 @@ import { AccountsService } from '../../../presentation/accounting/services/accou
 import { CrossAccountsTransferService } from '../../../presentation/accounting/services/cross-accounts-transfer.dialog.service';
 import { HandbooksService } from '../../../presentation/accounting/services/handbooks.service';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
+import { RelatedTransferNavigationService } from '../../../presentation/accounting/services/related-transfer-navigation.service';
 import { TransferProjectionSynchronizationService } from '../../../presentation/accounting/services/transfer-projection-synchronization.service';
 
 describe('payments dashboard component', () => {
@@ -47,6 +48,7 @@ describe('payments dashboard component', () => {
 	let handbooksServiceSpy: jasmine.SpyObj<HandbooksService>;
 	let paymentsHistoryServiceSpy: jasmine.SpyObj<PaymentsHistoryService>;
 	let accountsServiceSpy: jasmine.SpyObj<AccountsService>;
+	let relatedTransferNavigationServiceSpy: jasmine.SpyObj<RelatedTransferNavigationService>;
 	let sseServiceSpy: jasmine.SpyObj<SseService>;
 	let notificationsSubject: Subject<AccountNotification>;
 	let transferProjectionSynchronizationService: TransferProjectionSynchronizationService;
@@ -103,6 +105,15 @@ describe('payments dashboard component', () => {
 		accountsServiceSpy = jasmine.createSpyObj<AccountsService>('accountsService', {
 			refreshAccounts: of(undefined),
 		});
+		relatedTransferNavigationServiceSpy = jasmine.createSpyObj<RelatedTransferNavigationService>(
+			'relatedTransferNavigationService',
+			[
+				'completePendingTarget',
+				'getPendingTargetOperationKey',
+				'hasPendingTargetForAccount',
+				'navigateToRelatedTransfer',
+			]
+		);
 		notificationsSubject = new Subject<AccountNotification>();
 		sseServiceSpy = jasmine.createSpyObj<SseService>('sseService', ['connect', 'disconnect'], {
 			notifications$: notificationsSubject.asObservable(),
@@ -135,6 +146,10 @@ describe('payments dashboard component', () => {
 				{
 					provide: AccountsService,
 					useValue: accountsServiceSpy,
+				},
+				{
+					provide: RelatedTransferNavigationService,
+					useValue: relatedTransferNavigationServiceSpy,
 				},
 				{
 					provide: SseService,
@@ -197,7 +212,7 @@ describe('payments dashboard component', () => {
 	});
 
 	it('shows projection synchronization without replacing the active account details', () => {
-		transferProjectionSynchronizationService.start([Guid.parse(activeAccountId)]);
+		transferProjectionSynchronizationService.start([Guid.parse(activeAccountId)], Guid.create());
 		fixture.detectChanges();
 
 		expect(getNativeText()).toContain('Transfer completed. Updating balance and history…');

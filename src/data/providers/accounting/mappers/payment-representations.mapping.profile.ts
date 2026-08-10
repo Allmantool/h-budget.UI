@@ -98,6 +98,14 @@ export class PaymentRepresentationsMappingProfile extends Profile {
 				opt.preCondition(src => !_.isNil(src.record.operationType));
 				opt.mapFrom(src => src.record.operationType);
 			},
+			relatedPaymentAccountId: opt => {
+				opt.preCondition(src => !_.isNil(src.record.relatedPaymentAccountId));
+				opt.mapFrom(src => src.record.relatedPaymentAccountId);
+			},
+			conversionMultiplier: opt => {
+				opt.preCondition(src => !_.isNil(src.record.conversionMultiplier));
+				opt.mapFrom(src => src.record.conversionMultiplier);
+			},
 		});
 
 		this.createMap(PaymentRepresentationsMappingProfile.PaymentOperationToRepresentationModel, {
@@ -124,6 +132,14 @@ export class PaymentRepresentationsMappingProfile extends Profile {
 			operationType: opt => {
 				opt.preCondition(src => !_.isNil(src.operationType));
 				opt.mapFrom(src => src.operationType);
+			},
+			relatedPaymentAccountId: opt => {
+				opt.preCondition(src => !_.isNil(src.relatedPaymentAccountId));
+				opt.mapFrom(src => src.relatedPaymentAccountId);
+			},
+			conversionMultiplier: opt => {
+				opt.preCondition(src => !_.isNil(src.conversionMultiplier));
+				opt.mapFrom(src => src.conversionMultiplier);
 			},
 			income: opt => {
 				opt.mapFrom(src =>
