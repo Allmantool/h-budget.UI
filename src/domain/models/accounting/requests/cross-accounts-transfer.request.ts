@@ -3,5 +3,6 @@ export interface ICrossAccountsTransferRequest {
 	recipient: string;
 	amount: number;
 	multiplier: number;
+	customConversionMultiplier?: number;
 	operationAt: string;
 }

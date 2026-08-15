@@ -34,6 +34,9 @@ export class CrossAccountsTransferProvider implements ICrossAccountsTransferProv
 			multiplier: payload.multiplier,
 			amount: +payload.amount,
 			operationAt: format(payload.operationAt, DateFormats.ApiRequest),
+			...(payload.customConversionMultiplier === undefined
+				? {}
+				: { customConversionMultiplier: payload.customConversionMultiplier }),
 		};
 
 		return this.http
