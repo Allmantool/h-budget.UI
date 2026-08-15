@@ -42,6 +42,7 @@
 						<mat-button-toggle-group
 							formControlName="transferDirection"
 							aria-label="Transfer direction"
+							(change)="resetRateForCurrencyPair()"
 						>
 							<mat-button-toggle value="In">Send from current account</mat-button-toggle>
 							<mat-button-toggle value="Out">Receive into current account</mat-button-toggle>
@@ -54,7 +55,10 @@
 							class="cross-account-transfer-dialog__field cross-account-transfer-dialog__field--counterpart"
 						>
 							<mat-label>{{ counterpartAccountLabelSignal() }}</mat-label>
-							<mat-select formControlName="targetAccountId">
+							<mat-select
+								formControlName="targetAccountId"
+								(selectionChange)="resetRateForCurrencyPair()"
+							>
 								@for (account of availableAccountsSignal(); track account.key?.toString()) {
 								<mat-option [value]="account.key?.toString()">
 									{{ getAccountLabel(account) }}
@@ -130,7 +134,65 @@
 							<small>{{ toAccount.currency }}</small>
 						</div>
 					</section>
-					} }
+					} } @if (isCrossCurrencyTransferSignal()) {
+					<section
+						class="cross-account-transfer-dialog__exchange-rate"
+						aria-labelledby="exchange-rate-heading"
+					>
+						<h3
+							id="exchange-rate-heading"
+							class="cross-account-transfer-dialog__exchange-rate-heading"
+						>
+							Exchange rate
+						</h3>
+						<mat-button-toggle-group
+							formControlName="rateMode"
+							aria-label="Exchange rate mode"
+							(change)="setRateMode($event.value)"
+						>
+							<mat-button-toggle value="Automatic">Automatic rate</mat-button-toggle>
+							<mat-button-toggle value="Custom">Custom rate</mat-button-toggle>
+						</mat-button-toggle-group>
+
+						@if (isCustomRateModeSignal()) {
+						<mat-form-field
+							appearance="outline"
+							class="cross-account-transfer-dialog__custom-rate-field"
+						>
+							<mat-label>Custom exchange rate</mat-label>
+							@if (fromAccountSignal(); as fromAccount) { @if (toAccountSignal(); as toAccount) {
+							<span matTextPrefix>1 {{ fromAccount.currency }} = &nbsp;</span>
+							<input
+								matInput
+								type="number"
+								step="any"
+								formControlName="customConversionMultiplier"
+								aria-describedby="custom-rate-helper"
+							/>
+							<span matTextSuffix>{{ toAccount.currency }}</span>
+							} } @if (transferDetailsStepFg.controls.customConversionMultiplier.touched &&
+							transferDetailsStepFg.controls.customConversionMultiplier.invalid) {
+							<mat-error>Enter a positive exchange rate.</mat-error>
+							}
+						</mat-form-field>
+						<p
+							id="custom-rate-helper"
+							class="cross-account-transfer-dialog__exchange-rate-helper"
+						>
+							Used instead of the automatic rate for this transfer.
+						</p>
+						} @else {
+						<p class="cross-account-transfer-dialog__exchange-rate-helper">
+							Automatic rate will be loaded when you continue.
+						</p>
+						} @if (destinationAmountSignal() !== null) { @if (toAccountSignal(); as toAccount) {
+						<p class="cross-account-transfer-dialog__received-preview">
+							Received
+							<strong>{{ destinationAmountSignal() }} {{ toAccount.currency }}</strong>
+						</p>
+						} }
+					</section>
+					}
 				</form>
 			</mat-step>
 
@@ -166,8 +228,13 @@
 						<div>
 							<dt>Exchange rate</dt>
 							<dd>
-								1 {{ fromAccount.currency }} = {{ currencyMultiplierSignal() }} {{ toAccount.currency }}
+								1 {{ fromAccount.currency }} = {{ effectiveMultiplierSignal() }} {{ toAccount.currency
+								}}
 							</dd>
+						</div>
+						<div>
+							<dt>Rate source</dt>
+							<dd>{{ isCustomRateModeSignal() ? 'Custom' : 'Automatic' }}</dd>
 						</div>
 						<div>
 							<dt>Received</dt>

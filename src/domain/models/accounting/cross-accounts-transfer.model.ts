@@ -5,5 +5,6 @@ export interface ICrossAccountsTransferModel {
 	recipient: Guid;
 	amount: number;
 	multiplier: number;
+	customConversionMultiplier?: number;
 	operationAt: Date;
 }

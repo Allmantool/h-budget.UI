@@ -118,6 +118,7 @@ describe('cross-accounts-transfer-dialog.component', () => {
 		expect(component.title).toBe('Transfer money');
 		expect(component.selectedStepIndexSignal()).toBe(0);
 		expect(component.transferDetailsStepFg.controls.transferDirection.value).toBe('In');
+		expect(component.rateModeSignal()).toBe('Automatic');
 		expect(component.transferDetailsStepFg.controls.operationDate.value).toEqual(jasmine.any(Date));
 		expect(text).toContain('Current account');
 		expect(text).toContain('Source bank');
@@ -169,6 +170,73 @@ describe('cross-accounts-transfer-dialog.component', () => {
 		expect(stepperSpy.next).toHaveBeenCalledTimes(1);
 	});
 
+	it('uses a custom multiplier without resolving an automatic rate', () => {
+		const stepperSpy = jasmine.createSpyObj<MatStepper>('MatStepper', ['next']);
+		setTransferDetails();
+		component.setRateMode('Custom');
+		component.transferDetailsStepFg.controls.customConversionMultiplier.setValue(3.1);
+
+		component.next(stepperSpy);
+
+		expect(exchangeServiceSpy.getExchangeMultiplier).not.toHaveBeenCalled();
+		expect(component.effectiveMultiplierSignal()).toBe(3.1);
+		expect(component.destinationAmountSignal()).toBe(31);
+		expect(stepperSpy.next).toHaveBeenCalledTimes(1);
+	});
+
+	it('does not use an automatic rate response after the user chooses a custom rate', () => {
+		const rateResponse = new Subject<Result<number>>();
+		const stepperSpy = jasmine.createSpyObj<MatStepper>('MatStepper', ['next']);
+		exchangeServiceSpy.getExchangeMultiplier.and.returnValue(rateResponse);
+		setTransferDetails();
+
+		component.next(stepperSpy);
+		component.setRateMode('Custom');
+		component.transferDetailsStepFg.controls.customConversionMultiplier.setValue(3.1);
+		rateResponse.next(new Result<number>({ isSucceeded: true, payload: 2.5 }));
+
+		expect(component.effectiveMultiplierSignal()).toBe(3.1);
+		expect(stepperSpy.next).not.toHaveBeenCalled();
+	});
+
+	it('uses a multiplier of one without querying rates for same-currency transfers', () => {
+		store.dispatch(
+			new SetInitialPaymentAccounts([
+				sourceAccount,
+				{
+					...targetAccount,
+					currency: 'BYN',
+				},
+			])
+		);
+		const stepperSpy = jasmine.createSpyObj<MatStepper>('MatStepper', ['next']);
+		setTransferDetails();
+
+		component.next(stepperSpy);
+
+		expect(exchangeServiceSpy.getExchangeMultiplier).not.toHaveBeenCalled();
+		expect(component.currencyMultiplierSignal()).toBe(1);
+		expect(stepperSpy.next).toHaveBeenCalledTimes(1);
+	});
+
+	it('does not retain a custom multiplier after returning to automatic mode', () => {
+		setTransferDetails();
+		component.setRateMode('Custom');
+		component.transferDetailsStepFg.controls.customConversionMultiplier.setValue(3.1);
+		component.setRateMode('Automatic');
+		component.currencyMultiplierSignal.set(2.5);
+
+		component.applyTransfer();
+
+		expect(submitSpy).toHaveBeenCalledWith({
+			sender: sourceAccountId,
+			recipient: targetAccountId,
+			amount: 10,
+			multiplier: 2.5,
+			operationAt: operationDate,
+		});
+	});
+
 	it('shows the current transfer values on review and keeps details when returning', () => {
 		setTransferDetails();
 		component.currencyMultiplierSignal.set(2.5);
@@ -218,6 +286,8 @@ describe('cross-accounts-transfer-dialog.component', () => {
 			targetAccountId: targetAccountId.toString(),
 			operationDate,
 			transferAmount: 10,
+			rateMode: 'Automatic',
+			customConversionMultiplier: null,
 		});
 	});
 
@@ -238,6 +308,8 @@ describe('cross-accounts-transfer-dialog.component', () => {
 			targetAccountId: targetAccountId.toString(),
 			operationDate,
 			transferAmount: 10,
+			rateMode: 'Automatic',
+			customConversionMultiplier: null,
 		});
 	});
 
@@ -263,7 +335,7 @@ describe('cross-accounts-transfer-dialog.component', () => {
 	});
 
 	function setTransferDetails(): void {
-		component.transferDetailsStepFg.setValue({
+		component.transferDetailsStepFg.patchValue({
 			transferDirection: 'In',
 			targetAccountId: targetAccountId.toString(),
 			operationDate,

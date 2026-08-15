@@ -67,4 +67,25 @@ describe('cross accounts transfer provider', () => {
 
 		expect(receivedError).toEqual(jasmine.objectContaining({ status: 500 }));
 	});
+
+	it('includes the custom multiplier only when the transfer uses one', () => {
+		const customTransfer: ICrossAccountsTransferModel = {
+			...transfer,
+			customConversionMultiplier: 3.1,
+		};
+
+		sut.applyTransfer(customTransfer).subscribe();
+
+		const request = httpTestingController.expectOne(`${gatewayHost}/accounting/cross-accounts-transfer`);
+		expect(request.request.body).toEqual({
+			sender: customTransfer.sender.toString(),
+			recipient: customTransfer.recipient.toString(),
+			amount: customTransfer.amount,
+			multiplier: customTransfer.multiplier,
+			customConversionMultiplier: 3.1,
+			operationAt: '2024-01-11',
+		});
+
+		request.flush({ isSucceeded: true, payload: {} });
+	});
 });

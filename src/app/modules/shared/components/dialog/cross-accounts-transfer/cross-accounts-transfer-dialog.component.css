@@ -83,6 +83,32 @@
 	font-weight: 500;
 }
 
+.cross-account-transfer-dialog__exchange-rate {
+	margin-top: 1rem;
+	padding-top: 1rem;
+	border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.cross-account-transfer-dialog__exchange-rate-heading {
+	margin: 0 0 0.5rem;
+	font-size: 1rem;
+}
+
+.cross-account-transfer-dialog__custom-rate-field {
+	display: block;
+	max-width: 24rem;
+	margin-top: 1rem;
+}
+
+.cross-account-transfer-dialog__exchange-rate-helper,
+.cross-account-transfer-dialog__received-preview {
+	margin: 0.5rem 0 0;
+}
+
+.cross-account-transfer-dialog__exchange-rate-helper {
+	font-size: 0.875rem;
+}
+
 .cross-account-transfer-dialog__fields {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
