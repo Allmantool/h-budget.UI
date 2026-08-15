@@ -154,14 +154,15 @@
 							<mat-button-toggle value="Custom">Custom rate</mat-button-toggle>
 						</mat-button-toggle-group>
 
-						@if (isCustomRateModeSignal()) {
+						@if (isCustomRateModeSignal()) { @if (fromAccountSignal(); as fromAccount) { @if
+						(toAccountSignal(); as toAccount) {
 						<mat-form-field
 							appearance="outline"
+							floatLabel="always"
 							class="cross-account-transfer-dialog__custom-rate-field"
 						>
 							<mat-label>Custom exchange rate</mat-label>
-							@if (fromAccountSignal(); as fromAccount) { @if (toAccountSignal(); as toAccount) {
-							<span matTextPrefix>1 {{ fromAccount.currency }} = &nbsp;</span>
+							<span matTextPrefix>1&nbsp;{{ fromAccount.currency }}&nbsp;=&nbsp;</span>
 							<input
 								matInput
 								type="number"
@@ -170,11 +171,12 @@
 								aria-describedby="custom-rate-helper"
 							/>
 							<span matTextSuffix>{{ toAccount.currency }}</span>
-							} } @if (transferDetailsStepFg.controls.customConversionMultiplier.touched &&
+							@if (transferDetailsStepFg.controls.customConversionMultiplier.touched &&
 							transferDetailsStepFg.controls.customConversionMultiplier.invalid) {
 							<mat-error>Enter a positive exchange rate.</mat-error>
 							}
 						</mat-form-field>
+						} }
 						<p
 							id="custom-rate-helper"
 							class="cross-account-transfer-dialog__exchange-rate-helper"

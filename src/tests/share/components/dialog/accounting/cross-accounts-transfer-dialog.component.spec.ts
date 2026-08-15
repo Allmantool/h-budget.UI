@@ -184,6 +184,53 @@ describe('cross-accounts-transfer-dialog.component', () => {
 		expect(stepperSpy.next).toHaveBeenCalledTimes(1);
 	});
 
+	it('renders the empty custom rate with a persistent label and direction-aware currency context', () => {
+		component.transferDetailsStepFg.controls.targetAccountId.setValue(targetAccountId.toString());
+		component.setRateMode('Custom');
+		fixture.detectChanges();
+
+		const customRateField = (fixture.nativeElement as HTMLElement).querySelector(
+			'mat-form-field.cross-account-transfer-dialog__custom-rate-field'
+		);
+		const customRateInput = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(
+			'input[formcontrolname="customConversionMultiplier"]'
+		);
+
+		expect(customRateField?.getAttribute('floatlabel')).toBe('always');
+		expect(getNormalizedText(customRateField)).toContain('Custom exchange rate');
+		expect(getNormalizedText(customRateField)).toContain('1 BYN =');
+		expect(getNormalizedText(customRateField)).toContain('USD');
+		expect(getNormalizedText(customRateField?.querySelector('.mat-mdc-form-field-text-prefix') ?? null)).toContain(
+			'1 BYN ='
+		);
+		expect(getNormalizedText(customRateField?.querySelector('.mat-mdc-form-field-text-suffix') ?? null)).toContain(
+			'USD'
+		);
+		expect(customRateInput?.value).toBe('');
+		expect(component.transferDetailsStepFg.controls.customConversionMultiplier.invalid).toBeTrue();
+
+		component.transferDetailsStepFg.controls.transferDirection.setValue('Out');
+		fixture.detectChanges();
+
+		expect(getNormalizedText(customRateField)).toContain('1 USD =');
+		expect(getNormalizedText(customRateField)).toContain('BYN');
+	});
+
+	it('hides the custom rate control when automatic mode is selected', () => {
+		component.transferDetailsStepFg.controls.targetAccountId.setValue(targetAccountId.toString());
+		component.setRateMode('Custom');
+		fixture.detectChanges();
+
+		component.setRateMode('Automatic');
+		fixture.detectChanges();
+
+		expect(
+			(fixture.nativeElement as HTMLElement).querySelector(
+				'mat-form-field.cross-account-transfer-dialog__custom-rate-field'
+			)
+		).toBeNull();
+	});
+
 	it('does not use an automatic rate response after the user chooses a custom rate', () => {
 		const rateResponse = new Subject<Result<number>>();
 		const stepperSpy = jasmine.createSpyObj<MatStepper>('MatStepper', ['next']);
@@ -344,7 +391,11 @@ describe('cross-accounts-transfer-dialog.component', () => {
 	}
 
 	function getText(): string {
-		return (fixture.nativeElement as HTMLElement).textContent?.replace(/\s+/g, ' ').trim() ?? '';
+		return getNormalizedText(fixture.nativeElement as HTMLElement);
+	}
+
+	function getNormalizedText(element: Element | null): string {
+		return element?.textContent?.replace(/\s+/g, ' ').trim() ?? '';
 	}
 
 	function getButtonsByText(text: string): HTMLButtonElement[] {
