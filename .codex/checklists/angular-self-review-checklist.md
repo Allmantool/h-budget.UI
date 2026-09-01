@@ -9,5 +9,6 @@
 - [ ] Confirm strict typing; review all `any`, assertions, suppressions, logs, DOM/sanitizer use, timers, and subscriptions in context.
 - [ ] Confirm file/complexity limits or record a narrow exception.
 - [ ] Confirm meaningful behavior tests and validation match the changed risk.
+- [ ] Evaluate every applicable acceptance criterion independently; update traceability, TDD evidence/exception, implementation progress, and verification status in the task specification.
 - [ ] Search the diff for warning signs listed in `review-and-validation.md`; fix findings.
 - [ ] Rerun affected validation after corrections and report each result as PASS, FAIL, or NOT RUN.

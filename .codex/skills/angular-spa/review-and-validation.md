@@ -37,4 +37,6 @@ Exceptions must be exact and temporary where possible; never grant a whole-direc
 
 ## Final evidence
 
-State the result, behavior/scope, changed files, design decisions, validation status, self-review findings/corrections, non-run checks, preserved unrelated changes, and concrete remaining risks. Distinguish verified facts, inferences, and unknowns.
+Implementation complete is not task complete. Before reporting completion, use the [verification gate](../verification/SKILL.md) and evaluate every applicable acceptance criterion independently. A successful build or test suite is evidence only for what it actually covers.
+
+For non-trivial work, state the result, specification path, requirement/acceptance-criteria outcomes, TDD RED/GREEN/REFACTOR evidence or specific exception, changed files, design decisions, validation status, self-review findings/corrections, non-run checks, preserved unrelated changes, and concrete remaining risks. Distinguish verified facts, inferences, and unknowns.

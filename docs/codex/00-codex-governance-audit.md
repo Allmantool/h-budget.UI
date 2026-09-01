@@ -31,3 +31,9 @@ Current dependencies declare Angular 21.2 and Nx 22.7. The app remains NgModule-
 ## Remaining audit limitations
 
 This was a governance audit, not an application architecture assessment. Existing application patterns were sampled only to calibrate standards; no claim is made that they meet the new standards. Markdown linting is not currently configured as a project script.
+
+## SDD/TDD enhancement
+
+The original governance package already established a concise root entry point, Angular/Nx skill routing, dirty-tree protection, task-type classification, repository-calibrated validation, and complete-diff review. It did not require a task specification, acceptance-criteria traceability, recorded RED/GREEN evidence, a definition-of-ready gate, or persistent task progress.
+
+The current enhancement preserves that hierarchy and adds three focused lifecycle skills: specification-driven development, test-driven development, and verification. Non-trivial tasks now keep a lightweight specification in `docs/specs/`; behaviorally testable changes default to RED → GREEN → REFACTOR; and completion requires independent acceptance-criteria evidence rather than a passing command alone. Existing `npm run verify` and CI commands remain the authoritative automation because they already align with repository tooling.
