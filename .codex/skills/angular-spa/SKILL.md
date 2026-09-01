@@ -8,12 +8,13 @@ description: Govern implementation, refactoring, bug-fix, audit, review, testing
 ## Required workflow
 
 1. Read `AGENTS.md`, applicable scoped `AGENTS.md` files, and this skill before editing.
-2. Inspect `package.json`, `project.json`, `nx.json`, and relevant compiler/lint configuration to establish installed Angular/Nx versions, project type, available targets, and constraints. Do not apply a newer Angular convention merely because it exists.
-3. Identify task type and read the supporting standards below that apply. Read all applicable files before implementation, not after it.
-4. Inspect nearby implementation, tests, registrations, and equivalent patterns. Preserve observable behavior unless explicitly changing it.
-5. Capture `git status --short`; never overwrite unrelated dirty work.
-6. Identify focused and broader validation before modifying files.
-7. Implement the smallest coherent change, then treat it as a draft: execute the self-review, correct issues, and rerun validation.
+2. Classify the task as lightweight or non-trivial using the root criteria. For non-trivial work, create or update the task specification before production implementation.
+3. Inspect `package.json`, `project.json`, `nx.json`, and relevant compiler/lint configuration to establish installed Angular/Nx versions, project type, available targets, and constraints. Do not apply a newer Angular convention merely because it exists.
+4. Identify task type and read the supporting standards below that apply. Read all applicable files before implementation, not after it.
+5. Inspect nearby implementation, tests, registrations, and equivalent patterns. Preserve observable behavior unless explicitly changing it.
+6. Capture `git status --short`; never overwrite unrelated dirty work.
+7. Identify focused and broader validation before modifying files.
+8. Implement the smallest coherent change, then treat it as a draft: execute the self-review, verification gate, correct issues, and rerun validation.
 
 ## Current repository constraints
 
@@ -25,6 +26,9 @@ description: Govern implementation, refactoring, bug-fix, audit, review, testing
 ## Read the applicable supporting standards
 
 - Always: [architecture](architecture.md), [TypeScript](typescript.md), and [review and validation](review-and-validation.md).
+- Non-trivial work: [specification-driven development](../specification-driven-development/SKILL.md).
+- Behaviorally testable implementation, bug fix, or refactoring: [test-driven development](../test-driven-development/SKILL.md).
+- Before reporting completion: [verification gate](../verification/SKILL.md).
 - Components, directives, pipes, templates, forms, or styles: [components and templates](components-and-templates.md).
 - User-facing templates, CSS/SCSS, Angular Material presentation, or UI/UX behavior: [styling, UI, and template standards](styling-and-ui.md).
 - NGXS, signals, RxJS, APIs, providers, mappings, or errors: [state, RxJS, and data access](state-rxjs-and-data-access.md).
@@ -44,9 +48,9 @@ description: Govern implementation, refactoring, bug-fix, audit, review, testing
 
 | Task               | Required outcome                                                                                                       |
 | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| Implementation     | Change only authorized scope; cover meaningful changed behavior.                                                       |
-| Bug fix            | Reproduce or explain root cause; add a regression test when practical; avoid symptom-only fixes.                       |
-| Refactoring        | Preserve observable behavior; add characterization coverage when it is inadequately protected.                         |
+| Implementation     | Create/update the non-trivial specification; change only authorized scope; cover meaningful behavior test-first.       |
+| Bug fix            | Reproduce and specify the defect; add a failing regression test when practical; avoid symptom-only fixes.               |
+| Refactoring        | Preserve observable behavior; add characterization coverage first when it is inadequately protected.                    |
 | Architecture audit | Produce evidence and a remediation plan before broad changes; do not modernize application code without authorization. |
 | PR review          | Inspect the complete diff against the correct base; report severity and evidence; do not edit unless asked.            |
 | Standards-only     | Modify only governance files; validate links and scope; do not change runtime behavior.                                |

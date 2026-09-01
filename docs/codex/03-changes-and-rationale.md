@@ -16,3 +16,13 @@ The former root guidance and standalone Angular standards/review checklist conta
 ## Extension rule
 
 Add a scoped `AGENTS.md` only when a directory has real, stable local constraints. It may specialize but not weaken root/skill safeguards. Add detailed guidance to the existing topic file when it has the same owner; create a new supporting file only for a distinct concern and link it directly from the skill. Do not create generic `standards`, `prompts`, or `guidelines` files that compete with this hierarchy.
+
+## Task lifecycle ownership
+
+- `AGENTS.md` decides when the lightweight or non-trivial path applies and requires the appropriate skills.
+- `skills/specification-driven-development/` owns requirement quality, Definition of Ready, traceability, scope/change control, and resumable task state.
+- `skills/test-driven-development/` owns RED → GREEN → REFACTOR and exceptions; Angular testing conventions remain in `skills/angular-spa/testing.md`.
+- `skills/verification/` owns the independent completion gate and delegates exact SPA validation commands and self-review detail to `skills/angular-spa/review-and-validation.md`.
+- `docs/specs/` owns task-specific contracts. It is deliberately outside `.codex` so a specification can be reviewed alongside its implementation without becoming another global instruction source.
+
+This splits durable policy from task state, avoids duplicating Angular rules, and keeps the root instructions small enough to load every session.
