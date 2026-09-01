@@ -17,13 +17,17 @@
 				<strong>{{ futureRecordsCount }}</strong>
 				<span>scheduled</span>
 			</div>
+			<button
+				mat-flat-button
+				color="primary"
+				(click)="beginNewPayment()"
+			>
+				New payment
+			</button>
 		</div>
 	</div>
 
-	<div
-		class="accounting-table"
-		tabindex="0"
-	>
+	<div class="payments-history__table">
 		<mat-table
 			#table
 			[dataSource]="dataSource$"
@@ -169,11 +173,35 @@
 				[attr.data-operation-key]="row.key.toString()"
 				tabindex="-1"
 				(click)="selectRow(row)"
+				(keydown.enter)="selectRow(row)"
+				(keydown.space)="selectRow(row); $event.preventDefault()"
+				[attr.aria-label]="'Edit payment on ' + (row.operationDate | date)"
 				[class.row-is-clicked]="clickedRowGuids.has(row?.key)"
 				[class.future-payment]="isFuturePayment(row)"
 				[class.payments-history__row--related-target]="highlightedRelatedOperationKey === row.key"
 				*matRowDef="let row; columns: displayedColumns;"
 			></tr>
 		</mat-table>
+	</div>
+
+	<div class="payments-history__mobile-list">
+		@for (record of dataSource$ | async; track record.key.toString()) {
+		<button
+			type="button"
+			class="payments-history__mobile-record"
+			(click)="selectRow(record)"
+			[attr.aria-label]="'Edit payment on ' + (record.operationDate | date)"
+		>
+			<span>{{ record.operationDate | date: 'mediumDate' }}</span>
+			<strong
+				[class.payments-history__amount--income]="record.income > 0"
+				[class.payments-history__amount--expense]="record.expense > 0"
+			>
+				{{ (record.income || record.expense) | accountingCurrencyFormat | currency: ' ' }}
+			</strong>
+			<span>{{ record.category || 'Uncategorized' }}</span>
+			<span>{{ record.contractor }}</span>
+		</button>
+		}
 	</div>
 </section>

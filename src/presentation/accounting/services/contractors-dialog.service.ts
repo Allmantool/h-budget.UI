@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
 
-import { concatMap, map } from 'rxjs';
+import { concatMap, map, Observable } from 'rxjs';
 
 import { ContractorsDialogComponent } from '../../../app/modules/shared/components/dialog/contractors/contractors-dialog.component';
 import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
@@ -16,7 +16,7 @@ export class ContractorsDialogService {
 		private readonly dialogProvider: DialogProvider
 	) {}
 
-	public openContractors(): void {
+	public openContractors(): Observable<IContractorModel | undefined> {
 		const config = new MatDialogConfig<DialogContainer<IContractorModel, IContractorModel>>();
 
 		const onSave = (payloadForSave: IContractorModel) => {
@@ -35,6 +35,6 @@ export class ContractorsDialogService {
 
 		config.disableClose = true;
 
-		this.dialogProvider.openDialog(ContractorsDialogComponent, config);
+		return this.dialogProvider.openDialog(ContractorsDialogComponent, config).afterClosed();
 	}
 }

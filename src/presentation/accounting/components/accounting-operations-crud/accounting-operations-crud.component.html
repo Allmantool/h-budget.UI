@@ -1,113 +1,164 @@
-<div class="crud-content">
-	<form [formGroup]="crudRecordFg">
-		<div class="record-crud-header">
-			<p class="record-crud-section-title">{{ crudModeLabelSignal() }}</p>
-			<h3 class="record-crud-title">{{ crudTitleSignal() }}</h3>
-			<p class="record-crud-copy">
-				{{ isDraftRecordSignal() ? 'Create and save a new accounting operation.' : 'Update the selected
-				operation or remove it if it is no longer needed.' }}
-			</p>
-		</div>
-		<div class="date-section">
-			<app-datepicker
-				[disabled]="isNotReadyForSaveSignal()"
-				placeholder="Choose a opeation date"
+<section
+	class="payment-editor"
+	[class.payment-editor--submitting]="isSubmittingSignal()"
+>
+	<header class="payment-editor__header">
+		<p class="payment-editor__eyebrow">{{ editorModeSignal() === 'create' ? 'New record' : 'Selected record' }}</p>
+		<h2 class="payment-editor__title">{{ editorModeSignal() === 'create' ? 'New payment' : 'Edit payment' }}</h2>
+		<p class="payment-editor__account">
+			{{ activeAccountSignal()?.emitter }} · {{ activeAccountSignal()?.currency }}
+		</p>
+	</header>
+	@if (submissionStateSignal(); as submission) { @if (submission.status === 'failed') {
+	<p
+		class="payment-editor__status payment-editor__status--error"
+		role="alert"
+	>
+		{{ submission.message }}
+	</p>
+	} @else if (submission.status === 'submitting') {
+	<p
+		class="payment-editor__status"
+		role="status"
+		aria-live="polite"
+	>
+		Submitting payment…
+	</p>
+	} @else if (submission.status === 'accepted' || submission.status === 'waitingForProjection') {
+	<p
+		class="payment-editor__status"
+		role="status"
+		aria-live="polite"
+	>
+		Payment accepted. Updating account history…
+	</p>
+	} @else if (submission.status === 'succeeded') {
+	<p
+		class="payment-editor__status payment-editor__status--success"
+		role="status"
+		aria-live="polite"
+	>
+		Payment history is up to date.
+	</p>
+	} }
+	<form
+		class="payment-editor__form"
+		[formGroup]="paymentForm"
+		(ngSubmit)="submitAsync()"
+		novalidate
+	>
+		<mat-form-field appearance="outline">
+			<mat-label>Amount</mat-label>
+			<input
+				matInput
+				type="number"
+				inputmode="decimal"
+				min="0.01"
+				step="0.01"
+				formControlName="amount"
+			/>
+			<span matTextSuffix>{{ activeAccountSignal()?.currency }}</span>
+			@if (paymentForm.controls.amount.touched && paymentForm.controls.amount.invalid) {
+			<mat-error>Amount must be greater than zero.</mat-error>
+			}
+		</mat-form-field>
+		<mat-form-field appearance="outline">
+			<mat-label>Type</mat-label>
+			<mat-select formControlName="direction">
+				<mat-option [value]="0">Income</mat-option>
+				<mat-option [value]="1">Expense</mat-option>
+			</mat-select>
+		</mat-form-field>
+		<mat-form-field appearance="outline">
+			<mat-label>Date</mat-label>
+			<input
+				matInput
+				type="date"
 				formControlName="operationDate"
-			></app-datepicker>
-		</div>
-		<div class="contractor-section">
-			<app-form-field
-				formControlName="contractor"
-				[fieldType]="'SELECT'"
-				[title]="'Contractor:'"
-				[selectOptions]="getContractorsOptions"
-				[disabled]="isNotReadyForSaveSignal()"
-			></app-form-field>
-
+			/>
+			@if (paymentForm.controls.operationDate.touched && paymentForm.controls.operationDate.invalid) {
+			<mat-error>Choose an operation date.</mat-error>
+			}
+		</mat-form-field>
+		<div class="payment-editor__field-action">
+			<mat-form-field appearance="outline">
+				<mat-label>Category</mat-label>
+				<mat-select formControlName="categoryId">
+					@for (category of filteredCategoriesSignal(); track category.key.toString()) {
+					<mat-option [value]="category.key.toString()">{{ categoryName(category) }}</mat-option>
+					}
+				</mat-select>
+				@if (paymentForm.controls.categoryId.touched && paymentForm.controls.categoryId.invalid) {
+				<mat-error>Choose a category.</mat-error>
+				}
+			</mat-form-field>
 			<button
-				(click)="addContractor()"
-				mat-fab
-				color="primary"
-				aria-label="add a contractor"
-			>
-				<mat-icon>add</mat-icon>
-			</button>
-		</div>
-
-		<div class="category-section">
-			<app-form-field
-				formControlName="category"
-				[fieldType]="'SELECT'"
-				[title]="'Category:'"
-				[selectOptions]="getCategoriesOptions"
-				[disabled]="isNotReadyForSaveSignal()"
-			></app-form-field>
-
-			<button
+				type="button"
+				mat-icon-button
+				aria-label="Add category"
 				(click)="addCategory()"
-				mat-fab
-				color="primary"
-				aria-label="add a category"
+				[disabled]="isSubmittingSignal()"
 			>
 				<mat-icon>add</mat-icon>
 			</button>
 		</div>
-
-		@if (isExpenseSignal()) {
-		<ng-container #expense>
-			<div class="expense-section">
-				<app-form-field
-					formControlName="expense"
-					[fieldType]="'INPUT'"
-					[title]="'Amount(Expense)::'"
-					[disabled]="isNotReadyForSaveSignal()"
-				></app-form-field>
-			</div>
-		</ng-container>
-		} @else {
-		<div class="income-section">
-			<app-form-field
-				formControlName="income"
-				[fieldType]="'INPUT'"
-				[title]="'Amount(Income):'"
-				[disabled]="isNotReadyForSaveSignal()"
-			></app-form-field>
+		<div class="payment-editor__field-action">
+			<mat-form-field appearance="outline">
+				<mat-label>Contractor (optional)</mat-label>
+				<mat-select formControlName="contractorId">
+					<mat-option value="">No contractor</mat-option>
+					@for (contractor of contractorsSignal(); track contractor.key.toString()) {
+					<mat-option [value]="contractor.key.toString()">{{ contractorName(contractor) }}</mat-option>
+					}
+				</mat-select>
+			</mat-form-field>
+			<button
+				type="button"
+				mat-icon-button
+				aria-label="Add contractor"
+				(click)="addContractor()"
+				[disabled]="isSubmittingSignal()"
+			>
+				<mat-icon>add</mat-icon>
+			</button>
 		</div>
-		}
-
-		<div class="comment-section">
-			<app-form-field
+		<mat-form-field appearance="outline">
+			<mat-label>Comment (optional)</mat-label>
+			<textarea
+				matInput
+				rows="3"
 				formControlName="comment"
-				[fieldType]="'TEXT_AREA'"
-				[title]="'Comments:'"
-				[disabled]="isNotReadyForSaveSignal()"
-			></app-form-field>
-		</div>
-		<div class="command-buttons">
-			<app-button
-				[isDisabled]="isNotReadyForSaveSignal()"
-				(click)="saveRecordAsync()"
-				type="fab"
-				[text]="isDraftRecordSignal() ? 'Save payment operation' : 'Save payment operation changes'"
-				color="primary"
-				icon="save"
-			></app-button>
-			<app-button
-				[hidden]="false"
-				(click)="addRecordAsync()"
-				type="fab"
-				text="Add payment operation"
-				color="accent"
-				icon="add_circle_outline"
-			></app-button>
-			<app-button
-				[isDisabled]="isNotReadyForSaveSignal()"
-				(click)="deleteRecordAsync()"
-				type="fab"
-				[text]="isDraftRecordSignal() ? 'Discard payment operation draft' : 'Delete payment operation'"
+			></textarea>
+		</mat-form-field>
+		<footer class="payment-editor__actions">
+			@if (editorModeSignal() === 'edit') {
+			<button
+				type="button"
+				mat-button
 				color="warn"
-				icon="delete_forever"
-			></app-button>
-		</div>
+				(click)="deleteAsync()"
+				[disabled]="isSubmittingSignal()"
+			>
+				Delete
+			</button>
+			}
+			<button
+				type="button"
+				mat-button
+				(click)="cancel()"
+				[disabled]="isSubmittingSignal()"
+			>
+				Cancel
+			</button>
+			<button
+				type="submit"
+				mat-flat-button
+				color="primary"
+				[disabled]="isSubmittingSignal() || !activeAccountIdSignal()"
+			>
+				{{ isSubmittingSignal() ? 'Submitting…' : editorModeSignal() === 'create' ? 'Create payment' : 'Save
+				changes' }}
+			</button>
+		</footer>
 	</form>
-</div>
+</section>

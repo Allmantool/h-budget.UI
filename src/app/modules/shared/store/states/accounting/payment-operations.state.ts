@@ -77,6 +77,10 @@ export class AccountingOperationsState {
 
 		const updatedItemIndex = _.findIndex(records, r => r.key === accountingRecord.key);
 
+		if (updatedItemIndex < 0) {
+			return;
+		}
+
 		records.splice(updatedItemIndex, 1, accountingRecord);
 
 		patchState({

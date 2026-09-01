@@ -428,7 +428,6 @@ describe('accounting lazy route and named-outlet activation', () => {
 					{
 						provide: AccountingOperationsService,
 						useValue: jasmine.createSpyObj<AccountingOperationsService>('accountingOperationsService', [
-							'addNewAsync',
 							'updateAsync',
 							'deleteByIdAsync',
 						]),

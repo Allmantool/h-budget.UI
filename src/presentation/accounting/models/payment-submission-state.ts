@@ -1,0 +1,9 @@
+export type PaymentSubmissionOperation = 'create' | 'update' | 'delete';
+
+export type PaymentSubmissionState =
+	| { status: 'idle' }
+	| { status: 'submitting'; operation: PaymentSubmissionOperation }
+	| { status: 'accepted'; operation: PaymentSubmissionOperation; operationId: string }
+	| { status: 'waitingForProjection'; operation: PaymentSubmissionOperation; operationId: string }
+	| { status: 'succeeded'; operation: PaymentSubmissionOperation; operationId?: string }
+	| { status: 'failed'; operation: PaymentSubmissionOperation; message: string };

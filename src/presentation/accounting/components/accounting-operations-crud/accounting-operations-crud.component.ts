@@ -1,49 +1,48 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { ReactiveFormsModule, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
-import { OperationTypes } from 'domain/types/operation.types';
-
-import * as _ from 'lodash';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 
 import { Select, Store } from '@ngxs/store';
-import { BehaviorSubject, combineLatest, Observable, take } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { combineLatest, firstValueFrom, Observable } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
-import { AppButtonComponent } from '../../../../app/modules/shared/components/button/app-button.component';
-import { DatepickerComponent } from '../../../../app/modules/shared/components/datepicker/app-datepicker.component';
-import { AppFormFieldComponent } from '../../../../app/modules/shared/components/form-field/app-form-field.component';
-import { SelectDropdownOptions } from '../../../../app/modules/shared/models/select-dropdown-options';
-import { IAccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
 import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
-import { Delete } from '../../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
 import { getAccountPayments } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
-import { getActivePaymentAccountId } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import {
-	getAccountingTableOptions,
-	getSelectedRecordGuid,
-} from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
-import {
-	getCategoryAsNodesMap,
-	getCategoryNodes,
-} from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
-import {
-	getContractorAsNodesMap,
-	getContractorNodes,
-} from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
-import { CrossAccountsTransferProvider } from '../../../../data/providers/accounting/cross-accounts-transfer.provider';
-import '../../../../domain/extensions/handbookExtensions';
+	getActivePaymentAccount,
+	getActivePaymentAccountId,
+} from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
+import { getSelectedRecordGuid } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
+import { getCategories } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
+import { getContractors } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
 import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
 import { IContractorModel } from '../../../../domain/models/accounting/contractor.model.';
 import { PaymentOperationTypes } from '../../../../domain/models/accounting/operation-types';
+import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
-import { IPaymentRepresentationModel } from '../../models/operation-record';
+import { OperationTypes } from '../../../../domain/types/operation.types';
+import { PaymentDeleteDialogComponent } from '../payment-delete-dialog/payment-delete-dialog.component';
+import { PaymentSubmissionState } from '../../models/payment-submission-state';
 import { AccountingOperationsService } from '../../services/accounting-operations.service';
 import { CategoriesDialogService } from '../../services/categories-dialog.service';
 import { ContractorsDialogService } from '../../services/contractors-dialog.service';
-import { PaymentsHistoryService } from '../../services/payments-history.service';
+
+type PaymentEditorMode = 'create' | 'edit';
+
+interface PaymentEditorValue {
+	amount: number;
+	categoryId: string;
+	comment: string;
+	contractorId: string;
+	direction: PaymentOperationTypes;
+	operationDate: string;
+}
 
 @Component({
 	selector: 'accounting-crud',
@@ -54,240 +53,314 @@ import { PaymentsHistoryService } from '../../services/payments-history.service'
 	imports: [
 		ReactiveFormsModule,
 		MatButtonModule,
+		MatDialogModule,
+		MatFormFieldModule,
 		MatIconModule,
-		AppButtonComponent,
-		DatepickerComponent,
-		AppFormFieldComponent,
+		MatInputModule,
+		MatSelectModule,
 	],
 })
 export class AccountingOperationsCrudComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);
-
-	public crudRecordFg: UntypedFormGroup;
+	private readonly formBuilder = inject(FormBuilder);
+	private baseline: PaymentEditorValue = this.defaultValue();
+	private loadedOperationId?: string;
+	private reconciliationToken = 0;
 
 	@Select(getActivePaymentAccountId)
-	public getActivePaymentAccountId$!: Observable<Guid | undefined>;
+	private activePaymentAccountId$!: Observable<Guid | undefined>;
 
-	@Select(getAccountingTableOptions)
-	accountingTableOptions$!: Observable<IAccountingOperationsTableOptions>;
+	@Select(getActivePaymentAccount)
+	private activePaymentAccount$!: Observable<IPaymentAccountModel | undefined>;
 
 	@Select(getAccountPayments)
-	accountingRecords$!: Observable<IPaymentOperationModel[]>;
-
-	@Select(getCategoryNodes)
-	categoryNodes$!: BehaviorSubject<string[]>;
-
-	@Select(getCategoryAsNodesMap)
-	categoriesMap$!: Observable<Map<string, ICategoryModel>>;
-
-	@Select(getContractorAsNodesMap)
-	contractorsMap$!: Observable<Map<string, IContractorModel>>;
-
-	@Select(getContractorNodes)
-	contractorNodes$!: Observable<string[]>;
+	private paymentOperations$!: Observable<IPaymentOperationModel[]>;
 
 	@Select(getSelectedRecordGuid)
-	selectedRecordGuid$!: Observable<Guid>;
+	private selectedRecordGuid$!: Observable<Guid | undefined>;
 
-	public selectedRecordGuidSignal: Signal<Guid | null>;
-	public isNotReadyForSaveSignal: Signal<boolean>;
+	@Select(getCategories)
+	private categories$!: Observable<ICategoryModel[]>;
 
-	public categoryNodesSignal: Signal<string[]>;
-	public contractorNodesSignal: Signal<string[]>;
-	public categoriesMapSignal: Signal<Map<string, ICategoryModel>>;
-	public contractorsMapSignal: Signal<Map<string, IContractorModel>>;
+	@Select(getContractors)
+	private contractors$!: Observable<IContractorModel[]>;
 
-	public selectedCategorySignal: Signal<SelectDropdownOptions>;
-	public selectedContractorSignal: Signal<SelectDropdownOptions>;
-
-	public isExpenseSignal: Signal<boolean>;
-	public selectedPaymentSignal: Signal<IPaymentOperationModel>;
-	public accountingRecordsSignal: Signal<IPaymentOperationModel[]>;
-	public activePaymentAccountIdSignal: Signal<Guid | undefined> = toSignal(this.getActivePaymentAccountId$, {
-		initialValue: undefined,
+	public readonly paymentForm = this.formBuilder.nonNullable.group({
+		amount: [0, [Validators.required, Validators.min(0.01)]],
+		categoryId: ['', Validators.required],
+		comment: [''],
+		contractorId: [''],
+		direction: [PaymentOperationTypes.Expense, Validators.required],
+		operationDate: [this.today(), Validators.required],
 	});
-	public readonly isDraftRecordSignal: Signal<boolean>;
-	public readonly crudModeLabelSignal: Signal<string>;
-	public readonly crudTitleSignal: Signal<string>;
+
+	public readonly activeAccountSignal = toSignal(this.activePaymentAccount$, { initialValue: undefined });
+	public readonly activeAccountIdSignal = toSignal(this.activePaymentAccountId$, { initialValue: undefined });
+	public readonly categoriesSignal = toSignal(this.categories$, { initialValue: [] });
+	public readonly contractorsSignal = toSignal(this.contractors$, { initialValue: [] });
+	public readonly paymentOperationsSignal = toSignal(this.paymentOperations$, { initialValue: [] });
+	public readonly selectedRecordGuidSignal = toSignal(this.selectedRecordGuid$, { initialValue: undefined });
+	public readonly formValueSignal = toSignal(this.paymentForm.valueChanges, {
+		initialValue: this.paymentForm.getRawValue(),
+	});
+	public readonly submissionStateSignal = signal<PaymentSubmissionState>({ status: 'idle' });
+	public readonly editorModeSignal = computed<PaymentEditorMode>(() =>
+		this.selectedOperationSignal() ? 'edit' : 'create'
+	);
+	public readonly selectedOperationSignal = computed(() => {
+		const selectedId = this.selectedRecordGuidSignal();
+		return selectedId
+			? this.paymentOperationsSignal().find(operation => operation.key.equals(selectedId))
+			: undefined;
+	});
+	public readonly filteredCategoriesSignal = computed(() =>
+		this.categoriesSignal().filter(category => category.operationType === this.formValueSignal().direction)
+	);
+	public readonly isSubmittingSignal = computed(() => {
+		const status = this.submissionStateSignal().status;
+		return status === 'submitting' || status === 'accepted' || status === 'waitingForProjection';
+	});
+	public readonly isDirtySignal = computed(
+		() => JSON.stringify(this.formValueSignal()) !== JSON.stringify(this.baseline)
+	);
 
 	constructor(
-		private readonly fb: UntypedFormBuilder,
 		private readonly accountingOperationsService: AccountingOperationsService,
 		private readonly categoriesDialogService: CategoriesDialogService,
 		private readonly contractorsDialogService: ContractorsDialogService,
-		private readonly paymentHistoryService: PaymentsHistoryService,
-		private readonly transferProvider: CrossAccountsTransferProvider,
+		private readonly dialog: MatDialog,
 		private readonly store: Store
-	) {
-		this.accountingRecordsSignal = toSignal(this.accountingRecords$, { initialValue: [] });
-
-		this.selectedRecordGuidSignal = toSignal(this.selectedRecordGuid$, { initialValue: null });
-
-		this.isNotReadyForSaveSignal = computed(
-			() => _.isEmpty(this.accountingRecordsSignal()) || _.isNil(this.selectedRecordGuidSignal())
-		);
-
-		this.contractorNodesSignal = toSignal(this.contractorNodes$, {
-			initialValue: [],
-		});
-
-		this.categoryNodesSignal = toSignal(this.categoryNodes$, {
-			initialValue: [],
-		});
-
-		this.crudRecordFg = this.fb.group({
-			key: new UntypedFormControl(),
-			operationDate: new UntypedFormControl({ disabled: true }),
-			contractor: new UntypedFormControl({ disabled: true }),
-			category: new UntypedFormControl({ disabled: true }),
-			income: new UntypedFormControl({ disabled: true }),
-			expense: new UntypedFormControl({ disabled: true }),
-			comment: new UntypedFormControl({ disabled: true }),
-		});
-
-		this.categoriesMapSignal = toSignal(this.categoriesMap$, { initialValue: new Map<string, ICategoryModel>() });
-		this.contractorsMapSignal = toSignal(this.contractorsMap$, {
-			initialValue: new Map<string, IContractorModel>(),
-		});
-		this.selectedCategorySignal = toSignal(this.crudRecordFg.get('category')!.valueChanges, { initialValue: '' });
-		this.selectedContractorSignal = toSignal(this.crudRecordFg.get('contractor')!.valueChanges, {
-			initialValue: '',
-		});
-
-		this.isExpenseSignal = computed(() => {
-			const selectedCategory = this.categoriesMapSignal().get(this.selectedCategorySignal().value!);
-
-			return selectedCategory?.operationType == PaymentOperationTypes.Expense;
-		});
-
-		const formsCrudSignal = toSignal<IPaymentRepresentationModel>(this.crudRecordFg.valueChanges, {
-			initialValue: null,
-		});
-
-		this.selectedPaymentSignal = computed(() => {
-			const paymentRepresentation = formsCrudSignal();
-			const payment = _.find(this.accountingRecordsSignal(), r => r.key === paymentRepresentation?.key);
-			const category = this.categoriesMapSignal().get(this.selectedCategorySignal().value ?? '');
-			const contractor = this.contractorsMapSignal().get(this.selectedContractorSignal().value ?? '');
-
-			return {
-				key: paymentRepresentation?.key,
-				paymentAccountId: this.activePaymentAccountIdSignal(),
-				operationDate: paymentRepresentation?.operationDate,
-				amount:
-					category?.operationType == PaymentOperationTypes.Expense
-						? paymentRepresentation?.expense
-						: paymentRepresentation?.income,
-				categoryId: category?.key,
-				contractorId: contractor?.key,
-				comment: paymentRepresentation?.comment,
-				operationType: payment?.operationType,
-			} as IPaymentOperationModel;
-		});
-
-		this.isDraftRecordSignal = computed(() => this.selectedPaymentSignal()?.key === Guid.EMPTY);
-		this.crudModeLabelSignal = computed(() => (this.isDraftRecordSignal() ? 'Create new record' : 'Edit record'));
-		this.crudTitleSignal = computed(() => (this.isDraftRecordSignal() ? 'Draft operation' : 'Selected operation'));
-	}
+	) {}
 
 	public ngOnInit(): void {
-		combineLatest([this.accountingTableOptions$, this.accountingRecords$])
-			.pipe(
-				takeUntilDestroyed(this.destroyRef),
-				filter(([tableOptions, records]) => !_.isNil(tableOptions) && !_.isNil(records))
-			)
-			.subscribe(() => {
-				if (!_.isNil(this.crudRecordFg)) {
-					const payload = this.paymentHistoryService.paymentOperationAsHistoryRecord();
+		combineLatest([this.selectedRecordGuid$, this.paymentOperations$])
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe(() => this.loadSelectedOperation());
 
-					if (!_.isNil(payload)) {
-						this.crudRecordFg.patchValue({
-							key: payload.key,
-							operationDate: payload.operationDate,
-							contractor: payload.contractor,
-							category: payload.category,
-							income: payload.income,
-							expense: payload.expense,
-							comment: payload.comment,
-							operationType: payload.operationType,
-						});
-					}
-				}
-			});
+		this.paymentForm.controls.direction.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+			const categoryId = this.paymentForm.controls.categoryId.value;
+			if (!this.filteredCategoriesSignal().some(category => category.key.toString() === categoryId)) {
+				this.paymentForm.controls.categoryId.setValue('');
+			}
+		});
 	}
 
-	public get getContractorsOptions(): SelectDropdownOptions[] {
-		return _.map(
-			this.contractorNodesSignal(),
-			contractor =>
-				new SelectDropdownOptions({
-					description: contractor,
-					value: contractor,
-				})
-		);
+	public categoryName(category: ICategoryModel): string {
+		return category.nameNodes.join(': ');
 	}
 
-	public get getCategoriesOptions(): SelectDropdownOptions[] {
-		return _.map(
-			this.categoryNodesSignal(),
-			category =>
-				new SelectDropdownOptions({
-					description: category,
-					value: category,
-				})
-		);
+	public contractorName(contractor: IContractorModel): string {
+		return contractor.nameNodes.join(': ');
 	}
 
-	public async applyChangesAsync(): Promise<void> {
-		await this.accountingOperationsService.updateAsync(this.selectedPaymentSignal());
-	}
-
-	public async addRecordAsync(): Promise<void> {
-		const records = this.accountingRecordsSignal();
-
-		if (!_.isEmpty(records) && _.some(records, { key: Guid.EMPTY })) {
+	public async submitAsync(): Promise<void> {
+		if (this.isSubmittingSignal()) {
 			return;
 		}
 
-		await this.accountingOperationsService.addNewAsync();
+		if (this.paymentForm.invalid || !this.activeAccountIdSignal()) {
+			this.paymentForm.markAllAsTouched();
+			this.submissionStateSignal.set({
+				status: 'failed',
+				operation: this.operationKind(),
+				message: 'Review the highlighted fields.',
+			});
+			return;
+		}
+
+		const operation = this.operationKind();
+		this.submissionStateSignal.set({ status: 'submitting', operation });
+
+		try {
+			const result = await this.accountingOperationsService.updateAsync(this.toPaymentOperation());
+
+			if (!result.isSucceeded || !result.payload) {
+				this.submissionStateSignal.set({
+					status: 'failed',
+					operation,
+					message: 'Payment could not be saved. Your entered values are still here.',
+				});
+				return;
+			}
+
+			await this.reconcileAsync(operation, result.payload);
+		} catch {
+			this.submissionStateSignal.set({
+				status: 'failed',
+				operation,
+				message: 'Payment could not be saved. Check your connection and try again.',
+			});
+		}
 	}
 
-	public async deleteRecordAsync(): Promise<void> {
-		const recordIdForDelete = this.selectedPaymentSignal()?.key;
-		const accountId = this.selectedPaymentSignal()?.paymentAccountId;
-		const operationType = this.selectedPaymentSignal().operationType;
+	public async deleteAsync(): Promise<void> {
+		const operation = this.selectedOperationSignal();
+		if (!operation || this.isSubmittingSignal()) {
+			return;
+		}
 
-		if (recordIdForDelete === Guid.EMPTY) {
+		const confirmed = await firstValueFrom(
+			this.dialog
+				.open(PaymentDeleteDialogComponent, { data: this.deleteDialogData(operation), restoreFocus: true })
+				.afterClosed()
+		);
+
+		if (!confirmed) {
+			return;
+		}
+
+		this.submissionStateSignal.set({ status: 'submitting', operation: 'delete' });
+		try {
+			const result = await this.accountingOperationsService.deleteByIdAsync(operation.key);
+			if (!result.isSucceeded || !result.payload) {
+				this.submissionStateSignal.set({
+					status: 'failed',
+					operation: 'delete',
+					message: 'Payment could not be deleted. It is still available to review.',
+				});
+				return;
+			}
+
+			await this.reconcileAsync('delete', result.payload);
+		} catch {
+			this.submissionStateSignal.set({
+				status: 'failed',
+				operation: 'delete',
+				message: 'Payment could not be deleted. Check your connection and try again.',
+			});
+		}
+	}
+
+	public cancel(): void {
+		this.reconciliationToken++;
+		this.submissionStateSignal.set({ status: 'idle' });
+		if (this.editorModeSignal() === 'edit') {
+			this.paymentForm.reset(this.baseline);
+			return;
+		}
+
+		this.paymentForm.reset(this.defaultValue());
+		this.baseline = this.defaultValue();
+	}
+
+	public async addCategory(): Promise<void> {
+		const category = await firstValueFrom(this.categoriesDialogService.openCategories());
+		if (category) {
+			this.paymentForm.controls.direction.setValue(category.operationType);
+			this.paymentForm.controls.categoryId.setValue(category.key.toString());
+		}
+	}
+
+	public async addContractor(): Promise<void> {
+		const contractor = await firstValueFrom(this.contractorsDialogService.openContractors());
+		if (contractor) {
+			this.paymentForm.controls.contractorId.setValue(contractor.key.toString());
+		}
+	}
+
+	private async reconcileAsync(operation: 'create' | 'update' | 'delete', operationId: string): Promise<void> {
+		const token = ++this.reconciliationToken;
+		this.submissionStateSignal.set({ status: 'accepted', operation, operationId });
+		this.submissionStateSignal.set({ status: 'waitingForProjection', operation, operationId });
+		const projected = await this.accountingOperationsService.reconcileProjectionAsync(
+			operationId,
+			operation,
+			() => token === this.reconciliationToken
+		);
+
+		if (token !== this.reconciliationToken) {
+			return;
+		}
+
+		if (!projected) {
+			return;
+		}
+
+		this.submissionStateSignal.set({ status: 'succeeded', operation, operationId });
+		if (operation === 'create') {
+			this.store.dispatch(new SetActiveAccountingOperation(Guid.parse(operationId)));
+		}
+		if (operation === 'delete') {
 			this.store.dispatch(new SetActiveAccountingOperation(undefined));
-			this.store.dispatch(new Delete(Guid.EMPTY));
-			this.crudRecordFg.patchValue({
-				key: null,
-				operationDate: null,
-				contractor: null,
-				category: null,
-				income: null,
-				expense: null,
-				comment: null,
-			});
+		}
+	}
+
+	private loadSelectedOperation(): void {
+		const operation = this.selectedOperationSignal();
+		const operationId = operation?.key.toString();
+		if (operationId === this.loadedOperationId) {
 			return;
 		}
 
-		if (operationType == OperationTypes.Transfer) {
-			this.transferProvider.deleteById(accountId, recordIdForDelete).pipe(take(1)).subscribe();
-		}
-
-		await this.accountingOperationsService.deleteByIdAsync(recordIdForDelete);
+		this.loadedOperationId = operationId;
+		const value = operation ? this.valueFromOperation(operation) : this.defaultValue();
+		this.baseline = value;
+		this.paymentForm.reset(value, { emitEvent: true });
+		this.submissionStateSignal.set({ status: 'idle' });
 	}
 
-	public addCategory(): void {
-		this.categoriesDialogService.openCategories();
+	private toPaymentOperation(): IPaymentOperationModel {
+		const value = this.paymentForm.getRawValue();
+		const existingOperation = this.selectedOperationSignal();
+		return {
+			key: existingOperation?.key ?? Guid.EMPTY,
+			paymentAccountId: Guid.parse(this.activeAccountIdSignal()!.toString()),
+			operationDate: new Date(`${value.operationDate}T00:00:00`),
+			amount: value.amount,
+			categoryId: Guid.parse(value.categoryId),
+			contractorId: value.contractorId ? Guid.parse(value.contractorId) : Guid.EMPTY,
+			comment: value.comment.trim(),
+			operationType: OperationTypes.Payment,
+		};
 	}
 
-	public addContractor(): void {
-		this.contractorsDialogService.openContractors();
+	private valueFromOperation(operation: IPaymentOperationModel): PaymentEditorValue {
+		const category = this.categoriesSignal().find(item => item.key.equals(operation.categoryId));
+		return {
+			amount: Math.abs(operation.amount),
+			categoryId: operation.categoryId.toString(),
+			comment: operation.comment,
+			contractorId: operation.contractorId?.equals(Guid.EMPTY) ? '' : operation.contractorId.toString(),
+			direction: category?.operationType ?? PaymentOperationTypes.Expense,
+			operationDate: this.asDateInput(operation.operationDate),
+		};
 	}
 
-	public async saveRecordAsync(): Promise<void> {
-		await this.applyChangesAsync();
+	private defaultValue(): PaymentEditorValue {
+		return {
+			amount: 0,
+			categoryId: '',
+			comment: '',
+			contractorId: '',
+			direction: PaymentOperationTypes.Expense,
+			operationDate: this.today(),
+		};
+	}
+
+	private deleteDialogData(operation: IPaymentOperationModel) {
+		const category = this.categoriesSignal().find(item => item.key.equals(operation.categoryId));
+		const contractor = this.contractorsSignal().find(item => item.key.equals(operation.contractorId));
+		return {
+			amount: Math.abs(operation.amount),
+			category: category ? this.categoryName(category) : 'Uncategorized',
+			currency: this.activeAccountSignal()?.currency ?? '',
+			date: this.asDateInput(operation.operationDate),
+			payee: contractor ? this.contractorName(contractor) : '',
+		};
+	}
+
+	private operationKind(): 'create' | 'update' {
+		return this.editorModeSignal() === 'create' ? 'create' : 'update';
+	}
+
+	private today(): string {
+		return this.asDateInput(new Date());
+	}
+
+	private asDateInput(date: Date): string {
+		const year = date.getFullYear();
+		const month = `${date.getMonth() + 1}`.padStart(2, '0');
+		const day = `${date.getDate()}`.padStart(2, '0');
+		return `${year}-${month}-${day}`;
 	}
 }

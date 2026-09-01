@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
 
-import { concatMap, map } from 'rxjs';
+import { concatMap, map, Observable } from 'rxjs';
 
 import { CategoriesDialogComponent } from '../../../app/modules/shared/components/dialog/categories/categories-dialog.component';
 import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
@@ -16,7 +16,7 @@ export class CategoriesDialogService {
 		private dialogProvider: DialogProvider
 	) {}
 
-	public openCategories(): void {
+	public openCategories(): Observable<ICategoryModel | undefined> {
 		const config = new MatDialogConfig<DialogContainer<ICategoryModel, ICategoryModel>>();
 
 		const onSave = (payloadForSave: ICategoryModel) => {
@@ -35,6 +35,6 @@ export class CategoriesDialogService {
 
 		config.disableClose = true;
 
-		this.dialogProvider.openDialog(CategoriesDialogComponent, config);
+		return this.dialogProvider.openDialog(CategoriesDialogComponent, config).afterClosed();
 	}
 }

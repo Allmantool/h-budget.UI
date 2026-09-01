@@ -1,4 +1,4 @@
-import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
+import { AsyncPipe, CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import {
 	afterEveryRender,
 	AfterViewInit,
@@ -14,6 +14,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatTableModule } from '@angular/material/table';
+import { MatButtonModule } from '@angular/material/button';
 import { SseService } from 'infrastructure/sse-service';
 
 import * as _ from 'lodash';
@@ -48,7 +49,15 @@ import { TransferProjectionSynchronizationService } from '../../services/transfe
 	styleUrls: ['./payments-history.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [CurrencyPipe, DatePipe, DecimalPipe, MatTableModule, AccountingCurrencyFormatPipe],
+	imports: [
+		AsyncPipe,
+		CurrencyPipe,
+		DatePipe,
+		DecimalPipe,
+		MatButtonModule,
+		MatTableModule,
+		AccountingCurrencyFormatPipe,
+	],
 })
 export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewInit {
 	private readonly destroyRef = inject(DestroyRef);
@@ -162,6 +171,10 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 
 	public selectRow(record: IPaymentRepresentationModel): void {
 		this.store.dispatch(new SetActiveAccountingOperation(record.key));
+	}
+
+	public beginNewPayment(): void {
+		this.store.dispatch(new SetActiveAccountingOperation(undefined));
 	}
 
 	public isFuturePayment = (record: IPaymentRepresentationModel): boolean => isFuture(record.operationDate);
