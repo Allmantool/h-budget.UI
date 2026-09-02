@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented
+Partially verified — release blockers remain
 
 ## Problem and Goal
 
@@ -52,13 +52,13 @@ Use Jasmine/TestBed regression tests for state unknown-ID safety, provider retry
 
 | Requirement | Acceptance Criteria | Implementation | Test / Evidence                   | Status  |
 | ----------- | ------------------- | -------------- | --------------------------------- | ------- |
-| REQ-001     | AC-001              | In progress    | State regression test planned     | NOT RUN |
-| REQ-002     | AC-002              | In progress    | Editor/service tests planned      | NOT RUN |
-| REQ-003     | AC-003              | In progress    | Reconciliation tests planned      | NOT RUN |
-| REQ-004     | AC-004              | In progress    | Component tests planned           | NOT RUN |
-| REQ-005     | AC-005              | In progress    | Validator/component tests planned | NOT RUN |
-| REQ-006     | AC-006              | In progress    | Dialog/component tests planned    | NOT RUN |
-| REQ-007     | AC-007              | In progress    | Template/CSS review               | NOT RUN |
+| REQ-001     | AC-001              | Complete       | Unknown-ID NGXS regression test   | PASS    |
+| REQ-002     | AC-002              | Complete       | Editor and service single-flight tests | PASS |
+| REQ-003     | AC-003              | Complete       | Bounded reconciliation code/test  | PARTIAL |
+| REQ-004     | AC-004              | Complete       | Editor template and focused tests | PASS    |
+| REQ-005     | AC-005              | Complete       | Form validation/template review   | PARTIAL |
+| REQ-006     | AC-006              | Complete       | Confirmation implementation review| PARTIAL |
+| REQ-007     | AC-007              | Complete       | CSS/template review only          | PARTIAL |
 
 ## Implementation Progress
 
@@ -67,14 +67,15 @@ Use Jasmine/TestBed regression tests for state unknown-ID safety, provider retry
 - Definition of Ready: requirements, scope, risks, constraints, and verification strategy captured.
 - Removed unsafe write retries; guarded unknown store edits; replaced fake drafts with local typed editor state.
 - Added lifecycle messaging/reconciliation, confirmation-based deletion, created-entity selection, and responsive history records.
-
-### In Progress
-
-- Broader lint and production-build verification.
+- Hardened reconciliation to validate update payload fields, stop after destruction/account changes, and distinguish accepted-but-delayed projection from a failed command.
+- Corrected date-only mapping to preserve the local business date and restored compatibility with existing category/contractor-dialog unit tests.
 
 ### Remaining
 
-- Backend idempotency/status capabilities and broader E2E coverage.
+- Dirty-form discard confirmation for editor close, selection, New payment, account switch, and route navigation.
+- Explicit tests for provider no-retry behavior, business-result failures, lifecycle cancellation, delete outcomes, selector workflows, and responsive browser behavior.
+- Backend idempotency/status capabilities and correlated projection notifications.
+- Repository-wide lint debt: `npm run lint` passes with 341 warnings; the warnings need separate ownership verification.
 
 ### Decisions and Requirement Changes
 
@@ -83,9 +84,11 @@ Use Jasmine/TestBed regression tests for state unknown-ID safety, provider retry
 ### Verification
 
 - RED: the unknown-ID edit regression exposed the unguarded `splice(-1, ...)` behavior.
-- GREEN: focused state safety and editor single-flight tests pass.
-- PASS: `npm run typecheck`.
-- NOT RUN: complete lint and production build; lint did not finish in the command window.
+- GREEN: focused state safety, editor single-flight, and delayed-projection recovery tests pass.
+- PASS: `npm run test:ci` — 253 specs passed.
+- PASS: `npm run typecheck` and `npm run build:prod`; the production build retains the existing 2.38 MB initial-bundle budget warning.
+- PASS: `npm run lint` — 0 errors and 341 warnings. Option B errors were corrected; remaining warnings need separate ownership verification.
+- PASS: `git diff --check`.
 
 Path: `src/presentation/accounting/components/accounting-operations-crud/accounting-operations-crud.component.ts`
 Rule/threshold: Component TypeScript 150-line design signal.

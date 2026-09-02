@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -27,11 +27,11 @@ import { PaymentOperationTypes } from '../../../../domain/models/accounting/oper
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
 import { OperationTypes } from '../../../../domain/types/operation.types';
-import { PaymentDeleteDialogComponent } from '../payment-delete-dialog/payment-delete-dialog.component';
 import { PaymentSubmissionState } from '../../models/payment-submission-state';
 import { AccountingOperationsService } from '../../services/accounting-operations.service';
 import { CategoriesDialogService } from '../../services/categories-dialog.service';
 import { ContractorsDialogService } from '../../services/contractors-dialog.service';
+import { PaymentDeleteDialogComponent } from '../payment-delete-dialog/payment-delete-dialog.component';
 
 type PaymentEditorMode = 'create' | 'edit';
 
@@ -42,6 +42,14 @@ interface PaymentEditorValue {
 	contractorId: string;
 	direction: PaymentOperationTypes;
 	operationDate: string;
+}
+
+interface PaymentDeleteDialogData {
+	amount: number;
+	category: string;
+	currency: string;
+	date: string;
+	payee: string;
 }
 
 @Component({
@@ -66,6 +74,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	private baseline: PaymentEditorValue = this.defaultValue();
 	private loadedOperationId?: string;
 	private reconciliationToken = 0;
+	private isDestroyed = false;
 
 	@Select(getActivePaymentAccountId)
 	private activePaymentAccountId$!: Observable<Guid | undefined>;
@@ -86,12 +95,18 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	private contractors$!: Observable<IContractorModel[]>;
 
 	public readonly paymentForm = this.formBuilder.nonNullable.group({
-		amount: [0, [Validators.required, Validators.min(0.01)]],
-		categoryId: ['', Validators.required],
+		amount: [
+			0,
+			[
+				(control: AbstractControl) => Validators.required(control),
+				(control: AbstractControl) => Validators.min(0.01)(control),
+			],
+		],
+		categoryId: ['', (control: AbstractControl) => Validators.required(control)],
 		comment: [''],
 		contractorId: [''],
-		direction: [PaymentOperationTypes.Expense, Validators.required],
-		operationDate: [this.today(), Validators.required],
+		direction: [PaymentOperationTypes.Expense, (control: AbstractControl) => Validators.required(control)],
+		operationDate: [this.today(), (control: AbstractControl) => Validators.required(control)],
 	});
 
 	public readonly activeAccountSignal = toSignal(this.activePaymentAccount$, { initialValue: undefined });
@@ -137,6 +152,15 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			.pipe(takeUntilDestroyed(this.destroyRef))
 			.subscribe(() => this.loadSelectedOperation());
 
+		this.destroyRef.onDestroy(() => {
+			this.isDestroyed = true;
+			this.reconciliationToken++;
+		});
+
+		this.activePaymentAccountId$
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe(() => this.reconciliationToken++);
+
 		this.paymentForm.controls.direction.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
 			const categoryId = this.paymentForm.controls.categoryId.value;
 			if (!this.filteredCategoriesSignal().some(category => category.key.toString() === categoryId)) {
@@ -172,7 +196,8 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		this.submissionStateSignal.set({ status: 'submitting', operation });
 
 		try {
-			const result = await this.accountingOperationsService.updateAsync(this.toPaymentOperation());
+			const expectedOperation = this.toPaymentOperation();
+			const result = await this.accountingOperationsService.updateAsync(expectedOperation);
 
 			if (!result.isSucceeded || !result.payload) {
 				this.submissionStateSignal.set({
@@ -183,7 +208,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 				return;
 			}
 
-			await this.reconcileAsync(operation, result.payload);
+			await this.reconcileAsync(operation, result.payload, expectedOperation);
 		} catch {
 			this.submissionStateSignal.set({
 				status: 'failed',
@@ -201,7 +226,10 @@ export class AccountingOperationsCrudComponent implements OnInit {
 
 		const confirmed = await firstValueFrom(
 			this.dialog
-				.open(PaymentDeleteDialogComponent, { data: this.deleteDialogData(operation), restoreFocus: true })
+				.open<PaymentDeleteDialogComponent, PaymentDeleteDialogData, boolean>(PaymentDeleteDialogComponent, {
+					data: this.deleteDialogData(operation),
+					restoreFocus: true,
+				})
 				.afterClosed()
 		);
 
@@ -221,7 +249,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 				return;
 			}
 
-			await this.reconcileAsync('delete', result.payload);
+			await this.reconcileAsync('delete', result.payload, undefined);
 		} catch {
 			this.submissionStateSignal.set({
 				status: 'failed',
@@ -258,14 +286,19 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		}
 	}
 
-	private async reconcileAsync(operation: 'create' | 'update' | 'delete', operationId: string): Promise<void> {
+	private async reconcileAsync(
+		operation: 'create' | 'update' | 'delete',
+		operationId: string,
+		expectedOperation: IPaymentOperationModel | undefined
+	): Promise<void> {
 		const token = ++this.reconciliationToken;
 		this.submissionStateSignal.set({ status: 'accepted', operation, operationId });
 		this.submissionStateSignal.set({ status: 'waitingForProjection', operation, operationId });
 		const projected = await this.accountingOperationsService.reconcileProjectionAsync(
 			operationId,
 			operation,
-			() => token === this.reconciliationToken
+			expectedOperation,
+			() => !this.isDestroyed && token === this.reconciliationToken
 		);
 
 		if (token !== this.reconciliationToken) {
@@ -273,6 +306,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		}
 
 		if (!projected) {
+			this.submissionStateSignal.set({ status: 'projectionDelayed', operation, operationId });
 			return;
 		}
 
@@ -337,7 +371,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		};
 	}
 
-	private deleteDialogData(operation: IPaymentOperationModel) {
+	private deleteDialogData(operation: IPaymentOperationModel): PaymentDeleteDialogData {
 		const category = this.categoriesSignal().find(item => item.key.equals(operation.categoryId));
 		const contractor = this.contractorsSignal().find(item => item.key.equals(operation.contractorId));
 		return {

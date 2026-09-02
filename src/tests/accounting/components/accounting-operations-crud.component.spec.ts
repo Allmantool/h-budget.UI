@@ -1,14 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { Result } from 'core/result';
 
 import { NgxsModule, Store } from '@ngxs/store';
 import { Guid } from 'typescript-guid';
 
 import { ngxsConfig } from '../../../app/modules/shared/store/ngxs.config';
+import { AccountingOperationsTableState } from '../../../app/modules/shared/store/states/accounting/accounting-operations-table.state';
 import { SetActivePaymentAccount } from '../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
 import { PaymentAccountState } from '../../../app/modules/shared/store/states/accounting/payment-account.state';
 import { AccountingOperationsState } from '../../../app/modules/shared/store/states/accounting/payment-operations.state';
-import { AccountingOperationsTableState } from '../../../app/modules/shared/store/states/accounting/accounting-operations-table.state';
 import { CategoriesState } from '../../../app/modules/shared/store/states/handbooks/categories.state';
 import { ContractorsState } from '../../../app/modules/shared/store/states/handbooks/contractors.state';
 import { AccountingOperationsCrudComponent } from '../../../presentation/accounting/components/accounting-operations-crud/accounting-operations-crud.component';
@@ -56,6 +57,53 @@ describe('accounting operations CRUD component', () => {
 		void component.submitAsync();
 
 		expect(write).toHaveBeenCalledTimes(1);
-		expect(fixture.nativeElement.textContent).toContain('Create payment');
+		const nativeElement: unknown = fixture.nativeElement;
+		if (!(nativeElement instanceof HTMLElement)) {
+			throw new Error('Expected the fixture to render an HTMLElement.');
+		}
+		expect(nativeElement.textContent).toContain('Create payment');
+	});
+
+	it('re-enables the editor when a confirmed payment is not yet projected into history', async () => {
+		const updateAsync = jasmine
+			.createSpy('updateAsync')
+			.and.resolveTo(new Result({ isSucceeded: true, payload: '11111111-1111-1111-1111-111111111111' }));
+		const reconcileProjectionAsync = jasmine.createSpy('reconcileProjectionAsync').and.resolveTo(false);
+		await TestBed.configureTestingModule({
+			imports: [
+				AccountingOperationsCrudComponent,
+				NoopAnimationsModule,
+				NgxsModule.forRoot(
+					[
+						AccountingOperationsState,
+						AccountingOperationsTableState,
+						PaymentAccountState,
+						CategoriesState,
+						ContractorsState,
+					],
+					ngxsConfig
+				),
+			],
+			providers: [
+				{ provide: AccountingOperationsService, useValue: { updateAsync, reconcileProjectionAsync } },
+				{ provide: CategoriesDialogService, useValue: { openCategories: jasmine.createSpy() } },
+				{ provide: ContractorsDialogService, useValue: { openContractors: jasmine.createSpy() } },
+			],
+		}).compileComponents();
+		const store = TestBed.inject(Store);
+		store.dispatch(new SetActivePaymentAccount('1c12ec59-8875-45c1-9fb0-e4edcf34a074'));
+		const fixture = TestBed.createComponent(AccountingOperationsCrudComponent);
+		fixture.detectChanges();
+		const component = fixture.componentInstance;
+		component.paymentForm.patchValue({ amount: 10, categoryId: Guid.create().toString() });
+
+		await component.submitAsync();
+		fixture.detectChanges();
+
+		expect(component.submissionStateSignal().status).toBe('projectionDelayed');
+		expect(component.isSubmittingSignal()).toBeFalse();
+		expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+			'Payment was accepted, but account history has not updated yet.'
+		);
 	});
 });

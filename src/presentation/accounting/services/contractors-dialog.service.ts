@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatDialogConfig } from '@angular/material/dialog';
 
-import { concatMap, map, Observable } from 'rxjs';
+import { concatMap, map, Observable, of } from 'rxjs';
 
 import { ContractorsDialogComponent } from '../../../app/modules/shared/components/dialog/contractors/contractors-dialog.component';
 import { DialogContainer } from '../../../app/modules/shared/models/dialog-container';
@@ -35,6 +35,14 @@ export class ContractorsDialogService {
 
 		config.disableClose = true;
 
-		return this.dialogProvider.openDialog(ContractorsDialogComponent, config).afterClosed();
+		return (
+			this.dialogProvider
+				.openDialog<
+					ContractorsDialogComponent,
+					DialogContainer<IContractorModel, IContractorModel>,
+					IContractorModel
+				>(ContractorsDialogComponent, config)
+				?.afterClosed() ?? of(undefined)
+		);
 	}
 }

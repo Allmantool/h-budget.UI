@@ -32,6 +32,14 @@
 	>
 		Payment accepted. Updating account history…
 	</p>
+	} @else if (submission.status === 'projectionDelayed') {
+	<p
+		class="payment-editor__status"
+		role="status"
+		aria-live="polite"
+	>
+		Payment was accepted, but account history has not updated yet.
+	</p>
 	} @else if (submission.status === 'succeeded') {
 	<p
 		class="payment-editor__status payment-editor__status--success"
