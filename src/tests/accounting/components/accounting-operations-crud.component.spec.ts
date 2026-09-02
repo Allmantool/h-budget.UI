@@ -16,6 +16,7 @@ import { AccountingOperationsCrudComponent } from '../../../presentation/account
 import { AccountingOperationsService } from '../../../presentation/accounting/services/accounting-operations.service';
 import { CategoriesDialogService } from '../../../presentation/accounting/services/categories-dialog.service';
 import { ContractorsDialogService } from '../../../presentation/accounting/services/contractors-dialog.service';
+import { PaymentEditorLeaveService } from '../../../presentation/accounting/services/payment-editor-leave.service';
 
 describe('accounting operations CRUD component', () => {
 	it('renders one create primary action and prevents concurrent submission', async () => {
@@ -42,6 +43,7 @@ describe('accounting operations CRUD component', () => {
 				},
 				{ provide: CategoriesDialogService, useValue: { openCategories: jasmine.createSpy() } },
 				{ provide: ContractorsDialogService, useValue: { openContractors: jasmine.createSpy() } },
+				{ provide: PaymentEditorLeaveService, useValue: createLeaveService() },
 			],
 		}).compileComponents();
 		const store = TestBed.inject(Store);
@@ -88,6 +90,7 @@ describe('accounting operations CRUD component', () => {
 				{ provide: AccountingOperationsService, useValue: { updateAsync, reconcileProjectionAsync } },
 				{ provide: CategoriesDialogService, useValue: { openCategories: jasmine.createSpy() } },
 				{ provide: ContractorsDialogService, useValue: { openContractors: jasmine.createSpy() } },
+				{ provide: PaymentEditorLeaveService, useValue: createLeaveService() },
 			],
 		}).compileComponents();
 		const store = TestBed.inject(Store);
@@ -106,4 +109,12 @@ describe('accounting operations CRUD component', () => {
 			'Payment was accepted, but account history has not updated yet.'
 		);
 	});
+
+	function createLeaveService() {
+		return {
+			canLeave: () => Promise.resolve(true),
+			confirmDiscard: () => Promise.resolve(true),
+			register: () => () => undefined,
+		};
+	}
 });

@@ -33,6 +33,7 @@ import { IPaymentRepresentationModel } from '../../../presentation/accounting/mo
 import { AccountsService } from '../../../presentation/accounting/services/accounts.service';
 import { HandbooksService } from '../../../presentation/accounting/services/handbooks.service';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
+import { PaymentEditorLeaveService } from '../../../presentation/accounting/services/payment-editor-leave.service';
 import { RelatedTransferNavigationService } from '../../../presentation/accounting/services/related-transfer-navigation.service';
 import { TransferProjectionSynchronizationService } from '../../../presentation/accounting/services/transfer-projection-synchronization.service';
 
@@ -173,6 +174,7 @@ describe('payments history component', () => {
 					provide: SseService,
 					useValue: sseServiceSpy,
 				},
+				{ provide: PaymentEditorLeaveService, useValue: { canLeave: () => Promise.resolve(true) } },
 			],
 		}).compileComponents();
 
@@ -299,6 +301,30 @@ describe('payments history component', () => {
 		]);
 		expect(accountsServiceSpy.refreshAccounts.calls.mostRecent().args).toEqual([activePaymentAccountId]);
 		expect(component.recordsCount).toBe(2);
+	});
+
+	it('runs one trailing projection refresh when notifications arrive during an active refresh', () => {
+		const firstHistoryResponse = new Subject<IPaymentRepresentationModel[]>();
+		const secondHistoryResponse = new Subject<IPaymentRepresentationModel[]>();
+		const latestRows = [historyRows[1]];
+		paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.reset();
+		accountsServiceSpy.refreshAccounts.calls.reset();
+		paymentsHistoryServiceSpy.refreshPaymentsHistory.and.returnValues(firstHistoryResponse, secondHistoryResponse);
+		accountsServiceSpy.refreshAccounts.and.returnValues(of(undefined), of(undefined));
+
+		notificationsSubject.next(matchingNotification());
+		notificationsSubject.next(matchingNotification());
+		notificationsSubject.next(matchingNotification());
+
+		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(1);
+		firstHistoryResponse.next(historyRows);
+		firstHistoryResponse.complete();
+
+		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(2);
+		secondHistoryResponse.next(latestRows);
+		secondHistoryResponse.complete();
+
+		expect(component.historySummarySignal()).toEqual(latestRows);
 	});
 
 	it('completes synchronization only after the submitted transfer is present in refreshed history', () => {
@@ -545,6 +571,14 @@ describe('payments history component', () => {
 		return Array.from<HTMLElement>(getNativeElement().querySelectorAll('th')).map(header =>
 			(header.textContent ?? '').trim()
 		);
+	}
+
+	function matchingNotification(): AccountNotification {
+		return {
+			eventId: 'event-id',
+			accountId: activePaymentAccountId,
+			eventType: 'UpdatePaymentAccountBalanceCommand',
+		};
 	}
 
 	function getTableText(): string {

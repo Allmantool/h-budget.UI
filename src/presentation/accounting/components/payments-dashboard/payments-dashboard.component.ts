@@ -5,6 +5,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CrossAccountsTransferService } from 'presentation/accounting/services/cross-accounts-transfer.dialog.service';
 import { TransferProjectionSynchronizationService } from 'presentation/accounting/services/transfer-projection-synchronization.service';
+import { PaymentEditorLeaveService } from 'presentation/accounting/services/payment-editor-leave.service';
 
 import _ from 'lodash';
 
@@ -64,6 +65,7 @@ export class PaymentsDashboardComponent implements OnInit {
 		private readonly router: Router,
 		private readonly store: Store,
 		private readonly accountsTransferService: CrossAccountsTransferService,
+		private readonly paymentEditorLeaveService: PaymentEditorLeaveService,
 		public readonly transferProjectionSynchronizationService: TransferProjectionSynchronizationService
 	) {
 		this.paymentAccountGeneralInfoSignal = computed(() => {
@@ -109,6 +111,10 @@ export class PaymentsDashboardComponent implements OnInit {
 	}
 
 	public async navigateToPaymentAccountsAsync(): Promise<void> {
+		if (!(await this.paymentEditorLeaveService.canLeave())) {
+			return;
+		}
+
 		this.store.dispatch(new SetActivePaymentAccount(''));
 		this.store.dispatch(new SetActiveAccountingOperation(undefined));
 

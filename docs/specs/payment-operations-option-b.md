@@ -24,6 +24,9 @@ The payment editor represents unsaved data as a fake history record and performs
 
 ## Requirements and Acceptance Criteria
 
+- **REQ-008:** Unsaved payment input is never silently abandoned. **AC-008:** Selection, new-payment mode, accounting navigation, and route deactivation proceed immediately when pristine and require an explicit keep-editing/discard decision when semantically dirty.
+- **REQ-009:** History refreshes preserve a meaningful trigger received during an active read. **AC-009:** One active refresh may queue exactly one trailing refresh; the final history is published in request order.
+
 - **REQ-001:** Confirmed operation state contains only server-confirmed records. **AC-001:** No `Guid.EMPTY` record is added for a new form; an unknown edit ID does not replace another record.
 - **REQ-002:** Writes have a single explicit lifecycle. **AC-002:** Repeated submit causes one provider call; failed writes retain form values and show a safe error.
 - **REQ-003:** Write acceptance is distinct from projection. **AC-003:** Create/update/delete enter a bounded reconciliation state before success/removal messaging.
@@ -50,15 +53,17 @@ Use Jasmine/TestBed regression tests for state unknown-ID safety, provider retry
 
 ## Requirement Traceability
 
-| Requirement | Acceptance Criteria | Implementation | Test / Evidence                   | Status  |
-| ----------- | ------------------- | -------------- | --------------------------------- | ------- |
-| REQ-001     | AC-001              | Complete       | Unknown-ID NGXS regression test   | PASS    |
-| REQ-002     | AC-002              | Complete       | Editor and service single-flight tests | PASS |
-| REQ-003     | AC-003              | Complete       | Bounded reconciliation code/test  | PARTIAL |
-| REQ-004     | AC-004              | Complete       | Editor template and focused tests | PASS    |
-| REQ-005     | AC-005              | Complete       | Form validation/template review   | PARTIAL |
-| REQ-006     | AC-006              | Complete       | Confirmation implementation review| PARTIAL |
-| REQ-007     | AC-007              | Complete       | CSS/template review only          | PARTIAL |
+| Requirement | Acceptance Criteria | Implementation | Test / Evidence                        | Status  |
+| ----------- | ------------------- | -------------- | -------------------------------------- | ------- |
+| REQ-001     | AC-001              | Complete       | Unknown-ID NGXS regression test        | PASS    |
+| REQ-002     | AC-002              | Complete       | Editor and service single-flight tests | PASS    |
+| REQ-003     | AC-003              | Complete       | Bounded reconciliation code/test       | PARTIAL |
+| REQ-004     | AC-004              | Complete       | Editor template and focused tests      | PASS    |
+| REQ-005     | AC-005              | Complete       | Form validation/template review        | PARTIAL |
+| REQ-006     | AC-006              | Complete       | Confirmation implementation review     | PARTIAL |
+| REQ-007     | AC-007              | Complete       | CSS/template review only               | PARTIAL |
+| REQ-008     | AC-008              | In progress    | Leave workflow tests planned           | NOT RUN |
+| REQ-009     | AC-009              | In progress    | Refresh concurrency test planned       | NOT RUN |
 
 ## Implementation Progress
 
@@ -72,7 +77,6 @@ Use Jasmine/TestBed regression tests for state unknown-ID safety, provider retry
 
 ### Remaining
 
-- Dirty-form discard confirmation for editor close, selection, New payment, account switch, and route navigation.
 - Explicit tests for provider no-retry behavior, business-result failures, lifecycle cancellation, delete outcomes, selector workflows, and responsive browser behavior.
 - Backend idempotency/status capabilities and correlated projection notifications.
 - Repository-wide lint debt: `npm run lint` passes with 341 warnings; the warnings need separate ownership verification.
@@ -80,6 +84,8 @@ Use Jasmine/TestBed regression tests for state unknown-ID safety, provider retry
 ### Decisions and Requirement Changes
 
 - Local editor state replaces the `Guid.EMPTY` store placeholder (REQ-001) because a placeholder must never be treated as confirmed history.
+- A route-scoped leave workflow (REQ-008) centralizes the authoritative dirty/submission decision. It will use a Material dialog only for meaningful local form changes; in-flight commands block leave rather than being abandoned.
+- A serialized trailing refresh (REQ-009) will retain one pending refresh while a history read is active, avoiding both lost notifications and unbounded queues.
 
 ### Verification
 

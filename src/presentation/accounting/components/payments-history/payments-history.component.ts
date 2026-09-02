@@ -42,6 +42,7 @@ import { HandbooksService } from '../../services/handbooks.service';
 import { PaymentsHistoryService } from '../../services/payments-history.service';
 import { RelatedTransferNavigationService } from '../../services/related-transfer-navigation.service';
 import { TransferProjectionSynchronizationService } from '../../services/transfer-projection-synchronization.service';
+import { PaymentEditorLeaveService } from '../../services/payment-editor-leave.service';
 
 @Component({
 	selector: 'payments-history',
@@ -65,6 +66,8 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	private readonly relatedTransferNavigationRequests$ = new Subject<IPaymentRepresentationModel>();
 	private relatedOperationHighlightTimeout?: ReturnType<typeof setTimeout>;
 	private highlightedRelatedOperationElement?: HTMLElement;
+	private isProjectionRefreshActive = false;
+	private hasQueuedProjectionRefresh = false;
 
 	@Select(getAccountPayments)
 	public accountPayments$!: Observable<IPaymentOperationModel[]>;
@@ -107,7 +110,8 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		private readonly sseService: SseService,
 		private readonly transferProjectionSynchronizationService: TransferProjectionSynchronizationService,
 		public readonly relatedTransferNavigationService: RelatedTransferNavigationService,
-		private readonly changeDetectorRef: ChangeDetectorRef
+		private readonly changeDetectorRef: ChangeDetectorRef,
+		private readonly paymentEditorLeaveService: PaymentEditorLeaveService
 	) {
 		afterEveryRender({
 			read: () => this.resolvePendingRelatedOperation(),
@@ -131,10 +135,9 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 					notification =>
 						notification.eventType === 'UpdatePaymentAccountBalanceCommand' &&
 						notification.accountId === this.activePaymentAccountIdSignal().toString()
-				),
-				exhaustMap(() => this.refreshActiveAccountProjection())
+				)
 			)
-			.subscribe(payments => this.publishPayments(payments));
+			.subscribe(() => this.requestProjectionRefresh());
 
 		this.relatedTransferNavigationRequests$
 			.pipe(
@@ -169,17 +172,29 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		}
 	}
 
-	public selectRow(record: IPaymentRepresentationModel): void {
+	public async selectRow(record: IPaymentRepresentationModel): Promise<void> {
+		if (!(await this.paymentEditorLeaveService.canLeave())) {
+			return;
+		}
+
 		this.store.dispatch(new SetActiveAccountingOperation(record.key));
 	}
 
-	public beginNewPayment(): void {
+	public async beginNewPayment(): Promise<void> {
+		if (!(await this.paymentEditorLeaveService.canLeave())) {
+			return;
+		}
+
 		this.store.dispatch(new SetActiveAccountingOperation(undefined));
 	}
 
 	public isFuturePayment = (record: IPaymentRepresentationModel): boolean => isFuture(record.operationDate);
 
-	public navigateToRelatedTransfer(record: IPaymentRepresentationModel): void {
+	public async navigateToRelatedTransfer(record: IPaymentRepresentationModel): Promise<void> {
+		if (!(await this.paymentEditorLeaveService.canLeave())) {
+			return;
+		}
+
 		this.clearRelatedOperationHighlight();
 		this.relatedTransferNavigationRequests$.next(record);
 	}
@@ -203,6 +218,30 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 			payments: this.paymentsHistoryService.refreshPaymentsHistory(accountId),
 			balance: this.accountsService.refreshAccounts(accountId),
 		}).pipe(map(payload => payload.payments));
+	}
+
+	private requestProjectionRefresh(): void {
+		if (this.isProjectionRefreshActive) {
+			this.hasQueuedProjectionRefresh = true;
+			return;
+		}
+
+		this.isProjectionRefreshActive = true;
+		this.refreshActiveAccountProjection()
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe({
+				next: payments => this.publishPayments(payments),
+				error: () => this.completeProjectionRefresh(),
+				complete: () => this.completeProjectionRefresh(),
+			});
+	}
+
+	private completeProjectionRefresh(): void {
+		this.isProjectionRefreshActive = false;
+		if (this.hasQueuedProjectionRefresh) {
+			this.hasQueuedProjectionRefresh = false;
+			this.requestProjectionRefresh();
+		}
 	}
 
 	private publishPayments(records: IPaymentRepresentationModel[]): void {

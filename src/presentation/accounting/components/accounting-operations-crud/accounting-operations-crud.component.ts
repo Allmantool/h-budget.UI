@@ -31,6 +31,7 @@ import { PaymentSubmissionState } from '../../models/payment-submission-state';
 import { AccountingOperationsService } from '../../services/accounting-operations.service';
 import { CategoriesDialogService } from '../../services/categories-dialog.service';
 import { ContractorsDialogService } from '../../services/contractors-dialog.service';
+import { PaymentEditorLeaveService } from '../../services/payment-editor-leave.service';
 import { PaymentDeleteDialogComponent } from '../payment-delete-dialog/payment-delete-dialog.component';
 
 type PaymentEditorMode = 'create' | 'edit';
@@ -143,16 +144,19 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		private readonly accountingOperationsService: AccountingOperationsService,
 		private readonly categoriesDialogService: CategoriesDialogService,
 		private readonly contractorsDialogService: ContractorsDialogService,
+		private readonly paymentEditorLeaveService: PaymentEditorLeaveService,
 		private readonly dialog: MatDialog,
 		private readonly store: Store
 	) {}
 
 	public ngOnInit(): void {
+		const unregisterLeaveEditor = this.paymentEditorLeaveService.register(() => this.canLeaveEditor());
 		combineLatest([this.selectedRecordGuid$, this.paymentOperations$])
 			.pipe(takeUntilDestroyed(this.destroyRef))
 			.subscribe(() => this.loadSelectedOperation());
 
 		this.destroyRef.onDestroy(() => {
+			unregisterLeaveEditor();
 			this.isDestroyed = true;
 			this.reconciliationToken++;
 		});
@@ -167,6 +171,14 @@ export class AccountingOperationsCrudComponent implements OnInit {
 				this.paymentForm.controls.categoryId.setValue('');
 			}
 		});
+	}
+
+	public async canLeaveEditor(): Promise<boolean> {
+		if (this.isSubmittingSignal()) {
+			return false;
+		}
+
+		return this.isDirtySignal() ? this.paymentEditorLeaveService.confirmDiscard() : true;
 	}
 
 	public categoryName(category: ICategoryModel): string {
@@ -208,6 +220,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 				return;
 			}
 
+			this.baseline = this.paymentForm.getRawValue();
 			await this.reconcileAsync(operation, result.payload, expectedOperation);
 		} catch {
 			this.submissionStateSignal.set({

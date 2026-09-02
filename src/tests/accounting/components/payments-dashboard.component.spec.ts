@@ -32,6 +32,7 @@ import { AccountsService } from '../../../presentation/accounting/services/accou
 import { CrossAccountsTransferService } from '../../../presentation/accounting/services/cross-accounts-transfer.dialog.service';
 import { HandbooksService } from '../../../presentation/accounting/services/handbooks.service';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
+import { PaymentEditorLeaveService } from '../../../presentation/accounting/services/payment-editor-leave.service';
 import { RelatedTransferNavigationService } from '../../../presentation/accounting/services/related-transfer-navigation.service';
 import { TransferProjectionSynchronizationService } from '../../../presentation/accounting/services/transfer-projection-synchronization.service';
 
@@ -155,6 +156,7 @@ describe('payments dashboard component', () => {
 					provide: SseService,
 					useValue: sseServiceSpy,
 				},
+				{ provide: PaymentEditorLeaveService, useValue: { canLeave: () => Promise.resolve(true) } },
 			],
 		}).compileComponents();
 
