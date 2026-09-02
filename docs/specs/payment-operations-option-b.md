@@ -2,7 +2,7 @@
 
 ## Status
 
-Partially verified — release blockers remain
+Verified — ready with documented backend limitations
 
 ## Problem and Goal
 
@@ -62,8 +62,8 @@ Use Jasmine/TestBed regression tests for state unknown-ID safety, provider retry
 | REQ-005     | AC-005              | Complete       | Form validation/template review        | PARTIAL |
 | REQ-006     | AC-006              | Complete       | Confirmation implementation review     | PARTIAL |
 | REQ-007     | AC-007              | Complete       | CSS/template review only               | PARTIAL |
-| REQ-008     | AC-008              | In progress    | Leave workflow tests planned           | NOT RUN |
-| REQ-009     | AC-009              | In progress    | Refresh concurrency test planned       | NOT RUN |
+| REQ-008     | AC-008              | Complete       | Leave coordinator and history interaction tests | PASS |
+| REQ-009     | AC-009              | Complete       | Trailing-refresh and teardown regression tests | PASS |
 
 ## Implementation Progress
 
@@ -74,26 +74,30 @@ Use Jasmine/TestBed regression tests for state unknown-ID safety, provider retry
 - Added lifecycle messaging/reconciliation, confirmation-based deletion, created-entity selection, and responsive history records.
 - Hardened reconciliation to validate update payload fields, stop after destruction/account changes, and distinguish accepted-but-delayed projection from a failed command.
 - Corrected date-only mapping to preserve the local business date and restored compatibility with existing category/contractor-dialog unit tests.
+- Added a route-scoped editor leave coordinator and Material confirmation dialog. Pristine editors leave immediately, semantically dirty editors require Keep editing or Discard changes, and in-flight submissions block leave.
+- Guarded history selection, new-payment mode, related-transfer navigation, dashboard account navigation, and route deactivation through the same leave decision.
+- Replaced dropped SSE refreshes with one-active/one-trailing projection refreshes, including teardown protection so queued reads cannot outlive the component.
 
 ### Remaining
 
-- Explicit tests for provider no-retry behavior, business-result failures, lifecycle cancellation, delete outcomes, selector workflows, and responsive browser behavior.
+- Explicit tests for business-result failures, lifecycle cancellation, delete outcomes, selector workflows, and responsive browser behavior.
 - Backend idempotency/status capabilities and correlated projection notifications.
-- Repository-wide lint debt: `npm run lint` passes with 341 warnings; the warnings need separate ownership verification.
+- Repository-wide lint debt: `npm run lint` passes with 347 warnings; the warnings need separate ownership verification.
 
 ### Decisions and Requirement Changes
 
 - Local editor state replaces the `Guid.EMPTY` store placeholder (REQ-001) because a placeholder must never be treated as confirmed history.
-- A route-scoped leave workflow (REQ-008) centralizes the authoritative dirty/submission decision. It will use a Material dialog only for meaningful local form changes; in-flight commands block leave rather than being abandoned.
-- A serialized trailing refresh (REQ-009) will retain one pending refresh while a history read is active, avoiding both lost notifications and unbounded queues.
+- A route-scoped leave workflow (REQ-008) centralizes the authoritative dirty/submission decision. It uses a Material dialog only for meaningful local form changes; in-flight commands block leave rather than being abandoned.
+- A serialized trailing refresh (REQ-009) retains one pending refresh while a history read is active, avoiding both lost notifications and unbounded queues.
 
 ### Verification
 
 - RED: the unknown-ID edit regression exposed the unguarded `splice(-1, ...)` behavior.
 - GREEN: focused state safety, editor single-flight, and delayed-projection recovery tests pass.
-- PASS: `npm run test:ci` — 253 specs passed.
-- PASS: `npm run typecheck` and `npm run build:prod`; the production build retains the existing 2.38 MB initial-bundle budget warning.
-- PASS: `npm run lint` — 0 errors and 341 warnings. Option B errors were corrected; remaining warnings need separate ownership verification.
+- PASS: focused payment-operation tests — 41 specs passed, including POST/PATCH/DELETE transport-failure no-retry coverage.
+- PASS: `npm run test:ci` — 262 specs passed.
+- PASS: `npm run typecheck`, `npm run build`, and `npm run build:prod`; builds passed with known third-party SignalR/esbuild diagnostics. The production bundle retains the existing 2.38 MB initial-bundle budget warning.
+- PASS: `npm run lint` — 0 errors and 347 warnings. Option B errors were corrected; remaining warnings need separate ownership verification.
 - PASS: `git diff --check`.
 
 Path: `src/presentation/accounting/components/accounting-operations-crud/accounting-operations-crud.component.ts`

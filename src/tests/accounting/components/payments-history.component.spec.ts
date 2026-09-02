@@ -32,8 +32,8 @@ import { PaymentsHistoryComponent } from '../../../presentation/accounting/compo
 import { IPaymentRepresentationModel } from '../../../presentation/accounting/models/operation-record';
 import { AccountsService } from '../../../presentation/accounting/services/accounts.service';
 import { HandbooksService } from '../../../presentation/accounting/services/handbooks.service';
-import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
 import { PaymentEditorLeaveService } from '../../../presentation/accounting/services/payment-editor-leave.service';
+import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
 import { RelatedTransferNavigationService } from '../../../presentation/accounting/services/related-transfer-navigation.service';
 import { TransferProjectionSynchronizationService } from '../../../presentation/accounting/services/transfer-projection-synchronization.service';
 
@@ -327,6 +327,21 @@ describe('payments history component', () => {
 		expect(component.historySummarySignal()).toEqual(latestRows);
 	});
 
+	it('does not run a queued projection refresh after the component is destroyed', () => {
+		const firstHistoryResponse = new Subject<IPaymentRepresentationModel[]>();
+		paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.reset();
+		paymentsHistoryServiceSpy.refreshPaymentsHistory.and.returnValue(firstHistoryResponse);
+
+		notificationsSubject.next(matchingNotification());
+		notificationsSubject.next(matchingNotification());
+		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(1);
+
+		fixture.destroy();
+		firstHistoryResponse.complete();
+
+		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(1);
+	});
+
 	it('completes synchronization only after the submitted transfer is present in refreshed history', () => {
 		transferProjectionSynchronizationService.start([Guid.parse(activePaymentAccountId)], incomeRecordId);
 
@@ -446,6 +461,8 @@ describe('payments history component', () => {
 		expect(getTableText()).toContain('Transfer to BelarusBank');
 
 		relatedTransferButton?.click();
+		await fixture.whenStable();
+		fixture.detectChanges();
 
 		expect(relatedTransferNavigationServiceSpy.navigateToRelatedTransfer.calls.count()).toBe(1);
 		expect(relatedTransferNavigationServiceSpy.navigateToRelatedTransfer.calls.mostRecent().args).toEqual([

@@ -31,8 +31,8 @@ import { IPaymentRepresentationModel } from '../../../presentation/accounting/mo
 import { AccountsService } from '../../../presentation/accounting/services/accounts.service';
 import { CrossAccountsTransferService } from '../../../presentation/accounting/services/cross-accounts-transfer.dialog.service';
 import { HandbooksService } from '../../../presentation/accounting/services/handbooks.service';
-import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
 import { PaymentEditorLeaveService } from '../../../presentation/accounting/services/payment-editor-leave.service';
+import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
 import { RelatedTransferNavigationService } from '../../../presentation/accounting/services/related-transfer-navigation.service';
 import { TransferProjectionSynchronizationService } from '../../../presentation/accounting/services/transfer-projection-synchronization.service';
 

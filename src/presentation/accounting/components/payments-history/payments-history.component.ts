@@ -68,6 +68,7 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	private highlightedRelatedOperationElement?: HTMLElement;
 	private isProjectionRefreshActive = false;
 	private hasQueuedProjectionRefresh = false;
+	private isDestroyed = false;
 
 	@Select(getAccountPayments)
 	public accountPayments$!: Observable<IPaymentOperationModel[]>;
@@ -164,6 +165,8 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	}
 
 	ngOnDestroy() {
+		this.isDestroyed = true;
+		this.hasQueuedProjectionRefresh = false;
 		this.sseService.disconnect();
 		this.relatedTransferNavigationRequests$.complete();
 
@@ -221,6 +224,10 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	}
 
 	private requestProjectionRefresh(): void {
+		if (this.isDestroyed) {
+			return;
+		}
+
 		if (this.isProjectionRefreshActive) {
 			this.hasQueuedProjectionRefresh = true;
 			return;
@@ -238,6 +245,10 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 
 	private completeProjectionRefresh(): void {
 		this.isProjectionRefreshActive = false;
+		if (this.isDestroyed) {
+			return;
+		}
+
 		if (this.hasQueuedProjectionRefresh) {
 			this.hasQueuedProjectionRefresh = false;
 			this.requestProjectionRefresh();

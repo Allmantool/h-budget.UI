@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 
 import { firstValueFrom } from 'rxjs';
@@ -7,10 +7,9 @@ import { PaymentDiscardDialogComponent } from '../components/payment-discard-dia
 
 @Injectable()
 export class PaymentEditorLeaveService {
+	private readonly dialog = inject(MatDialog);
 	private canLeaveEditor?: () => Promise<boolean>;
 	private pendingConfirmation?: Promise<boolean>;
-
-	constructor(private readonly dialog: MatDialog) {}
 
 	public register(canLeaveEditor: () => Promise<boolean>): () => void {
 		this.canLeaveEditor = canLeaveEditor;
@@ -35,7 +34,7 @@ export class PaymentEditorLeaveService {
 					})
 					.afterClosed()
 			).then(result => result === true);
-			this.pendingConfirmation.finally(() => {
+			void this.pendingConfirmation.finally(() => {
 				this.pendingConfirmation = undefined;
 			});
 		}
