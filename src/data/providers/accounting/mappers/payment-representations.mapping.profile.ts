@@ -11,13 +11,12 @@ import { Guid } from 'typescript-guid';
 import { getActivePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { getCategories } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
 import { getContractors } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
+import { calculatePaymentOperationIncrement } from '../../../../domain/models/accounting/calculate-payment-operation-increment';
 import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
 import { IContractorModel } from '../../../../domain/models/accounting/contractor.model.';
-import { PaymentOperationTypes } from '../../../../domain/models/accounting/operation-types';
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 import { IPaymentHistoryModel } from '../../../../domain/models/accounting/payment-history.model';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
-import { OperationTypes } from '../../../../domain/types/operation.types';
 import { IPaymentRepresentationModel } from '../../../../presentation/accounting/models/operation-record';
 
 export class PaymentRepresentationsMappingProfile extends Profile {
@@ -77,18 +76,10 @@ export class PaymentRepresentationsMappingProfile extends Profile {
 				opt.mapFrom(src => src.record.comment);
 			},
 			income: opt => {
-				opt.mapFrom(src =>
-					this.calculateAmount(src.record.categoryId, src.record.operationType, src.record.amount) > 0
-						? src.record.amount
-						: 0
-				);
+				opt.mapFrom(src => Math.max(this.calculateAmount(src.record), 0));
 			},
 			expense: opt => {
-				opt.mapFrom(src =>
-					this.calculateAmount(src.record.categoryId, src.record.operationType, src.record.amount) < 0
-						? -src.record.amount
-						: 0
-				);
+				opt.mapFrom(src => Math.min(this.calculateAmount(src.record), 0));
 			},
 			balance: opt => {
 				opt.preCondition(src => !_.isNil(src.balance));
@@ -142,19 +133,15 @@ export class PaymentRepresentationsMappingProfile extends Profile {
 				opt.mapFrom(src => src.conversionMultiplier);
 			},
 			income: opt => {
-				opt.mapFrom(src =>
-					this.calculateAmount(src.categoryId, src.operationType, src.amount) > 0 ? src.amount : 0
-				);
+				opt.mapFrom(src => Math.max(this.calculateAmount(src), 0));
 			},
 			expense: opt => {
-				opt.mapFrom(src =>
-					this.calculateAmount(src.categoryId, src.operationType, src.amount) < 0 ? -src.amount : 0
-				);
+				opt.mapFrom(src => Math.min(this.calculateAmount(src), 0));
 			},
 		});
 	}
 
-	private getRepresentationView(handbookPayload: ICategoryModel | IContractorModel): string {
+	private getRepresentationView(handbookPayload?: ICategoryModel | IContractorModel): string {
 		if (_.isNil(handbookPayload)) {
 			return 'N/A';
 		}
@@ -166,25 +153,15 @@ export class PaymentRepresentationsMappingProfile extends Profile {
 		return handbookPayload.nameNodes.join(': ');
 	}
 
-	private getCategoryById(id: Guid): ICategoryModel {
-		return _.find(this.categoriesSignal(), c => c.key.equals(id))!;
+	private getCategoryById(id: Guid): ICategoryModel | undefined {
+		return _.find(this.categoriesSignal(), c => c.key.equals(id));
 	}
 
-	private getContractorById(id: Guid): IContractorModel {
-		return _.find(this.contractorsSignal(), c => c.key.equals(id))!;
+	private getContractorById(id: Guid): IContractorModel | undefined {
+		return _.find(this.contractorsSignal(), c => c.key.equals(id));
 	}
 
-	private calculateAmount(categoryId: Guid, operationType: OperationTypes, amount: number): number {
-		if (operationType === OperationTypes.Transfer) {
-			return amount;
-		}
-
-		const category = this.getCategoryById(categoryId);
-
-		if (_.isNil(category)) {
-			return 0;
-		}
-
-		return category.operationType === PaymentOperationTypes.Income ? amount : -amount;
+	private calculateAmount(operation: IPaymentOperationModel): number {
+		return calculatePaymentOperationIncrement(operation, this.getCategoryById(operation.categoryId));
 	}
 }

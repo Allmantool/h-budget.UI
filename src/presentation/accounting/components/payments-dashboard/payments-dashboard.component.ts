@@ -22,6 +22,9 @@ import {
 	getActivePaymentAccount,
 	getActivePaymentAccountId,
 } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
+import { getCategories } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
+import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
+import { calculatePaymentOperationIncrement } from '../../../../domain/models/accounting/calculate-payment-operation-increment';
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
 import { PaymentsHistoryComponent } from '../payments-history/payments-history.component';
@@ -47,6 +50,9 @@ export class PaymentsDashboardComponent implements OnInit {
 	@Select(getAccountPayments)
 	public accountPayments$!: Observable<IPaymentOperationModel[]>;
 
+	@Select(getCategories)
+	public categories$!: Observable<ICategoryModel[]>;
+
 	public activePaymentsAccountSignal: Signal<IPaymentAccountModel | undefined> = toSignal(
 		this.activePaymentAccount$,
 		{
@@ -55,6 +61,10 @@ export class PaymentsDashboardComponent implements OnInit {
 	);
 
 	public accountPaymentsSignal: Signal<IPaymentOperationModel[]> = toSignal(this.accountPayments$, {
+		initialValue: [],
+	});
+
+	public categoriesSignal: Signal<ICategoryModel[]> = toSignal(this.categories$, {
 		initialValue: [],
 	});
 
@@ -84,17 +94,19 @@ export class PaymentsDashboardComponent implements OnInit {
 
 	public readonly accountingSummarySignal = computed(() => {
 		const operations = this.accountPaymentsSignal();
+		const categories = this.categoriesSignal();
+		const increments = operations.map(operation =>
+			calculatePaymentOperationIncrement(
+				operation,
+				categories.find(category => category.key.equals(operation.categoryId))
+			)
+		);
 
 		const settled = operations.filter(operation => isPast(new Date(operation.operationDate)));
 		const scheduled = operations.filter(operation => isFuture(new Date(operation.operationDate)));
-		const income = _.sumBy(
-			operations.filter(operation => operation.amount > 0),
-			operation => operation.amount
-		);
-		const expense = _.sumBy(
-			operations.filter(operation => operation.amount < 0),
-			operation => Math.abs(operation.amount)
-		);
+		const income = _.sum(increments.filter(increment => increment > 0));
+		const expense = _.sum(increments.filter(increment => increment < 0).map(Math.abs));
+		const net = _.sum(increments);
 
 		return {
 			operationsCount: operations.length,
@@ -102,7 +114,7 @@ export class PaymentsDashboardComponent implements OnInit {
 			scheduledCount: scheduled.length,
 			income: _.round(income, 2),
 			expense: _.round(expense, 2),
-			net: _.round(income - expense, 2),
+			net: _.round(net, 2),
 		};
 	});
 

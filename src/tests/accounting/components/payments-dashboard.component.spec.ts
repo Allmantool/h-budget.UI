@@ -20,7 +20,10 @@ import {
 	getPaymentAccounts,
 } from '../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { getAccountingTableOptions } from '../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
+import { SetInitialCategories } from '../../../app/modules/shared/store/states/handbooks/actions/category.actions';
+import { CategoriesState } from '../../../app/modules/shared/store/states/handbooks/categories.state';
 import { AccountTypes } from '../../../domain/models/accounting/account-types';
+import { PaymentOperationTypes } from '../../../domain/models/accounting/operation-types';
 import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
 import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 import { OperationTypes } from '../../../domain/types/operation.types';
@@ -131,7 +134,7 @@ describe('payments dashboard component', () => {
 			imports: [
 				PaymentsDashboardComponent,
 				NgxsModule.forRoot(
-					[AccountingOperationsState, AccountingOperationsTableState, PaymentAccountState],
+					[AccountingOperationsState, AccountingOperationsTableState, PaymentAccountState, CategoriesState],
 					ngxsConfig
 				),
 			],
@@ -216,6 +219,43 @@ describe('payments dashboard component', () => {
 			income: 100,
 			expense: 35.5,
 			net: 64.5,
+		});
+	});
+
+	it('classifies the supplied positive expense payment from its category rather than its amount sign', () => {
+		const categoryId = Guid.parse('850935c3-1e14-448f-be1c-30ef6f088fb5');
+
+		store.dispatch(
+			new SetInitialCategories([
+				{
+					key: categoryId,
+					operationType: PaymentOperationTypes.Expense,
+					nameNodes: ['category', 'two', 'expense'],
+				},
+			])
+		);
+		store.dispatch(
+			new SetInitialPaymentOperations([
+				{
+					key: Guid.parse('ccca2b39-c8b6-4aa8-b44b-3ef2112ff042'),
+					paymentAccountId: Guid.parse(activeAccountId),
+					contractorId: Guid.parse('7fba5b52-27bf-4e73-9a12-e1503457ae5f'),
+					categoryId,
+					operationDate: new Date(2026, 8, 5),
+					comment: 'XXX',
+					amount: 23,
+					operationType: OperationTypes.Payment,
+				},
+			])
+		);
+
+		expect(component.accountingSummarySignal()).toEqual({
+			operationsCount: 1,
+			settledCount: 1,
+			scheduledCount: 0,
+			income: 0,
+			expense: 23,
+			net: -23,
 		});
 	});
 
