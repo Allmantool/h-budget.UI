@@ -1,11 +1,12 @@
-import { ChangeDetectionStrategy, Component, computed, OnInit, signal, Signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal, Signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CrossAccountsTransferService } from 'presentation/accounting/services/cross-accounts-transfer.dialog.service';
-import { TransferProjectionSynchronizationService } from 'presentation/accounting/services/transfer-projection-synchronization.service';
+import { PaymentCommandExecutorService } from 'presentation/accounting/services/payment-command-executor.service';
 import { PaymentEditorLeaveService } from 'presentation/accounting/services/payment-editor-leave.service';
+import { TransferProjectionSynchronizationService } from 'presentation/accounting/services/transfer-projection-synchronization.service';
 
 import _ from 'lodash';
 
@@ -34,6 +35,7 @@ import { PaymentsHistoryComponent } from '../payments-history/payments-history.c
 	imports: [MatButtonModule, MatProgressBarModule, PaymentsHistoryComponent],
 })
 export class PaymentsDashboardComponent implements OnInit {
+	private readonly paymentCommandExecutor = inject(PaymentCommandExecutorService, { optional: true });
 	public paymentAccountGeneralInfoSignal: Signal<string> = signal('');
 
 	@Select(getActivePaymentAccountId)
@@ -105,6 +107,7 @@ export class PaymentsDashboardComponent implements OnInit {
 	});
 
 	public ngOnInit(): void {
+		void this.paymentCommandExecutor?.recoverPendingCommands();
 		if (_.isNil(this.store.selectSnapshot(getActivePaymentAccount))) {
 			void this.navigateToPaymentAccountsAsync();
 		}

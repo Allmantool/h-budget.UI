@@ -66,6 +66,7 @@ import { HandbooksService } from '../../presentation/accounting/services/handboo
 import { PaymentAccountDialogService } from '../../presentation/accounting/services/payment-account-dialog.service';
 import { PaymentCommandExecutorService } from '../../presentation/accounting/services/payment-command-executor.service';
 import { PaymentsHistoryService } from '../../presentation/accounting/services/payments-history.service';
+import { PendingPaymentCommandRegistryService } from '../../presentation/accounting/services/pending-payment-command-registry.service';
 import { RelatedTransferNavigationService } from '../../presentation/accounting/services/related-transfer-navigation.service';
 
 interface AccountingFeatureState {
@@ -581,6 +582,7 @@ const accountingFeatureProviders: Array<Type<unknown>> = [
 	CrossAccountsTransferService,
 	RelatedTransferNavigationService,
 	PaymentCommandExecutorService,
+	PendingPaymentCommandRegistryService,
 	HandbooksService,
 	CurrencyExchangeService,
 ];

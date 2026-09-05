@@ -3,8 +3,10 @@ import { inject, Injectable } from '@angular/core';
 
 import { Store } from '@ngxs/store';
 import { firstValueFrom, Observable, timer } from 'rxjs';
+import { Guid } from 'typescript-guid';
 
 import { AccountsService } from './accounts.service';
+import { PendingPaymentCommandRegistryService } from './pending-payment-command-registry.service';
 import { SetInitialPaymentOperations } from '../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
 import { Result } from '../../../core/result';
 import { PaymentOperationsProvider } from '../../../data/providers/accounting/payment-operations.provider';
@@ -13,6 +15,7 @@ import { IPaymentOperationModel } from '../../../domain/models/accounting/paymen
 import { IPaymentAccountCreateOrUpdateResponse } from '../../../domain/models/accounting/responses/payment-account-create-or-update.response';
 import { PaymentCommandExecutionResult } from '../models/payment-command-execution-result';
 import { PaymentCommandIntent } from '../models/payment-command-intent';
+import { PendingPaymentCommand } from '../models/pending-payment-command';
 
 type PaymentCommandAction = 'create' | 'update' | 'delete';
 
@@ -24,6 +27,8 @@ export class PaymentCommandExecutorService {
 	private readonly paymentsHistoryProvider = inject(PaymentsHistoryProvider);
 	private readonly store = inject(Store);
 	private readonly accountsService = inject(AccountsService);
+	private readonly pendingCommandRegistry = inject(PendingPaymentCommandRegistryService);
+	private recoveryPromise?: Promise<void>;
 
 	public executeCreate(
 		operation: IPaymentOperationModel,
@@ -67,6 +72,13 @@ export class PaymentCommandExecutorService {
 		return this.execute('delete', accountId, operationId, previousIntent, isActive, onProcessing);
 	}
 
+	public recoverPendingCommands(): Promise<void> {
+		this.recoveryPromise ??= Promise.all(
+			this.pendingCommandRegistry.getAll().map(command => this.recoverPendingCommand(command))
+		).then(() => undefined);
+		return this.recoveryPromise;
+	}
+
 	private async execute(
 		action: PaymentCommandAction,
 		accountId: string,
@@ -76,26 +88,91 @@ export class PaymentCommandExecutorService {
 		onProcessing: (commandId: string) => void
 	): Promise<PaymentCommandExecutionResult> {
 		const intent = this.intentFor(action, accountId, request, previousIntent);
+		this.pendingCommandRegistry.save(this.pendingCommand(intent, request));
 		const response = await this.submitAsync(action, accountId, request, intent.idempotencyKey);
 
 		if (response.kind === 'unknown') {
 			return { status: 'unknown', intent, message: 'Unable to confirm the payment. Retry to continue.' };
 		}
 		if (response.kind === 'conflict') {
+			this.pendingCommandRegistry.remove(intent.intentId);
 			return {
 				status: 'conflict',
 				message: 'This payment could not be confirmed. Please review the payment before trying again.',
 			};
 		}
 		if (response.kind === 'failed') {
+			this.pendingCommandRegistry.remove(intent.intentId);
 			return { status: 'failed', message: 'The payment command could not be accepted.' };
 		}
 		if (!response.result.isSucceeded || !response.result.payload) {
+			this.pendingCommandRegistry.remove(intent.intentId);
 			return { status: 'failed', message: 'The payment command was rejected.' };
 		}
 
 		const command = response.result.payload;
-		return this.observeCommandAsync(accountId, command, intent, isActive, onProcessing);
+		this.pendingCommandRegistry.updateCommandId(intent.intentId, command.commandId, command.paymentOperationId);
+		const result = await this.observeCommandAsync(accountId, command, intent, isActive, onProcessing);
+		this.removeTerminalIntent(intent, result);
+		return result;
+	}
+
+	private async recoverPendingCommand(command: PendingPaymentCommand): Promise<void> {
+		const intent = this.intentFromPendingCommand(command);
+		if (command.commandId) {
+			const result = await this.observeRestoredCommand(command, intent);
+			this.removeTerminalIntent(intent, result);
+			return;
+		}
+
+		const request = this.replayRequest(command);
+		if (!request) {
+			this.pendingCommandRegistry.remove(command.intentId);
+			return;
+		}
+		const result = await this.execute(
+			command.action,
+			command.accountId,
+			request,
+			intent,
+			() => true,
+			() => undefined
+		);
+		this.removeTerminalIntent(intent, result);
+	}
+
+	private async observeRestoredCommand(
+		command: PendingPaymentCommand,
+		intent: PaymentCommandIntent
+	): Promise<PaymentCommandExecutionResult> {
+		const commandId = command.commandId;
+		if (!commandId) {
+			return { status: 'unknown', intent };
+		}
+		try {
+			const statusResponse = await firstValueFrom(
+				this.paymentOperationsProvider.getCommandStatus(command.accountId, commandId)
+			);
+			if (!statusResponse.isSucceeded || !statusResponse.payload) {
+				return { status: 'unknown', intent, commandId };
+			}
+			return this.observeCommandAsync(
+				command.accountId,
+				{
+					commandId,
+					status: statusResponse.payload.status,
+					paymentOperationId: command.operationId ?? '',
+					paymentAccountId: command.accountId,
+					paymentAccountBalance: 0,
+					isDuplicate: statusResponse.payload.isDuplicate,
+				},
+				intent,
+				() => true,
+				() => undefined
+			);
+		} catch {
+			return { status: 'unknown', intent, commandId };
+		}
 	}
 
 	private async observeCommandAsync(
@@ -263,7 +340,94 @@ export class PaymentCommandExecutorService {
 			return previousIntent;
 		}
 
-		return { action, accountId, idempotencyKey: crypto.randomUUID(), requestFingerprint };
+		return {
+			action,
+			accountId,
+			idempotencyKey: crypto.randomUUID(),
+			intentId: crypto.randomUUID(),
+			requestFingerprint,
+		};
+	}
+
+	private intentFromPendingCommand(command: PendingPaymentCommand): PaymentCommandIntent {
+		const request = this.replayRequest(command);
+		return {
+			action: command.action,
+			accountId: command.accountId,
+			idempotencyKey: command.idempotencyKey,
+			intentId: command.intentId,
+			requestFingerprint: request
+				? this.fingerprint(command.action, request)
+				: this.fingerprint(command.action, command.operationId ?? ''),
+		};
+	}
+
+	private pendingCommand(
+		intent: PaymentCommandIntent,
+		request: IPaymentOperationModel | string
+	): PendingPaymentCommand {
+		const now = new Date().toISOString();
+		if (typeof request === 'string') {
+			return {
+				version: 1,
+				intentId: intent.intentId,
+				action: intent.action,
+				accountId: intent.accountId,
+				operationId: request,
+				idempotencyKey: intent.idempotencyKey,
+				createdAt: now,
+				updatedAt: now,
+			};
+		}
+		return {
+			version: 1,
+			intentId: intent.intentId,
+			action: intent.action,
+			accountId: intent.accountId,
+			operationId: intent.action === 'update' ? request.key.toString() : undefined,
+			idempotencyKey: intent.idempotencyKey,
+			request: {
+				amount: request.amount,
+				categoryId: request.categoryId.toString(),
+				comment: request.comment,
+				contractorId: request.contractorId.toString(),
+				operationDate: request.operationDate.toISOString(),
+				operationId: request.key.toString(),
+				operationType: request.operationType,
+			},
+			createdAt: now,
+			updatedAt: now,
+		};
+	}
+
+	private replayRequest(command: PendingPaymentCommand): IPaymentOperationModel | string | undefined {
+		if (command.action === 'delete') {
+			return command.operationId;
+		}
+		const request = command.request;
+		if (!request) {
+			return undefined;
+		}
+		try {
+			return {
+				key: Guid.parse(request.operationId),
+				paymentAccountId: Guid.parse(command.accountId),
+				operationDate: new Date(request.operationDate),
+				contractorId: Guid.parse(request.contractorId),
+				categoryId: Guid.parse(request.categoryId),
+				comment: request.comment,
+				amount: request.amount,
+				operationType: request.operationType,
+			};
+		} catch {
+			return undefined;
+		}
+	}
+
+	private removeTerminalIntent(intent: PaymentCommandIntent, result: PaymentCommandExecutionResult): void {
+		if (result.status === 'projected' || result.status === 'failed' || result.status === 'conflict') {
+			this.pendingCommandRegistry.remove(intent.intentId);
+		}
 	}
 
 	private fingerprint(action: PaymentCommandAction, request: IPaymentOperationModel | string): string {

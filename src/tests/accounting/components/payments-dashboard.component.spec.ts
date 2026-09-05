@@ -31,6 +31,7 @@ import { IPaymentRepresentationModel } from '../../../presentation/accounting/mo
 import { AccountsService } from '../../../presentation/accounting/services/accounts.service';
 import { CrossAccountsTransferService } from '../../../presentation/accounting/services/cross-accounts-transfer.dialog.service';
 import { HandbooksService } from '../../../presentation/accounting/services/handbooks.service';
+import { PaymentCommandExecutorService } from '../../../presentation/accounting/services/payment-command-executor.service';
 import { PaymentEditorLeaveService } from '../../../presentation/accounting/services/payment-editor-leave.service';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
 import { RelatedTransferNavigationService } from '../../../presentation/accounting/services/related-transfer-navigation.service';
@@ -51,6 +52,7 @@ describe('payments dashboard component', () => {
 	let accountsServiceSpy: jasmine.SpyObj<AccountsService>;
 	let relatedTransferNavigationServiceSpy: jasmine.SpyObj<RelatedTransferNavigationService>;
 	let sseServiceSpy: jasmine.SpyObj<SseService>;
+	let paymentCommandExecutorSpy: jasmine.SpyObj<PaymentCommandExecutorService>;
 	let notificationsSubject: Subject<AccountNotification>;
 	let transferProjectionSynchronizationService: TransferProjectionSynchronizationService;
 
@@ -119,6 +121,11 @@ describe('payments dashboard component', () => {
 		sseServiceSpy = jasmine.createSpyObj<SseService>('sseService', ['connect', 'disconnect'], {
 			notifications$: notificationsSubject.asObservable(),
 		});
+		paymentCommandExecutorSpy = jasmine.createSpyObj<PaymentCommandExecutorService>(
+			'paymentCommandExecutorService',
+			['recoverPendingCommands']
+		);
+		paymentCommandExecutorSpy.recoverPendingCommands.and.returnValue(Promise.resolve());
 
 		await TestBed.configureTestingModule({
 			imports: [
@@ -157,6 +164,7 @@ describe('payments dashboard component', () => {
 					useValue: sseServiceSpy,
 				},
 				{ provide: PaymentEditorLeaveService, useValue: { canLeave: () => Promise.resolve(true) } },
+				{ provide: PaymentCommandExecutorService, useValue: paymentCommandExecutorSpy },
 			],
 		}).compileComponents();
 
@@ -185,6 +193,10 @@ describe('payments dashboard component', () => {
 		expect(component).toBeTruthy();
 		expect(getNativeElement().querySelector('payments-history')).not.toBeNull();
 		expect(getNativeText()).toContain('Transactions timeline');
+	});
+
+	it('starts pending payment command recovery when the payment dashboard is recreated', () => {
+		expect(paymentCommandExecutorSpy.recoverPendingCommands.calls.count()).toBe(1);
 	});
 
 	it('should render dashboard actions in the existing order', () => {

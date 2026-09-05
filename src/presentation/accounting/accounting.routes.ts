@@ -18,6 +18,7 @@ import { PaymentAccountDialogService } from './services/payment-account-dialog.s
 import { PaymentCommandExecutorService } from './services/payment-command-executor.service';
 import { PaymentEditorLeaveService } from './services/payment-editor-leave.service';
 import { PaymentsHistoryService } from './services/payments-history.service';
+import { PendingPaymentCommandRegistryService } from './services/pending-payment-command-registry.service';
 import { RelatedTransferNavigationService } from './services/related-transfer-navigation.service';
 import { TransferProjectionSynchronizationService } from './services/transfer-projection-synchronization.service';
 import { DialogsSharedModule } from '../../app/modules/shared/dialogs.shared.module';
@@ -62,6 +63,7 @@ export const accountingRoutes: Routes = [
 			RelatedTransferNavigationService,
 			TransferProjectionSynchronizationService,
 			PaymentCommandExecutorService,
+			PendingPaymentCommandRegistryService,
 			HandbooksService,
 			CurrencyExchangeService,
 			importProvidersFrom(
