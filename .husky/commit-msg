@@ -1,5 +1,14 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
-[ "$CI" = "true" ] && exit 0
+set -eu
 
-npx --no-install commitlint --edit "$1"
+[ "${CI:-}" = "true" ] && exit 0
+
+# Husky can invoke this hook from a parent checkout. Resolve the UI package and
+# Git's message file before changing directories so neither depends on $PWD.
+hook_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+project_dir=$(CDPATH= cd -- "$hook_dir/.." && pwd)
+message_file=$(CDPATH= cd -- "$(dirname -- "$1")" && pwd)/$(basename -- "$1")
+
+cd "$project_dir"
+exec ./node_modules/.bin/commitlint --edit "$message_file"
