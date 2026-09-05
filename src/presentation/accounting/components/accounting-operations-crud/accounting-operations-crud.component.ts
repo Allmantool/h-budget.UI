@@ -27,10 +27,12 @@ import { PaymentOperationTypes } from '../../../../domain/models/accounting/oper
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
 import { OperationTypes } from '../../../../domain/types/operation.types';
+import { PaymentCommandExecutionResult } from '../../models/payment-command-execution-result';
+import { PaymentCommandIntent } from '../../models/payment-command-intent';
 import { PaymentSubmissionState } from '../../models/payment-submission-state';
-import { AccountingOperationsService } from '../../services/accounting-operations.service';
 import { CategoriesDialogService } from '../../services/categories-dialog.service';
 import { ContractorsDialogService } from '../../services/contractors-dialog.service';
+import { PaymentCommandExecutorService } from '../../services/payment-command-executor.service';
 import { PaymentEditorLeaveService } from '../../services/payment-editor-leave.service';
 import { PaymentDeleteDialogComponent } from '../payment-delete-dialog/payment-delete-dialog.component';
 
@@ -74,8 +76,9 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	private readonly formBuilder = inject(FormBuilder);
 	private baseline: PaymentEditorValue = this.defaultValue();
 	private loadedOperationId?: string;
-	private reconciliationToken = 0;
+	private executionToken = 0;
 	private isDestroyed = false;
+	private pendingIntent?: PaymentCommandIntent;
 
 	@Select(getActivePaymentAccountId)
 	private activePaymentAccountId$!: Observable<Guid | undefined>;
@@ -141,7 +144,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	);
 
 	constructor(
-		private readonly accountingOperationsService: AccountingOperationsService,
+		private readonly paymentCommandExecutor: PaymentCommandExecutorService,
 		private readonly categoriesDialogService: CategoriesDialogService,
 		private readonly contractorsDialogService: ContractorsDialogService,
 		private readonly paymentEditorLeaveService: PaymentEditorLeaveService,
@@ -158,12 +161,10 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		this.destroyRef.onDestroy(() => {
 			unregisterLeaveEditor();
 			this.isDestroyed = true;
-			this.reconciliationToken++;
+			this.executionToken++;
 		});
 
-		this.activePaymentAccountId$
-			.pipe(takeUntilDestroyed(this.destroyRef))
-			.subscribe(() => this.reconciliationToken++);
+		this.activePaymentAccountId$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.executionToken++);
 
 		this.paymentForm.controls.direction.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
 			const categoryId = this.paymentForm.controls.categoryId.value;
@@ -207,27 +208,24 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		const operation = this.operationKind();
 		this.submissionStateSignal.set({ status: 'submitting', operation });
 
-		try {
-			const expectedOperation = this.toPaymentOperation();
-			const result = await this.accountingOperationsService.updateAsync(expectedOperation);
-
-			if (!result.isSucceeded || !result.payload) {
-				this.submissionStateSignal.set({
-					status: 'failed',
-					operation,
-					message: 'Payment could not be saved. Your entered values are still here.',
-				});
-				return;
-			}
-
-			this.baseline = this.paymentForm.getRawValue();
-			await this.reconcileAsync(operation, result.payload, expectedOperation);
-		} catch {
-			this.submissionStateSignal.set({
-				status: 'failed',
-				operation,
-				message: 'Payment could not be saved. Check your connection and try again.',
-			});
+		const executionToken = ++this.executionToken;
+		const expectedOperation = this.toPaymentOperation();
+		const result =
+			operation === 'create'
+				? await this.paymentCommandExecutor.executeCreate(
+						expectedOperation,
+						this.pendingIntent,
+						() => this.isCurrentExecution(executionToken),
+						commandId => this.markAsProcessing(operation, executionToken, commandId)
+					)
+				: await this.paymentCommandExecutor.executeUpdate(
+						expectedOperation,
+						this.pendingIntent,
+						() => this.isCurrentExecution(executionToken),
+						commandId => this.markAsProcessing(operation, executionToken, commandId)
+					);
+		if (this.isCurrentExecution(executionToken)) {
+			this.applyExecutionResult(operation, result, expectedOperation.key.toString());
 		}
 	}
 
@@ -251,29 +249,31 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		}
 
 		this.submissionStateSignal.set({ status: 'submitting', operation: 'delete' });
-		try {
-			const result = await this.accountingOperationsService.deleteByIdAsync(operation.key);
-			if (!result.isSucceeded || !result.payload) {
-				this.submissionStateSignal.set({
-					status: 'failed',
-					operation: 'delete',
-					message: 'Payment could not be deleted. It is still available to review.',
-				});
-				return;
-			}
-
-			await this.reconcileAsync('delete', result.payload, undefined);
-		} catch {
+		const executionToken = ++this.executionToken;
+		const accountId = this.activeAccountIdSignal();
+		if (!accountId) {
 			this.submissionStateSignal.set({
 				status: 'failed',
 				operation: 'delete',
-				message: 'Payment could not be deleted. Check your connection and try again.',
+				message: 'Choose an account before deleting a payment.',
 			});
+			return;
+		}
+		const result = await this.paymentCommandExecutor.executeDelete(
+			accountId.toString(),
+			operation.key.toString(),
+			this.pendingIntent,
+			() => this.isCurrentExecution(executionToken),
+			commandId => this.markAsProcessing('delete', executionToken, commandId)
+		);
+		if (this.isCurrentExecution(executionToken)) {
+			this.applyExecutionResult('delete', result, operation.key.toString());
 		}
 	}
 
 	public cancel(): void {
-		this.reconciliationToken++;
+		this.executionToken++;
+		this.pendingIntent = undefined;
 		this.submissionStateSignal.set({ status: 'idle' });
 		if (this.editorModeSignal() === 'edit') {
 			this.paymentForm.reset(this.baseline);
@@ -299,33 +299,42 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		}
 	}
 
-	private async reconcileAsync(
+	private applyExecutionResult(
 		operation: 'create' | 'update' | 'delete',
-		operationId: string,
-		expectedOperation: IPaymentOperationModel | undefined
-	): Promise<void> {
-		const token = ++this.reconciliationToken;
-		this.submissionStateSignal.set({ status: 'accepted', operation, operationId });
-		this.submissionStateSignal.set({ status: 'waitingForProjection', operation, operationId });
-		const projected = await this.accountingOperationsService.reconcileProjectionAsync(
-			operationId,
+		result: PaymentCommandExecutionResult,
+		operationId: string
+	): void {
+		if (this.isDestroyed) {
+			return;
+		}
+		if (result.status === 'unknown') {
+			this.pendingIntent = result.intent;
+			this.submissionStateSignal.set({
+				status: 'uncertain',
+				operation,
+				message: result.message ?? 'Unable to confirm the payment. Retry to continue.',
+			});
+			return;
+		}
+
+		this.pendingIntent = undefined;
+		if (result.status !== 'projected') {
+			this.submissionStateSignal.set({
+				status: 'failed',
+				operation,
+				message: result.message ?? 'Payment could not be completed.',
+			});
+			return;
+		}
+
+		this.baseline = this.paymentForm.getRawValue();
+		this.submissionStateSignal.set({
+			status: 'succeeded',
 			operation,
-			expectedOperation,
-			() => !this.isDestroyed && token === this.reconciliationToken
-		);
-
-		if (token !== this.reconciliationToken) {
-			return;
-		}
-
-		if (!projected) {
-			this.submissionStateSignal.set({ status: 'projectionDelayed', operation, operationId });
-			return;
-		}
-
-		this.submissionStateSignal.set({ status: 'succeeded', operation, operationId });
+			operationId: result.paymentOperationId ?? operationId,
+		});
 		if (operation === 'create') {
-			this.store.dispatch(new SetActiveAccountingOperation(Guid.parse(operationId)));
+			this.store.dispatch(new SetActiveAccountingOperation(Guid.parse(result.paymentOperationId ?? operationId)));
 		}
 		if (operation === 'delete') {
 			this.store.dispatch(new SetActiveAccountingOperation(undefined));
@@ -340,6 +349,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		}
 
 		this.loadedOperationId = operationId;
+		this.pendingIntent = undefined;
 		const value = operation ? this.valueFromOperation(operation) : this.defaultValue();
 		this.baseline = value;
 		this.paymentForm.reset(value, { emitEvent: true });
@@ -398,6 +408,20 @@ export class AccountingOperationsCrudComponent implements OnInit {
 
 	private operationKind(): 'create' | 'update' {
 		return this.editorModeSignal() === 'create' ? 'create' : 'update';
+	}
+
+	private isCurrentExecution(executionToken: number): boolean {
+		return !this.isDestroyed && executionToken === this.executionToken;
+	}
+
+	private markAsProcessing(
+		operation: 'create' | 'update' | 'delete',
+		executionToken: number,
+		commandId: string
+	): void {
+		if (this.isCurrentExecution(executionToken)) {
+			this.submissionStateSignal.set({ status: 'waitingForProjection', operation, operationId: commandId });
+		}
 	}
 
 	private today(): string {

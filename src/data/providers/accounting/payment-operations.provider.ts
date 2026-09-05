@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { Mapper } from '@dynamic-mapper/angular';
@@ -9,6 +9,7 @@ import { AppConfigurationService } from '../../../app/modules/shared/services/ap
 import { Result } from '../../../core/result';
 import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 import { IPaymentAccountCreateOrUpdateResponse } from '../../../domain/models/accounting/responses/payment-account-create-or-update.response';
+import { IPaymentCommandResponse } from '../../../domain/models/accounting/responses/payment-command.response';
 
 @Injectable()
 export class PaymentOperationsProvider {
@@ -25,7 +26,8 @@ export class PaymentOperationsProvider {
 
 	public savePaymentOperation(
 		paymentAccountId: string,
-		operationsForSave: IPaymentOperationModel
+		operationsForSave: IPaymentOperationModel,
+		idempotencyKey: string
 	): Observable<Result<IPaymentAccountCreateOrUpdateResponse>> {
 		const request = this.mapper.map(
 			PaymentOperationsMappingProfile.DomainToPaymentOperationSaveRequest,
@@ -33,16 +35,21 @@ export class PaymentOperationsProvider {
 		);
 
 		return this.http
-			.post<
-				Result<IPaymentAccountCreateOrUpdateResponse>
-			>(`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}`, request)
+			.post<Result<IPaymentAccountCreateOrUpdateResponse>>(
+				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}`,
+				request,
+				{
+					headers: this.idempotencyHeaders(idempotencyKey),
+				}
+			)
 			.pipe(take(1));
 	}
 
 	public updatePaymentOperation(
 		operationForUpdate: IPaymentOperationModel,
 		paymentAccountId: string,
-		paymentOperationId: string
+		paymentOperationId: string,
+		idempotencyKey: string
 	): Observable<Result<IPaymentAccountCreateOrUpdateResponse>> {
 		const request = this.mapper.map(
 			PaymentOperationsMappingProfile.DomainToPaymentOperationSaveRequest,
@@ -50,20 +57,40 @@ export class PaymentOperationsProvider {
 		);
 
 		return this.http
-			.patch<
-				Result<IPaymentAccountCreateOrUpdateResponse>
-			>(`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}/${paymentOperationId}`, request)
+			.patch<Result<IPaymentAccountCreateOrUpdateResponse>>(
+				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}/${paymentOperationId}`,
+				request,
+				{
+					headers: this.idempotencyHeaders(idempotencyKey),
+				}
+			)
 			.pipe(take(1));
 	}
 
 	public removePaymentOperation(
 		paymentAccountId: string,
-		paymentOperationId: string
+		paymentOperationId: string,
+		idempotencyKey: string
 	): Observable<Result<IPaymentAccountCreateOrUpdateResponse>> {
 		return this.http
-			.delete<
-				Result<IPaymentAccountCreateOrUpdateResponse>
-			>(`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}/${paymentOperationId}`)
+			.delete<Result<IPaymentAccountCreateOrUpdateResponse>>(
+				`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}/${paymentOperationId}`,
+				{
+					headers: this.idempotencyHeaders(idempotencyKey),
+				}
+			)
 			.pipe(take(1));
+	}
+
+	public getCommandStatus(paymentAccountId: string, commandId: string): Observable<Result<IPaymentCommandResponse>> {
+		return this.http
+			.get<
+				Result<IPaymentCommandResponse>
+			>(`${this.accountingHostUrl}/${this.paymentOperationsApi}/${paymentAccountId}/commands/${commandId}`)
+			.pipe(take(1));
+	}
+
+	private idempotencyHeaders(idempotencyKey: string): HttpHeaders {
+		return new HttpHeaders({ 'Idempotency-Key': idempotencyKey });
 	}
 }

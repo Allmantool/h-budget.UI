@@ -58,13 +58,13 @@ import { PaymentAccountComponent } from '../../presentation/accounting/component
 import { PaymentAccountCrudComponent } from '../../presentation/accounting/components/payment-account-crud/payment-account-crud.component';
 import { PaymentsDashboardComponent } from '../../presentation/accounting/components/payments-dashboard/payments-dashboard.component';
 import { IPaymentRepresentationModel } from '../../presentation/accounting/models/operation-record';
-import { AccountingOperationsService } from '../../presentation/accounting/services/accounting-operations.service';
 import { AccountsService } from '../../presentation/accounting/services/accounts.service';
 import { CategoriesDialogService } from '../../presentation/accounting/services/categories-dialog.service';
 import { ContractorsDialogService } from '../../presentation/accounting/services/contractors-dialog.service';
 import { CrossAccountsTransferService } from '../../presentation/accounting/services/cross-accounts-transfer.dialog.service';
 import { HandbooksService } from '../../presentation/accounting/services/handbooks.service';
 import { PaymentAccountDialogService } from '../../presentation/accounting/services/payment-account-dialog.service';
+import { PaymentCommandExecutorService } from '../../presentation/accounting/services/payment-command-executor.service';
 import { PaymentsHistoryService } from '../../presentation/accounting/services/payments-history.service';
 import { RelatedTransferNavigationService } from '../../presentation/accounting/services/related-transfer-navigation.service';
 
@@ -426,10 +426,11 @@ describe('accounting lazy route and named-outlet activation', () => {
 						]),
 					},
 					{
-						provide: AccountingOperationsService,
-						useValue: jasmine.createSpyObj<AccountingOperationsService>('accountingOperationsService', [
-							'updateAsync',
-							'deleteByIdAsync',
+						provide: PaymentCommandExecutorService,
+						useValue: jasmine.createSpyObj<PaymentCommandExecutorService>('paymentCommandExecutorService', [
+							'executeCreate',
+							'executeUpdate',
+							'executeDelete',
 						]),
 					},
 					{
@@ -579,7 +580,7 @@ const accountingFeatureProviders: Array<Type<unknown>> = [
 	PaymentAccountDialogService,
 	CrossAccountsTransferService,
 	RelatedTransferNavigationService,
-	AccountingOperationsService,
+	PaymentCommandExecutorService,
 	HandbooksService,
 	CurrencyExchangeService,
 ];
@@ -644,7 +645,10 @@ const sampleHistoryRecord: IPaymentRepresentationModel = {
 };
 
 const sampleOperationResponse: IPaymentAccountCreateOrUpdateResponse = {
+	commandId: sampleOperationId,
+	isDuplicate: false,
 	paymentAccountId: sampleAccountId,
 	paymentAccountBalance: sampleAccount.balance,
 	paymentOperationId: sampleOperationId,
+	status: 'Projected',
 };

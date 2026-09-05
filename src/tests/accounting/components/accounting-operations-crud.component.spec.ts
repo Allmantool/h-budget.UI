@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { Result } from 'core/result';
 
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxsModule, Store } from '@ngxs/store';
 import { Guid } from 'typescript-guid';
 
@@ -13,14 +12,14 @@ import { AccountingOperationsState } from '../../../app/modules/shared/store/sta
 import { CategoriesState } from '../../../app/modules/shared/store/states/handbooks/categories.state';
 import { ContractorsState } from '../../../app/modules/shared/store/states/handbooks/contractors.state';
 import { AccountingOperationsCrudComponent } from '../../../presentation/accounting/components/accounting-operations-crud/accounting-operations-crud.component';
-import { AccountingOperationsService } from '../../../presentation/accounting/services/accounting-operations.service';
 import { CategoriesDialogService } from '../../../presentation/accounting/services/categories-dialog.service';
 import { ContractorsDialogService } from '../../../presentation/accounting/services/contractors-dialog.service';
+import { PaymentCommandExecutorService } from '../../../presentation/accounting/services/payment-command-executor.service';
 import { PaymentEditorLeaveService } from '../../../presentation/accounting/services/payment-editor-leave.service';
 
 describe('accounting operations CRUD component', () => {
 	it('renders one create primary action and prevents concurrent submission', async () => {
-		const write = jasmine.createSpy('updateAsync').and.returnValue(new Promise(() => undefined));
+		const write = jasmine.createSpy('executeCreate').and.returnValue(new Promise(() => undefined));
 		await TestBed.configureTestingModule({
 			imports: [
 				AccountingOperationsCrudComponent,
@@ -38,8 +37,8 @@ describe('accounting operations CRUD component', () => {
 			],
 			providers: [
 				{
-					provide: AccountingOperationsService,
-					useValue: { updateAsync: write, reconcileProjectionAsync: jasmine.createSpy() },
+					provide: PaymentCommandExecutorService,
+					useValue: { executeCreate: write },
 				},
 				{ provide: CategoriesDialogService, useValue: { openCategories: jasmine.createSpy() } },
 				{ provide: ContractorsDialogService, useValue: { openContractors: jasmine.createSpy() } },
@@ -66,11 +65,17 @@ describe('accounting operations CRUD component', () => {
 		expect(nativeElement.textContent).toContain('Create payment');
 	});
 
-	it('re-enables the editor when a confirmed payment is not yet projected into history', async () => {
-		const updateAsync = jasmine
-			.createSpy('updateAsync')
-			.and.resolveTo(new Result({ isSucceeded: true, payload: '11111111-1111-1111-1111-111111111111' }));
-		const reconcileProjectionAsync = jasmine.createSpy('reconcileProjectionAsync').and.resolveTo(false);
+	it('retains an uncertain intent and offers the user an explicit retry', async () => {
+		const executeCreate = jasmine.createSpy('executeCreate').and.resolveTo({
+			status: 'unknown',
+			intent: {
+				action: 'create',
+				accountId: '1c12ec59-8875-45c1-9fb0-e4edcf34a074',
+				idempotencyKey: 'intent-key',
+				requestFingerprint: 'fingerprint',
+			},
+			message: 'Unable to confirm the payment. Retry to continue.',
+		});
 		await TestBed.configureTestingModule({
 			imports: [
 				AccountingOperationsCrudComponent,
@@ -87,7 +92,7 @@ describe('accounting operations CRUD component', () => {
 				),
 			],
 			providers: [
-				{ provide: AccountingOperationsService, useValue: { updateAsync, reconcileProjectionAsync } },
+				{ provide: PaymentCommandExecutorService, useValue: { executeCreate } },
 				{ provide: CategoriesDialogService, useValue: { openCategories: jasmine.createSpy() } },
 				{ provide: ContractorsDialogService, useValue: { openContractors: jasmine.createSpy() } },
 				{ provide: PaymentEditorLeaveService, useValue: createLeaveService() },
@@ -103,11 +108,9 @@ describe('accounting operations CRUD component', () => {
 		await component.submitAsync();
 		fixture.detectChanges();
 
-		expect(component.submissionStateSignal().status).toBe('projectionDelayed');
+		expect(component.submissionStateSignal().status).toBe('uncertain');
 		expect(component.isSubmittingSignal()).toBeFalse();
-		expect((fixture.nativeElement as HTMLElement).textContent).toContain(
-			'Payment was accepted, but account history has not updated yet.'
-		);
+		expect((fixture.nativeElement as HTMLElement).textContent).toContain('Retry saving');
 	});
 
 	function createLeaveService() {

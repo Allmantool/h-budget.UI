@@ -6,5 +6,6 @@ export type PaymentSubmissionState =
 	| { status: 'accepted'; operation: PaymentSubmissionOperation; operationId: string }
 	| { status: 'waitingForProjection'; operation: PaymentSubmissionOperation; operationId: string }
 	| { status: 'projectionDelayed'; operation: PaymentSubmissionOperation; operationId: string }
+	| { status: 'uncertain'; operation: PaymentSubmissionOperation; message: string }
 	| { status: 'succeeded'; operation: PaymentSubmissionOperation; operationId?: string }
 	| { status: 'failed'; operation: PaymentSubmissionOperation; message: string };

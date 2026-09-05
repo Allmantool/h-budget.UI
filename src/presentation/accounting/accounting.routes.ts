@@ -9,13 +9,13 @@ import { PaymentAccountComponent } from './components/payment-account/payment-ac
 import { PaymentAccountCrudComponent } from './components/payment-account-crud/payment-account-crud.component';
 import { PaymentsDashboardComponent } from './components/payments-dashboard/payments-dashboard.component';
 import { paymentEditorCanDeactivateGuard } from './guards/payment-editor-can-deactivate.guard';
-import { AccountingOperationsService } from './services/accounting-operations.service';
 import { AccountsService } from './services/accounts.service';
 import { CategoriesDialogService } from './services/categories-dialog.service';
 import { ContractorsDialogService } from './services/contractors-dialog.service';
 import { CrossAccountsTransferService } from './services/cross-accounts-transfer.dialog.service';
 import { HandbooksService } from './services/handbooks.service';
 import { PaymentAccountDialogService } from './services/payment-account-dialog.service';
+import { PaymentCommandExecutorService } from './services/payment-command-executor.service';
 import { PaymentEditorLeaveService } from './services/payment-editor-leave.service';
 import { PaymentsHistoryService } from './services/payments-history.service';
 import { RelatedTransferNavigationService } from './services/related-transfer-navigation.service';
@@ -61,7 +61,7 @@ export const accountingRoutes: Routes = [
 			CrossAccountsTransferService,
 			RelatedTransferNavigationService,
 			TransferProjectionSynchronizationService,
-			AccountingOperationsService,
+			PaymentCommandExecutorService,
 			HandbooksService,
 			CurrencyExchangeService,
 			importProvidersFrom(

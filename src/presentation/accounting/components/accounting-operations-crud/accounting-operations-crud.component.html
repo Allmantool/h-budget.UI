@@ -22,7 +22,15 @@
 		role="status"
 		aria-live="polite"
 	>
-		Submitting payment…
+		Saving payment…
+	</p>
+	} @else if (submission.status === 'uncertain') {
+	<p
+		class="payment-editor__status"
+		role="status"
+		aria-live="polite"
+	>
+		{{ submission.message }}
 	</p>
 	} @else if (submission.status === 'accepted' || submission.status === 'waitingForProjection') {
 	<p
@@ -164,8 +172,8 @@
 				color="primary"
 				[disabled]="isSubmittingSignal() || !activeAccountIdSignal()"
 			>
-				{{ isSubmittingSignal() ? 'Submitting…' : editorModeSignal() === 'create' ? 'Create payment' : 'Save
-				changes' }}
+				{{ isSubmittingSignal() ? 'Saving…' : submissionStateSignal().status === 'uncertain' ? 'Retry saving' :
+				editorModeSignal() === 'create' ? 'Create payment' : 'Save changes' }}
 			</button>
 		</footer>
 	</form>

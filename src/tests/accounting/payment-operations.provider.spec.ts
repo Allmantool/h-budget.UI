@@ -29,34 +29,54 @@ describe('payment operations provider write retry behavior', () => {
 	afterEach(() => httpTestingController.verify());
 
 	it('does not retry a failed POST', () => {
-		sut.savePaymentOperation(accountId, createOperation()).subscribe({ error: () => undefined });
+		sut.savePaymentOperation(accountId, createOperation(), 'create-intent-key').subscribe({
+			error: () => undefined,
+		});
 
 		const request = httpTestingController.expectOne(`${gatewayHost}/accounting/payment-operations/${accountId}`);
 		expect(request.request.method).toBe('POST');
+		expect(request.request.headers.get('Idempotency-Key')).toBe('create-intent-key');
 		request.flush(null, { status: 500, statusText: 'Server Error' });
 		httpTestingController.expectNone(`${gatewayHost}/accounting/payment-operations/${accountId}`);
 	});
 
 	it('does not retry a failed PATCH', () => {
-		sut.updatePaymentOperation(createOperation(), accountId, operationId).subscribe({ error: () => undefined });
+		sut.updatePaymentOperation(createOperation(), accountId, operationId, 'update-intent-key').subscribe({
+			error: () => undefined,
+		});
 
 		const request = httpTestingController.expectOne(
 			`${gatewayHost}/accounting/payment-operations/${accountId}/${operationId}`
 		);
 		expect(request.request.method).toBe('PATCH');
+		expect(request.request.headers.get('Idempotency-Key')).toBe('update-intent-key');
 		request.flush(null, { status: 500, statusText: 'Server Error' });
 		httpTestingController.expectNone(`${gatewayHost}/accounting/payment-operations/${accountId}/${operationId}`);
 	});
 
 	it('does not retry a failed DELETE', () => {
-		sut.removePaymentOperation(accountId, operationId).subscribe({ error: () => undefined });
+		sut.removePaymentOperation(accountId, operationId, 'delete-intent-key').subscribe({ error: () => undefined });
 
 		const request = httpTestingController.expectOne(
 			`${gatewayHost}/accounting/payment-operations/${accountId}/${operationId}`
 		);
 		expect(request.request.method).toBe('DELETE');
+		expect(request.request.headers.get('Idempotency-Key')).toBe('delete-intent-key');
 		request.flush(null, { status: 500, statusText: 'Server Error' });
 		httpTestingController.expectNone(`${gatewayHost}/accounting/payment-operations/${accountId}/${operationId}`);
+	});
+
+	it('reads command status from the payment command endpoint', () => {
+		sut.getCommandStatus(accountId, operationId).subscribe();
+
+		const request = httpTestingController.expectOne(
+			`${gatewayHost}/accounting/payment-operations/${accountId}/commands/${operationId}`
+		);
+		expect(request.request.method).toBe('GET');
+		request.flush({
+			isSucceeded: true,
+			payload: { commandId: operationId, status: 'Projected', isDuplicate: false },
+		});
 	});
 
 	function createOperation(): IPaymentOperationModel {
