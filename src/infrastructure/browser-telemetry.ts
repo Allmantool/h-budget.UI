@@ -20,7 +20,10 @@ export function initializeBrowserTracing(settings?: IAppSettingsModel): void {
 		return;
 	}
 
-	const telemetryUrl = new URL(settings.telemetryEndpoint, window.location.origin).toString();
+	const telemetryUrl = resolveSupportedBrowserTelemetryEndpoint(settings.telemetryEndpoint, window.location.origin);
+	if (!telemetryUrl) {
+		return;
+	}
 	const ignoredTelemetryUrl = new RegExp(`^${escapeRegExp(telemetryUrl)}`);
 	const propagateTraceUrls = buildPropagateTraceUrls(settings);
 
@@ -63,6 +66,10 @@ export function initializeBrowserTracing(settings?: IAppSettingsModel): void {
 	tracingInitialized = true;
 }
 
+export function isBrowserTelemetryEndpointSupported(endpoint: string, pageOrigin: string): boolean {
+	return resolveSupportedBrowserTelemetryEndpoint(endpoint, pageOrigin) !== undefined;
+}
+
 function buildPropagateTraceUrls(settings: IAppSettingsModel): Array<string | RegExp> {
 	const urls: Array<string | RegExp> = [/^\/(?!\/)/];
 	const gatewayOrigin = getOrigin(settings.gatewayHost);
@@ -81,6 +88,21 @@ function getOrigin(url?: string): string | undefined {
 
 	try {
 		return new URL(url, window.location.origin).origin;
+	} catch {
+		return undefined;
+	}
+}
+
+function resolveSupportedBrowserTelemetryEndpoint(endpoint: string, pageOrigin: string): string | undefined {
+	try {
+		const pageUrl = new URL(pageOrigin);
+		const telemetryUrl = new URL(endpoint, pageOrigin);
+
+		if (pageUrl.protocol === 'https:' && telemetryUrl.protocol !== 'https:') {
+			return undefined;
+		}
+
+		return telemetryUrl.toString();
 	} catch {
 		return undefined;
 	}

@@ -163,7 +163,7 @@ export class PaymentRepresentationsMappingProfile extends Profile {
 			return handbookPayload.key.toString();
 		}
 
-		return handbookPayload.nameNodes.parseToTreeAsString();
+		return handbookPayload.nameNodes.join(': ');
 	}
 
 	private getCategoryById(id: Guid): ICategoryModel {

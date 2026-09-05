@@ -17,7 +17,6 @@ import { PaymentOperationTypes } from '../../../domain/models/accounting/operati
 import { IPaymentHistoryModel } from '../../../domain/models/accounting/payment-history.model';
 import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 import { OperationTypes } from '../../../domain/types/operation.types';
-import '../../../domain/extensions/handbookExtensions';
 
 describe('payment-representations-mapping.profile tests', () => {
 	let mapper: Mapper;
@@ -89,6 +88,53 @@ describe('payment-representations-mapping.profile tests', () => {
 		expect(record.balance).toBe(100.2);
 		expect(record.comment).toBe('comments 1');
 		expect(record.operationDate.toJSON()).toBe(new Date(paymentEntities[0].record.operationDate).toJSON());
+	});
+
+	it('maps JSON handbook name arrays without requiring a prototype extension', () => {
+		store.dispatch(
+			new SetInitialCategories([
+				{
+					key: Guid.parse('850935c3-1e14-448f-be1c-30ef6f088fb5'),
+					operationType: PaymentOperationTypes.Expense,
+					nameNodes: ['category', 'two', 'expense'],
+				},
+			])
+		);
+		store.dispatch(
+			new SetInitialContractors([
+				{
+					key: Guid.parse('7fba5b52-27bf-4e73-9a12-e1503457ae5f'),
+					nameNodes: ['Parties', 'one'],
+				},
+			])
+		);
+
+		const result = mapper.map(PaymentRepresentationsMappingProfile.PaymentHistoryToRepresentationModel, [
+			{
+				balance: 22,
+				record: {
+					key: Guid.parse('ccca2b39-c8b6-4aa8-b44b-3ef2112ff042'),
+					paymentAccountId: Guid.parse('199fe6c8-1605-4ec0-be16-8da34919c462'),
+					contractorId: Guid.parse('7fba5b52-27bf-4e73-9a12-e1503457ae5f'),
+					categoryId: Guid.parse('850935c3-1e14-448f-be1c-30ef6f088fb5'),
+					operationDate: new Date(2026, 8, 5),
+					operationType: OperationTypes.Payment,
+					comment: 'XXX',
+					amount: 23,
+				},
+			},
+		]);
+
+		expect(result).toEqual([
+			jasmine.objectContaining({
+				contractor: 'Parties: one',
+				category: 'category: two: expense',
+				income: 0,
+				expense: -23,
+				balance: 22,
+				comment: 'XXX',
+			}),
+		]);
 	});
 
 	it('should correctly map with "PaymentHistoryToRepresentationModel" when operation time is an expense', () => {

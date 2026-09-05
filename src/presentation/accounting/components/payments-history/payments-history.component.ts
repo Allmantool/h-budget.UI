@@ -183,14 +183,6 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		this.store.dispatch(new SetActiveAccountingOperation(record.key));
 	}
 
-	public async beginNewPayment(): Promise<void> {
-		if (!(await this.paymentEditorLeaveService.canLeave())) {
-			return;
-		}
-
-		this.store.dispatch(new SetActiveAccountingOperation(undefined));
-	}
-
 	public isFuturePayment = (record: IPaymentRepresentationModel): boolean => isFuture(record.operationDate);
 
 	public async navigateToRelatedTransfer(record: IPaymentRepresentationModel): Promise<void> {

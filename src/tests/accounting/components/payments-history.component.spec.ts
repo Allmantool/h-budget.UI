@@ -221,6 +221,10 @@ describe('payments history component', () => {
 		expect(getHeaderTexts()).toEqual(['Date', 'Contractor', 'Category', 'Income', 'Expense', 'Balance', 'Comment']);
 	});
 
+	it('does not duplicate the editor create action above the history table', () => {
+		expect(getNativeElement().textContent).not.toContain('New payment');
+	});
+
 	it('should render representative history rows and summary counts', () => {
 		const tableText = getTableText();
 		const componentText = getNativeElement().textContent ?? '';
