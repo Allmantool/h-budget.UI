@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 
+import { MatDatepicker } from '@angular/material/datepicker';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxsModule, Store } from '@ngxs/store';
 import { Guid } from 'typescript-guid';
@@ -73,6 +75,7 @@ describe('accounting operations CRUD component', () => {
 			throw new Error('Expected the fixture to render an HTMLElement.');
 		}
 		expect(nativeElement.textContent).toContain('Create payment');
+		expect(nativeElement.querySelector('mat-datepicker-toggle')).not.toBeNull();
 	});
 
 	it('retains an uncertain intent and offers the user an explicit retry', async () => {
@@ -264,6 +267,190 @@ describe('accounting operations CRUD component', () => {
 		expect(confirmDiscard).toHaveBeenCalledTimes(1);
 	});
 
+	it('keeps the projected local calendar date clean until it materially changes', async () => {
+		const confirmDiscard = jasmine.createSpy('confirmDiscard').and.resolveTo(true);
+		const { fixture } = await createSelectedEditor(confirmDiscard);
+		const component = fixture.componentInstance;
+
+		expect(component.paymentForm.controls.operationDate.value).toEqual(new Date(2026, 0, 1));
+		expect(component.isDirtySignal()).toBeFalse();
+		component.paymentForm.controls.operationDate.setValue(new Date(2026, 0, 1));
+		expect(component.isDirtySignal()).toBeFalse();
+
+		component.paymentForm.controls.operationDate.setValue(new Date(2026, 0, 2));
+		expect(component.isDirtySignal()).toBeTrue();
+		await component.canLeaveEditor();
+		expect(confirmDiscard).toHaveBeenCalledTimes(1);
+
+		component.paymentForm.controls.operationDate.setValue(new Date(2026, 0, 1));
+		expect(component.isDirtySignal()).toBeFalse();
+	});
+
+	it('opens and closes the Material datepicker without changing the create baseline', async () => {
+		const confirmDiscard = jasmine.createSpy('confirmDiscard').and.resolveTo(true);
+		const { fixture, store } = await createSelectedEditor(confirmDiscard);
+		const component = fixture.componentInstance;
+		store.dispatch(new SetActiveAccountingOperation(undefined));
+		fixture.detectChanges();
+		await fixture.whenStable();
+		const dateBeforeOpen = component.paymentForm.controls.operationDate.value;
+		const datepicker = fixture.debugElement.query(By.directive(MatDatepicker))
+			.componentInstance as MatDatepicker<Date>;
+
+		datepicker.open();
+		fixture.detectChanges();
+		expect(document.querySelector('.mat-datepicker-content')).not.toBeNull();
+		datepicker.close();
+		fixture.detectChanges();
+
+		expect(component.paymentForm.controls.operationDate.value).toEqual(dateBeforeOpen);
+		expect(component.isDirtySignal()).toBeFalse();
+		expect(await component.canLeaveEditor()).toBeTrue();
+		expect(confirmDiscard).not.toHaveBeenCalled();
+	});
+
+	it('blocks a malformed manually entered calendar date and associates the error with the Date field', async () => {
+		const { fixture, commandExecutor } = await createSelectedEditor();
+		const component = fixture.componentInstance;
+		const dateInput = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(
+			'input[formcontrolname="operationDate"]'
+		);
+		if (!dateInput) {
+			throw new Error('Expected the Date field to accept Material datepicker keyboard input.');
+		}
+
+		dateInput.value = 'not a calendar date';
+		dateInput.dispatchEvent(new Event('input'));
+		component.paymentForm.controls.operationDate.markAsTouched();
+		fixture.detectChanges();
+
+		expect(component.paymentForm.controls.operationDate.invalid).toBeTrue();
+		expect((fixture.nativeElement as HTMLElement).textContent).toContain('Enter a valid operation date.');
+		await component.submitAsync();
+		expect(commandExecutor.executeUpdate).not.toHaveBeenCalled();
+	});
+
+	it('restores an edited baseline before safely selecting another payment', async () => {
+		const confirmDiscard = jasmine.createSpy('confirmDiscard').and.resolveTo(true);
+		const { fixture, store } = await createSelectedEditor(confirmDiscard);
+		const component = fixture.componentInstance;
+
+		component.paymentForm.controls.comment.setValue('Unsaved change');
+		expect(component.isDirtySignal()).toBeTrue();
+
+		component.cancel();
+		expect(component.paymentForm.controls.comment.value).toBe('Payment A');
+		expect(component.isDirtySignal()).toBeFalse();
+
+		expect(await component.canLeaveEditor()).toBeTrue();
+		store.dispatch(new SetActiveAccountingOperation(operationB().key));
+		fixture.detectChanges();
+		await fixture.whenStable();
+
+		expect(confirmDiscard).not.toHaveBeenCalled();
+		expect(component.paymentForm.controls.comment.value).toBe('Payment B');
+	});
+
+	it('uses the projected update as the selected editor baseline and preserves its calendar day', async () => {
+		const confirmDiscard = jasmine.createSpy('confirmDiscard').and.resolveTo(true);
+		const { fixture, store, commandExecutor } = await createSelectedEditor(confirmDiscard);
+		const component = fixture.componentInstance;
+		const updatedOperation = paymentOperation(
+			operationA().key.toString(),
+			10,
+			'Updated payment',
+			new Date(2026, 0, 2)
+		);
+		commandExecutor.executeUpdate.and.callFake(() => {
+			store.dispatch(new SetInitialPaymentOperations([updatedOperation, operationB()]));
+			return Promise.resolve({ status: 'projected', paymentOperationId: updatedOperation.key.toString() });
+		});
+
+		component.paymentForm.patchValue({
+			comment: updatedOperation.comment,
+			operationDate: updatedOperation.operationDate,
+		});
+		await component.submitAsync();
+		fixture.detectChanges();
+		await fixture.whenStable();
+
+		expect(commandExecutor.executeUpdate).toHaveBeenCalledTimes(1);
+		expect(component.editorModeSignal()).toBe('edit');
+		expect(component.paymentForm.controls.comment.value).toBe('Updated payment');
+		expect(component.paymentForm.controls.operationDate.value).toEqual(new Date(2026, 0, 2));
+		expect(component.isDirtySignal()).toBeFalse();
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid?.toString()).toBe(
+			operationA().key.toString()
+		);
+		expect((fixture.nativeElement as HTMLElement).textContent).toContain('Save changes');
+
+		expect(await component.canLeaveEditor()).toBeTrue();
+		store.dispatch(new SetActiveAccountingOperation(operationB().key));
+		fixture.detectChanges();
+		await fixture.whenStable();
+		expect(confirmDiscard).not.toHaveBeenCalled();
+	});
+
+	it('clears the selection and editor identity after a projected delete', async () => {
+		const { fixture, store } = await createSelectedEditor();
+		const component = fixture.componentInstance;
+		store.dispatch(new SetInitialPaymentOperations([operationB()]));
+
+		(
+			component as unknown as {
+				applyExecutionResult: (
+					operation: 'delete',
+					result: { status: 'projected'; paymentOperationId: string },
+					operationId: string
+				) => void;
+			}
+		).applyExecutionResult(
+			'delete',
+			{ status: 'projected', paymentOperationId: operationA().key.toString() },
+			operationA().key.toString()
+		);
+		fixture.detectChanges();
+		await fixture.whenStable();
+
+		expect(component.editorModeSignal()).toBe('create');
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid).toBeUndefined();
+		expect(component.paymentForm.controls.comment.value).toBe('');
+		expect(component.isDirtySignal()).toBeFalse();
+		expect((fixture.nativeElement as HTMLElement).textContent).toContain('Create payment');
+	});
+
+	it('treats initialized create defaults as clean and only prompts after a material create edit', async () => {
+		const confirmDiscard = jasmine.createSpy('confirmDiscard').and.resolveTo(false);
+		const { fixture, store } = await createSelectedEditor(confirmDiscard);
+		const component = fixture.componentInstance;
+		store.dispatch(new SetActiveAccountingOperation(undefined));
+		fixture.detectChanges();
+		await fixture.whenStable();
+
+		expect(component.editorModeSignal()).toBe('create');
+		expect(component.isDirtySignal()).toBeFalse();
+		expect(await component.canLeaveEditor()).toBeTrue();
+		component.paymentForm.controls.comment.setValue('Draft payment');
+		expect(component.isDirtySignal()).toBeTrue();
+		expect(await component.canLeaveEditor()).toBeFalse();
+		expect(confirmDiscard).toHaveBeenCalledTimes(1);
+
+		component.cancel();
+		expect(component.isDirtySignal()).toBeFalse();
+		expect(await component.canLeaveEditor()).toBeTrue();
+		expect(confirmDiscard).toHaveBeenCalledTimes(1);
+	});
+
+	it('accepts a future calendar date without adding an artificial maximum date', async () => {
+		const { fixture } = await createSelectedEditor();
+		const component = fixture.componentInstance;
+
+		component.paymentForm.controls.operationDate.setValue(new Date(2099, 0, 1));
+
+		expect(component.paymentForm.controls.operationDate.valid).toBeTrue();
+		expect(component.isDirtySignal()).toBeTrue();
+	});
+
 	it('treats stable category identity and empty contractor representations as unchanged values', async () => {
 		const confirmDiscard = jasmine.createSpy('confirmDiscard').and.resolveTo(true);
 		const { fixture } = await createSelectedEditor(confirmDiscard);
@@ -315,6 +502,11 @@ describe('accounting operations CRUD component', () => {
 	});
 
 	async function createSelectedEditor(confirmDiscard = jasmine.createSpy('confirmDiscard').and.resolveTo(true)) {
+		const commandExecutor = {
+			executeCreate: jasmine.createSpy('executeCreate'),
+			executeUpdate: jasmine.createSpy('executeUpdate'),
+			executeDelete: jasmine.createSpy('executeDelete'),
+		};
 		await TestBed.configureTestingModule({
 			imports: [
 				AccountingOperationsCrudComponent,
@@ -333,7 +525,7 @@ describe('accounting operations CRUD component', () => {
 			providers: [
 				{
 					provide: PaymentCommandExecutorService,
-					useValue: { executeCreate: jasmine.createSpy(), executeUpdate: jasmine.createSpy() },
+					useValue: commandExecutor,
 				},
 				{ provide: CategoriesDialogService, useValue: { openCategories: jasmine.createSpy() } },
 				{ provide: ContractorsDialogService, useValue: { openContractors: jasmine.createSpy() } },
@@ -365,7 +557,7 @@ describe('accounting operations CRUD component', () => {
 		fixture.detectChanges();
 		await fixture.whenStable();
 		fixture.detectChanges();
-		return { fixture, store };
+		return { fixture, store, commandExecutor };
 	}
 
 	function operationA(): IPaymentOperationModel {
@@ -376,11 +568,16 @@ describe('accounting operations CRUD component', () => {
 		return paymentOperation('5a4ab9fd-3128-43b6-ab4d-47c55a25c7cf', 15, 'Payment B');
 	}
 
-	function paymentOperation(key: string, amount: number, comment: string): IPaymentOperationModel {
+	function paymentOperation(
+		key: string,
+		amount: number,
+		comment: string,
+		operationDate = new Date(2026, 0, 1)
+	): IPaymentOperationModel {
 		return {
 			key: Guid.parse(key),
 			paymentAccountId: Guid.parse('1c12ec59-8875-45c1-9fb0-e4edcf34a074'),
-			operationDate: new Date(2026, 0, 1),
+			operationDate,
 			contractorId: Guid.EMPTY,
 			categoryId: Guid.parse('a7c82a9d-e78c-4d73-973a-f7e7f20de64b'),
 			comment,

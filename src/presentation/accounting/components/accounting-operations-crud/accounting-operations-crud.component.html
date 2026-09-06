@@ -81,11 +81,16 @@
 			<mat-label>Date</mat-label>
 			<input
 				matInput
-				type="date"
+				[matDatepicker]="operationDatePicker"
 				formControlName="operationDate"
 			/>
+			<mat-datepicker-toggle
+				matIconSuffix
+				[for]="operationDatePicker"
+			></mat-datepicker-toggle>
+			<mat-datepicker #operationDatePicker></mat-datepicker>
 			@if (paymentForm.controls.operationDate.touched && paymentForm.controls.operationDate.invalid) {
-			<mat-error>Choose an operation date.</mat-error>
+			<mat-error>Enter a valid operation date.</mat-error>
 			}
 		</mat-form-field>
 		<div class="payment-editor__field-action">

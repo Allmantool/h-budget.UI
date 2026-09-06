@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnIni
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -43,7 +45,7 @@ interface PaymentEditorValue {
 	comment: string;
 	contractorId: string;
 	direction: PaymentOperationTypes;
-	operationDate: string;
+	operationDate: Date;
 }
 
 interface NormalizedPaymentEditorValue {
@@ -72,10 +74,12 @@ interface PaymentDeleteDialogData {
 	imports: [
 		ReactiveFormsModule,
 		MatButtonModule,
+		MatDatepickerModule,
 		MatDialogModule,
 		MatFormFieldModule,
 		MatIconModule,
 		MatInputModule,
+		MatNativeDateModule,
 		MatSelectModule,
 	],
 })
@@ -121,7 +125,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		comment: [''],
 		contractorId: [''],
 		direction: [PaymentOperationTypes.Expense, (control: AbstractControl) => Validators.required(control)],
-		operationDate: [this.today(), (control: AbstractControl) => Validators.required(control)],
+		operationDate: [this.businessDateToday(), (control: AbstractControl) => Validators.required(control)],
 	});
 
 	public readonly activeAccountSignal = toSignal(this.activePaymentAccount$, { initialValue: undefined });
@@ -414,7 +418,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		return {
 			key: existingOperation?.key ?? Guid.EMPTY,
 			paymentAccountId: Guid.parse(this.activeAccountIdSignal()!.toString()),
-			operationDate: new Date(`${value.operationDate}T00:00:00`),
+			operationDate: this.businessDate(value.operationDate),
 			amount: value.amount,
 			categoryId: Guid.parse(value.categoryId),
 			contractorId: value.contractorId ? Guid.parse(value.contractorId) : Guid.EMPTY,
@@ -431,7 +435,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			comment: operation.comment,
 			contractorId: operation.contractorId?.equals(Guid.EMPTY) ? '' : operation.contractorId.toString(),
 			direction: category?.operationType ?? PaymentOperationTypes.Expense,
-			operationDate: this.asDateInput(operation.operationDate),
+			operationDate: this.businessDate(operation.operationDate),
 		};
 	}
 
@@ -442,7 +446,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			comment: '',
 			contractorId: '',
 			direction: PaymentOperationTypes.Expense,
-			operationDate: this.today(),
+			operationDate: this.businessDateToday(),
 		};
 	}
 
@@ -488,6 +492,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		return {
 			...baseline,
 			amount: typeof baseline.amount === 'number' ? baseline.amount : Number(baseline.amount),
+			operationDate: this.dateFromBusinessDay(baseline.operationDate),
 		};
 	}
 
@@ -558,8 +563,21 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		}
 	}
 
-	private today(): string {
-		return this.asDateInput(new Date());
+	private businessDateToday(): Date {
+		return this.businessDate(new Date());
+	}
+
+	private businessDate(date: Date): Date {
+		return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+	}
+
+	private dateFromBusinessDay(value: string): Date {
+		const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+		if (!dateOnly) {
+			return this.businessDateToday();
+		}
+
+		return new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]));
 	}
 
 	private asDateInput(date: Date): string {

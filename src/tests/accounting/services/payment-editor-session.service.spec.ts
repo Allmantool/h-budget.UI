@@ -71,4 +71,23 @@ describe('payment editor session service', () => {
 			jasmine.clock().uninstall();
 		}
 	});
+
+	it('starts a recreated route session clean while an old mutation timer cannot leak into it', () => {
+		jasmine.clock().install();
+		try {
+			service.beginEdit();
+			service.queueRecentMutation(operationId, 'updated');
+			service.confirmRecentMutationIsVisible([operationId]);
+			service.ngOnDestroy();
+
+			const recreatedService = new PaymentEditorSessionService();
+			jasmine.clock().tick(RECENT_PAYMENT_MUTATION_DURATION_MS);
+
+			expect(recreatedService.editorModeSignal()).toBe('create');
+			expect(recreatedService.recentMutationSignal()).toBeUndefined();
+			recreatedService.ngOnDestroy();
+		} finally {
+			jasmine.clock().uninstall();
+		}
+	});
 });
