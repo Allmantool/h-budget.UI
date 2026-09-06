@@ -92,7 +92,11 @@ export class PaymentCommandExecutorService {
 		const response = await this.submitAsync(action, accountId, request, intent.idempotencyKey);
 
 		if (response.kind === 'unknown') {
-			return { status: 'unknown', intent, message: 'Unable to confirm the payment. Retry to continue.' };
+			return {
+				status: 'unknown',
+				intent,
+				message: "We couldn't confirm whether this payment was accepted. Retry to check its status.",
+			};
 		}
 		if (response.kind === 'conflict') {
 			this.pendingCommandRegistry.remove(intent.intentId);

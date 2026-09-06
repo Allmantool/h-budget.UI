@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, provideRouter, Router } from '@angular/router';
+import { ActivatedRoute, ParamMap, provideRouter, Router } from '@angular/router';
 
 import { NgxsModule, Store } from '@ngxs/store';
 import { of, Subject } from 'rxjs';
@@ -22,6 +22,7 @@ import {
 import { getAccountingTableOptions } from '../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { SetInitialCategories } from '../../../app/modules/shared/store/states/handbooks/actions/category.actions';
 import { CategoriesState } from '../../../app/modules/shared/store/states/handbooks/categories.state';
+import { DefaultPaymentAccountsProvider } from '../../../data/providers/accounting/payment-accounts.provider';
 import { AccountTypes } from '../../../domain/models/accounting/account-types';
 import { PaymentOperationTypes } from '../../../domain/models/accounting/operation-types';
 import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
@@ -36,6 +37,7 @@ import { CrossAccountsTransferService } from '../../../presentation/accounting/s
 import { HandbooksService } from '../../../presentation/accounting/services/handbooks.service';
 import { PaymentCommandExecutorService } from '../../../presentation/accounting/services/payment-command-executor.service';
 import { PaymentEditorLeaveService } from '../../../presentation/accounting/services/payment-editor-leave.service';
+import { PaymentEditorSessionService } from '../../../presentation/accounting/services/payment-editor-session.service';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
 import { RelatedTransferNavigationService } from '../../../presentation/accounting/services/related-transfer-navigation.service';
 import { TransferProjectionSynchronizationService } from '../../../presentation/accounting/services/transfer-projection-synchronization.service';
@@ -47,7 +49,13 @@ describe('payments dashboard component', () => {
 	let router: Router;
 	const accountingWorkspaceRouteStub = {} as ActivatedRoute;
 	const providerRouteStub = { parent: accountingWorkspaceRouteStub } as ActivatedRoute;
-	const activatedRouteStub = { parent: providerRouteStub } as ActivatedRoute;
+	const routeQueryParamMap = jasmine.createSpyObj<ParamMap>('queryParamMap', ['get', 'getAll', 'has'], {
+		keys: [],
+	});
+	const activatedRouteStub = {
+		parent: providerRouteStub,
+		snapshot: { queryParamMap: routeQueryParamMap },
+	};
 
 	let accountsTransferServiceSpy: jasmine.SpyObj<CrossAccountsTransferService>;
 	let handbooksServiceSpy: jasmine.SpyObj<HandbooksService>;
@@ -56,6 +64,7 @@ describe('payments dashboard component', () => {
 	let relatedTransferNavigationServiceSpy: jasmine.SpyObj<RelatedTransferNavigationService>;
 	let sseServiceSpy: jasmine.SpyObj<SseService>;
 	let paymentCommandExecutorSpy: jasmine.SpyObj<PaymentCommandExecutorService>;
+	let paymentAccountsProviderSpy: jasmine.SpyObj<DefaultPaymentAccountsProvider>;
 	let notificationsSubject: Subject<AccountNotification>;
 	let transferProjectionSynchronizationService: TransferProjectionSynchronizationService;
 
@@ -104,7 +113,9 @@ describe('payments dashboard component', () => {
 		accountsTransferServiceSpy = jasmine.createSpyObj<CrossAccountsTransferService>('accountsTransferService', [
 			'openForTransfer',
 		]);
-		handbooksServiceSpy = jasmine.createSpyObj<HandbooksService>('handbooksService', ['setupHandbooksStore']);
+		handbooksServiceSpy = jasmine.createSpyObj<HandbooksService>('handbooksService', {
+			setupHandbooksStore: of(undefined),
+		});
 		paymentsHistoryServiceSpy = jasmine.createSpyObj<PaymentsHistoryService>('paymentsHistoryService', {
 			refreshPaymentsHistory: of(historyRows),
 		});
@@ -129,6 +140,10 @@ describe('payments dashboard component', () => {
 			['recoverPendingCommands']
 		);
 		paymentCommandExecutorSpy.recoverPendingCommands.and.returnValue(Promise.resolve());
+		paymentAccountsProviderSpy = jasmine.createSpyObj<DefaultPaymentAccountsProvider>('paymentAccountsProvider', [
+			'getById',
+		]);
+		routeQueryParamMap.get.and.returnValue(null);
 
 		await TestBed.configureTestingModule({
 			imports: [
@@ -141,7 +156,7 @@ describe('payments dashboard component', () => {
 			providers: [
 				provideRouter([]),
 				TransferProjectionSynchronizationService,
-				{ provide: ActivatedRoute, useValue: activatedRouteStub },
+				{ provide: ActivatedRoute, useValue: activatedRouteStub as unknown as ActivatedRoute },
 				{
 					provide: CrossAccountsTransferService,
 					useValue: accountsTransferServiceSpy,
@@ -167,7 +182,9 @@ describe('payments dashboard component', () => {
 					useValue: sseServiceSpy,
 				},
 				{ provide: PaymentEditorLeaveService, useValue: { canLeave: () => Promise.resolve(true) } },
+				PaymentEditorSessionService,
 				{ provide: PaymentCommandExecutorService, useValue: paymentCommandExecutorSpy },
+				{ provide: DefaultPaymentAccountsProvider, useValue: paymentAccountsProviderSpy },
 			],
 		}).compileComponents();
 
@@ -337,6 +354,33 @@ describe('payments dashboard component', () => {
 		expect(getNativeText()).toContain('Select a payment account');
 		expect(getNativeElement().querySelector('payments-history')).toBeNull();
 		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(0);
+	});
+
+	it('restores the selected account from the operations route after a browser refresh', async () => {
+		const navigateSpy = spyOn(router, 'navigate').and.resolveTo(true);
+		paymentAccountsProviderSpy.getById.and.returnValue(of(activeAccount));
+		routeQueryParamMap.get.and.callFake((key: string) => (key === 'paymentAccountId' ? activeAccountId : null));
+
+		fixture.destroy();
+		store.reset({
+			...store.snapshot(),
+			paymentAccounts: {
+				activeAccountGuid: '',
+				accounts: [],
+			},
+		});
+
+		fixture = TestBed.createComponent(PaymentsDashboardComponent);
+		component = fixture.componentInstance;
+		fixture.detectChanges();
+
+		await fixture.whenStable();
+		fixture.detectChanges();
+
+		expect(paymentAccountsProviderSpy.getById.calls.mostRecent().args).toEqual([activeAccountId]);
+		expect(store.selectSnapshot(getActivePaymentAccount)).toEqual(activeAccount);
+		expect(navigateSpy).not.toHaveBeenCalled();
+		expect(getNativeText()).toContain('Primary wallet');
 	});
 
 	function createPaymentOperation(amount: number, operationDate: Date): IPaymentOperationModel {

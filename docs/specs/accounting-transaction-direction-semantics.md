@@ -96,7 +96,7 @@ full Karma suite, production build, and diff.
 - Focused dashboard (9), mapper (6), and increment (3) Karma suites pass.
 - Type checking and lint pass; lint reports the repository's existing 347
   warnings and no errors.
-- Full CI Karma suite passes 287 tests; production build succeeds with its
+- Full CI Karma suite passes 288 tests; production build succeeds with its
   existing initial-bundle budget warning.
 
 ### Decisions and Requirement Changes
@@ -109,6 +109,16 @@ full Karma suite, production build, and diff.
 - `npm run typecheck`: PASS.
 - `npm run lint`: PASS; 347 existing warnings, 0 errors.
 - `npm run format:check`: PASS.
-- `npm run test:ci`: PASS; 287 tests.
+- `npm run test:ci`: PASS; 288 tests.
 - `npm run build:prod`: PASS; existing 2 MB initial-bundle warning remains.
 - `git diff --check`: PASS.
+
+## Release Verification Addendum
+
+The deterministic fixture is now present through the configured gateway. On
+Account A `5ed2cb00-6579-435a-a2b4-725c80ac1431`, the visible dashboard showed
+balance `22 USD`, one operation, Income `0 USD`, Expense `23 USD`, and Net
+flow `-23 USD`. The timeline row showed contractor `Parties: one`, category
+`category: two: expense`, Expense `-23.00`, balance `22.00`, and comment
+`XXX`. The same values persisted after refresh and after switching Account A
+to empty Account B and back. Browser direction acceptance is **PASS**.

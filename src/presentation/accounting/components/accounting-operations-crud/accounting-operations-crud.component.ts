@@ -34,12 +34,20 @@ import { CategoriesDialogService } from '../../services/categories-dialog.servic
 import { ContractorsDialogService } from '../../services/contractors-dialog.service';
 import { PaymentCommandExecutorService } from '../../services/payment-command-executor.service';
 import { PaymentEditorLeaveService } from '../../services/payment-editor-leave.service';
+import { PaymentEditorSessionService } from '../../services/payment-editor-session.service';
 import { PaymentDeleteDialogComponent } from '../payment-delete-dialog/payment-delete-dialog.component';
-
-type PaymentEditorMode = 'create' | 'edit';
 
 interface PaymentEditorValue {
 	amount: number;
+	categoryId: string;
+	comment: string;
+	contractorId: string;
+	direction: PaymentOperationTypes;
+	operationDate: string;
+}
+
+interface NormalizedPaymentEditorValue {
+	amount: number | string;
 	categoryId: string;
 	comment: string;
 	contractorId: string;
@@ -74,8 +82,11 @@ interface PaymentDeleteDialogData {
 export class AccountingOperationsCrudComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);
 	private readonly formBuilder = inject(FormBuilder);
-	private baseline: PaymentEditorValue = this.defaultValue();
+	private readonly baselineSignal = signal<NormalizedPaymentEditorValue>(
+		this.normalizeEditableValue(this.defaultValue())
+	);
 	private loadedOperationId?: string;
+	private activeAccountId?: string;
 	private executionToken = 0;
 	private isDestroyed = false;
 	private pendingIntent?: PaymentCommandIntent;
@@ -123,9 +134,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		initialValue: this.paymentForm.getRawValue(),
 	});
 	public readonly submissionStateSignal = signal<PaymentSubmissionState>({ status: 'idle' });
-	public readonly editorModeSignal = computed<PaymentEditorMode>(() =>
-		this.selectedOperationSignal() ? 'edit' : 'create'
-	);
+	public readonly editorModeSignal = this.paymentEditorSession.editorModeSignal;
 	public readonly selectedOperationSignal = computed(() => {
 		const selectedId = this.selectedRecordGuidSignal();
 		return selectedId
@@ -137,10 +146,10 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	);
 	public readonly isSubmittingSignal = computed(() => {
 		const status = this.submissionStateSignal().status;
-		return status === 'submitting' || status === 'accepted' || status === 'waitingForProjection';
+		return status === 'submitting' || status === 'waitingForProjection';
 	});
 	public readonly isDirtySignal = computed(
-		() => JSON.stringify(this.formValueSignal()) !== JSON.stringify(this.baseline)
+		() => !this.areEquivalent(this.normalizeEditableValue(this.formValueSignal()), this.baselineSignal())
 	);
 
 	constructor(
@@ -148,6 +157,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		private readonly categoriesDialogService: CategoriesDialogService,
 		private readonly contractorsDialogService: ContractorsDialogService,
 		private readonly paymentEditorLeaveService: PaymentEditorLeaveService,
+		private readonly paymentEditorSession: PaymentEditorSessionService,
 		private readonly dialog: MatDialog,
 		private readonly store: Store
 	) {}
@@ -164,7 +174,15 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			this.executionToken++;
 		});
 
-		this.activePaymentAccountId$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.executionToken++);
+		this.activePaymentAccountId$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(accountId => {
+			const nextAccountId = accountId?.toString();
+			if (this.activeAccountId && this.activeAccountId !== nextAccountId) {
+				this.paymentEditorSession.reset();
+				this.store.dispatch(new SetActiveAccountingOperation(undefined));
+			}
+			this.activeAccountId = nextAccountId;
+			this.executionToken++;
+		});
 
 		this.paymentForm.controls.direction.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
 			const categoryId = this.paymentForm.controls.categoryId.value;
@@ -206,6 +224,15 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		}
 
 		const operation = this.operationKind();
+		if (operation === 'update' && !this.selectedOperationSignal()) {
+			this.reconcileStaleSelection();
+			this.submissionStateSignal.set({
+				status: 'failed',
+				operation,
+				message: 'This payment is no longer available. Start a new payment or select a current record.',
+			});
+			return;
+		}
 		this.submissionStateSignal.set({ status: 'submitting', operation });
 
 		const executionToken = ++this.executionToken;
@@ -273,15 +300,13 @@ export class AccountingOperationsCrudComponent implements OnInit {
 
 	public cancel(): void {
 		this.executionToken++;
-		this.pendingIntent = undefined;
 		this.submissionStateSignal.set({ status: 'idle' });
 		if (this.editorModeSignal() === 'edit') {
-			this.paymentForm.reset(this.baseline);
+			this.paymentForm.reset(this.baselineValue());
 			return;
 		}
 
-		this.paymentForm.reset(this.defaultValue());
-		this.baseline = this.defaultValue();
+		this.initializeForm(this.defaultValue());
 	}
 
 	public async addCategory(): Promise<void> {
@@ -312,7 +337,9 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			this.submissionStateSignal.set({
 				status: 'uncertain',
 				operation,
-				message: result.message ?? 'Unable to confirm the payment. Retry to continue.',
+				message:
+					result.message ??
+					"We couldn't confirm whether this payment was accepted. Retry to check its status.",
 			});
 			return;
 		}
@@ -327,22 +354,44 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			return;
 		}
 
-		this.baseline = this.paymentForm.getRawValue();
+		this.captureBaseline();
 		this.submissionStateSignal.set({
 			status: 'succeeded',
 			operation,
 			operationId: result.paymentOperationId ?? operationId,
 		});
 		if (operation === 'create') {
-			this.store.dispatch(new SetActiveAccountingOperation(Guid.parse(result.paymentOperationId ?? operationId)));
+			this.paymentEditorSession.queueRecentMutation(
+				Guid.parse(result.paymentOperationId ?? operationId),
+				'created'
+			);
+			this.paymentEditorSession.beginCreate();
+			this.resetNewPaymentForm();
+			this.store.dispatch(new SetActiveAccountingOperation(undefined));
+		}
+		if (operation === 'update') {
+			this.paymentEditorSession.queueRecentMutation(
+				Guid.parse(result.paymentOperationId ?? operationId),
+				'updated'
+			);
+			this.loadedOperationId = undefined;
+			this.loadSelectedOperation();
 		}
 		if (operation === 'delete') {
+			this.paymentEditorSession.beginCreate();
+			this.resetNewPaymentForm();
 			this.store.dispatch(new SetActiveAccountingOperation(undefined));
 		}
 	}
 
 	private loadSelectedOperation(): void {
 		const operation = this.selectedOperationSignal();
+		const selectedOperationId = this.selectedRecordGuidSignal();
+		if (selectedOperationId && !operation) {
+			this.reconcileStaleSelection();
+			return;
+		}
+
 		const operationId = operation?.key.toString();
 		if (operationId === this.loadedOperationId) {
 			return;
@@ -350,9 +399,12 @@ export class AccountingOperationsCrudComponent implements OnInit {
 
 		this.loadedOperationId = operationId;
 		this.pendingIntent = undefined;
-		const value = operation ? this.valueFromOperation(operation) : this.defaultValue();
-		this.baseline = value;
-		this.paymentForm.reset(value, { emitEvent: true });
+		if (operation) {
+			this.paymentEditorSession.beginEdit();
+		} else {
+			this.paymentEditorSession.beginCreate();
+		}
+		this.initializeForm(operation ? this.valueFromOperation(operation) : this.defaultValue());
 		this.submissionStateSignal.set({ status: 'idle' });
 	}
 
@@ -408,6 +460,88 @@ export class AccountingOperationsCrudComponent implements OnInit {
 
 	private operationKind(): 'create' | 'update' {
 		return this.editorModeSignal() === 'create' ? 'create' : 'update';
+	}
+
+	private reconcileStaleSelection(): void {
+		this.paymentEditorSession.beginCreate();
+		this.resetNewPaymentForm();
+		this.store.dispatch(new SetActiveAccountingOperation(undefined));
+	}
+
+	private resetNewPaymentForm(): void {
+		this.loadedOperationId = undefined;
+		this.initializeForm(this.defaultValue());
+		this.submissionStateSignal.set({ status: 'idle' });
+	}
+
+	private initializeForm(value: PaymentEditorValue): void {
+		this.paymentForm.reset(value);
+		this.captureBaseline();
+	}
+
+	private captureBaseline(): void {
+		this.baselineSignal.set(this.normalizeEditableValue(this.paymentForm.getRawValue()));
+	}
+
+	private baselineValue(): PaymentEditorValue {
+		const baseline = this.baselineSignal();
+		return {
+			...baseline,
+			amount: typeof baseline.amount === 'number' ? baseline.amount : Number(baseline.amount),
+		};
+	}
+
+	private normalizeEditableValue(value: Partial<PaymentEditorValue>): NormalizedPaymentEditorValue {
+		const amount = Number(value.amount);
+		return {
+			amount: Number.isFinite(amount) ? amount : String(value.amount ?? ''),
+			categoryId: this.stableId(value.categoryId),
+			comment: value.comment?.trim() ?? '',
+			contractorId: this.stableId(value.contractorId),
+			direction: value.direction ?? PaymentOperationTypes.Expense,
+			operationDate: this.normalizedDate(value.operationDate),
+		};
+	}
+
+	private stableId(value: unknown): string {
+		if (value === null || value === undefined || value === '' || value === Guid.EMPTY) {
+			return '';
+		}
+
+		if (value instanceof Guid) {
+			return value.equals(Guid.EMPTY) ? '' : value.toString().toLowerCase();
+		}
+
+		if (typeof value === 'object') {
+			const identity = value as { id?: unknown; key?: unknown };
+			return this.stableId(identity.key ?? identity.id);
+		}
+
+		if (typeof value !== 'string' && typeof value !== 'number') {
+			return '';
+		}
+
+		const normalizedValue = `${value}`.toLowerCase();
+		return normalizedValue === Guid.EMPTY.toString() ? '' : normalizedValue;
+	}
+
+	private normalizedDate(value: string | Date | undefined): string {
+		if (value instanceof Date) {
+			return this.asDateInput(value);
+		}
+
+		return value?.slice(0, 10) ?? '';
+	}
+
+	private areEquivalent(current: NormalizedPaymentEditorValue, baseline: NormalizedPaymentEditorValue): boolean {
+		return (
+			current.amount === baseline.amount &&
+			current.categoryId === baseline.categoryId &&
+			current.comment === baseline.comment &&
+			current.contractorId === baseline.contractorId &&
+			current.direction === baseline.direction &&
+			current.operationDate === baseline.operationDate
+		);
 	}
 
 	private isCurrentExecution(executionToken: number): boolean {

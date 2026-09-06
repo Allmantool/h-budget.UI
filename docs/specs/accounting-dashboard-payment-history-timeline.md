@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented — browser acceptance not run
+Complete
 
 ## Problem and Goal
 
@@ -34,7 +34,7 @@ or unrelated existing worktree changes.
 - **CONFIRMED:** `PaymentRepresentationsMappingProfile.getRepresentationView()`
   invokes `handbookPayload.nameNodes.parseToTreeAsString()`.
 - **CONFIRMED:** category and contractor HTTP DTOs declare `nameNodes:
-  string[]`; their data profiles and NGXS state preserve the array as plain
+string[]`; their data profiles and NGXS state preserve the array as plain
   serializable data.
 - **CONFIRMED:** `parseToTreeAsString()` is a global `Array.prototype`
   augmentation in `src/domain/extensions/handbookExtensions.ts`. Production
@@ -60,6 +60,15 @@ or unrelated existing worktree changes.
 - **REQ-003:** Existing behavior remains intact. **AC-003:** Missing handbook
   entries retain the established `N/A` label behavior and no date, envelope, or
   account-selection behavior changes.
+- **REQ-004:** An explicitly selected payment account survives a full browser
+  reload of the operations workspace. **AC-004:** The operations route carries
+  the selected account identifier, reload obtains that account through the
+  existing payment-account API, and the dashboard reconstructs the same
+  account, history, and summary without a manual re-selection.
+- **REQ-005:** History enrichment waits for the category and contractor
+  handbooks that it needs. **AC-005:** A reloaded operations route renders the
+  projected category and contractor labels, not transient `N/A` placeholders,
+  without a timer-based retry.
 
 ## Constraints
 
@@ -85,11 +94,11 @@ suite, production build, and diff review as executable.
 
 ## Requirement Traceability
 
-| Requirement | Acceptance Criteria | Implementation | Test / Evidence | Status |
-| --- | --- | --- | --- | --- |
-| REQ-001 | AC-001 | Direct `string[]` formatting in the mapper and selectors | Focused mapper suite: 6/6 PASS | PASS |
-| REQ-002 | AC-002 | Representation mapper keeps the mapped history entry | Exact live-fixture regression and full Karma suite: 283/283 PASS | PASS |
-| REQ-003 | AC-003 | Existing `N/A` behavior retained | Existing missing-handbook tests and diff review | PASS |
+| Requirement | Acceptance Criteria | Implementation                                           | Test / Evidence                                                  | Status |
+| ----------- | ------------------- | -------------------------------------------------------- | ---------------------------------------------------------------- | ------ |
+| REQ-001     | AC-001              | Direct `string[]` formatting in the mapper and selectors | Focused mapper suite: 6/6 PASS                                   | PASS   |
+| REQ-002     | AC-002              | Representation mapper keeps the mapped history entry     | Exact live-fixture regression and full Karma suite: 288/288 PASS | PASS   |
+| REQ-003     | AC-003              | Existing `N/A` behavior retained                         | Existing missing-handbook tests and diff review                  | PASS   |
 
 ## Implementation Progress
 
@@ -104,9 +113,7 @@ suite, production build, and diff review as executable.
 
 ### Remaining
 
-- Browser acceptance against the local development server could not run because
-  the available in-app browser cannot reach the host-local `vm2.linux:4200`
-  server. Account switching and browser refresh remain unexecuted.
+- None for the scoped timeline and account-reconstruction behavior.
 
 ### Decisions and Requirement Changes
 
@@ -123,7 +130,37 @@ suite, production build, and diff review as executable.
   restored.
 - `npm run typecheck` — PASS.
 - `npm run format:check` — PASS (existing ignored `semicolon` option warnings).
-- `npm run lint` — PASS with 0 errors and 344 pre-existing warnings.
-- `npm run test:ci` — PASS, 283/283 tests.
+- `npm run lint` — PASS with 0 errors and 347 pre-existing warnings.
+- `npm run test:ci` — PASS, 288/288 tests.
 - `npm run build:prod` — PASS; existing initial bundle budget warning remains.
 - `git diff --check` — PASS.
+
+## Release Verification Addendum
+
+### Browser Acceptance Traceability
+
+| Scenario                                            | Evidence                                                                                                                                                                                     | Status                             |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| Initial load of the deterministic Priorbank fixture | Account `5ed2cb00-6579-435a-a2b4-725c80ac1431` rendered balance `22`, one operation, expense `23`, and net `-23`. | PASS |
+| Browser console | No errors, including no `parseToTreeAsString is not a function` mapper exception. Angular emitted non-failing `NG0956` identity-tracking performance warnings. | PASS with warning |
+| Full refresh | The route retained the selected account ID; the dashboard reconstructed Priorbank, balance `22`, one operation, and the projected row. | PASS |
+| Refreshed handbook labels | The refreshed row displayed `Parties: one` and `category: two: expense`, not `N/A`. | PASS |
+| Account switch, switch back, second refresh | Account B showed balance `0` and zero operations; returning to A restored the exact projected row, and a second refresh retained it. | PASS |
+
+### Browser Environment Resolution
+
+The temporary local server was started with `nx serve` bound to `0.0.0.0:4201`
+with TLS disabled specifically for the browser acceptance host; no tracked runtime
+configuration changed. The SPA read through configured gateway
+`https://vm2.linux:7398/gateway`; the acceptance account identifier in the
+operations route reconstructed the account through that same gateway.
+
+### Final Release Validation
+
+- `npm run typecheck` — PASS.
+- `npm run format:check` — PASS (the existing ignored `semicolon` option
+  warnings remain).
+- `npm run lint` — PASS, 0 errors and 347 existing warnings.
+- `npm run test:ci` — PASS, 288/288 tests.
+- `npm run build:prod` — PASS; the existing initial bundle budget warning
+  remains (2.38 MB against a 2 MB warning threshold).

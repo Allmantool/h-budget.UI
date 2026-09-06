@@ -12,11 +12,15 @@ import _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
 import { isFuture, isPast } from 'date-fns';
-import { Observable } from 'rxjs';
+import { Observable, take } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
 import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
-import { SetActivePaymentAccount } from '../../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
+import {
+	AddPaymentAccount,
+	SetActivePaymentAccount,
+} from '../../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
+import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
 import { getAccountPayments } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import {
 	getActivePaymentAccount,
@@ -76,6 +80,7 @@ export class PaymentsDashboardComponent implements OnInit {
 		private readonly route: ActivatedRoute,
 		private readonly router: Router,
 		private readonly store: Store,
+		private readonly paymentAccountsProvider: DefaultPaymentAccountsProvider,
 		private readonly accountsTransferService: CrossAccountsTransferService,
 		private readonly paymentEditorLeaveService: PaymentEditorLeaveService,
 		public readonly transferProjectionSynchronizationService: TransferProjectionSynchronizationService
@@ -121,8 +126,30 @@ export class PaymentsDashboardComponent implements OnInit {
 	public ngOnInit(): void {
 		void this.paymentCommandExecutor?.recoverPendingCommands();
 		if (_.isNil(this.store.selectSnapshot(getActivePaymentAccount))) {
-			void this.navigateToPaymentAccountsAsync();
+			this.restoreActivePaymentAccountFromRoute();
 		}
+	}
+
+	private restoreActivePaymentAccountFromRoute(): void {
+		const paymentAccountId = this.route.snapshot.queryParamMap.get('paymentAccountId');
+
+		if (_.isNil(paymentAccountId)) {
+			void this.navigateToPaymentAccountsAsync();
+			return;
+		}
+
+		this.paymentAccountsProvider
+			.getById(paymentAccountId)
+			.pipe(take(1))
+			.subscribe({
+				next: paymentAccount => {
+					this.store.dispatch([
+						new AddPaymentAccount(paymentAccount),
+						new SetActivePaymentAccount(paymentAccountId),
+					]);
+				},
+				error: () => void this.navigateToPaymentAccountsAsync(),
+			});
 	}
 
 	public async navigateToPaymentAccountsAsync(): Promise<void> {

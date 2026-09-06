@@ -8,18 +8,78 @@
 			</p>
 		</div>
 
-		<div class="payments-history__stats">
-			<div class="payments-history__stat">
-				<strong>{{ recordsCount }}</strong>
-				<span>records</span>
+		<div class="payments-history__header-actions">
+			<div class="payments-history__stats">
+				<div class="payments-history__stat">
+					<strong>{{ recordsCount }}</strong>
+					<span>records</span>
+				</div>
+				<div class="payments-history__stat">
+					<strong>{{ futureRecordsCount }}</strong>
+					<span>scheduled</span>
+				</div>
 			</div>
-			<div class="payments-history__stat">
-				<strong>{{ futureRecordsCount }}</strong>
-				<span>scheduled</span>
-			</div>
+			<button
+				type="button"
+				mat-flat-button
+				color="primary"
+				(click)="addPayment()"
+			>
+				<mat-icon>add</mat-icon>
+				Add payment
+			</button>
 		</div>
 	</div>
 
+	@if (recentMutation(); as recentMutation) {
+	<p
+		class="payments-history__live-status"
+		role="status"
+		aria-live="polite"
+	>
+		Payment {{ recentMutation.kind === 'created' ? 'added to' : 'updated in' }} history.
+	</p>
+	} @if (historyLoadingSignal() && recordsCount === 0) {
+	<p
+		class="payments-history__state"
+		role="status"
+		aria-live="polite"
+	>
+		Loading payments…
+	</p>
+	} @else if (historyLoadErrorSignal() && recordsCount === 0) {
+	<div
+		class="payments-history__state payments-history__state--error"
+		role="alert"
+	>
+		<p>Payments could not be loaded.</p>
+		<button
+			type="button"
+			mat-stroked-button
+			(click)="retryHistory()"
+		>
+			Retry
+		</button>
+	</div>
+	} @else if (recordsCount === 0) {
+	<div class="payments-history__state">
+		<p>No payments yet.</p>
+		<button
+			type="button"
+			mat-stroked-button
+			(click)="addPayment()"
+		>
+			Add payment
+		</button>
+	</div>
+	} @else { @if (historyLoadErrorSignal()) {
+	<p
+		class="payments-history__state payments-history__state--error"
+		role="alert"
+	>
+		Payments could not be refreshed. Showing the most recently loaded history.
+	</p>
+	}
 	<div class="payments-history__table">
 		<mat-table
 			#table
@@ -38,7 +98,15 @@
 					mat-cell
 					*matCellDef="let element"
 				>
-					{{ element.operationDate | date }}
+					{{ element.operationDate | date }} @if (recentMutationFor(element); as recentMutation) {
+					<span
+						class="payments-history__mutation-badge"
+						[class.payments-history__mutation-badge--created]="recentMutation.kind === 'created'"
+						[class.payments-history__mutation-badge--updated]="recentMutation.kind === 'updated'"
+					>
+						{{ recentMutation.kind === 'created' ? 'Added' : 'Updated' }}
+					</span>
+					}
 				</td>
 			</ng-container>
 
@@ -164,13 +232,16 @@
 				class="row payments-history__row"
 				mat-row
 				[attr.data-operation-key]="row.key.toString()"
-				tabindex="-1"
+				[attr.tabindex]="isRowTabStop(row) ? 0 : -1"
+				[attr.aria-selected]="isSelected(row)"
 				(click)="selectRow(row)"
 				(keydown.enter)="selectRow(row)"
 				(keydown.space)="selectRow(row); $event.preventDefault()"
 				[attr.aria-label]="'Edit payment on ' + (row.operationDate | date)"
-				[class.row-is-clicked]="clickedRowGuids.has(row?.key)"
+				[class.payments-history__row--selected]="isSelected(row)"
 				[class.future-payment]="isFuturePayment(row)"
+				[class.payments-history__row--recent-created]="recentMutationFor(row)?.kind === 'created'"
+				[class.payments-history__row--recent-updated]="recentMutationFor(row)?.kind === 'updated'"
 				[class.payments-history__row--related-target]="highlightedRelatedOperationKey === row.key"
 				*matRowDef="let row; columns: displayedColumns;"
 			></tr>
@@ -183,7 +254,11 @@
 			type="button"
 			class="payments-history__mobile-record"
 			(click)="selectRow(record)"
-			[attr.aria-label]="'Edit payment on ' + (record.operationDate | date)"
+			[attr.aria-label]="(isSelected(record) ? 'Selected. ' : '') + 'Edit payment on ' + (record.operationDate | date)"
+			[attr.aria-pressed]="isSelected(record)"
+			[class.payments-history__mobile-record--selected]="isSelected(record)"
+			[class.payments-history__mobile-record--recent-created]="recentMutationFor(record)?.kind === 'created'"
+			[class.payments-history__mobile-record--recent-updated]="recentMutationFor(record)?.kind === 'updated'"
 		>
 			<span>{{ record.operationDate | date: 'mediumDate' }}</span>
 			<strong
@@ -193,8 +268,14 @@
 				{{ (record.income || record.expense) | accountingCurrencyFormat | currency: ' ' }}
 			</strong>
 			<span>{{ record.category || 'Uncategorized' }}</span>
-			<span>{{ record.contractor }}</span>
+			<span class="payments-history__mobile-contractor">{{ record.contractor }}</span>
+			@if (recentMutationFor(record); as recentMutation) {
+			<span class="payments-history__mutation-badge">
+				{{ recentMutation.kind === 'created' ? 'Added' : 'Updated' }}
+			</span>
+			}
 		</button>
 		}
 	</div>
+	}
 </section>

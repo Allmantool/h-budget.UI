@@ -32,21 +32,13 @@
 	>
 		{{ submission.message }}
 	</p>
-	} @else if (submission.status === 'accepted' || submission.status === 'waitingForProjection') {
+	} @else if (submission.status === 'waitingForProjection') {
 	<p
 		class="payment-editor__status"
 		role="status"
 		aria-live="polite"
 	>
 		Payment accepted. Updating account history…
-	</p>
-	} @else if (submission.status === 'projectionDelayed') {
-	<p
-		class="payment-editor__status"
-		role="status"
-		aria-live="polite"
-	>
-		Payment was accepted, but account history has not updated yet.
 	</p>
 	} @else if (submission.status === 'succeeded') {
 	<p
@@ -164,7 +156,8 @@
 				(click)="cancel()"
 				[disabled]="isSubmittingSignal()"
 			>
-				Cancel
+				{{ submissionStateSignal().status === 'uncertain' ? 'Keep processing in background' : editorModeSignal()
+				=== 'edit' ? 'Revert changes' : 'Reset form' }}
 			</button>
 			<button
 				type="submit"

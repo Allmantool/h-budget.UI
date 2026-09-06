@@ -36,6 +36,14 @@
 	gap: 0.75rem;
 }
 
+.payments-history__header-actions {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 0.75rem;
+}
+
 .payments-history__stat {
 	display: grid;
 	gap: 0.2rem;
@@ -50,10 +58,42 @@
 }
 
 .payments-history__table {
+	overflow-x: auto;
 	padding: 0.75rem;
 	border-radius: 22px;
 	border: 1px solid rgba(15, 23, 42, 0.08);
 	background: rgba(255, 255, 255, 0.9);
+}
+
+.payments-history__state {
+	display: grid;
+	justify-items: start;
+	gap: 0.75rem;
+	margin: 0;
+	padding: 1rem;
+	border: 1px solid rgba(14, 116, 144, 0.24);
+	border-radius: 1rem;
+	background: rgba(236, 254, 255, 0.72);
+}
+
+.payments-history__state p,
+.payments-history__live-status {
+	margin: 0;
+}
+
+.payments-history__state--error {
+	border-color: rgba(185, 28, 28, 0.3);
+	background: rgba(254, 242, 242, 0.9);
+	color: #991b1b;
+}
+
+.payments-history__live-status {
+	position: absolute;
+	inline-size: 1px;
+	block-size: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
 }
 
 .payments-history__mobile-list {
@@ -74,7 +114,7 @@
 	text-align: left;
 }
 
-.payments-history__mobile-record span:last-child {
+.payments-history__mobile-contractor {
 	grid-column: 1 / -1;
 	color: #617089;
 }
@@ -84,10 +124,29 @@
 	outline-offset: 0.2rem;
 }
 
-.row-is-clicked {
-	font-weight: bold;
-	background-color: rgba(14, 116, 144, 0.12);
-	opacity: 100% !important;
+.payments-history__mobile-record--selected {
+	outline: 2px solid #0e7490;
+	outline-offset: -2px;
+	font-weight: 700;
+}
+
+.payments-history__row {
+	outline-offset: -2px;
+	cursor: pointer;
+}
+
+.payments-history__row:focus-visible,
+.payments-history__row--selected {
+	outline: 2px solid #0e7490;
+	font-weight: 700;
+}
+
+.payments-history__row--recent-created,
+.payments-history__row--recent-updated,
+.payments-history__mobile-record--recent-created,
+.payments-history__mobile-record--recent-updated {
+	box-shadow: inset 4px 0 0 #0e7490;
+	background: rgba(236, 254, 255, 0.72);
 }
 
 .future-payment {
@@ -99,6 +158,7 @@
 	overflow-y: auto;
 	max-height: 70em;
 	min-height: 48em;
+	min-width: 122em;
 }
 
 .mat-mdc-cell {
@@ -147,6 +207,22 @@
 
 .payments-history__amount--balance {
 	color: #10233c;
+}
+
+.payments-history__mutation-badge {
+	display: inline-flex;
+	margin-inline-start: 0.5rem;
+	padding: 0.12rem 0.45rem;
+	border: 1px solid currentColor;
+	border-radius: 999px;
+	color: #0e7490;
+	font-size: 0.75rem;
+	font-weight: 700;
+	line-height: 1.2;
+}
+
+.payments-history__mutation-badge--updated {
+	color: #7c3f00;
 }
 
 .payments-history__transfer-comment {
@@ -211,6 +287,10 @@
 	.payments-history__header {
 		flex-direction: column;
 		align-items: start;
+	}
+
+	.payments-history__header-actions {
+		justify-content: flex-start;
 	}
 
 	.payments-history__table {

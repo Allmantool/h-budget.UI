@@ -33,6 +33,7 @@ import { IPaymentRepresentationModel } from '../../../presentation/accounting/mo
 import { AccountsService } from '../../../presentation/accounting/services/accounts.service';
 import { HandbooksService } from '../../../presentation/accounting/services/handbooks.service';
 import { PaymentEditorLeaveService } from '../../../presentation/accounting/services/payment-editor-leave.service';
+import { PaymentEditorSessionService } from '../../../presentation/accounting/services/payment-editor-session.service';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
 import { RelatedTransferNavigationService } from '../../../presentation/accounting/services/related-transfer-navigation.service';
 import { TransferProjectionSynchronizationService } from '../../../presentation/accounting/services/transfer-projection-synchronization.service';
@@ -175,6 +176,7 @@ describe('payments history component', () => {
 					useValue: sseServiceSpy,
 				},
 				{ provide: PaymentEditorLeaveService, useValue: { canLeave: () => Promise.resolve(true) } },
+				PaymentEditorSessionService,
 			],
 		}).compileComponents();
 
@@ -221,8 +223,8 @@ describe('payments history component', () => {
 		expect(getHeaderTexts()).toEqual(['Date', 'Contractor', 'Category', 'Income', 'Expense', 'Balance', 'Comment']);
 	});
 
-	it('does not duplicate the editor create action above the history table', () => {
-		expect(getNativeElement().textContent).not.toContain('New payment');
+	it('renders an always-available Add payment action above the history table', () => {
+		expect(getNativeElement().textContent).toContain('Add payment');
 	});
 
 	it('should render representative history rows and summary counts', () => {
@@ -270,7 +272,8 @@ describe('payments history component', () => {
 
 		expect(tableOptions.selectedRecordGuid.toString()).toBe(expenseRecordId.toString());
 		expect(Array.from(component.clickedRowGuids).some(recordGuid => recordGuid.equals(expenseRecordId))).toBe(true);
-		expect(getRenderedRows()[1].classList).toContain('row-is-clicked');
+		expect(getRenderedRows()[1].classList).toContain('payments-history__row--selected');
+		expect(getRenderedRows()[1].getAttribute('aria-selected')).toBe('true');
 	});
 
 	it('should preserve repeated row selection behavior', async () => {
@@ -288,6 +291,43 @@ describe('payments history component', () => {
 		expect(Array.from(component.clickedRowGuids).map(recordGuid => recordGuid.toString())).toEqual([
 			expenseRecordId.toString(),
 		]);
+	});
+
+	it('returns the editor to create mode and clears selection when Add payment is used from an edit', async () => {
+		const editorSession = TestBed.inject(PaymentEditorSessionService);
+		store.dispatch(new SetActiveAccountingOperation(incomeRecordId));
+		editorSession.beginEdit();
+		fixture.detectChanges();
+
+		const addPaymentButton = Array.from(getNativeElement().querySelectorAll<HTMLButtonElement>('button')).find(
+			button => button.textContent?.includes('Add payment')
+		);
+		addPaymentButton?.click();
+		await fixture.whenStable();
+		fixture.detectChanges();
+
+		expect(editorSession.editorModeSignal()).toBe('create');
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid).toBeUndefined();
+	});
+
+	it('keeps selected and recently updated row semantics together', () => {
+		const editorSession = TestBed.inject(PaymentEditorSessionService);
+		store.dispatch(new SetActiveAccountingOperation(incomeRecordId));
+		editorSession.queueRecentMutation(incomeRecordId, 'updated');
+		editorSession.confirmRecentMutationIsVisible([incomeRecordId]);
+		fixture.detectChanges();
+
+		const selectedRow = getRenderedRows()[0];
+		expect(selectedRow.classList).toContain('payments-history__row--selected');
+		expect(selectedRow.classList).toContain('payments-history__row--recent-updated');
+		expect(selectedRow.textContent).toContain('Updated');
+	});
+
+	it('uses one roving keyboard tab stop for history row activation', () => {
+		const rows = getRenderedRows();
+
+		expect(rows[0].getAttribute('tabindex')).toBe('0');
+		expect(rows[1].getAttribute('tabindex')).toBe('-1');
 	});
 
 	it('should refresh history and accounts after a matching SSE notification', () => {

@@ -17,6 +17,7 @@ import { HandbooksService } from './services/handbooks.service';
 import { PaymentAccountDialogService } from './services/payment-account-dialog.service';
 import { PaymentCommandExecutorService } from './services/payment-command-executor.service';
 import { PaymentEditorLeaveService } from './services/payment-editor-leave.service';
+import { PaymentEditorSessionService } from './services/payment-editor-session.service';
 import { PaymentsHistoryService } from './services/payments-history.service';
 import { PendingPaymentCommandRegistryService } from './services/pending-payment-command-registry.service';
 import { RelatedTransferNavigationService } from './services/related-transfer-navigation.service';
@@ -59,6 +60,7 @@ export const accountingRoutes: Routes = [
 			ContractorsDialogService,
 			PaymentAccountDialogService,
 			PaymentEditorLeaveService,
+			PaymentEditorSessionService,
 			CrossAccountsTransferService,
 			RelatedTransferNavigationService,
 			TransferProjectionSynchronizationService,

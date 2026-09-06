@@ -11,17 +11,17 @@ import {
 	OnDestroy,
 	OnInit,
 	Signal,
+	signal,
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
 import { SseService } from 'infrastructure/sse-service';
-
-import * as _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
 import { isFuture } from 'date-fns';
-import { BehaviorSubject, filter, forkJoin, map, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, filter, forkJoin, map, Observable, shareReplay, Subject, switchMap } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
 import { Guid } from 'typescript-guid';
 
@@ -43,6 +43,7 @@ import { PaymentsHistoryService } from '../../services/payments-history.service'
 import { RelatedTransferNavigationService } from '../../services/related-transfer-navigation.service';
 import { TransferProjectionSynchronizationService } from '../../services/transfer-projection-synchronization.service';
 import { PaymentEditorLeaveService } from '../../services/payment-editor-leave.service';
+import { PaymentEditorSessionService, RecentPaymentMutation } from '../../services/payment-editor-session.service';
 
 @Component({
 	selector: 'payments-history',
@@ -56,6 +57,7 @@ import { PaymentEditorLeaveService } from '../../services/payment-editor-leave.s
 		DatePipe,
 		DecimalPipe,
 		MatButtonModule,
+		MatIconModule,
 		MatTableModule,
 		AccountingCurrencyFormatPipe,
 	],
@@ -66,6 +68,7 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	private readonly relatedTransferNavigationRequests$ = new Subject<IPaymentRepresentationModel>();
 	private relatedOperationHighlightTimeout?: ReturnType<typeof setTimeout>;
 	private highlightedRelatedOperationElement?: HTMLElement;
+	private readonly handbooksReady$: Observable<void>;
 	private isProjectionRefreshActive = false;
 	private hasQueuedProjectionRefresh = false;
 	private isDestroyed = false;
@@ -102,6 +105,9 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 
 	public clickedRowGuids = new Set<Guid>();
 	public highlightedRelatedOperationKey?: Guid;
+	public readonly historyLoadingSignal = signal(true);
+	public readonly historyLoadErrorSignal = signal(false);
+	public readonly recentMutation = () => this.paymentEditorSession.recentMutationSignal();
 
 	constructor(
 		private readonly handbooksService: HandbooksService,
@@ -112,15 +118,20 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		private readonly transferProjectionSynchronizationService: TransferProjectionSynchronizationService,
 		public readonly relatedTransferNavigationService: RelatedTransferNavigationService,
 		private readonly changeDetectorRef: ChangeDetectorRef,
-		private readonly paymentEditorLeaveService: PaymentEditorLeaveService
+		private readonly paymentEditorLeaveService: PaymentEditorLeaveService,
+		private readonly paymentEditorSession: PaymentEditorSessionService
 	) {
+		this.handbooksReady$ = this.handbooksService
+			.setupHandbooksStore()
+			.pipe(shareReplay({ bufferSize: 1, refCount: false }));
+
 		afterEveryRender({
 			read: () => this.resolvePendingRelatedOperation(),
 		});
 	}
 
 	public ngOnInit(): void {
-		this.handbooksService.setupHandbooksStore();
+		this.handbooksReady$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
 
 		this.accountingTableOptions$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(options => {
 			this.clickedRowGuids.clear();
@@ -153,15 +164,22 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 			.pipe(
 				takeUntilDestroyed(this.destroyRef),
 				exhaustMap(() =>
-					forkJoin({
-						payments: this.paymentsHistoryService.refreshPaymentsHistory(
-							this.activePaymentAccountIdSignal()
-						),
-						balance: this.accountsService.refreshAccounts(this.activePaymentAccountIdSignal()),
-					})
+					this.handbooksReady$.pipe(
+						switchMap(() =>
+							forkJoin({
+								payments: this.paymentsHistoryService.refreshPaymentsHistory(
+									this.activePaymentAccountIdSignal()
+								),
+								balance: this.accountsService.refreshAccounts(this.activePaymentAccountIdSignal()),
+							})
+						)
+					)
 				)
 			)
-			.subscribe(payload => this.publishPayments(payload.payments));
+			.subscribe({
+				next: payload => this.publishPayments(payload.payments),
+				error: () => this.showHistoryLoadError(),
+			});
 	}
 
 	ngOnDestroy() {
@@ -180,10 +198,37 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 			return;
 		}
 
+		this.paymentEditorSession.beginEdit();
 		this.store.dispatch(new SetActiveAccountingOperation(record.key));
 	}
 
+	public async addPayment(): Promise<void> {
+		if (!(await this.paymentEditorLeaveService.canLeave())) {
+			return;
+		}
+
+		this.paymentEditorSession.beginCreate();
+		this.store.dispatch(new SetActiveAccountingOperation(undefined));
+	}
+
+	public retryHistory(): void {
+		this.requestProjectionRefresh();
+	}
+
 	public isFuturePayment = (record: IPaymentRepresentationModel): boolean => isFuture(record.operationDate);
+
+	public isSelected(record: IPaymentRepresentationModel): boolean {
+		return this.clickedRowGuids.has(record.key);
+	}
+
+	public isRowTabStop(record: IPaymentRepresentationModel): boolean {
+		return this.isSelected(record) || this.historySummarySignal()[0]?.key.equals(record.key) === true;
+	}
+
+	public recentMutationFor(record: IPaymentRepresentationModel): RecentPaymentMutation | undefined {
+		const recentMutation = this.paymentEditorSession.recentMutationSignal();
+		return recentMutation?.operationId.equals(record.key) ? recentMutation : undefined;
+	}
 
 	public async navigateToRelatedTransfer(record: IPaymentRepresentationModel): Promise<void> {
 		if (!(await this.paymentEditorLeaveService.canLeave())) {
@@ -226,11 +271,16 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		}
 
 		this.isProjectionRefreshActive = true;
+		this.historyLoadingSignal.set(true);
+		this.historyLoadErrorSignal.set(false);
 		this.refreshActiveAccountProjection()
 			.pipe(takeUntilDestroyed(this.destroyRef))
 			.subscribe({
 				next: payments => this.publishPayments(payments),
-				error: () => this.completeProjectionRefresh(),
+				error: () => {
+					this.showHistoryLoadError();
+					this.completeProjectionRefresh();
+				},
 				complete: () => this.completeProjectionRefresh(),
 			});
 	}
@@ -252,10 +302,18 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		const activePaymentAccountId = this.activePaymentAccountIdSignal();
 
 		this.dataSource$.next(displayRecords);
+		this.historyLoadingSignal.set(false);
+		this.historyLoadErrorSignal.set(false);
+		this.paymentEditorSession.confirmRecentMutationIsVisible(displayRecords.map(record => record.key));
 		this.transferProjectionSynchronizationService.completeProjectedOperations(
 			activePaymentAccountId,
 			displayRecords.map(record => record.key)
 		);
+	}
+
+	private showHistoryLoadError(): void {
+		this.historyLoadingSignal.set(false);
+		this.historyLoadErrorSignal.set(true);
 	}
 
 	private withRelatedPaymentAccountNames(records: IPaymentRepresentationModel[]): IPaymentRepresentationModel[] {
