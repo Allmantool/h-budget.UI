@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented — focused browser verification passed; release assessment remains conservative pending end-to-end viewport coverage.
+Implemented — focused datepicker verification passed; release assessment remains conservative pending the complete end-to-end matrix.
 
 ## Problem and goal
 
@@ -20,10 +20,18 @@ The payment editor currently derives create/edit mode solely from the selected N
 - **REQ-PH-CRUD-01:** A user can create Payment B immediately after Payment A projects. **AC:** AC-01, AC-08 to AC-10, AC-30.
 - **REQ-PH-CRUD-02:** Editor mode is explicit and separate from selection. **AC:** AC-02 to AC-07, AC-17 to AC-19.
 - **REQ-PH-CRUD-03:** A created or updated row receives a 2-second, projection-confirmed, non-colour-only marker. **AC:** AC-11 to AC-16.
-- **REQ-PH-CRUD-04:** Unknown outcomes retain their original retry identity and existing session recovery. **AC:** AC-20 to AC-24.
-- **REQ-PH-CRUD-05:** History selection and responsive presentations are accessible and history has clear loading, empty, and read-failure states. **AC:** AC-25 to AC-28.
-- **REQ-PH-CRUD-06:** Unsaved changes are detected by normalized editable values relative to an explicit baseline, not interaction dirtiness. **AC:** AC-31 to AC-39.
-- **REQ-PH-CRUD-07:** Editor title, primary action, and destructive actions consistently derive from explicit editor mode. **AC:** AC-40 to AC-42.
+- **REQ-PH-CRUD-04:** Selection, editor mode, pending commands, and recent mutation feedback remain independent. **AC:** AC-15, AC-23, AC-24.
+- **REQ-PH-CRUD-05:** Unknown outcomes retain their original retry identity and existing session recovery. **AC:** AC-20 to AC-22.
+- **REQ-PH-CRUD-06:** History selection and responsive presentations are accessible and history has clear loading, empty, and read-failure states. **AC:** AC-25 to AC-28.
+- **REQ-PH-CRUD-07:** Unsaved changes are detected by normalized editable values relative to an explicit baseline, not interaction dirtiness. **AC:** AC-31 to AC-39.
+- **REQ-PH-CRUD-08:** Row-to-row navigation is safe and atomic. **AC:** AC-31, AC-32, AC-37.
+- **REQ-PH-CRUD-09:** Editor title, primary action, and destructive actions consistently derive from explicit editor mode. **AC:** AC-40 to AC-42.
+- **REQ-PH-CRUD-10:** Payment date uses the existing Angular Material calendar picker and preserves the date-only API contract. **AC:** AC-43, AC-44, AC-49, AC-51, AC-53, AC-54, AC-56.
+- **REQ-PH-CRUD-11:** Date changes participate in semantic dirty-state comparison. **AC:** AC-45 to AC-48, AC-50.
+- **REQ-PH-CRUD-12:** Date handling preserves the local date-only business value without UTC drift. **AC:** AC-52.
+- **REQ-PH-CRUD-13:** Future payment dates remain valid for scheduled operations. **AC:** AC-49.
+- **Engineering constraint:** Production consistency must not depend on arbitrary sleeps. **AC:** AC-29.
+- **Conditional DateOnly criterion:** A time picker is required only if the domain persists time-of-day. The confirmed `DateOnly` contract makes AC-55 not applicable; AC-56 requires that no fake Time field is exposed.
 
 ## Scope and constraints
 
@@ -48,10 +56,16 @@ Use Jasmine/TestBed component and route-scoped service tests. Fake timers prove 
 | REQ-PH-CRUD-01 | Editor session + CRUD create transition | CRUD/history components | ChromeHeadless focused Karma suite | PASS |
 | REQ-PH-CRUD-02 | Editor session + selection reconciliation | CRUD/history components | ChromeHeadless focused Karma suite | PASS |
 | REQ-PH-CRUD-03 | Mutation feedback service + history states | session/history components | Fake-timer ChromeHeadless tests | PASS |
-| REQ-PH-CRUD-04 | Existing executor/registry plus editor retention | CRUD/executor regression | ChromeHeadless focused Karma suite | PASS |
-| REQ-PH-CRUD-05 | History template/styles | History component | ChromeHeadless focused Karma suite | PASS |
-| REQ-PH-CRUD-06 | CRUD normalized baseline and leave guard | CRUD component | ChromeHeadless focused Karma suite | PASS |
-| REQ-PH-CRUD-07 | Shared explicit session mode in CRUD template | CRUD component | ChromeHeadless focused Karma suite | PASS |
+| REQ-PH-CRUD-04 | Route session + NGXS + executor/registry boundaries | CRUD/history/executor components | Focused ChromeHeadless suite | PASS |
+| REQ-PH-CRUD-05 | Existing executor/registry plus editor retention | CRUD/executor regression | Focused ChromeHeadless suite | PASS |
+| REQ-PH-CRUD-06 | History template/styles | History component | Focused ChromeHeadless suite | PASS |
+| REQ-PH-CRUD-07 | CRUD normalized baseline and leave guard | CRUD component | Focused ChromeHeadless suite | PASS |
+| REQ-PH-CRUD-08 | History leave guard before row selection/Add dispatch | History component | Focused ChromeHeadless suite | PASS |
+| REQ-PH-CRUD-09 | Shared explicit session mode in CRUD template | CRUD component | Focused ChromeHeadless suite | PASS |
+| REQ-PH-CRUD-10 | Material datepicker, local calendar-date form mapping | CRUD component + mapper contract | Focused datepicker + mapper tests | PASS |
+| REQ-PH-CRUD-11 | Normalized local-date baseline | CRUD component | Focused datepicker tests | PASS |
+| REQ-PH-CRUD-12 | Local `Date` construction + mapper `yyyy-MM-dd` serialization | CRUD component + mapper | Focused mapper/component tests | PASS |
+| REQ-PH-CRUD-13 | No picker maximum and valid future form value | CRUD component | Focused datepicker tests | PASS |
 
 ## Implementation progress
 
@@ -72,3 +86,21 @@ Use Jasmine/TestBed component and route-scoped service tests. Fake timers prove 
 - **PASS:** `npm run lint` completes with 0 errors (370 pre-existing warnings).
 - **PASS:** `npm run build:prod` completes successfully. The configured initial-bundle budget emits its existing warning (2.38 MB versus 2 MB).
 - **NOT VERIFIED:** end-to-end account switching and manual viewport checks; no E2E target exists in this workspace.
+
+## Date contract decision
+
+- **CONFIRMED:** The Accounting API accepts `DateOnly OperationDate`; payment command fingerprints canonicalize it as `yyyy-MM-dd`; and the SPA mapper serializes the local `Date` with `date-fns` `yyyy-MM-dd` formatting.
+- **Decision:** Use the installed Angular Material native datepicker with a local `Date` form value. Do not expose a time control because the contract intentionally has no time-of-day field.
+- **Timezone constraint:** Construct and normalize values using the local calendar day. Do not serialize a picker value with `toISOString()`, which can shift the business date in non-UTC timezones.
+
+## Datepicker implementation plan
+
+1. Add a failing component test proving that the Date field exposes the Material calendar trigger.
+2. Change the editor form's `operationDate` from an HTML date string to a local `Date` and use the existing Material native datepicker modules.
+3. Preserve mapper-owned `yyyy-MM-dd` request serialization and add deterministic date baseline tests.
+
+## Datepicker verification
+
+- **RED:** The focused CRUD browser test failed before the implementation because no `mat-datepicker-toggle` existed.
+- **GREEN:** Focused ChromeHeadless Karma tests pass after the picker change, covering the calendar trigger, projected local-date initialization, date-only semantic dirty state, date restore, and future date validity.
+- **Regression evidence:** The existing payment-operation mapper test passes for local date-only parsing and `yyyy-MM-dd` request serialization.

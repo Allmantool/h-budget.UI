@@ -51,6 +51,7 @@ describe('payments history component', () => {
 	let sseServiceSpy: jasmine.SpyObj<SseService>;
 	let notificationsSubject: Subject<AccountNotification>;
 	let transferProjectionSynchronizationService: TransferProjectionSynchronizationService;
+	let canLeaveEditor = true;
 
 	let store: Store;
 
@@ -84,6 +85,7 @@ describe('payments history component', () => {
 	];
 
 	beforeEach(async () => {
+		canLeaveEditor = true;
 		contractorsProviderSpy = jasmine.createSpyObj<DefaultContractorsProvider>('contractorsProvider', {
 			getContractors: of([
 				{
@@ -175,7 +177,7 @@ describe('payments history component', () => {
 					provide: SseService,
 					useValue: sseServiceSpy,
 				},
-				{ provide: PaymentEditorLeaveService, useValue: { canLeave: () => Promise.resolve(true) } },
+				{ provide: PaymentEditorLeaveService, useValue: { canLeave: () => Promise.resolve(canLeaveEditor) } },
 				PaymentEditorSessionService,
 			],
 		}).compileComponents();
@@ -255,6 +257,41 @@ describe('payments history component', () => {
 		expect(getRenderedRows().length).toBe(0);
 	});
 
+	it('renders loading, empty, and read-error states without confusing an error for an empty history', () => {
+		component.dataSource$.next([]);
+		component.historyLoadingSignal.set(true);
+		component.historyLoadErrorSignal.set(false);
+		fixture.detectChanges();
+		expect(getNativeElement().textContent).toContain('Loading payments…');
+		expect(getNativeElement().textContent).not.toContain('No payments yet.');
+
+		component.historyLoadingSignal.set(false);
+		fixture.detectChanges();
+		expect(getNativeElement().textContent).toContain('No payments yet.');
+		expect(getNativeElement().textContent).toContain('Add payment');
+
+		component.historyLoadErrorSignal.set(true);
+		fixture.detectChanges();
+		expect(getNativeElement().textContent).toContain('Payments could not be loaded.');
+		expect(getNativeElement().textContent).toContain('Retry');
+	});
+
+	it('retries a failed history read through the existing projection refresh action', () => {
+		paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.reset();
+		accountsServiceSpy.refreshAccounts.calls.reset();
+		component.historyLoadErrorSignal.set(true);
+
+		component.retryHistory();
+
+		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(1);
+		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.mostRecent().args).toEqual([
+			activePaymentAccountId,
+		]);
+		expect(accountsServiceSpy.refreshAccounts.calls.count()).toBe(1);
+		expect(accountsServiceSpy.refreshAccounts.calls.mostRecent().args).toEqual([activePaymentAccountId]);
+		expect(component.historyLoadErrorSignal()).toBeFalse();
+	});
+
 	it('should initialize selected row state from NGXS table options', () => {
 		store.dispatch(new SetActiveAccountingOperation(incomeRecordId));
 		fixture.detectChanges();
@@ -308,6 +345,20 @@ describe('payments history component', () => {
 
 		expect(editorSession.editorModeSignal()).toBe('create');
 		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid).toBeUndefined();
+	});
+
+	it('keeps a changed editor intact when the shared leave guard rejects Add payment', async () => {
+		const editorSession = TestBed.inject(PaymentEditorSessionService);
+		store.dispatch(new SetActiveAccountingOperation(incomeRecordId));
+		editorSession.beginEdit();
+		canLeaveEditor = false;
+
+		await component.addPayment();
+
+		expect(editorSession.editorModeSignal()).toBe('edit');
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid.toString()).toBe(
+			incomeRecordId.toString()
+		);
 	});
 
 	it('keeps selected and recently updated row semantics together', () => {

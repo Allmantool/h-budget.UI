@@ -98,4 +98,31 @@ describe('payment-operations-mapping.profile tests', () => {
 		expect(request.comment).toBe('test');
 		expect(request.operationDate).toBe('2024-02-10');
 	});
+
+	it('preserves local DateOnly calendar values without converting them through UTC', () => {
+		const dates = [
+			[new Date(2024, 0, 1, 23, 59), '2024-01-01'],
+			[new Date(2024, 2, 31, 23, 59), '2024-03-31'],
+			[new Date(2024, 5, 15, 23, 59), '2024-06-15'],
+			[new Date(2024, 11, 31, 23, 59), '2024-12-31'],
+		] as const;
+
+		const requests = mapper.map(
+			PaymentOperationsMappingProfile.DomainToPaymentOperationSaveRequest,
+			dates.map(
+				([operationDate]) =>
+					({
+						key: Guid.create(),
+						contractorId: Guid.EMPTY,
+						categoryId: Guid.create(),
+						paymentAccountId: Guid.create(),
+						comment: '',
+						amount: 1,
+						operationDate,
+					}) as IPaymentOperationModel
+			)
+		);
+
+		expect(requests.map(request => request.operationDate)).toEqual(dates.map(([, expected]) => expected));
+	});
 });
