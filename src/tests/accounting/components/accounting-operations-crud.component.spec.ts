@@ -1,90 +1,33 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { NgxsModule, Store } from '@ngxs/store';
-import { firstValueFrom, of } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
-import { SelectDropdownOptions } from '../../../app/modules/shared/models/select-dropdown-options';
 import { ngxsConfig } from '../../../app/modules/shared/store/ngxs.config';
 import { AccountingOperationsTableState } from '../../../app/modules/shared/store/states/accounting/accounting-operations-table.state';
 import { SetActiveAccountingOperation } from '../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
 import { SetActivePaymentAccount } from '../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
 import { SetInitialPaymentOperations } from '../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
+import { SetInitialCategories } from '../../../app/modules/shared/store/states/handbooks/actions/category.actions';
 import { PaymentAccountState } from '../../../app/modules/shared/store/states/accounting/payment-account.state';
 import { AccountingOperationsState } from '../../../app/modules/shared/store/states/accounting/payment-operations.state';
-import { getAccountPayments } from '../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
-import { getSelectedRecordGuid } from '../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
-import { SetInitialCategories } from '../../../app/modules/shared/store/states/handbooks/actions/category.actions';
-import { SetInitialContractors } from '../../../app/modules/shared/store/states/handbooks/actions/contractor.actions';
+import { getAccountingTableOptions } from '../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { CategoriesState } from '../../../app/modules/shared/store/states/handbooks/categories.state';
 import { ContractorsState } from '../../../app/modules/shared/store/states/handbooks/contractors.state';
-import { Result } from '../../../core/result';
-import { CrossAccountsTransferProvider } from '../../../data/providers/accounting/cross-accounts-transfer.provider';
-import { ICategoryModel } from '../../../domain/models/accounting/category.model';
-import { IContractorModel } from '../../../domain/models/accounting/contractor.model.';
-import { PaymentOperationTypes } from '../../../domain/models/accounting/operation-types';
-import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
-import { OperationTypes } from '../../../domain/types/operation.types';
 import { AccountingOperationsCrudComponent } from '../../../presentation/accounting/components/accounting-operations-crud/accounting-operations-crud.component';
-import { IPaymentRepresentationModel } from '../../../presentation/accounting/models/operation-record';
-import { AccountingOperationsService } from '../../../presentation/accounting/services/accounting-operations.service';
 import { CategoriesDialogService } from '../../../presentation/accounting/services/categories-dialog.service';
 import { ContractorsDialogService } from '../../../presentation/accounting/services/contractors-dialog.service';
-import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
+import { PaymentCommandExecutorService } from '../../../presentation/accounting/services/payment-command-executor.service';
+import { PaymentEditorLeaveService } from '../../../presentation/accounting/services/payment-editor-leave.service';
+import { PaymentEditorSessionService } from '../../../presentation/accounting/services/payment-editor-session.service';
+import { OperationTypes } from '../../../domain/types/operation.types';
+import { PaymentOperationTypes } from '../../../domain/models/accounting/operation-types';
+import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 
 describe('accounting operations CRUD component', () => {
-	let fixture: ComponentFixture<AccountingOperationsCrudComponent>;
-	let component: AccountingOperationsCrudComponent;
-	let store: Store;
-
-	let accountingOperationsServiceSpy: jasmine.SpyObj<AccountingOperationsService>;
-	let categoriesDialogServiceSpy: jasmine.SpyObj<CategoriesDialogService>;
-	let contractorsDialogServiceSpy: jasmine.SpyObj<ContractorsDialogService>;
-	let paymentHistoryServiceSpy: jasmine.SpyObj<PaymentsHistoryService>;
-	let crossAccountsTransferProviderSpy: jasmine.SpyObj<CrossAccountsTransferProvider>;
-
-	const paymentAccountId = '24a07833-5cf5-4885-b09d-32c089fac4dd';
-	const operationId = Guid.parse('c596f11b-d44d-425f-8c90-0655c51318ad');
-	const transferOperationId = Guid.parse('5bb1a692-0a2f-45ec-a5df-f44a04c298b5');
-	const expenseCategoryId = Guid.parse('c4d7ed46-dbeb-4633-b29d-5aa7b0735887');
-	const incomeCategoryId = Guid.parse('d8a353e7-0407-44be-a7df-5da70d19f55d');
-	const contractorId = Guid.parse('5128860d-f621-4d16-b612-1978e68b174c');
-	const expenseCategoryName = 'Home: Groceries';
-	const incomeCategoryName = 'Salary: Monthly';
-	const contractorName = 'Acme: Payroll';
-
-	const paymentOperation = createPaymentOperation(operationId, OperationTypes.Payment);
-	const transferOperation = createPaymentOperation(transferOperationId, OperationTypes.Transfer);
-	const historyRecord = createHistoryRecord(operationId, expenseCategoryName, contractorName);
-
-	beforeEach(async () => {
-		TestBed.resetTestingModule();
-
-		accountingOperationsServiceSpy = jasmine.createSpyObj<AccountingOperationsService>(
-			'accountingOperationsService',
-			{
-				updateAsync: Promise.resolve(new Result<boolean>({ isSucceeded: true, payload: true })),
-				addNewAsync: Promise.resolve(new Result<IPaymentRepresentationModel>({ isSucceeded: true })),
-				deleteByIdAsync: Promise.resolve(new Result<boolean>({ isSucceeded: true, payload: true })),
-			}
-		);
-		categoriesDialogServiceSpy = jasmine.createSpyObj<CategoriesDialogService>('categoriesDialogService', [
-			'openCategories',
-		]);
-		contractorsDialogServiceSpy = jasmine.createSpyObj<ContractorsDialogService>('contractorsDialogService', [
-			'openContractors',
-		]);
-		paymentHistoryServiceSpy = jasmine.createSpyObj<PaymentsHistoryService>('paymentHistoryService', {
-			paymentOperationAsHistoryRecord: historyRecord,
-		});
-		crossAccountsTransferProviderSpy = jasmine.createSpyObj<CrossAccountsTransferProvider>(
-			'crossAccountsTransferProvider',
-			{
-				deleteById: of(new Result<Guid>({ isSucceeded: true, payload: transferOperationId })),
-			}
-		);
-
+	it('renders one create primary action and prevents concurrent submission', async () => {
+		const write = jasmine.createSpy('executeCreate').and.returnValue(new Promise(() => undefined));
 		await TestBed.configureTestingModule({
 			imports: [
 				AccountingOperationsCrudComponent,
@@ -102,274 +45,355 @@ describe('accounting operations CRUD component', () => {
 			],
 			providers: [
 				{
-					provide: AccountingOperationsService,
-					useValue: accountingOperationsServiceSpy,
+					provide: PaymentCommandExecutorService,
+					useValue: { executeCreate: write },
 				},
-				{
-					provide: CategoriesDialogService,
-					useValue: categoriesDialogServiceSpy,
-				},
-				{
-					provide: ContractorsDialogService,
-					useValue: contractorsDialogServiceSpy,
-				},
-				{
-					provide: PaymentsHistoryService,
-					useValue: paymentHistoryServiceSpy,
-				},
-				{
-					provide: CrossAccountsTransferProvider,
-					useValue: crossAccountsTransferProviderSpy,
-				},
+				{ provide: CategoriesDialogService, useValue: { openCategories: jasmine.createSpy() } },
+				{ provide: ContractorsDialogService, useValue: { openContractors: jasmine.createSpy() } },
+				{ provide: PaymentEditorLeaveService, useValue: createLeaveService() },
+				PaymentEditorSessionService,
 			],
 		}).compileComponents();
-
-		store = TestBed.inject(Store);
-		await seedStore([paymentOperation], operationId);
-		suppressExistingDisabledControlWarning();
-
-		fixture = TestBed.createComponent(AccountingOperationsCrudComponent);
-		component = fixture.componentInstance;
-		fixture.detectChanges();
-		await fixture.whenStable();
-	});
-
-	afterEach(() => {
-		fixture.destroy();
-		TestBed.resetTestingModule();
-	});
-
-	it('should create the standalone component and compile the real template', () => {
-		expect(component).toBeTruthy();
-		expect(component.crudRecordFg.contains('operationDate')).toBeTrue();
-		expect(component.crudRecordFg.contains('contractor')).toBeTrue();
-		expect(component.crudRecordFg.contains('category')).toBeTrue();
-		expect(component.crudRecordFg.contains('income')).toBeTrue();
-		expect(component.crudRecordFg.contains('expense')).toBeTrue();
-		expect(component.crudRecordFg.contains('comment')).toBeTrue();
-		expect(getNativeText()).toContain('Edit record');
-		expect(getNativeText()).toContain('Contractor:');
-		expect(getNativeText()).toContain('Category:');
-		expect(getButtonTexts()).toContain(jasmine.stringContaining('Save payment operation changes'));
-		expect(getButtonTexts()).toContain(jasmine.stringContaining('Add payment operation'));
-		expect(getButtonTexts()).toContain(jasmine.stringContaining('Delete payment operation'));
-	});
-
-	it('should patch the selected history record into the local disabled form', () => {
-		expect(paymentHistoryServiceSpy.paymentOperationAsHistoryRecord.calls.count()).toBeGreaterThan(0);
-		expect(component.crudRecordFg.get('key')?.value).toBe(historyRecord.key);
-		expect(component.crudRecordFg.get('operationDate')?.value).toBe(historyRecord.operationDate);
-		expect(component.crudRecordFg.get('category')?.value).toBe(historyRecord.category);
-		expect(component.crudRecordFg.get('contractor')?.value).toBe(historyRecord.contractor);
-	});
-
-	it('should keep save and delete disabled when no operation is selected', async () => {
-		await seedStore([], undefined);
-		fixture.detectChanges();
-		await fixture.whenStable();
-
-		expect(component.isNotReadyForSaveSignal()).toBeTrue();
-		expect(getButtonDisabledState('Save payment operation changes')).toBeTrue();
-		expect(getButtonDisabledState('Delete payment operation')).toBeTrue();
-	});
-
-	it('should preserve expense and income amount branch rendering', async () => {
-		setSelectedCategory(expenseCategoryName);
-		fixture.detectChanges();
-
-		expect(component.isExpenseSignal()).toBeTrue();
-		expect(getNativeText()).toContain('Amount(Expense)::');
-
-		setSelectedCategory(incomeCategoryName);
-		fixture.detectChanges();
-		await fixture.whenStable();
-
-		expect(component.isExpenseSignal()).toBeFalse();
-		expect(getNativeText()).toContain('Amount(Income):');
-	});
-
-	it('should invoke update with the selected payment payload when changes are applied', async () => {
-		component.crudRecordFg.patchValue({
-			key: operationId,
-			category: new SelectDropdownOptions({ description: expenseCategoryName, value: expenseCategoryName }),
-			contractor: new SelectDropdownOptions({ description: contractorName, value: contractorName }),
-		});
-
-		await component.applyChangesAsync();
-
-		const updatePayload = accountingOperationsServiceSpy.updateAsync.calls.mostRecent().args[0];
-		expect(updatePayload.key).toBe(operationId);
-		expect(updatePayload.paymentAccountId).toBe(paymentAccountId as unknown as Guid);
-		expect(updatePayload.categoryId).toBe(expenseCategoryId);
-		expect(updatePayload.contractorId).toBe(contractorId);
-		expect(updatePayload.operationType).toBe(OperationTypes.Payment);
-	});
-
-	it('should not add a draft when a draft record already exists', async () => {
-		await seedStore([{ ...paymentOperation, key: Guid.EMPTY }], Guid.EMPTY);
-
-		await component.addRecordAsync();
-
-		expect(accountingOperationsServiceSpy.addNewAsync.calls.count()).toBe(0);
-	});
-
-	it('should add a new draft when no draft record exists', async () => {
-		await component.addRecordAsync();
-
-		expect(accountingOperationsServiceSpy.addNewAsync.calls.count()).toBe(1);
-	});
-
-	it('should discard a local draft without calling the delete service', async () => {
-		await seedStore([{ ...paymentOperation, key: Guid.EMPTY }], Guid.EMPTY);
-		component.crudRecordFg.patchValue({
-			key: Guid.EMPTY,
-			category: new SelectDropdownOptions({ description: expenseCategoryName, value: expenseCategoryName }),
-		});
-
-		await component.deleteRecordAsync();
-
-		expect(accountingOperationsServiceSpy.deleteByIdAsync.calls.count()).toBe(0);
-		expect(store.selectSnapshot(getSelectedRecordGuid)).toBeUndefined();
-		expect(store.selectSnapshot(getAccountPayments)).toEqual([]);
-		expect(component.crudRecordFg.get('key')?.value).toBeNull();
-	});
-
-	it('should delete a transfer through the transfer provider before deleting the operation record', async () => {
-		await seedStore([transferOperation], transferOperationId);
-		component.crudRecordFg.patchValue({
-			key: transferOperationId,
-			category: new SelectDropdownOptions({ description: expenseCategoryName, value: expenseCategoryName }),
-		});
-
-		await component.deleteRecordAsync();
-
-		expect(crossAccountsTransferProviderSpy.deleteById.calls.count()).toBe(1);
-		expect(crossAccountsTransferProviderSpy.deleteById.calls.mostRecent().args).toEqual([
-			paymentAccountId as unknown as Guid,
-			transferOperationId,
-		]);
-		expect(accountingOperationsServiceSpy.deleteByIdAsync.calls.count()).toBe(1);
-		expect(accountingOperationsServiceSpy.deleteByIdAsync.calls.mostRecent().args).toEqual([transferOperationId]);
-	});
-
-	it('should open the existing category and contractor management dialogs', () => {
-		component.addCategory();
-		component.addContractor();
-
-		expect(categoriesDialogServiceSpy.openCategories.calls.count()).toBe(1);
-		expect(contractorsDialogServiceSpy.openContractors.calls.count()).toBe(1);
-	});
-
-	async function seedStore(records: IPaymentOperationModel[], selectedOperationId: Guid | undefined): Promise<void> {
-		await firstValueFrom(store.dispatch(new SetActivePaymentAccount(paymentAccountId)));
-		await firstValueFrom(store.dispatch(new SetInitialPaymentOperations(records)));
-		await firstValueFrom(store.dispatch(new SetActiveAccountingOperation(selectedOperationId)));
-		await firstValueFrom(store.dispatch(new SetInitialCategories(createCategories())));
-		await firstValueFrom(store.dispatch(new SetInitialContractors(createContractors())));
-	}
-
-	function setSelectedCategory(categoryName: string): void {
-		component.crudRecordFg.get('category')?.patchValue(
-			new SelectDropdownOptions({
-				description: categoryName,
-				value: categoryName,
-			})
+		const store = TestBed.inject(Store);
+		store.dispatch(new SetActivePaymentAccount('1c12ec59-8875-45c1-9fb0-e4edcf34a074'));
+		const fixture: ComponentFixture<AccountingOperationsCrudComponent> = TestBed.createComponent(
+			AccountingOperationsCrudComponent
 		);
+		fixture.detectChanges();
+		const component = fixture.componentInstance;
+		const categoryId = Guid.create().toString();
+		component.paymentForm.patchValue({ amount: 10, categoryId });
+
+		void component.submitAsync();
+		void component.submitAsync();
+
+		expect(write).toHaveBeenCalledTimes(1);
+		const nativeElement: unknown = fixture.nativeElement;
+		if (!(nativeElement instanceof HTMLElement)) {
+			throw new Error('Expected the fixture to render an HTMLElement.');
+		}
+		expect(nativeElement.textContent).toContain('Create payment');
+	});
+
+	it('retains an uncertain intent and offers the user an explicit retry', async () => {
+		const executeCreate = jasmine.createSpy('executeCreate').and.resolveTo({
+			status: 'unknown',
+			intent: {
+				action: 'create',
+				accountId: '1c12ec59-8875-45c1-9fb0-e4edcf34a074',
+				idempotencyKey: 'intent-key',
+				requestFingerprint: 'fingerprint',
+			},
+			message: "We couldn't confirm whether this payment was accepted. Retry to check its status.",
+		});
+		await TestBed.configureTestingModule({
+			imports: [
+				AccountingOperationsCrudComponent,
+				NoopAnimationsModule,
+				NgxsModule.forRoot(
+					[
+						AccountingOperationsState,
+						AccountingOperationsTableState,
+						PaymentAccountState,
+						CategoriesState,
+						ContractorsState,
+					],
+					ngxsConfig
+				),
+			],
+			providers: [
+				{ provide: PaymentCommandExecutorService, useValue: { executeCreate } },
+				{ provide: CategoriesDialogService, useValue: { openCategories: jasmine.createSpy() } },
+				{ provide: ContractorsDialogService, useValue: { openContractors: jasmine.createSpy() } },
+				{ provide: PaymentEditorLeaveService, useValue: createLeaveService() },
+				PaymentEditorSessionService,
+			],
+		}).compileComponents();
+		const store = TestBed.inject(Store);
+		store.dispatch(new SetActivePaymentAccount('1c12ec59-8875-45c1-9fb0-e4edcf34a074'));
+		const fixture = TestBed.createComponent(AccountingOperationsCrudComponent);
+		fixture.detectChanges();
+		const component = fixture.componentInstance;
+		const categoryId = Guid.create().toString();
+		component.paymentForm.patchValue({ amount: 10, categoryId });
+
+		await component.submitAsync();
+		fixture.detectChanges();
+
+		expect(component.submissionStateSignal().status).toBe('uncertain');
+		expect(component.isSubmittingSignal()).toBeFalse();
+		expect((fixture.nativeElement as HTMLElement).textContent).toContain('Retry saving');
+
+		component.cancel();
+		component.paymentForm.patchValue({ amount: 10, categoryId });
+		await component.submitAsync();
+
+		expect(executeCreate.calls.argsFor(1)[1]).toEqual(jasmine.objectContaining({ idempotencyKey: 'intent-key' }));
+	});
+
+	it('allows sequential projected creates without selecting either new payment', async () => {
+		const createdOperationId = '1932b129-a5ca-4bbd-b0f9-4682720e25d9';
+		const secondCreatedOperationId = '5a4ab9fd-3128-43b6-ab4d-47c55a25c7cf';
+		const executeCreate = jasmine
+			.createSpy('executeCreate')
+			.and.returnValues(
+				Promise.resolve({ status: 'projected', paymentOperationId: createdOperationId }),
+				Promise.resolve({ status: 'projected', paymentOperationId: secondCreatedOperationId })
+			);
+		await TestBed.configureTestingModule({
+			imports: [
+				AccountingOperationsCrudComponent,
+				NoopAnimationsModule,
+				NgxsModule.forRoot(
+					[
+						AccountingOperationsState,
+						AccountingOperationsTableState,
+						PaymentAccountState,
+						CategoriesState,
+						ContractorsState,
+					],
+					ngxsConfig
+				),
+			],
+			providers: [
+				{ provide: PaymentCommandExecutorService, useValue: { executeCreate } },
+				{ provide: CategoriesDialogService, useValue: { openCategories: jasmine.createSpy() } },
+				{ provide: ContractorsDialogService, useValue: { openContractors: jasmine.createSpy() } },
+				{ provide: PaymentEditorLeaveService, useValue: createLeaveService() },
+				PaymentEditorSessionService,
+			],
+		}).compileComponents();
+		const store = TestBed.inject(Store);
+		store.dispatch(new SetActivePaymentAccount('1c12ec59-8875-45c1-9fb0-e4edcf34a074'));
+		const fixture = TestBed.createComponent(AccountingOperationsCrudComponent);
+		fixture.detectChanges();
+		const component = fixture.componentInstance;
+		component.paymentForm.patchValue({ amount: 10, categoryId: Guid.create().toString(), comment: 'Payment A' });
+
+		await component.submitAsync();
+		fixture.detectChanges();
+
+		expect(component.editorModeSignal()).toBe('create');
+		expect(component.paymentForm.getRawValue()).toEqual(
+			jasmine.objectContaining({ amount: 0, categoryId: '', comment: '' })
+		);
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid).toBeUndefined();
+		expect((fixture.nativeElement as HTMLElement).textContent).toContain('New payment');
+
+		component.paymentForm.patchValue({ amount: 20, categoryId: Guid.create().toString(), comment: 'Payment B' });
+		await component.submitAsync();
+
+		expect(executeCreate).toHaveBeenCalledTimes(2);
+		expect(component.editorModeSignal()).toBe('create');
+		expect(component.isDirtySignal()).toBeFalse();
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid).toBeUndefined();
+	});
+
+	it('reconciles a selected operation that is no longer projected before an update can be submitted', async () => {
+		const executeUpdate = jasmine.createSpy('executeUpdate');
+		await TestBed.configureTestingModule({
+			imports: [
+				AccountingOperationsCrudComponent,
+				NoopAnimationsModule,
+				NgxsModule.forRoot(
+					[
+						AccountingOperationsState,
+						AccountingOperationsTableState,
+						PaymentAccountState,
+						CategoriesState,
+						ContractorsState,
+					],
+					ngxsConfig
+				),
+			],
+			providers: [
+				{
+					provide: PaymentCommandExecutorService,
+					useValue: { executeCreate: jasmine.createSpy(), executeUpdate },
+				},
+				{ provide: CategoriesDialogService, useValue: { openCategories: jasmine.createSpy() } },
+				{ provide: ContractorsDialogService, useValue: { openContractors: jasmine.createSpy() } },
+				{ provide: PaymentEditorLeaveService, useValue: createLeaveService() },
+				PaymentEditorSessionService,
+			],
+		}).compileComponents();
+		const store = TestBed.inject(Store);
+		store.dispatch(new SetActivePaymentAccount('1c12ec59-8875-45c1-9fb0-e4edcf34a074'));
+		store.dispatch(new SetActiveAccountingOperation(Guid.create()));
+		const fixture = TestBed.createComponent(AccountingOperationsCrudComponent);
+		fixture.detectChanges();
+
+		await fixture.whenStable();
+		fixture.detectChanges();
+
+		expect(fixture.componentInstance.editorModeSignal()).toBe('create');
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid).toBeUndefined();
+		expect(executeUpdate).not.toHaveBeenCalled();
+	});
+
+	it('uses a normalized baseline so browsing unchanged records does not request a discard', async () => {
+		const confirmDiscard = jasmine.createSpy('confirmDiscard').and.resolveTo(true);
+		const { fixture, store } = await createSelectedEditor(confirmDiscard);
+		const component = fixture.componentInstance;
+
+		expect(component.isDirtySignal()).toBeFalse();
+		expect(await component.canLeaveEditor()).toBeTrue();
+		expect(confirmDiscard).not.toHaveBeenCalled();
+
+		store.dispatch(new SetActiveAccountingOperation(operationB().key));
+		fixture.detectChanges();
+		await fixture.whenStable();
+
+		expect(component.paymentForm.controls.comment.value).toBe('Payment B');
+		expect(component.isDirtySignal()).toBeFalse();
+	});
+
+	it('only requests a discard for a material edit and returns clean after restoring the baseline', async () => {
+		const confirmDiscard = jasmine.createSpy('confirmDiscard').and.resolveTo(true);
+		const { fixture } = await createSelectedEditor(confirmDiscard);
+		const component = fixture.componentInstance;
+
+		component.paymentForm.patchValue({ amount: 20 });
+		expect(component.isDirtySignal()).toBeTrue();
+		await component.canLeaveEditor();
+		expect(confirmDiscard).toHaveBeenCalledTimes(1);
+
+		component.paymentForm.patchValue({ amount: 10 });
+		expect(component.isDirtySignal()).toBeFalse();
+		await component.canLeaveEditor();
+		expect(confirmDiscard).toHaveBeenCalledTimes(1);
+	});
+
+	it('treats stable category identity and empty contractor representations as unchanged values', async () => {
+		const confirmDiscard = jasmine.createSpy('confirmDiscard').and.resolveTo(true);
+		const { fixture } = await createSelectedEditor(confirmDiscard);
+		const component = fixture.componentInstance;
+		const categoryId = operationA().categoryId.toString();
+
+		component.paymentForm.patchValue({
+			categoryId: { key: categoryId } as unknown as string,
+			contractorId: Guid.EMPTY as unknown as string,
+		});
+
+		expect(component.isDirtySignal()).toBeFalse();
+		expect(await component.canLeaveEditor()).toBeTrue();
+		expect(confirmDiscard).not.toHaveBeenCalled();
+	});
+
+	it('keeps title and primary action consistent when switching from edit to create', async () => {
+		const { fixture, store } = await createSelectedEditor();
+		const nativeElement = fixture.nativeElement as HTMLElement;
+
+		expect(nativeElement.textContent).toContain('Edit payment');
+		expect(nativeElement.textContent).toContain('Save changes');
+		expect(nativeElement.textContent).not.toContain('Create payment');
+
+		store.dispatch(new SetActiveAccountingOperation(undefined));
+		fixture.detectChanges();
+		await fixture.whenStable();
+		fixture.detectChanges();
+
+		expect(nativeElement.textContent).toContain('New payment');
+		expect(nativeElement.textContent).toContain('Create payment');
+		expect(nativeElement.textContent).not.toContain('Save changes');
+		expect(nativeElement.textContent).not.toContain('Delete');
+	});
+
+	it('clears editor session state and selection when the active account changes', async () => {
+		const { fixture, store } = await createSelectedEditor();
+		const editorSession = TestBed.inject(PaymentEditorSessionService);
+		editorSession.queueRecentMutation(operationA().key, 'updated');
+		editorSession.confirmRecentMutationIsVisible([operationA().key]);
+
+		store.dispatch(new SetActivePaymentAccount('3c12ec59-8875-45c1-9fb0-e4edcf34a074'));
+		fixture.detectChanges();
+		await fixture.whenStable();
+
+		expect(editorSession.editorModeSignal()).toBe('create');
+		expect(editorSession.recentMutationSignal()).toBeUndefined();
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid).toBeUndefined();
+	});
+
+	async function createSelectedEditor(confirmDiscard = jasmine.createSpy('confirmDiscard').and.resolveTo(true)) {
+		await TestBed.configureTestingModule({
+			imports: [
+				AccountingOperationsCrudComponent,
+				NoopAnimationsModule,
+				NgxsModule.forRoot(
+					[
+						AccountingOperationsState,
+						AccountingOperationsTableState,
+						PaymentAccountState,
+						CategoriesState,
+						ContractorsState,
+					],
+					ngxsConfig
+				),
+			],
+			providers: [
+				{
+					provide: PaymentCommandExecutorService,
+					useValue: { executeCreate: jasmine.createSpy(), executeUpdate: jasmine.createSpy() },
+				},
+				{ provide: CategoriesDialogService, useValue: { openCategories: jasmine.createSpy() } },
+				{ provide: ContractorsDialogService, useValue: { openContractors: jasmine.createSpy() } },
+				{
+					provide: PaymentEditorLeaveService,
+					useValue: {
+						canLeave: () => Promise.resolve(true),
+						confirmDiscard,
+						register: () => () => undefined,
+					},
+				},
+				PaymentEditorSessionService,
+			],
+		}).compileComponents();
+		const store = TestBed.inject(Store);
+		store.dispatch(new SetActivePaymentAccount('1c12ec59-8875-45c1-9fb0-e4edcf34a074'));
+		store.dispatch([
+			new SetInitialCategories([
+				{
+					key: operationA().categoryId,
+					operationType: PaymentOperationTypes.Expense,
+					nameNodes: ['Test category'],
+				},
+			]),
+		]);
+		store.dispatch(new SetInitialPaymentOperations([operationA(), operationB()]));
+		store.dispatch(new SetActiveAccountingOperation(operationA().key));
+		const fixture = TestBed.createComponent(AccountingOperationsCrudComponent);
+		fixture.detectChanges();
+		await fixture.whenStable();
+		fixture.detectChanges();
+		return { fixture, store };
 	}
 
-	function createPaymentOperation(key: Guid, operationType: OperationTypes): IPaymentOperationModel {
-		return {
-			key,
-			paymentAccountId: Guid.parse(paymentAccountId),
-			operationDate: new Date(2024, 0, 11),
-			contractorId,
-			categoryId: expenseCategoryId,
-			comment: 'Initial operation',
-			amount: 42,
-			operationType,
-		};
+	function operationA(): IPaymentOperationModel {
+		return paymentOperation('1932b129-a5ca-4bbd-b0f9-4682720e25d9', 10, 'Payment A');
 	}
 
-	function createHistoryRecord(key: Guid, category: string, contractor: string): IPaymentRepresentationModel {
+	function operationB(): IPaymentOperationModel {
+		return paymentOperation('5a4ab9fd-3128-43b6-ab4d-47c55a25c7cf', 15, 'Payment B');
+	}
+
+	function paymentOperation(key: string, amount: number, comment: string): IPaymentOperationModel {
 		return {
-			key,
-			balance: 22,
-			category,
-			contractor,
-			comment: 'Initial history record',
-			expense: 42,
-			income: 0,
-			operationDate: new Date(2024, 0, 11),
+			key: Guid.parse(key),
+			paymentAccountId: Guid.parse('1c12ec59-8875-45c1-9fb0-e4edcf34a074'),
+			operationDate: new Date(2026, 0, 1),
+			contractorId: Guid.EMPTY,
+			categoryId: Guid.parse('a7c82a9d-e78c-4d73-973a-f7e7f20de64b'),
+			comment,
+			amount,
 			operationType: OperationTypes.Payment,
 		};
 	}
 
-	function createCategories(): ICategoryModel[] {
-		return [
-			{
-				key: expenseCategoryId,
-				operationType: PaymentOperationTypes.Expense,
-				nameNodes: ['Home', 'Groceries'],
-			},
-			{
-				key: incomeCategoryId,
-				operationType: PaymentOperationTypes.Income,
-				nameNodes: ['Salary', 'Monthly'],
-			},
-		];
-	}
-
-	function createContractors(): IContractorModel[] {
-		return [
-			{
-				key: contractorId,
-				nameNodes: ['Acme', 'Payroll'],
-			},
-		];
-	}
-
-	function getButtonTexts(): string[] {
-		return getButtons().map(button => normalizeText(button.textContent ?? ''));
-	}
-
-	function getButtonDisabledState(buttonText: string): boolean | undefined {
-		return getButtons().find(button => normalizeText(button.textContent ?? '').includes(buttonText))?.disabled;
-	}
-
-	function getButtons(): HTMLButtonElement[] {
-		return Array.from(getNativeElement().querySelectorAll('button'));
-	}
-
-	function getNativeText(): string {
-		return normalizeText(getNativeElement().textContent ?? '');
-	}
-
-	function normalizeText(value: string): string {
-		return value.replace(/\s+/g, ' ').trim();
-	}
-
-	function getNativeElement(): HTMLElement {
-		const nativeElement: unknown = fixture.nativeElement;
-
-		if (!(nativeElement instanceof HTMLElement)) {
-			throw new Error('Expected the component fixture to render an HTMLElement.');
-		}
-
-		return nativeElement;
-	}
-
-	function suppressExistingDisabledControlWarning(): void {
-		const originalWarn = console.warn;
-
-		spyOn(console, 'warn').and.callFake((message?: unknown, ...optionalParams: unknown[]) => {
-			if (
-				typeof message === 'string' &&
-				message.includes('using the disabled attribute with a reactive form directive')
-			) {
-				return;
-			}
-
-			originalWarn.call(console, message, ...optionalParams);
-		});
+	function createLeaveService() {
+		return {
+			canLeave: () => Promise.resolve(true),
+			confirmDiscard: () => Promise.resolve(true),
+			register: () => () => undefined,
+		};
 	}
 });

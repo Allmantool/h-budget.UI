@@ -1,0 +1,19 @@
+<h2 mat-dialog-title>Discard changes?</h2>
+<mat-dialog-content>Your unsaved payment changes will be lost.</mat-dialog-content>
+<mat-dialog-actions align="end">
+	<button
+		type="button"
+		mat-button
+		mat-dialog-close
+	>
+		Keep editing
+	</button>
+	<button
+		type="button"
+		mat-flat-button
+		color="warn"
+		(click)="discard()"
+	>
+		Discard changes
+	</button>
+</mat-dialog-actions>

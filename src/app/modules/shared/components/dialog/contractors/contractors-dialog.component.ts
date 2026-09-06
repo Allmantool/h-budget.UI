@@ -100,7 +100,7 @@ export class ContractorsDialogComponent {
 				this.store.dispatch(new AddCounterParty(response));
 
 				this.isLoadingSignal.set(false);
-				this.dialogRef.close();
+				this.dialogRef.close(response);
 			});
 	}
 

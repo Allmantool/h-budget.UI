@@ -62,7 +62,7 @@ describe('payment-operations-mapping.profile tests', () => {
 
 		expect(recordEntity.amount).toBe(11.88);
 		expect(recordEntity.comment).toBe('comments 1');
-		expect(recordEntity.operationDate.toJSON()).toBe(new Date(paymentEntities[0].operationDay).toJSON());
+		expect(recordEntity.operationDate).toEqual(new Date(2024, 0, 12));
 		expect(recordEntity.categoryId.equals(Guid.parse('3b2a138e-f575-425a-8650-a309480a6ece'))).toBeTruthy();
 		expect(recordEntity.contractorId.equals(Guid.parse('a249b2e9-edf0-45f2-a274-92ac310d4008'))).toBeTruthy();
 		expect(recordEntity.paymentAccountId.equals(Guid.parse('78f5743a-715b-402b-801b-ed88193c1195'))).toBeTruthy();

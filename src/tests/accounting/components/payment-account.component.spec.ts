@@ -154,6 +154,8 @@ describe('payment account component', () => {
 	});
 
 	it('should navigate to the existing primary and right-sidebar operations outlets', async () => {
+		await clickAccountOption('Bank card');
+
 		await component.navigateToOperations();
 
 		expect(routerSpy.navigate.calls.mostRecent().args).toEqual([
@@ -165,7 +167,10 @@ describe('payment account component', () => {
 					},
 				},
 			],
-			{ relativeTo: accountingWorkspaceRouteStub },
+			{
+				relativeTo: accountingWorkspaceRouteStub,
+				queryParams: { paymentAccountId: virtualAccountId },
+			},
 		]);
 	});
 

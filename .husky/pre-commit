@@ -1,10 +1,6 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
-# Skip hooks in CI
-[ "$CI" = "true" ] && exit 0
-
-# Only run commitlint for UI project
-if git diff --cached --name-only | grep -q '^UI/'; then
-  cd UI
-  npx commitlint --edit "$1"
-fi
+# Commitlint needs Git's message-file argument, which is only available in the
+# commit-msg hook. Keep this hook inert instead of attempting a second, dynamic
+# package-runner invocation with an empty argument.
+exit 0

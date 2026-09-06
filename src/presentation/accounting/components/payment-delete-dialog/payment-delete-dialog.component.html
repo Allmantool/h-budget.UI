@@ -1,0 +1,21 @@
+<h2 mat-dialog-title>Delete payment?</h2>
+<mat-dialog-content>
+	<p><strong>{{ data.amount | number: '1.2-2' }} {{ data.currency }}</strong></p>
+	<p>{{ data.category }} · {{ data.payee || 'No payee' }} · {{ data.date }}</p>
+	<p>This payment will be removed from the account history.</p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+	<button
+		mat-button
+		mat-dialog-close
+	>
+		Cancel
+	</button>
+	<button
+		mat-flat-button
+		color="warn"
+		(click)="confirm()"
+	>
+		Delete payment
+	</button>
+</mat-dialog-actions>

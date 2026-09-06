@@ -81,12 +81,21 @@ export class PaymentOperationsMappingProfile extends Profile {
 			},
 			operationDate: opt => {
 				opt.preCondition(src => !_.isNil(src.operationDay));
-				opt.mapFrom(src => new Date(src.operationDay));
+				opt.mapFrom(src => this.parseOperationDate(src.operationDay));
 			},
 			operationType: opt => {
 				opt.preCondition(src => !_.isNil(src.transactionType));
 				opt.mapFrom(src => src.transactionType);
 			},
 		});
+	}
+
+	private parseOperationDate(value: string): Date {
+		const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+		if (!dateOnly) {
+			return new Date(value);
+		}
+
+		return new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]));
 	}
 }

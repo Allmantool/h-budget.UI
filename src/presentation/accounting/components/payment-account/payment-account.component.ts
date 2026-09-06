@@ -40,6 +40,7 @@ import { IPaymentAccountModel } from '../../../../domain/models/accounting/payme
 })
 export class PaymentAccountComponent implements OnInit {
 	public isNavigateToOperationsDisabled: boolean = true;
+	private selectedPaymentAccountId?: string;
 	public cashAccountsSignal = signal<IPaymentAccountModel[]>([]);
 	public debitVirtualAccountsSignal = signal<IPaymentAccountModel[]>([]);
 	public creditVirtualAccountsSignal = signal<IPaymentAccountModel[]>([]);
@@ -108,6 +109,7 @@ export class PaymentAccountComponent implements OnInit {
 		const guid = _.first(options)?.value as Guid;
 
 		this.store.dispatch(new SetActivePaymentAccount(guid.toString()));
+		this.selectedPaymentAccountId = guid.toString();
 
 		this.isNavigateToOperationsDisabled = false;
 	}
@@ -128,7 +130,10 @@ export class PaymentAccountComponent implements OnInit {
 					},
 				},
 			],
-			{ relativeTo: accountingWorkspaceRoute }
+			{
+				relativeTo: accountingWorkspaceRoute,
+				queryParams: { paymentAccountId: this.selectedPaymentAccountId },
+			}
 		);
 	}
 

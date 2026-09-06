@@ -118,7 +118,7 @@ export class CategoriesDialogComponent {
 				this.store.dispatch(new AddCategory(response));
 
 				this.isLoadingSignal.set(false);
-				this.dialogRef.close();
+				this.dialogRef.close(response);
 			});
 	}
 

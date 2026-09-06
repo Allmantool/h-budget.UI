@@ -1,7 +1,7 @@
 import { Injectable, NgZone } from '@angular/core';
 import { AppConfigurationService } from 'app/modules/shared/services/app-configuration.service';
 
-import { Subject, take, timer } from 'rxjs';
+import { Subject, Subscription, take, timer } from 'rxjs';
 
 import { HttpTransportType, HubConnection, HubConnectionBuilder, HubConnectionState } from '@microsoft/signalr';
 
@@ -11,8 +11,9 @@ import { AccountNotification } from './account-notification';
 export class SseService {
 	private connection?: HubConnection;
 
-	private reconnectDelay = 1000;
-	private readonly maxReconnectDelay = 30000;
+	private readonly reconnectDelaysMs = [1_000, 2_000, 5_000, 10_000, 30_000] as const;
+	private reconnectAttempt = 0;
+	private reconnectSubscription?: Subscription;
 
 	private notificationSubject = new Subject<AccountNotification>();
 	public notifications$ = this.notificationSubject.asObservable();
@@ -55,7 +56,7 @@ export class SseService {
 		const activeConnection = this.connection;
 
 		this.connection = undefined;
-		this.reconnectDelay = 1000;
+		this.resetReconnectState();
 
 		if (!activeConnection) {
 			return;
@@ -70,12 +71,11 @@ export class SseService {
 		);
 
 		connection.onreconnecting(() => {
-			console.warn('SignalR connection lost. Waiting for reconnect...');
+			this.resetReconnectState();
 		});
 
 		connection.onreconnected(() => {
-			this.reconnectDelay = 1000;
-			console.debug('SignalR reconnected');
+			this.resetReconnectState();
 		});
 
 		connection.onclose(() => {
@@ -83,8 +83,9 @@ export class SseService {
 				return;
 			}
 
-			console.warn('SignalR connection closed. Reconnecting...');
-			this.scheduleReconnect(connection);
+			this.connection = undefined;
+			this.resetReconnectState();
+			console.warn('SignalR connection closed after bounded reconnect attempts.');
 		});
 	}
 
@@ -95,28 +96,37 @@ export class SseService {
 
 		try {
 			await connection.start();
-			this.reconnectDelay = 1000;
-			console.debug('SignalR connected');
-		} catch (error) {
-			console.warn('SignalR connection failed. Reconnecting...', error);
-			this.scheduleReconnect(connection);
+			this.resetReconnectState();
+		} catch {
+			this.scheduleInitialReconnect(connection);
 		}
 	}
 
-	private scheduleReconnect(connection: HubConnection): void {
-		const delay = this.reconnectDelay;
+	private scheduleInitialReconnect(connection: HubConnection): void {
+		const delay = this.reconnectDelaysMs[this.reconnectAttempt];
+		if (delay === undefined) {
+			this.connection = undefined;
+			console.warn('SignalR connection could not be established after bounded retry attempts.');
+			return;
+		}
 
-		this.reconnectDelay = Math.min(this.reconnectDelay * 2, this.maxReconnectDelay);
-
-		timer(delay)
+		this.reconnectAttempt++;
+		this.reconnectSubscription = timer(delay)
 			.pipe(take(1))
 			.subscribe(() => {
+				this.reconnectSubscription = undefined;
 				if (this.connection !== connection) {
 					return;
 				}
 
 				void this.startConnection(connection);
 			});
+	}
+
+	private resetReconnectState(): void {
+		this.reconnectAttempt = 0;
+		this.reconnectSubscription?.unsubscribe();
+		this.reconnectSubscription = undefined;
 	}
 
 	private handleNotificationEvent(payload: AccountNotification | string): void {
