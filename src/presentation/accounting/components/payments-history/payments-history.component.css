@@ -100,6 +100,34 @@
 	display: none;
 }
 
+.payments-history__filters,
+.payments-history__pagination {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: end;
+	gap: 0.75rem;
+}
+
+.payments-history__filters label,
+.payments-history__pagination label {
+	display: grid;
+	gap: 0.2rem;
+	font-size: 0.875rem;
+}
+
+.payments-history__sort-button {
+	border: 0;
+	background: transparent;
+	font: inherit;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.payments-history__sort-button:focus-visible {
+	outline: 2px solid #0e7490;
+	outline-offset: 0.2rem;
+}
+
 .payments-history__mobile-record {
 	display: grid;
 	grid-template-columns: 1fr auto;

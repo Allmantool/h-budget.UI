@@ -15,6 +15,8 @@ import { getSelectedRecordGuid } from '../../../app/modules/shared/store/states/
 import { PaymentRepresentationsMappingProfile } from '../../../data/providers/accounting/mappers/payment-representations.mapping.profile';
 import { PaymentsHistoryProvider } from '../../../data/providers/accounting/payments-history.provider';
 import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
+import { IPaymentHistoryPageModel } from '../../../domain/models/accounting/payment-history-page.model';
+import { IPaymentHistoryQueryModel } from '../../../domain/models/accounting/payment-history-query.model';
 import { IPaymentRepresentationModel } from '../models/operation-record';
 
 @Injectable()
@@ -83,6 +85,21 @@ export class PaymentsHistoryService implements IPaymentsHistoryService {
 
 				return paymentsRepresentation;
 			})
+		);
+	}
+
+	public refreshPagedPaymentsHistory(
+		paymentAccountId: string | Guid,
+		query: IPaymentHistoryQueryModel
+	): Observable<Omit<IPaymentHistoryPageModel, 'items'> & { items: IPaymentRepresentationModel[] }> {
+		return this.paymensHistoryProvider.getPagedOperationsHistoryForPaymentAccount(paymentAccountId, query).pipe(
+			map(history => ({
+				...history,
+				items: this.mapper.map(
+					PaymentRepresentationsMappingProfile.PaymentHistoryToRepresentationModel,
+					history.items
+				),
+			}))
 		);
 	}
 

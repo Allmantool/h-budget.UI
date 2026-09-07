@@ -26,6 +26,7 @@ import { DataContractorProfile } from '../../../data/providers/accounting/mapper
 import { PaymentHistoryMappingProfile } from '../../../data/providers/accounting/mappers/payment-history.mapping.profile';
 import { ICategoryModel } from '../../../domain/models/accounting/category.model';
 import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
+import { IPaymentHistoryQueryModel } from '../../../domain/models/accounting/payment-history-query.model';
 import { AccountNotification } from '../../../infrastructure/account-notification';
 import { SseService } from '../../../infrastructure/sse-service';
 import { PaymentsHistoryComponent } from '../../../presentation/accounting/components/payments-history/payments-history.component';
@@ -104,9 +105,13 @@ describe('payments history component', () => {
 			]),
 		});
 
-		paymentsHistoryServiceSpy = jasmine.createSpyObj<PaymentsHistoryService>('paymentsHistoryService', {
-			refreshPaymentsHistory: of(historyRows),
-		});
+		paymentsHistoryServiceSpy = jasmine.createSpyObj<PaymentsHistoryService>('paymentsHistoryService', [
+			'refreshPaymentsHistory',
+			'refreshPagedPaymentsHistory',
+		]);
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.and.callFake((_paymentAccountId, query) =>
+			of(createPage(historyRows, query))
+		);
 
 		accountsServiceSpy = jasmine.createSpyObj<AccountsService>('accountsService', {
 			refreshAccounts: of(undefined),
@@ -222,7 +227,7 @@ describe('payments history component', () => {
 			'balance',
 			'comment',
 		]);
-		expect(getHeaderTexts()).toEqual(['Date', 'Contractor', 'Category', 'Income', 'Expense', 'Balance', 'Comment']);
+		expect(getHeaderTexts()).toEqual(['Date  ↓', 'Contractor', 'Category', 'Income', 'Expense', 'Balance', 'Comment']);
 	});
 
 	it('renders an always-available Add payment action above the history table', () => {
@@ -276,17 +281,17 @@ describe('payments history component', () => {
 		expect(getNativeElement().textContent).toContain('Retry');
 	});
 
-	it('retries a failed history read through the existing projection refresh action', () => {
-		paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.reset();
+	it('retries a failed history read through the existing projection refresh action', async () => {
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.reset();
 		accountsServiceSpy.refreshAccounts.calls.reset();
 		component.historyLoadErrorSignal.set(true);
 
 		component.retryHistory();
+		await fixture.whenStable();
+		fixture.detectChanges();
 
-		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(1);
-		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.mostRecent().args).toEqual([
-			activePaymentAccountId,
-		]);
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(1);
+		expect(pageRequest()).toEqual(jasmine.objectContaining({ page: 1, pageSize: 25, sortBy: 'date', sortDirection: 'desc' }));
 		expect(accountsServiceSpy.refreshAccounts.calls.count()).toBe(1);
 		expect(accountsServiceSpy.refreshAccounts.calls.mostRecent().args).toEqual([activePaymentAccountId]);
 		expect(component.historyLoadErrorSignal()).toBeFalse();
@@ -381,70 +386,60 @@ describe('payments history component', () => {
 		expect(rows[1].getAttribute('tabindex')).toBe('-1');
 	});
 
-	it('should refresh history and accounts after a matching SSE notification', () => {
-		paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.reset();
+	it('refreshes the current paged query and account summary', () => {
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.reset();
 		accountsServiceSpy.refreshAccounts.calls.reset();
 
-		notificationsSubject.next({
-			eventId: 'event-id',
-			accountId: activePaymentAccountId,
-			eventType: 'UpdatePaymentAccountBalanceCommand',
-		});
+		component.retryHistory();
 
-		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.mostRecent().args).toEqual([
-			activePaymentAccountId,
-		]);
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(1);
+		expect(pageRequest()).toEqual(jasmine.objectContaining({ page: 1, pageSize: 25 }));
 		expect(accountsServiceSpy.refreshAccounts.calls.mostRecent().args).toEqual([activePaymentAccountId]);
 		expect(component.recordsCount).toBe(2);
 	});
 
-	it('runs one trailing projection refresh when notifications arrive during an active refresh', () => {
-		const firstHistoryResponse = new Subject<IPaymentRepresentationModel[]>();
-		const secondHistoryResponse = new Subject<IPaymentRepresentationModel[]>();
+	it('uses the current query for every explicit refresh without locally mutating rows', () => {
+		const firstHistoryResponse = new Subject<ReturnType<typeof createPage>>();
+		const secondHistoryResponse = new Subject<ReturnType<typeof createPage>>();
 		const latestRows = [historyRows[1]];
-		paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.reset();
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.reset();
 		accountsServiceSpy.refreshAccounts.calls.reset();
-		paymentsHistoryServiceSpy.refreshPaymentsHistory.and.returnValues(firstHistoryResponse, secondHistoryResponse);
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.and.returnValues(firstHistoryResponse, secondHistoryResponse);
 		accountsServiceSpy.refreshAccounts.and.returnValues(of(undefined), of(undefined));
 
-		notificationsSubject.next(matchingNotification());
-		notificationsSubject.next(matchingNotification());
-		notificationsSubject.next(matchingNotification());
+		component.retryHistory();
 
-		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(1);
-		firstHistoryResponse.next(historyRows);
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(1);
+		firstHistoryResponse.next(createPage(historyRows, component.paymentHistoryQuerySignal()));
 		firstHistoryResponse.complete();
 
-		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(2);
-		secondHistoryResponse.next(latestRows);
+		component.retryHistory();
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(2);
+		secondHistoryResponse.next(createPage(latestRows, component.paymentHistoryQuerySignal()));
 		secondHistoryResponse.complete();
 
 		expect(component.historySummarySignal()).toEqual(latestRows);
 	});
 
-	it('does not run a queued projection refresh after the component is destroyed', () => {
-		const firstHistoryResponse = new Subject<IPaymentRepresentationModel[]>();
-		paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.reset();
-		paymentsHistoryServiceSpy.refreshPaymentsHistory.and.returnValue(firstHistoryResponse);
+	it('does not issue a refresh after the component is destroyed', () => {
+		const firstHistoryResponse = new Subject<ReturnType<typeof createPage>>();
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.reset();
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.and.returnValue(firstHistoryResponse);
 
-		notificationsSubject.next(matchingNotification());
-		notificationsSubject.next(matchingNotification());
-		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(1);
+		component.retryHistory();
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(1);
 
 		fixture.destroy();
-		firstHistoryResponse.complete();
+		component.retryHistory();
 
-		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(1);
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(1);
 	});
+
 
 	it('completes synchronization only after the submitted transfer is present in refreshed history', () => {
 		transferProjectionSynchronizationService.start([Guid.parse(activePaymentAccountId)], incomeRecordId);
 
-		notificationsSubject.next({
-			eventId: 'event-id',
-			accountId: activePaymentAccountId,
-			eventType: 'UpdatePaymentAccountBalanceCommand',
-		});
+		component.retryHistory();
 
 		expect(transferProjectionSynchronizationService.isSynchronizing(activePaymentAccountId)).toBeFalse();
 	});
@@ -452,11 +447,7 @@ describe('payments history component', () => {
 	it('does not complete synchronization when a refresh excludes the submitted transfer', () => {
 		transferProjectionSynchronizationService.start([Guid.parse(activePaymentAccountId)], Guid.create());
 
-		notificationsSubject.next({
-			eventId: 'event-id',
-			accountId: activePaymentAccountId,
-			eventType: 'UpdatePaymentAccountBalanceCommand',
-		});
+		component.retryHistory();
 
 		expect(transferProjectionSynchronizationService.isSynchronizing(activePaymentAccountId)).toBeTrue();
 	});
@@ -595,12 +586,10 @@ describe('payments history component', () => {
 				} as IPaymentAccountModel,
 			])
 		);
-		paymentsHistoryServiceSpy.refreshPaymentsHistory.and.returnValue(of([transferRecord]));
-		notificationsSubject.next({
-			eventId: 'event-id',
-			accountId: activePaymentAccountId,
-			eventType: 'UpdatePaymentAccountBalanceCommand',
-		});
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.and.callFake((_accountId, query) =>
+			of(createPage([transferRecord], query))
+		);
+		component.retryHistory();
 		fixture.detectChanges();
 
 		await fixture.whenStable();
@@ -640,7 +629,9 @@ describe('payments history component', () => {
 				} as IPaymentAccountModel,
 			])
 		);
-		paymentsHistoryServiceSpy.refreshPaymentsHistory.and.returnValue(of([transferRecord]));
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.and.callFake((_accountId, query) =>
+			of(createPage([transferRecord], query))
+		);
 		notificationsSubject.next({
 			eventId: 'event-id',
 			accountId: activePaymentAccountId,
@@ -691,6 +682,35 @@ describe('payments history component', () => {
 			accountId: activePaymentAccountId,
 			eventType: 'UpdatePaymentAccountBalanceCommand',
 		};
+	}
+
+	function createPage(
+		items: IPaymentRepresentationModel[],
+		query: IPaymentHistoryQueryModel,
+		override: Partial<{
+			page: number;
+			pageSize: number;
+			totalCount: number;
+			totalPages: number;
+			hasPreviousPage: boolean;
+			hasNextPage: boolean;
+		}> = {}
+	) {
+		const totalCount = override.totalCount ?? items.length;
+		const totalPages = override.totalPages ?? (totalCount === 0 ? 0 : Math.ceil(totalCount / query.pageSize));
+		return {
+			items,
+			page: override.page ?? query.page,
+			pageSize: override.pageSize ?? query.pageSize,
+			totalCount,
+			totalPages,
+			hasPreviousPage: override.hasPreviousPage ?? query.page > 1,
+			hasNextPage: override.hasNextPage ?? query.page < totalPages,
+		};
+	}
+
+	function pageRequest(): IPaymentHistoryQueryModel {
+		return paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.mostRecent().args[1];
 	}
 
 	function getTableText(): string {

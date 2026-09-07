@@ -21,7 +21,19 @@ import { SseService } from 'infrastructure/sse-service';
 
 import { Select, Store } from '@ngxs/store';
 import { isFuture } from 'date-fns';
-import { BehaviorSubject, filter, forkJoin, map, Observable, shareReplay, Subject, switchMap } from 'rxjs';
+import {
+	BehaviorSubject,
+	distinctUntilChanged,
+	filter,
+	forkJoin,
+	map,
+	merge,
+	Observable,
+	shareReplay,
+	Subject,
+	switchMap,
+	tap,
+} from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
 import { Guid } from 'typescript-guid';
 
@@ -29,6 +41,8 @@ import { AccountingCurrencyFormatPipe } from '../../../../app/modules/shared/pip
 import { IAccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
 import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
 import { getAccountPayments } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
+import { getCategories } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
+import { getContractors } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
 import {
 	getActivePaymentAccountId,
 	getPaymentAccounts,
@@ -36,6 +50,12 @@ import {
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
+import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
+import { IContractorModel } from '../../../../domain/models/accounting/contractor.model.';
+import {
+	defaultPaymentHistoryQuery,
+	IPaymentHistoryQueryModel,
+} from '../../../../domain/models/accounting/payment-history-query.model';
 import { IPaymentRepresentationModel } from '../../models/operation-record';
 import { AccountsService } from '../../services/accounts.service';
 import { HandbooksService } from '../../services/handbooks.service';
@@ -66,6 +86,7 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	private readonly destroyRef = inject(DestroyRef);
 	private readonly hostElement = inject<ElementRef<HTMLElement>>(ElementRef);
 	private readonly relatedTransferNavigationRequests$ = new Subject<IPaymentRepresentationModel>();
+	private readonly timelineRefreshRequests$ = new Subject<void>();
 	private relatedOperationHighlightTimeout?: ReturnType<typeof setTimeout>;
 	private highlightedRelatedOperationElement?: HTMLElement;
 	private readonly handbooksReady$: Observable<void>;
@@ -75,6 +96,12 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 
 	@Select(getAccountPayments)
 	public accountPayments$!: Observable<IPaymentOperationModel[]>;
+
+	@Select(getCategories)
+	public categories$!: Observable<ICategoryModel[]>;
+
+	@Select(getContractors)
+	public contractors$!: Observable<IContractorModel[]>;
 
 	@Select(getActivePaymentAccountId)
 	public getActivePaymentAccountId$!: Observable<Guid>;
@@ -107,6 +134,12 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	public highlightedRelatedOperationKey?: Guid;
 	public readonly historyLoadingSignal = signal(true);
 	public readonly historyLoadErrorSignal = signal(false);
+	public readonly paymentHistoryQuerySignal = signal<IPaymentHistoryQueryModel>(defaultPaymentHistoryQuery);
+	public readonly totalCountSignal = signal(0);
+	public readonly totalPagesSignal = signal(0);
+	public readonly hasPreviousPageSignal = signal(false);
+	public readonly hasNextPageSignal = signal(false);
+	public readonly math = Math;
 	public readonly recentMutation = () => this.paymentEditorSession.recentMutationSignal();
 
 	constructor(
@@ -160,24 +193,26 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	}
 
 	public ngAfterViewInit(): void {
-		this.accountPayments$
+		merge(
+			this.accountPayments$.pipe(map(() => undefined)),
+			this.getActivePaymentAccountId$.pipe(
+				filter(accountId => !accountId.equals(Guid.EMPTY)),
+				distinctUntilChanged((previous, current) => previous.equals(current)),
+				tap(() => this.resetQueryForAccountChange()),
+				map(() => undefined)
+			),
+			this.timelineRefreshRequests$
+		)
 			.pipe(
 				takeUntilDestroyed(this.destroyRef),
-				exhaustMap(() =>
+				switchMap(() =>
 					this.handbooksReady$.pipe(
-						switchMap(() =>
-							forkJoin({
-								payments: this.paymentsHistoryService.refreshPaymentsHistory(
-									this.activePaymentAccountIdSignal()
-								),
-								balance: this.accountsService.refreshAccounts(this.activePaymentAccountIdSignal()),
-							})
-						)
+						switchMap(() => this.refreshActiveAccountProjection())
 					)
 				)
 			)
 			.subscribe({
-				next: payload => this.publishPayments(payload.payments),
+				next: payments => this.publishPayments(payments),
 				error: () => this.showHistoryLoadError(),
 			});
 	}
@@ -214,6 +249,52 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	public retryHistory(): void {
 		this.requestProjectionRefresh();
 	}
+
+	public changePage(page: number): void {
+		if (page < 1 || page > this.totalPagesSignal() || page === this.paymentHistoryQuerySignal().page) {
+			return;
+		}
+
+		this.updateQuery({ page });
+	}
+
+	public changePageSize(event: Event): void {
+		const target = event.target;
+		if (!(target instanceof HTMLSelectElement)) {
+			return;
+		}
+
+		this.updateQuery({ page: 1, pageSize: Number(target.value) as IPaymentHistoryQueryModel['pageSize'] });
+	}
+
+	public toggleSort(sortBy: IPaymentHistoryQueryModel['sortBy']): void {
+		const current = this.paymentHistoryQuerySignal();
+		this.updateQuery({
+			page: current.sortBy === sortBy ? current.page : 1,
+			sortBy,
+			sortDirection: current.sortBy === sortBy && current.sortDirection === 'desc' ? 'asc' : 'desc',
+		});
+	}
+
+	public updateFilter(event: Event, field: keyof Pick<IPaymentHistoryQueryModel, 'dateFrom' | 'dateTo' | 'type' | 'categoryId' | 'contractorId' | 'amountMin' | 'amountMax'>): void {
+		const target = event.target;
+		if (!(target instanceof HTMLInputElement || target instanceof HTMLSelectElement)) {
+			return;
+		}
+
+		const value = target.value;
+		const parsedValue = field === 'amountMin' || field === 'amountMax'
+			? (value === '' ? undefined : Number(value))
+			: (value === '' ? undefined : value);
+		this.updateQuery({ page: 1, [field]: parsedValue });
+	}
+
+	public clearFilters(): void {
+		const { pageSize, sortBy, sortDirection } = this.paymentHistoryQuerySignal();
+		this.paymentHistoryQuerySignal.set({ page: 1, pageSize, sortBy, sortDirection });
+		this.requestProjectionRefresh();
+	}
+
 
 	public isFuturePayment = (record: IPaymentRepresentationModel): boolean => isFuture(record.operationDate);
 
@@ -255,9 +336,37 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		const accountId = this.activePaymentAccountIdSignal();
 
 		return forkJoin({
-			payments: this.paymentsHistoryService.refreshPaymentsHistory(accountId),
+			payments: this.paymentsHistoryService.refreshPagedPaymentsHistory(accountId, this.paymentHistoryQuerySignal()),
 			balance: this.accountsService.refreshAccounts(accountId),
-		}).pipe(map(payload => payload.payments));
+		}).pipe(map(payload => {
+			this.setPageMetadata(payload.payments);
+			return payload.payments.items;
+		}));
+	}
+
+	private resetQueryForAccountChange(): void {
+		this.paymentHistoryQuerySignal.set({
+			...defaultPaymentHistoryQuery,
+			pageSize: this.paymentHistoryQuerySignal().pageSize,
+		});
+	}
+
+	private updateQuery(update: Partial<IPaymentHistoryQueryModel>): void {
+		this.paymentHistoryQuerySignal.set({ ...this.paymentHistoryQuerySignal(), ...update });
+		this.requestProjectionRefresh();
+	}
+
+	private setPageMetadata(page: {
+		page: number;
+		totalCount: number;
+		totalPages: number;
+		hasPreviousPage: boolean;
+		hasNextPage: boolean;
+	}): void {
+		this.totalCountSignal.set(page.totalCount);
+		this.totalPagesSignal.set(page.totalPages);
+		this.hasPreviousPageSignal.set(page.hasPreviousPage);
+		this.hasNextPageSignal.set(page.hasNextPage);
 	}
 
 	private requestProjectionRefresh(): void {
@@ -265,24 +374,9 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 			return;
 		}
 
-		if (this.isProjectionRefreshActive) {
-			this.hasQueuedProjectionRefresh = true;
-			return;
-		}
-
-		this.isProjectionRefreshActive = true;
 		this.historyLoadingSignal.set(true);
 		this.historyLoadErrorSignal.set(false);
-		this.refreshActiveAccountProjection()
-			.pipe(takeUntilDestroyed(this.destroyRef))
-			.subscribe({
-				next: payments => this.publishPayments(payments),
-				error: () => {
-					this.showHistoryLoadError();
-					this.completeProjectionRefresh();
-				},
-				complete: () => this.completeProjectionRefresh(),
-			});
+		this.timelineRefreshRequests$.next();
 	}
 
 	private completeProjectionRefresh(): void {
