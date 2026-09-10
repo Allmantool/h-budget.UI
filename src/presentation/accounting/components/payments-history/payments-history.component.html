@@ -11,14 +11,23 @@
 		<div class="payments-history__header-actions">
 			<div class="payments-history__stats">
 				<div class="payments-history__stat">
-					<strong>{{ recordsCount }}</strong>
-					<span>records</span>
+					<strong>{{ totalCountSignal() }}</strong>
+					<span>matching results</span>
 				</div>
 				<div class="payments-history__stat">
 					<strong>{{ futureRecordsCount }}</strong>
-					<span>scheduled</span>
+					<span>scheduled on this page</span>
 				</div>
 			</div>
+			<button
+				type="button"
+				mat-stroked-button
+				(click)="retryHistory()"
+				[disabled]="historyLoadingSignal()"
+			>
+				<mat-icon>refresh</mat-icon>
+				Refresh
+			</button>
 			<button
 				type="button"
 				mat-flat-button
@@ -30,8 +39,142 @@
 			</button>
 		</div>
 	</div>
+	<form
+		class="payments-history__filters"
+		aria-label="Transaction filters"
+		(submit)="$event.preventDefault(); applyFilters()"
+	>
+		<mat-form-field appearance="outline">
+			<mat-label>From</mat-label>
+			<input
+				matInput
+				type="date"
+				[value]="draftPaymentHistoryQuerySignal().dateFrom ?? ''"
+				(change)="updateDraftFilterFromInput('dateFrom', $event)"
+			/>
+		</mat-form-field>
+		<mat-form-field appearance="outline">
+			<mat-label>To</mat-label>
+			<input
+				matInput
+				type="date"
+				[value]="draftPaymentHistoryQuerySignal().dateTo ?? ''"
+				(change)="updateDraftFilterFromInput('dateTo', $event)"
+			/>
+		</mat-form-field>
+		<mat-form-field appearance="outline">
+			<mat-label>Type</mat-label>
+			<mat-select
+				[value]="draftPaymentHistoryQuerySignal().type ?? ''"
+				(valueChange)="updateDraftFilter('type', $event)"
+			>
+				<mat-option value="">All types</mat-option>
+				<mat-option value="income">Income</mat-option>
+				<mat-option value="expense">Expense</mat-option>
+			</mat-select>
+		</mat-form-field>
+		<mat-form-field appearance="outline">
+			<mat-label>Category</mat-label>
+			<mat-select
+				[value]="draftPaymentHistoryQuerySignal().categoryId ?? ''"
+				(valueChange)="updateDraftFilter('categoryId', $event)"
+			>
+				<mat-option value="">All categories</mat-option>
+				@for (category of categories$ | async; track category.key.toString()) {
+				<mat-option [value]="category.key.toString()">{{ category.nameNodes.join(': ') }}</mat-option>
+				}
+			</mat-select>
+		</mat-form-field>
+		<mat-form-field appearance="outline">
+			<mat-label>Contractor</mat-label>
+			<mat-select
+				[value]="draftPaymentHistoryQuerySignal().contractorId ?? ''"
+				(valueChange)="updateDraftFilter('contractorId', $event)"
+			>
+				<mat-option value="">All contractors</mat-option>
+				@for (contractor of contractors$ | async; track contractor.key.toString()) {
+				<mat-option [value]="contractor.key.toString()">{{ contractor.nameNodes.join(': ') }}</mat-option>
+				}
+			</mat-select>
+		</mat-form-field>
+		<mat-form-field appearance="outline">
+			<mat-label>Minimum amount</mat-label>
+			<input
+				matInput
+				type="number"
+				min="0"
+				inputmode="decimal"
+				[value]="draftPaymentHistoryQuerySignal().amountMin ?? ''"
+				(change)="updateDraftFilterFromInput('amountMin', $event)"
+			/>
+		</mat-form-field>
+		<mat-form-field appearance="outline">
+			<mat-label>Maximum amount</mat-label>
+			<input
+				matInput
+				type="number"
+				min="0"
+				inputmode="decimal"
+				[value]="draftPaymentHistoryQuerySignal().amountMax ?? ''"
+				(change)="updateDraftFilterFromInput('amountMax', $event)"
+			/>
+		</mat-form-field>
+		<div class="payments-history__filter-actions">
+			<button
+				type="submit"
+				mat-flat-button
+				color="primary"
+				[disabled]="areDraftFiltersInvalid"
+			>
+				Apply filters
+			</button>
+			<button
+				type="button"
+				mat-button
+				(click)="clearFilters()"
+				[disabled]="!hasAppliedFilters"
+			>
+				Clear filters
+			</button>
+			@if (hasAppliedFilters) {
+			<span
+				class="payments-history__applied-filter-count"
+				aria-live="polite"
+			>
+				{{ appliedFilterCount }} filters applied
+			</span>
+			}
+		</div>
+		@if (isDraftDateRangeInvalid) {
+		<p
+			class="payments-history__filter-error"
+			role="alert"
+		>
+			The From date must not be after the To date.
+		</p>
+		} @else if (isDraftAmountRangeInvalid) {
+		<p
+			class="payments-history__filter-error"
+			role="alert"
+		>
+			The minimum amount must not exceed the maximum amount.
+		</p>
+		}
+	</form>
 
-	@if (recentMutation(); as recentMutation) {
+	@if (isHistoryRefreshingSignal()) {
+	<div
+		class="payments-history__progress"
+		role="status"
+		aria-live="polite"
+	>
+		<mat-progress-bar
+			mode="indeterminate"
+			aria-label="Updating transactions"
+		></mat-progress-bar>
+		<span>Updating transactions…</span>
+	</div>
+	} @if (recentMutation(); as recentMutation) {
 	<p
 		class="payments-history__live-status"
 		role="status"
@@ -45,7 +188,7 @@
 		role="status"
 		aria-live="polite"
 	>
-		Loading payments…
+		Loading transactions…
 	</p>
 	} @else if (historyLoadErrorSignal() && recordsCount === 0) {
 	<div
@@ -63,24 +206,34 @@
 	</div>
 	} @else if (recordsCount === 0) {
 	<div class="payments-history__state">
-		<p>No payments yet.</p>
+		<p>{{ hasAppliedFilters ? 'No transactions match these filters.' : 'No transactions yet.' }}</p>
 		<button
 			type="button"
 			mat-stroked-button
-			(click)="addPayment()"
+			(click)="hasAppliedFilters ? clearFilters() : addPayment()"
 		>
-			Add payment
+			{{ hasAppliedFilters ? 'Clear filters' : 'Add payment' }}
 		</button>
 	</div>
 	} @else { @if (historyLoadErrorSignal()) {
-	<p
+	<div
 		class="payments-history__state payments-history__state--error"
 		role="alert"
 	>
-		Payments could not be refreshed. Showing the most recently loaded history.
-	</p>
+		<p>Payments could not be refreshed. Showing the most recently loaded history.</p>
+		<button
+			type="button"
+			mat-stroked-button
+			(click)="retryHistory()"
+		>
+			Retry
+		</button>
+	</div>
 	}
-	<div class="payments-history__table">
+	<div
+		class="payments-history__table"
+		[attr.aria-busy]="historyLoadingSignal()"
+	>
 		<mat-table
 			#table
 			[dataSource]="dataSource$"
@@ -92,7 +245,15 @@
 					mat-header-cell
 					*matHeaderCellDef
 				>
-					Date
+					<button
+						type="button"
+						class="payments-history__sort-button"
+						(click)="toggleSort('date')"
+						[attr.aria-sort]="paymentHistoryQuerySignal().sortBy === 'date' ? paymentHistoryQuerySignal().sortDirection + 'ending' : 'none'"
+					>
+						Date @if (paymentHistoryQuerySignal().sortBy === 'date') { {{
+						paymentHistoryQuerySignal().sortDirection === 'asc' ? '↑' : '↓' }} }
+					</button>
 				</th>
 				<td
 					mat-cell
@@ -106,6 +267,8 @@
 					>
 						{{ recentMutation.kind === 'created' ? 'Added' : 'Updated' }}
 					</span>
+					} @if (isFuturePayment(element)) {
+					<span class="payments-history__scheduled-badge">Scheduled</span>
 					}
 				</td>
 			</ng-container>
@@ -145,7 +308,15 @@
 					mat-header-cell
 					*matHeaderCellDef
 				>
-					Income
+					<button
+						type="button"
+						class="payments-history__sort-button"
+						(click)="toggleSort('amount')"
+						[attr.aria-sort]="paymentHistoryQuerySignal().sortBy === 'amount' ? paymentHistoryQuerySignal().sortDirection + 'ending' : 'none'"
+					>
+						Income @if (paymentHistoryQuerySignal().sortBy === 'amount') { {{
+						paymentHistoryQuerySignal().sortDirection === 'asc' ? '↑' : '↓' }} }
+					</button>
 				</th>
 				<td
 					mat-cell
@@ -224,6 +395,29 @@
 				</td>
 			</ng-container>
 
+			<ng-container matColumnDef="actions">
+				<th
+					mat-header-cell
+					*matHeaderCellDef
+				>
+					Actions
+				</th>
+				<td
+					mat-cell
+					*matCellDef="let element"
+					class="payments-history__actions"
+				>
+					<button
+						type="button"
+						mat-icon-button
+						aria-label="Edit payment"
+						(click)="selectRow(element); $event.stopPropagation()"
+					>
+						<mat-icon>edit</mat-icon>
+					</button>
+				</td>
+			</ng-container>
+
 			<tr
 				mat-header-row
 				*matHeaderRowDef="displayedColumns; sticky: true"
@@ -247,7 +441,6 @@
 			></tr>
 		</mat-table>
 	</div>
-
 	<div class="payments-history__mobile-list">
 		@for (record of dataSource$ | async; track record.key.toString()) {
 		<button
@@ -276,6 +469,17 @@
 			}
 		</button>
 		}
+	</div>
+	<div class="payments-history__pagination">
+		<span>Showing {{ recordsCount }} of {{ totalCountSignal() }} results</span>
+		<mat-paginator
+			aria-label="Transactions pagination"
+			[length]="totalCountSignal()"
+			[pageIndex]="paymentHistoryQuerySignal().page - 1"
+			[pageSize]="paymentHistoryQuerySignal().pageSize"
+			[pageSizeOptions]="[10, 25, 50, 100]"
+			(page)="changePage($event)"
+		></mat-paginator>
 	</div>
 	}
 </section>
