@@ -92,6 +92,30 @@
 	gap: 0.85rem;
 }
 
+.payments-dashboard__summary-scope {
+	grid-column: 1 / -1;
+	margin: 0;
+	color: #617089;
+	font-size: 0.875rem;
+}
+
+.payments-dashboard__summary-unavailable {
+	display: grid;
+	gap: 0.25rem;
+	padding: 1rem;
+	border: 1px solid rgba(15, 23, 42, 0.08);
+	border-radius: 18px;
+	background: rgba(255, 255, 255, 0.82);
+}
+
+.payments-dashboard__summary-unavailable p {
+	margin: 0;
+}
+
+.payments-dashboard__summary-unavailable p:last-child {
+	color: #617089;
+}
+
 .payments-dashboard__summary-card--net {
 	background: linear-gradient(135deg, rgba(14, 116, 144, 0.1), rgba(255, 255, 255, 0.94));
 }

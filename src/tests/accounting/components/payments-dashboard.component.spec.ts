@@ -239,6 +239,14 @@ describe('payments dashboard component', () => {
 		});
 	});
 
+	it('does not present an empty operations cache as zero-valued account-wide totals', () => {
+		store.dispatch(new SetInitialPaymentOperations([]));
+		fixture.detectChanges();
+
+		expect(getNativeText()).toContain('Account-wide transaction totals are unavailable');
+		expect(getNativeText()).not.toContain('Net flow');
+	});
+
 	it('classifies the supplied positive expense payment from its category rather than its amount sign', () => {
 		const categoryId = Guid.parse('850935c3-1e14-448f-be1c-30ef6f088fb5');
 

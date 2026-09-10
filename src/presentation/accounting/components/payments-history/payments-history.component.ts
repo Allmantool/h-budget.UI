@@ -5,6 +5,7 @@ import {
 	ChangeDetectionStrategy,
 	ChangeDetectorRef,
 	Component,
+	computed,
 	DestroyRef,
 	ElementRef,
 	inject,
@@ -15,7 +16,12 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { SseService } from 'infrastructure/sse-service';
 
@@ -27,6 +33,7 @@ import {
 	distinctUntilChanged,
 	EMPTY,
 	filter,
+	finalize,
 	forkJoin,
 	map,
 	merge,
@@ -65,6 +72,16 @@ import { PaymentsHistoryService } from '../../services/payments-history.service'
 import { RelatedTransferNavigationService } from '../../services/related-transfer-navigation.service';
 import { TransferProjectionSynchronizationService } from '../../services/transfer-projection-synchronization.service';
 
+type PaymentHistoryFilterField = keyof Pick<
+	IPaymentHistoryQueryModel,
+	'dateFrom' | 'dateTo' | 'type' | 'categoryId' | 'contractorId' | 'amountMin' | 'amountMax'
+>;
+
+interface ProjectionRefreshRequest {
+	accountId: string;
+	id: number;
+}
+
 @Component({
 	selector: 'payments-history',
 	templateUrl: './payments-history.component.html',
@@ -77,7 +94,12 @@ import { TransferProjectionSynchronizationService } from '../../services/transfe
 		DatePipe,
 		DecimalPipe,
 		MatButtonModule,
+		MatFormFieldModule,
 		MatIconModule,
+		MatInputModule,
+		MatPaginatorModule,
+		MatProgressBarModule,
+		MatSelectModule,
 		MatTableModule,
 		AccountingCurrencyFormatPipe,
 	],
@@ -92,6 +114,7 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	private readonly handbooksReady$: Observable<void>;
 	private isProjectionRefreshActive = false;
 	private hasQueuedProjectionRefresh = false;
+	private activeProjectionRefreshId = 0;
 	private isDestroyed = false;
 
 	@Select(getCategories)
@@ -121,6 +144,7 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		'expense',
 		'balance',
 		'comment',
+		'actions',
 	];
 
 	public dataSource$: BehaviorSubject<IPaymentRepresentationModel[]> = new BehaviorSubject<
@@ -132,11 +156,11 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	public readonly historyLoadingSignal = signal(true);
 	public readonly historyLoadErrorSignal = signal(false);
 	public readonly paymentHistoryQuerySignal = signal<IPaymentHistoryQueryModel>(defaultPaymentHistoryQuery);
+	public readonly draftPaymentHistoryQuerySignal = signal<IPaymentHistoryQueryModel>(defaultPaymentHistoryQuery);
 	public readonly totalCountSignal = signal(0);
 	public readonly totalPagesSignal = signal(0);
 	public readonly hasPreviousPageSignal = signal(false);
 	public readonly hasNextPageSignal = signal(false);
-	public readonly math = Math;
 	public readonly recentMutation = () => this.paymentEditorSession.recentMutationSignal();
 
 	constructor(
@@ -194,20 +218,23 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 			this.getActivePaymentAccountId$.pipe(
 				filter(accountId => accountId.toString() !== Guid.EMPTY.toString()),
 				distinctUntilChanged(),
-				tap(() => this.resetQueryForAccountChange()),
-				map(() => undefined)
+				tap(() => this.resetHistoryForAccountChange()),
+				map(accountId => this.beginProjectionRefresh(accountId.toString(), true))
 			),
-			this.timelineRefreshRequests$
+			this.timelineRefreshRequests$.pipe(
+				map(() => this.beginProjectionRefresh(this.activePaymentAccountIdSignal(), false))
+			)
 		)
 			.pipe(
 				takeUntilDestroyed(this.destroyRef),
-				switchMap(() =>
+				switchMap(request =>
 					this.handbooksReady$.pipe(
-						switchMap(() => this.refreshActiveAccountProjection()),
+						switchMap(() => this.refreshActiveAccountProjection(request.accountId)),
 						catchError(() => {
-							this.showHistoryLoadError();
+							this.showHistoryLoadError(request.id);
 							return EMPTY;
-						})
+						}),
+						finalize(() => this.completeProjectionRefresh(request.id))
 					)
 				)
 			)
@@ -247,21 +274,16 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		this.requestProjectionRefresh();
 	}
 
-	public changePage(page: number): void {
-		if (page < 1 || page > this.totalPagesSignal() || page === this.paymentHistoryQuerySignal().page) {
+	public changePage(event: PageEvent): void {
+		const page = event.pageIndex + 1;
+		if (page < 1 || page > this.totalPagesSignal() || !this.isSupportedPageSize(event.pageSize)) {
 			return;
 		}
 
-		this.updateQuery({ page });
-	}
-
-	public changePageSize(event: Event): void {
-		const target = event.target;
-		if (!(target instanceof HTMLSelectElement)) {
-			return;
-		}
-
-		this.updateQuery({ page: 1, pageSize: Number(target.value) as IPaymentHistoryQueryModel['pageSize'] });
+		this.updateQuery({
+			page,
+			pageSize: event.pageSize,
+		});
 	}
 
 	public toggleSort(sortBy: IPaymentHistoryQueryModel['sortBy']): void {
@@ -273,19 +295,7 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		});
 	}
 
-	public updateFilter(
-		event: Event,
-		field: keyof Pick<
-			IPaymentHistoryQueryModel,
-			'dateFrom' | 'dateTo' | 'type' | 'categoryId' | 'contractorId' | 'amountMin' | 'amountMax'
-		>
-	): void {
-		const target = event.target;
-		if (!(target instanceof HTMLInputElement || target instanceof HTMLSelectElement)) {
-			return;
-		}
-
-		const value = target.value;
+	public updateDraftFilter(field: PaymentHistoryFilterField, value: string): void {
 		const parsedValue =
 			field === 'amountMin' || field === 'amountMax'
 				? value === ''
@@ -294,14 +304,92 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 				: value === ''
 					? undefined
 					: value;
-		this.updateQuery({ page: 1, [field]: parsedValue });
+		this.draftPaymentHistoryQuerySignal.set({
+			...this.draftPaymentHistoryQuerySignal(),
+			[field]: parsedValue,
+		});
+	}
+
+	public updateDraftFilterFromInput(field: PaymentHistoryFilterField, event: Event): void {
+		const target = event.target;
+		if (target instanceof HTMLInputElement) {
+			this.updateDraftFilter(field, target.value);
+		}
+	}
+
+	public applyFilters(): void {
+		if (this.areDraftFiltersInvalid) {
+			return;
+		}
+
+		const currentQuery = this.paymentHistoryQuerySignal();
+		const draftQuery = this.draftPaymentHistoryQuerySignal();
+		this.updateQuery({
+			page: 1,
+			dateFrom: draftQuery.dateFrom,
+			dateTo: draftQuery.dateTo,
+			type: draftQuery.type,
+			categoryId: draftQuery.categoryId,
+			contractorId: draftQuery.contractorId,
+			amountMin: draftQuery.amountMin,
+			amountMax: draftQuery.amountMax,
+			pageSize: currentQuery.pageSize,
+			sortBy: currentQuery.sortBy,
+			sortDirection: currentQuery.sortDirection,
+		});
 	}
 
 	public clearFilters(): void {
 		const { pageSize, sortBy, sortDirection } = this.paymentHistoryQuerySignal();
-		this.paymentHistoryQuerySignal.set({ page: 1, pageSize, sortBy, sortDirection });
-		this.requestProjectionRefresh();
+		const clearedQuery = { page: 1, pageSize, sortBy, sortDirection };
+		this.draftPaymentHistoryQuerySignal.set(clearedQuery);
+		this.updateQuery(clearedQuery);
 	}
+
+	public get areDraftFiltersInvalid(): boolean {
+		return this.isDraftDateRangeInvalid || this.isDraftAmountRangeInvalid;
+	}
+
+	public get isDraftDateRangeInvalid(): boolean {
+		const { dateFrom, dateTo } = this.draftPaymentHistoryQuerySignal();
+		return dateFrom !== undefined && dateTo !== undefined && dateFrom > dateTo;
+	}
+
+	public get isDraftAmountRangeInvalid(): boolean {
+		const { amountMax, amountMin } = this.draftPaymentHistoryQuerySignal();
+		return (
+			(amountMin !== undefined && (!Number.isFinite(amountMin) || amountMin < 0)) ||
+			(amountMax !== undefined && (!Number.isFinite(amountMax) || amountMax < 0)) ||
+			(amountMin !== undefined && amountMax !== undefined && amountMin > amountMax)
+		);
+	}
+
+	public get hasAppliedFilters(): boolean {
+		const query = this.paymentHistoryQuerySignal();
+		return (
+			query.dateFrom !== undefined ||
+			query.dateTo !== undefined ||
+			query.type !== undefined ||
+			query.categoryId !== undefined ||
+			query.contractorId !== undefined ||
+			query.amountMin !== undefined ||
+			query.amountMax !== undefined
+		);
+	}
+
+	public get appliedFilterCount(): number {
+		const query = this.paymentHistoryQuerySignal();
+		return [
+			query.dateFrom,
+			query.dateTo,
+			query.type,
+			query.categoryId,
+			query.contractorId,
+			query.amountMin,
+			query.amountMax,
+		].filter(value => value !== undefined).length;
+	}
+
 	public isFuturePayment = (record: IPaymentRepresentationModel): boolean => isFuture(record.operationDate);
 
 	public isSelected(record: IPaymentRepresentationModel): boolean {
@@ -329,6 +417,9 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	public readonly historySummarySignal = toSignal(this.dataSource$.pipe(), {
 		initialValue: [],
 	});
+	public readonly isHistoryRefreshingSignal = computed(
+		() => this.historyLoadingSignal() && this.historySummarySignal().length > 0
+	);
 
 	public get recordsCount(): number {
 		return this.historySummarySignal().length;
@@ -338,9 +429,7 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		return this.historySummarySignal().filter(record => this.isFuturePayment(record)).length;
 	}
 
-	private refreshActiveAccountProjection(): Observable<IPaymentRepresentationModel[]> {
-		const accountId = this.activePaymentAccountIdSignal();
-
+	private refreshActiveAccountProjection(accountId: string): Observable<IPaymentRepresentationModel[]> {
 		return forkJoin({
 			payments: this.paymentsHistoryService.refreshPagedPaymentsHistory(
 				accountId,
@@ -355,16 +444,49 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		);
 	}
 
-	private resetQueryForAccountChange(): void {
-		this.paymentHistoryQuerySignal.set({
+	private resetHistoryForAccountChange(): void {
+		const query = {
 			...defaultPaymentHistoryQuery,
 			pageSize: this.paymentHistoryQuerySignal().pageSize,
-		});
+		};
+		this.paymentHistoryQuerySignal.set(query);
+		this.draftPaymentHistoryQuerySignal.set(query);
+		this.hasQueuedProjectionRefresh = false;
+		this.dataSource$.next([]);
+		this.totalCountSignal.set(0);
+		this.totalPagesSignal.set(0);
+		this.hasPreviousPageSignal.set(false);
+		this.hasNextPageSignal.set(false);
 	}
 
 	private updateQuery(update: Partial<IPaymentHistoryQueryModel>): void {
-		this.paymentHistoryQuerySignal.set({ ...this.paymentHistoryQuerySignal(), ...update });
+		const nextQuery = { ...this.paymentHistoryQuerySignal(), ...update };
+		if (this.areQueriesEqual(this.paymentHistoryQuerySignal(), nextQuery)) {
+			return;
+		}
+
+		this.paymentHistoryQuerySignal.set(nextQuery);
 		this.requestProjectionRefresh();
+	}
+
+	private areQueriesEqual(left: IPaymentHistoryQueryModel, right: IPaymentHistoryQueryModel): boolean {
+		return (
+			left.page === right.page &&
+			left.pageSize === right.pageSize &&
+			left.sortBy === right.sortBy &&
+			left.sortDirection === right.sortDirection &&
+			left.dateFrom === right.dateFrom &&
+			left.dateTo === right.dateTo &&
+			left.type === right.type &&
+			left.categoryId === right.categoryId &&
+			left.contractorId === right.contractorId &&
+			left.amountMin === right.amountMin &&
+			left.amountMax === right.amountMax
+		);
+	}
+
+	private isSupportedPageSize(pageSize: number): pageSize is IPaymentHistoryQueryModel['pageSize'] {
+		return pageSize === 10 || pageSize === 25 || pageSize === 50 || pageSize === 100;
 	}
 
 	private setPageMetadata(page: {
@@ -385,12 +507,31 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 			return;
 		}
 
-		this.historyLoadingSignal.set(true);
-		this.historyLoadErrorSignal.set(false);
+		if (this.isProjectionRefreshActive) {
+			this.hasQueuedProjectionRefresh = true;
+			return;
+		}
+
 		this.timelineRefreshRequests$.next();
 	}
 
-	private completeProjectionRefresh(): void {
+	private beginProjectionRefresh(accountId: string, isAccountChange: boolean): ProjectionRefreshRequest {
+		if (isAccountChange) {
+			this.hasQueuedProjectionRefresh = false;
+		}
+
+		this.isProjectionRefreshActive = true;
+		this.historyLoadingSignal.set(true);
+		this.historyLoadErrorSignal.set(false);
+		this.activeProjectionRefreshId += 1;
+		return { accountId, id: this.activeProjectionRefreshId };
+	}
+
+	private completeProjectionRefresh(requestId: number): void {
+		if (requestId !== this.activeProjectionRefreshId) {
+			return;
+		}
+
 		this.isProjectionRefreshActive = false;
 		if (this.isDestroyed) {
 			return;
@@ -416,7 +557,11 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		);
 	}
 
-	private showHistoryLoadError(): void {
+	private showHistoryLoadError(requestId: number): void {
+		if (requestId !== this.activeProjectionRefreshId) {
+			return;
+		}
+
 		this.historyLoadingSignal.set(false);
 		this.historyLoadErrorSignal.set(true);
 	}

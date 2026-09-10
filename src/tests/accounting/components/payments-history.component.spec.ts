@@ -226,6 +226,7 @@ describe('payments history component', () => {
 			'expense',
 			'balance',
 			'comment',
+			'actions',
 		]);
 		expect(getHeaderTexts()).toEqual([
 			'Date  ↓',
@@ -235,11 +236,58 @@ describe('payments history component', () => {
 			'Expense',
 			'Balance',
 			'Comment',
+			'Actions',
 		]);
 	});
 
 	it('renders an always-available Add payment action above the history table', () => {
 		expect(getNativeElement().textContent).toContain('Add payment');
+	});
+
+	it('uses Material filter and pagination controls while keeping query application explicit', () => {
+		const nativeElement = getNativeElement();
+
+		expect(nativeElement.querySelectorAll('mat-form-field').length).toBeGreaterThan(0);
+		expect(nativeElement.querySelectorAll('mat-select').length).toBeGreaterThan(0);
+		expect(nativeElement.querySelector('mat-paginator')).not.toBeNull();
+		expect(nativeElement.textContent).toContain('Apply filters');
+		expect(nativeElement.textContent).toContain('Showing 2 of 2 results');
+	});
+
+	it('provides a labelled row edit action in addition to row selection', async () => {
+		const editButton = getNativeElement().querySelector<HTMLButtonElement>('button[aria-label="Edit payment"]');
+
+		expect(editButton).not.toBeNull();
+		editButton?.click();
+		await fixture.whenStable();
+
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid.toString()).toBe(
+			incomeRecordId.toString()
+		);
+	});
+
+	it('does not load until valid draft filters are applied', () => {
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.reset();
+
+		component.updateDraftFilter('type', 'expense');
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(0);
+
+		component.applyFilters();
+
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(1);
+		expect(pageRequest()).toEqual(jasmine.objectContaining({ page: 1, type: 'expense' }));
+	});
+
+	it('keeps an invalid amount range local instead of issuing an invalid history request', () => {
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.reset();
+		component.updateDraftFilter('amountMin', '20');
+		component.updateDraftFilter('amountMax', '10');
+
+		component.applyFilters();
+		fixture.detectChanges();
+
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(0);
+		expect(getNativeElement().textContent).toContain('minimum amount must not exceed the maximum amount');
 	});
 
 	it('loads the initial page once for the selected account without a notification', () => {
@@ -283,17 +331,27 @@ describe('payments history component', () => {
 		component.historyLoadingSignal.set(true);
 		component.historyLoadErrorSignal.set(false);
 		fixture.detectChanges();
-		expect(getNativeElement().textContent).toContain('Loading payments…');
-		expect(getNativeElement().textContent).not.toContain('No payments yet.');
+		expect(getNativeElement().textContent).toContain('Loading transactions…');
+		expect(getNativeElement().textContent).not.toContain('No transactions yet.');
 
 		component.historyLoadingSignal.set(false);
 		fixture.detectChanges();
-		expect(getNativeElement().textContent).toContain('No payments yet.');
+		expect(getNativeElement().textContent).toContain('No transactions yet.');
 		expect(getNativeElement().textContent).toContain('Add payment');
 
 		component.historyLoadErrorSignal.set(true);
 		fixture.detectChanges();
 		expect(getNativeElement().textContent).toContain('Payments could not be loaded.');
+		expect(getNativeElement().textContent).toContain('Retry');
+	});
+
+	it('keeps loaded transactions visible and offers Retry after a refresh error', () => {
+		component.historyLoadErrorSignal.set(true);
+		component.historyLoadingSignal.set(false);
+		fixture.detectChanges();
+
+		expect(getRenderedRows().length).toBe(2);
+		expect(getNativeElement().textContent).toContain('Showing the most recently loaded history.');
 		expect(getNativeElement().textContent).toContain('Retry');
 	});
 
@@ -452,6 +510,32 @@ describe('payments history component', () => {
 		secondHistoryResponse.complete();
 
 		expect(component.historySummarySignal()).toEqual(latestRows);
+	});
+
+	it('queues one final account refresh when a notification arrives during an active refresh', () => {
+		const firstHistoryResponse = new Subject<ReturnType<typeof createPage>>();
+		const secondHistoryResponse = new Subject<ReturnType<typeof createPage>>();
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.reset();
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.and.returnValues(
+			firstHistoryResponse,
+			secondHistoryResponse
+		);
+		accountsServiceSpy.refreshAccounts.and.returnValues(of(undefined), of(undefined));
+
+		component.retryHistory();
+		notificationsSubject.next({
+			eventId: Guid.create().toString(),
+			accountId: activePaymentAccountId,
+			eventType: 'UpdatePaymentAccountBalanceCommand',
+		});
+
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(1);
+		firstHistoryResponse.next(createPage(historyRows, component.paymentHistoryQuerySignal()));
+		firstHistoryResponse.complete();
+
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(2);
+		secondHistoryResponse.next(createPage(historyRows, component.paymentHistoryQuerySignal()));
+		secondHistoryResponse.complete();
 	});
 
 	it('does not issue a refresh after the component is destroyed', () => {

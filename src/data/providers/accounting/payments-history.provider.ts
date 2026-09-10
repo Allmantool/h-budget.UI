@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { HttpClient } from '@angular/common/http';
 import { HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
@@ -50,10 +49,9 @@ export class PaymentsHistoryProvider {
 		query: IPaymentHistoryQueryModel
 	): Observable<IPaymentHistoryPageModel> {
 		return this.http
-			.get<Result<IPaymentHistoryPageEntity>>(
-				`${this.accountingHostUrl}/${this.paymentOperationsApi}/query/${paymentAccountId.toString()}`,
-				{ params: this.toQueryParams(query) }
-			)
+			.get<
+				Result<IPaymentHistoryPageEntity>
+			>(`${this.accountingHostUrl}/${this.paymentOperationsApi}/query/${paymentAccountId.toString()}`, { params: this.toQueryParams(query) })
 			.pipe(
 				map(responseResult => responseResult.payload),
 				map(payload => ({
@@ -69,8 +67,9 @@ export class PaymentsHistoryProvider {
 	}
 
 	private toQueryParams(query: IPaymentHistoryQueryModel): HttpParams {
-		return Object.entries(query).reduce((params, [key, value]) => {
-			return value === undefined || value === null || value === '' ? params : params.set(key, value.toString());
+		return (Object.keys(query) as Array<keyof IPaymentHistoryQueryModel>).reduce((params, key) => {
+			const value = query[key];
+			return value === undefined || value === '' ? params : params.set(key, String(value));
 		}, new HttpParams());
 	}
 

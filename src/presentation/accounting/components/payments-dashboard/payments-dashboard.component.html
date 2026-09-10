@@ -51,10 +51,16 @@
 	>
 		Transfer completed. Latest account data may still be updating.
 	</p>
-	}
-	<div class="payments-dashboard__summary">
+	} @if (accountingSummarySignal().operationsCount > 0) {
+	<div
+		class="payments-dashboard__summary"
+		aria-label="Cached account-operation summary"
+	>
+		<p class="payments-dashboard__summary-scope">
+			Cached account-operation snapshot. The paged timeline below can represent a different scope.
+		</p>
 		<div class="payments-dashboard__summary-card">
-			<span class="payments-dashboard__summary-label">Operations</span>
+			<span class="payments-dashboard__summary-label">Cached operations</span>
 			<strong>{{ accountingSummarySignal().operationsCount }}</strong>
 			<span>{{ accountingSummarySignal().settledCount }} settled</span>
 		</div>
@@ -74,11 +80,20 @@
 			<span>{{ activePaymentAccount.currency }}</span>
 		</div>
 		<div class="payments-dashboard__summary-card payments-dashboard__summary-card--net">
-			<span class="payments-dashboard__summary-label">Net flow</span>
+			<span class="payments-dashboard__summary-label">Cached net flow</span>
 			<strong>{{ accountingSummarySignal().net }}</strong>
 			<span>{{ activePaymentAccount.currency }}</span>
 		</div>
 	</div>
+	} @else {
+	<div
+		class="payments-dashboard__summary-unavailable"
+		role="status"
+	>
+		<p>Account-wide transaction totals are unavailable until a complete account snapshot is loaded.</p>
+		<p>The transaction timeline below remains the authoritative paged result set.</p>
+	</div>
+	}
 	<payments-history></payments-history>
 </section>
 } @else {
