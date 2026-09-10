@@ -42,16 +42,16 @@ import { Guid } from 'typescript-guid';
 import { AccountingCurrencyFormatPipe } from '../../../../app/modules/shared/pipes/accounting-currency.pipe';
 import { IAccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
 import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
-import { getCategories } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
-import { getContractors } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
 import {
 	getActivePaymentAccountId,
 	getPaymentAccounts,
 } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
-import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
+import { getCategories } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
+import { getContractors } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
 import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
 import { IContractorModel } from '../../../../domain/models/accounting/contractor.model.';
+import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 import {
 	defaultPaymentHistoryQuery,
 	IPaymentHistoryQueryModel,
@@ -59,11 +59,11 @@ import {
 import { IPaymentRepresentationModel } from '../../models/operation-record';
 import { AccountsService } from '../../services/accounts.service';
 import { HandbooksService } from '../../services/handbooks.service';
+import { PaymentEditorLeaveService } from '../../services/payment-editor-leave.service';
+import { PaymentEditorSessionService, RecentPaymentMutation } from '../../services/payment-editor-session.service';
 import { PaymentsHistoryService } from '../../services/payments-history.service';
 import { RelatedTransferNavigationService } from '../../services/related-transfer-navigation.service';
 import { TransferProjectionSynchronizationService } from '../../services/transfer-projection-synchronization.service';
-import { PaymentEditorLeaveService } from '../../services/payment-editor-leave.service';
-import { PaymentEditorSessionService, RecentPaymentMutation } from '../../services/payment-editor-session.service';
 
 @Component({
 	selector: 'payments-history',

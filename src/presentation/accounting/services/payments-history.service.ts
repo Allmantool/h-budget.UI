@@ -14,9 +14,9 @@ import { getAccountPayments } from '../../../app/modules/shared/store/states/acc
 import { getSelectedRecordGuid } from '../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { PaymentRepresentationsMappingProfile } from '../../../data/providers/accounting/mappers/payment-representations.mapping.profile';
 import { PaymentsHistoryProvider } from '../../../data/providers/accounting/payments-history.provider';
-import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 import { IPaymentHistoryPageModel } from '../../../domain/models/accounting/payment-history-page.model';
 import { IPaymentHistoryQueryModel } from '../../../domain/models/accounting/payment-history-query.model';
+import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 import { IPaymentRepresentationModel } from '../models/operation-record';
 
 @Injectable()

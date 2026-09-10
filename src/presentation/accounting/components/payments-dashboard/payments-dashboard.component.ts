@@ -20,15 +20,15 @@ import {
 	AddPaymentAccount,
 	SetActivePaymentAccount,
 } from '../../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
-import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
 import { getAccountPayments } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import {
 	getActivePaymentAccount,
 	getActivePaymentAccountId,
 } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { getCategories } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
-import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
+import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
 import { calculatePaymentOperationIncrement } from '../../../../domain/models/accounting/calculate-payment-operation-increment';
+import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
 import { PaymentsHistoryComponent } from '../payments-history/payments-history.component';

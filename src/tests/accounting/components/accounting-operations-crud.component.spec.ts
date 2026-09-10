@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
-
 import { MatDatepicker } from '@angular/material/datepicker';
+import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+
 import { NgxsModule, Store } from '@ngxs/store';
 import { Guid } from 'typescript-guid';
 
@@ -11,21 +11,21 @@ import { AccountingOperationsTableState } from '../../../app/modules/shared/stor
 import { SetActiveAccountingOperation } from '../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
 import { SetActivePaymentAccount } from '../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
 import { SetInitialPaymentOperations } from '../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
-import { SetInitialCategories } from '../../../app/modules/shared/store/states/handbooks/actions/category.actions';
 import { PaymentAccountState } from '../../../app/modules/shared/store/states/accounting/payment-account.state';
 import { AccountingOperationsState } from '../../../app/modules/shared/store/states/accounting/payment-operations.state';
 import { getAccountingTableOptions } from '../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
+import { SetInitialCategories } from '../../../app/modules/shared/store/states/handbooks/actions/category.actions';
 import { CategoriesState } from '../../../app/modules/shared/store/states/handbooks/categories.state';
 import { ContractorsState } from '../../../app/modules/shared/store/states/handbooks/contractors.state';
+import { PaymentOperationTypes } from '../../../domain/models/accounting/operation-types';
+import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
+import { OperationTypes } from '../../../domain/types/operation.types';
 import { AccountingOperationsCrudComponent } from '../../../presentation/accounting/components/accounting-operations-crud/accounting-operations-crud.component';
 import { CategoriesDialogService } from '../../../presentation/accounting/services/categories-dialog.service';
 import { ContractorsDialogService } from '../../../presentation/accounting/services/contractors-dialog.service';
 import { PaymentCommandExecutorService } from '../../../presentation/accounting/services/payment-command-executor.service';
 import { PaymentEditorLeaveService } from '../../../presentation/accounting/services/payment-editor-leave.service';
 import { PaymentEditorSessionService } from '../../../presentation/accounting/services/payment-editor-session.service';
-import { OperationTypes } from '../../../domain/types/operation.types';
-import { PaymentOperationTypes } from '../../../domain/models/accounting/operation-types';
-import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 
 describe('accounting operations CRUD component', () => {
 	it('renders one create primary action and prevents concurrent submission', async () => {

@@ -30,15 +30,86 @@
 			</button>
 		</div>
 	</div>
-	<div class="payments-history__filters" aria-label="Transaction filters">
-		<label>From <input type="date" [value]="paymentHistoryQuerySignal().dateFrom ?? ''" (change)="updateFilter($event, 'dateFrom')" /></label>
-		<label>To <input type="date" [value]="paymentHistoryQuerySignal().dateTo ?? ''" (change)="updateFilter($event, 'dateTo')" /></label>
-		<label>Type <select [value]="paymentHistoryQuerySignal().type ?? ''" (change)="updateFilter($event, 'type')"><option value="">All</option><option value="income">Income</option><option value="expense">Expense</option></select></label>
-		<label>Category <select [value]="paymentHistoryQuerySignal().categoryId ?? ''" (change)="updateFilter($event, 'categoryId')"><option value="">All categories</option>@for (category of categories$ | async; track category.key.toString()) { <option [value]="category.key.toString()">{{ category.nameNodes.join(': ') }}</option> }</select></label>
-		<label>Contractor <select [value]="paymentHistoryQuerySignal().contractorId ?? ''" (change)="updateFilter($event, 'contractorId')"><option value="">All contractors</option>@for (contractor of contractors$ | async; track contractor.key.toString()) { <option [value]="contractor.key.toString()">{{ contractor.nameNodes.join(': ') }}</option> }</select></label>
-		<label>Min amount <input type="number" min="0" [value]="paymentHistoryQuerySignal().amountMin ?? ''" (change)="updateFilter($event, 'amountMin')" /></label>
-		<label>Max amount <input type="number" min="0" [value]="paymentHistoryQuerySignal().amountMax ?? ''" (change)="updateFilter($event, 'amountMax')" /></label>
-		<button type="button" mat-stroked-button (click)="clearFilters()">Clear filters</button>
+	<div
+		class="payments-history__filters"
+		aria-label="Transaction filters"
+	>
+		<label>
+			From
+			<input
+				type="date"
+				[value]="paymentHistoryQuerySignal().dateFrom ?? ''"
+				(change)="updateFilter($event, 'dateFrom')"
+			/>
+		</label>
+		<label>
+			To
+			<input
+				type="date"
+				[value]="paymentHistoryQuerySignal().dateTo ?? ''"
+				(change)="updateFilter($event, 'dateTo')"
+			/>
+		</label>
+		<label>
+			Type
+			<select
+				[value]="paymentHistoryQuerySignal().type ?? ''"
+				(change)="updateFilter($event, 'type')"
+			>
+				<option value="">All</option>
+				<option value="income">Income</option>
+				<option value="expense">Expense</option>
+			</select>
+		</label>
+		<label>
+			Category
+			<select
+				[value]="paymentHistoryQuerySignal().categoryId ?? ''"
+				(change)="updateFilter($event, 'categoryId')"
+			>
+				<option value="">All categories</option>
+				@for (category of categories$ | async; track category.key.toString()) {
+				<option [value]="category.key.toString()">{{ category.nameNodes.join(': ') }}</option>
+				}
+			</select>
+		</label>
+		<label>
+			Contractor
+			<select
+				[value]="paymentHistoryQuerySignal().contractorId ?? ''"
+				(change)="updateFilter($event, 'contractorId')"
+			>
+				<option value="">All contractors</option>
+				@for (contractor of contractors$ | async; track contractor.key.toString()) {
+				<option [value]="contractor.key.toString()">{{ contractor.nameNodes.join(': ') }}</option>
+				}
+			</select>
+		</label>
+		<label>
+			Min amount
+			<input
+				type="number"
+				min="0"
+				[value]="paymentHistoryQuerySignal().amountMin ?? ''"
+				(change)="updateFilter($event, 'amountMin')"
+			/>
+		</label>
+		<label>
+			Max amount
+			<input
+				type="number"
+				min="0"
+				[value]="paymentHistoryQuerySignal().amountMax ?? ''"
+				(change)="updateFilter($event, 'amountMax')"
+			/>
+		</label>
+		<button
+			type="button"
+			mat-stroked-button
+			(click)="clearFilters()"
+		>
+			Clear filters
+		</button>
 	</div>
 
 	@if (recentMutation(); as recentMutation) {
@@ -102,7 +173,15 @@
 					mat-header-cell
 					*matHeaderCellDef
 				>
-					<button type="button" class="payments-history__sort-button" (click)="toggleSort('date')" [attr.aria-sort]="paymentHistoryQuerySignal().sortBy === 'date' ? paymentHistoryQuerySignal().sortDirection + 'ending' : 'none'">Date @if (paymentHistoryQuerySignal().sortBy === 'date') { {{ paymentHistoryQuerySignal().sortDirection === 'asc' ? '↑' : '↓' }} }</button>
+					<button
+						type="button"
+						class="payments-history__sort-button"
+						(click)="toggleSort('date')"
+						[attr.aria-sort]="paymentHistoryQuerySignal().sortBy === 'date' ? paymentHistoryQuerySignal().sortDirection + 'ending' : 'none'"
+					>
+						Date @if (paymentHistoryQuerySignal().sortBy === 'date') { {{
+						paymentHistoryQuerySignal().sortDirection === 'asc' ? '↑' : '↓' }} }
+					</button>
 				</th>
 				<td
 					mat-cell
@@ -155,7 +234,15 @@
 					mat-header-cell
 					*matHeaderCellDef
 				>
-					<button type="button" class="payments-history__sort-button" (click)="toggleSort('amount')" [attr.aria-sort]="paymentHistoryQuerySignal().sortBy === 'amount' ? paymentHistoryQuerySignal().sortDirection + 'ending' : 'none'">Income @if (paymentHistoryQuerySignal().sortBy === 'amount') { {{ paymentHistoryQuerySignal().sortDirection === 'asc' ? '↑' : '↓' }} }</button>
+					<button
+						type="button"
+						class="payments-history__sort-button"
+						(click)="toggleSort('amount')"
+						[attr.aria-sort]="paymentHistoryQuerySignal().sortBy === 'amount' ? paymentHistoryQuerySignal().sortDirection + 'ending' : 'none'"
+					>
+						Income @if (paymentHistoryQuerySignal().sortBy === 'amount') { {{
+						paymentHistoryQuerySignal().sortDirection === 'asc' ? '↑' : '↓' }} }
+					</button>
 				</th>
 				<td
 					mat-cell
@@ -256,7 +343,7 @@
 				*matRowDef="let row; columns: displayedColumns;"
 			></tr>
 		</mat-table>
-		</div>
+	</div>
 	<div class="payments-history__mobile-list">
 		@for (record of dataSource$ | async; track record.key.toString()) {
 		<button
@@ -286,12 +373,46 @@
 		</button>
 		}
 	</div>
-	<div class="payments-history__pagination" aria-label="Transactions pagination">
-		@if (totalCountSignal() > 0) { <span>{{ (paymentHistoryQuerySignal().page - 1) * paymentHistoryQuerySignal().pageSize + 1 }}–{{ math.min(paymentHistoryQuerySignal().page * paymentHistoryQuerySignal().pageSize, totalCountSignal()) }} of {{ totalCountSignal() }}</span> }
-		<label>Rows <select [value]="paymentHistoryQuerySignal().pageSize" (change)="changePageSize($event)"><option value="10">10</option><option value="25">25</option><option value="50">50</option><option value="100">100</option></select></label>
-		<button type="button" mat-stroked-button (click)="changePage(paymentHistoryQuerySignal().page - 1)" [disabled]="!hasPreviousPageSignal()">Previous</button>
+	<div
+		class="payments-history__pagination"
+		aria-label="Transactions pagination"
+	>
+		@if (totalCountSignal() > 0) {
+		<span>
+			{{ (paymentHistoryQuerySignal().page - 1) * paymentHistoryQuerySignal().pageSize + 1 }}–{{
+			math.min(paymentHistoryQuerySignal().page * paymentHistoryQuerySignal().pageSize, totalCountSignal()) }} of
+			{{ totalCountSignal() }}
+		</span>
+		}
+		<label>
+			Rows
+			<select
+				[value]="paymentHistoryQuerySignal().pageSize"
+				(change)="changePageSize($event)"
+			>
+				<option value="10">10</option>
+				<option value="25">25</option>
+				<option value="50">50</option>
+				<option value="100">100</option>
+			</select>
+		</label>
+		<button
+			type="button"
+			mat-stroked-button
+			(click)="changePage(paymentHistoryQuerySignal().page - 1)"
+			[disabled]="!hasPreviousPageSignal()"
+		>
+			Previous
+		</button>
 		<span>Page {{ paymentHistoryQuerySignal().page }} of {{ totalPagesSignal() }}</span>
-		<button type="button" mat-stroked-button (click)="changePage(paymentHistoryQuerySignal().page + 1)" [disabled]="!hasNextPageSignal()">Next</button>
+		<button
+			type="button"
+			mat-stroked-button
+			(click)="changePage(paymentHistoryQuerySignal().page + 1)"
+			[disabled]="!hasNextPageSignal()"
+		>
+			Next
+		</button>
 	</div>
 	}
 </section>
