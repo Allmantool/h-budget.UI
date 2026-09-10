@@ -2,33 +2,32 @@
 
 ## Status
 
-Ready
+Verified
 
 ## Problem and Goal
 
-The visible payment-history timeline has migrated to the verified paged query contract, but its component tests still assert the retired unpaged refresh path. Complete the SPA lifecycle by making query state the one source of truth, correcting an invalid page after a destructive refresh, and covering deterministic paging, filters, stale responses, errors, and command-driven refreshes.
+The visible payment-history timeline has migrated to the verified paged query contract, but the production SPA displays “Payments could not be loaded” even though the gateway returns a valid paged response. The refresh stream must remain usable after a read failure, must wait for a valid account, and must execute the real paged provider request exactly once for initial account activation.
 
 ## Scope
 
-**Required:** Keep all visible timeline reads on `refreshPagedPaymentsHistory`, migrate the eight obsolete component expectations, add deterministic component coverage for the specified query transitions and command effects, and correct a page only when the authoritative response says the requested page is invalid.
+**Required:** Keep all visible timeline reads on `refreshPagedPaymentsHistory`; prevent invalid-account refreshes; retain the refresh subscription after request, mapping, or account-summary failures; add deterministic selected-account/retry coverage and real-provider HTTP-boundary coverage.
 
 **Non-goals:** Backend, gateway, payment-command protocol, Mongo query, legacy compatibility endpoint, Angular/NGXS migration, and optimistic local timeline mutations.
 
 ## Repository Evidence and Unknowns
 
-- **CONFIRMED:** `PaymentsHistoryComponent` owns one `IPaymentHistoryQueryModel` signal and uses `switchMap` for its timeline refresh stream.
-- **CONFIRMED:** `PaymentCommandExecutorService` refreshes command projection state; that state emission triggers the timeline's current paged query.
-- **CONFIRMED:** The focused component suite has eight failures, all caused by expectations of `refreshPaymentsHistory` or values supplied through it.
-- **CONFIRMED:** The response carries `page`, `totalPages`, counts, and navigation flags required for bounded corrective paging.
-- **UNKNOWN:** A real browser test is not required because the existing Karma/TestBed harness can deterministically prove these local component transitions.
+- **CONFIRMED:** `PaymentAccountState` stores `activeAccountGuid` as a string, but `PaymentsHistoryComponent` declared the selector as `Observable<Guid>` and called `accountId.equals(...)`. At runtime this throws before the history provider is invoked.
+- **CONFIRMED:** The component also merged an initial `accountPayments$` emission, which could start a refresh before account readiness. The subscription handled errors only at its outer boundary, so any failure terminated later account activation and Retry.
+- **CONFIRMED:** In a local browser smoke test, the active Priorank account showed the generic error while categories and contractors rendered. Retrying left the UI loading; the browser console contained no application error.
+- **CONFIRMED:** The exact gateway request for the routed account returned HTTP 200 and one valid record. The missing-request claim in the screenshot is therefore not established by its filtered request list.
+- **CONFIRMED:** The backend contract is `GET /accounting/payments-history/query/{paymentAccountId}` with the documented paging and filter query values.
 
 ## Requirements and Acceptance Criteria
 
-- **REQ-001:** Account and query changes issue one authoritative paged request. **AC-001:** Page, page size, sorting, and filters sent to the service match query state.
-- **REQ-002:** Stale account requests cannot render after a newer active account request. **AC-002:** A delayed Account A response cannot overwrite Account B rows, metadata, loading, or error state.
-- **REQ-003:** Paging/filter/sort actions mutate only the intended query fields. **AC-003:** Resets and preserved fields match the query contract.
-- **REQ-004:** A destructive refresh corrects only an out-of-range page. **AC-004:** Page 4 of an authoritative 3-page result performs one corrective page-3 request; page 1 remains page 1 when empty.
-- **REQ-005:** Projected create, update, and delete refresh the current query without optimistic local rows. **AC-005:** A selected deleted operation is cleared by the existing projected-delete editor flow.
+- **REQ-001:** A timeline refreshes only for a valid selected account. **AC-001:** The selected account starts exactly one paged read with default query values.
+- **REQ-002:** A read failure does not terminate future refreshes. **AC-002:** Retry with unchanged account and filters starts a new read and can clear the error on success.
+- **REQ-003:** The real paged provider constructs the backend contract correctly. **AC-003:** Angular's HTTP testing backend receives one `GET` for a valid account with default parameters, preserves a valid mapped record, and omits cleared optional filters.
+- **REQ-004:** Account changes retain cancellation safety. **AC-004:** The existing `switchMap` behavior remains responsible for obsolete account requests.
 
 ## Constraints
 
@@ -36,43 +35,43 @@ No skipped/weakened tests, arbitrary delays, duplicated query state, client-side
 
 ## Test and Verification Strategy
 
-RED: run the existing focused component suite (8 failures), then add deterministic Subject-backed regression tests for stale response and invalid-page correction before production changes. GREEN: implement the smallest query-response correction. Run focused Karma, typecheck, lint, build, and diff review.
+RED: reproduce the original selected-account failure in the browser and add regressions for initial selected-account loading and a failed read followed by Retry; the original selector invokes `String.equals` before HTTP and the outer error terminates Retry. Add a provider integration test that reaches `HttpTestingController`. GREEN: respect the selector's string contract, remove the premature trigger, and contain errors inside the per-request pipeline. Run focused Karma, typecheck, lint, build, and diff review.
 
 ## Implementation Plan
 
-1. Migrate obsolete focused tests to paged-service expectations — all eight failures classified and replaced by equivalent business assertions.
-2. Add red tests for stale response and invalid-page correction — behavior observable through paged requests and rendered state.
-3. Add the bounded correction to response handling and command/query transition coverage — focused suite green.
-4. Run release validation and update traceability.
+1. Add RED coverage for selected-account initialization and an error-resilient refresh stream.
+2. Add real-provider HTTP-boundary coverage for default and cleared filters.
+3. Filter invalid trigger emissions and contain errors without hiding them from the UI.
+4. Run focused and broader validation, then update traceability.
 
 ## Requirement Traceability
 
-| Requirement | Acceptance Criteria | Implementation | Test / Evidence | Status |
-| --- | --- | --- | --- | --- |
-| REQ-001 | AC-001 | Query signal and paged service | Focused component suite | NOT RUN |
-| REQ-002 | AC-002 | Existing `switchMap` lifecycle | Subject-backed component test | NOT RUN |
-| REQ-003 | AC-003 | Existing query mutation methods | Component interaction tests | NOT RUN |
-| REQ-004 | AC-004 | Bounded response correction | Component regression tests | NOT RUN |
-| REQ-005 | AC-005 | Existing projection/store lifecycle | Component and CRUD regression tests | NOT RUN |
+| Requirement | Acceptance Criteria | Implementation                        | Test / Evidence                                     | Status |
+| ----------- | ------------------- | ------------------------------------- | --------------------------------------------------- | ------ |
+| REQ-001     | AC-001              | Account-id trigger only               | Initial selected-account component test             | PASS   |
+| REQ-002     | AC-002              | Per-refresh `catchError`              | Failed-read/Retry component test                    | PASS   |
+| REQ-003     | AC-003              | Existing provider query serialization | `PaymentsHistoryProvider` + `HttpTestingController` | PASS   |
+| REQ-004     | AC-004              | Existing `switchMap`                  | Focused component suite                             | PASS   |
 
 ## Implementation Progress
 
 ### Completed
 
-- Readiness investigation and unchanged focused-suite baseline: 18 passing, 8 failing.
-
-### In Progress
-
-- Test migration and missing lifecycle coverage.
-
-### Remaining
-
-- Implementation and validation.
+- Production browser and gateway investigation.
+- Focused component and provider regression suites.
+- Browser verification on the original account and a switched second account.
+- Typecheck, production build, and diff review.
 
 ### Decisions and Requirement Changes
 
-- The eight failures are test migrations, not product defects: each asserts retired unpaged mechanics rather than server-authoritative paged behavior.
+- The supplied Network screenshot was filtered, but the reproduced failure has a stronger explanation: the active-account selector throws synchronously before the provider call. Gateway success independently proves the API has a valid response for the reproduced account.
 
 ### Verification
 
-- RED baseline: `npx nx test h-budget --include=src/tests/accounting/components/payments-history.component.spec.ts --watch=false --browsers=ChromiumNoSandbox` — FAIL, 8 failures.
+- RED evidence: before the correction, browser navigation reached `String.equals` on the selector value and threw before HTTP; the same outer error would terminate the refresh stream. The added initial-load and failed-read/Retry tests protect those boundaries.
+- GREEN: focused component suite — 27/27 PASS; provider HTTP-boundary suite — 2/2 PASS.
+- Full unit suite — 318/318 PASS.
+- `npm run typecheck` — PASS.
+- `npm run build:prod` — PASS with the existing 2.38 MB initial-bundle warning.
+- Targeted Prettier check — PASS. Global `npm run lint` remains blocked by 54 pre-existing errors and 416 warnings outside this change.
+- Browser smoke: the original account rendered its record after refresh; switching to a second account rendered that account's record without the load-error banner.

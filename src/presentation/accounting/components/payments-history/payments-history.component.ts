@@ -23,7 +23,9 @@ import { Select, Store } from '@ngxs/store';
 import { isFuture } from 'date-fns';
 import {
 	BehaviorSubject,
+	catchError,
 	distinctUntilChanged,
+	EMPTY,
 	filter,
 	forkJoin,
 	map,
@@ -40,7 +42,6 @@ import { Guid } from 'typescript-guid';
 import { AccountingCurrencyFormatPipe } from '../../../../app/modules/shared/pipes/accounting-currency.pipe';
 import { IAccountingOperationsTableOptions } from '../../../../app/modules/shared/store/models/accounting/accounting-table-options';
 import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
-import { getAccountPayments } from '../../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import { getCategories } from '../../../../app/modules/shared/store/states/handbooks/selectors/categories.selectors';
 import { getContractors } from '../../../../app/modules/shared/store/states/handbooks/selectors/counterparties.selectors';
 import {
@@ -49,7 +50,6 @@ import {
 } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { getAccountingTableOptions } from '../../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
-import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
 import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
 import { IContractorModel } from '../../../../domain/models/accounting/contractor.model.';
 import {
@@ -94,9 +94,6 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	private hasQueuedProjectionRefresh = false;
 	private isDestroyed = false;
 
-	@Select(getAccountPayments)
-	public accountPayments$!: Observable<IPaymentOperationModel[]>;
-
 	@Select(getCategories)
 	public categories$!: Observable<ICategoryModel[]>;
 
@@ -104,7 +101,7 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	public contractors$!: Observable<IContractorModel[]>;
 
 	@Select(getActivePaymentAccountId)
-	public getActivePaymentAccountId$!: Observable<Guid>;
+	public getActivePaymentAccountId$!: Observable<string>;
 
 	@Select(getPaymentAccounts)
 	public paymentAccounts$!: Observable<IPaymentAccountModel[]>;
@@ -112,8 +109,8 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	@Select(getAccountingTableOptions)
 	public accountingTableOptions$!: Observable<IAccountingOperationsTableOptions>;
 
-	public activePaymentAccountIdSignal: Signal<Guid> = toSignal(this.getActivePaymentAccountId$, {
-		initialValue: Guid.EMPTY,
+	public activePaymentAccountIdSignal: Signal<string> = toSignal(this.getActivePaymentAccountId$, {
+		initialValue: Guid.EMPTY.toString(),
 	});
 
 	public displayedColumns: string[] = [
@@ -194,10 +191,9 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 
 	public ngAfterViewInit(): void {
 		merge(
-			this.accountPayments$.pipe(map(() => undefined)),
 			this.getActivePaymentAccountId$.pipe(
-				filter(accountId => !accountId.equals(Guid.EMPTY)),
-				distinctUntilChanged((previous, current) => previous.equals(current)),
+				filter(accountId => accountId.toString() !== Guid.EMPTY.toString()),
+				distinctUntilChanged(),
 				tap(() => this.resetQueryForAccountChange()),
 				map(() => undefined)
 			),
@@ -207,14 +203,15 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 				takeUntilDestroyed(this.destroyRef),
 				switchMap(() =>
 					this.handbooksReady$.pipe(
-						switchMap(() => this.refreshActiveAccountProjection())
+						switchMap(() => this.refreshActiveAccountProjection()),
+						catchError(() => {
+							this.showHistoryLoadError();
+							return EMPTY;
+						})
 					)
 				)
 			)
-			.subscribe({
-				next: payments => this.publishPayments(payments),
-				error: () => this.showHistoryLoadError(),
-			});
+			.subscribe(payments => this.publishPayments(payments));
 	}
 
 	ngOnDestroy() {
@@ -276,16 +273,27 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		});
 	}
 
-	public updateFilter(event: Event, field: keyof Pick<IPaymentHistoryQueryModel, 'dateFrom' | 'dateTo' | 'type' | 'categoryId' | 'contractorId' | 'amountMin' | 'amountMax'>): void {
+	public updateFilter(
+		event: Event,
+		field: keyof Pick<
+			IPaymentHistoryQueryModel,
+			'dateFrom' | 'dateTo' | 'type' | 'categoryId' | 'contractorId' | 'amountMin' | 'amountMax'
+		>
+	): void {
 		const target = event.target;
 		if (!(target instanceof HTMLInputElement || target instanceof HTMLSelectElement)) {
 			return;
 		}
 
 		const value = target.value;
-		const parsedValue = field === 'amountMin' || field === 'amountMax'
-			? (value === '' ? undefined : Number(value))
-			: (value === '' ? undefined : value);
+		const parsedValue =
+			field === 'amountMin' || field === 'amountMax'
+				? value === ''
+					? undefined
+					: Number(value)
+				: value === ''
+					? undefined
+					: value;
 		this.updateQuery({ page: 1, [field]: parsedValue });
 	}
 
@@ -294,8 +302,6 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		this.paymentHistoryQuerySignal.set({ page: 1, pageSize, sortBy, sortDirection });
 		this.requestProjectionRefresh();
 	}
-
-
 	public isFuturePayment = (record: IPaymentRepresentationModel): boolean => isFuture(record.operationDate);
 
 	public isSelected(record: IPaymentRepresentationModel): boolean {
@@ -336,12 +342,17 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		const accountId = this.activePaymentAccountIdSignal();
 
 		return forkJoin({
-			payments: this.paymentsHistoryService.refreshPagedPaymentsHistory(accountId, this.paymentHistoryQuerySignal()),
+			payments: this.paymentsHistoryService.refreshPagedPaymentsHistory(
+				accountId,
+				this.paymentHistoryQuerySignal()
+			),
 			balance: this.accountsService.refreshAccounts(accountId),
-		}).pipe(map(payload => {
-			this.setPageMetadata(payload.payments);
-			return payload.payments.items;
-		}));
+		}).pipe(
+			map(payload => {
+				this.setPageMetadata(payload.payments);
+				return payload.payments.items;
+			})
+		);
 	}
 
 	private resetQueryForAccountChange(): void {
@@ -413,7 +424,7 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	private withRelatedPaymentAccountNames(records: IPaymentRepresentationModel[]): IPaymentRepresentationModel[] {
 		const paymentAccounts = this.store.selectSnapshot(getPaymentAccounts);
 		const activePaymentAccount = paymentAccounts.find(
-			account => account.key?.equals(this.activePaymentAccountIdSignal()) === true
+			account => account.key?.toString() === this.activePaymentAccountIdSignal()
 		);
 
 		return records.map(record => {

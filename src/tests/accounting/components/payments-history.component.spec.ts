@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { MapperModule } from '@dynamic-mapper/angular';
 import { NgxsModule, Store } from '@ngxs/store';
-import { of, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
 import { ngxsConfig } from '../../../app/modules/shared/store/ngxs.config';
@@ -227,11 +227,27 @@ describe('payments history component', () => {
 			'balance',
 			'comment',
 		]);
-		expect(getHeaderTexts()).toEqual(['Date  ↓', 'Contractor', 'Category', 'Income', 'Expense', 'Balance', 'Comment']);
+		expect(getHeaderTexts()).toEqual([
+			'Date  ↓',
+			'Contractor',
+			'Category',
+			'Income',
+			'Expense',
+			'Balance',
+			'Comment',
+		]);
 	});
 
 	it('renders an always-available Add payment action above the history table', () => {
 		expect(getNativeElement().textContent).toContain('Add payment');
+	});
+
+	it('loads the initial page once for the selected account without a notification', () => {
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(1);
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.mostRecent().args).toEqual([
+			activePaymentAccountId,
+			jasmine.objectContaining({ page: 1, pageSize: 25, sortBy: 'date', sortDirection: 'desc' }),
+		]);
 	});
 
 	it('should render representative history rows and summary counts', () => {
@@ -284,15 +300,29 @@ describe('payments history component', () => {
 	it('retries a failed history read through the existing projection refresh action', async () => {
 		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.reset();
 		accountsServiceSpy.refreshAccounts.calls.reset();
-		component.historyLoadErrorSignal.set(true);
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.and.returnValue(
+			throwError(() => new Error('History read failed.'))
+		);
 
 		component.retryHistory();
 		await fixture.whenStable();
 		fixture.detectChanges();
 
 		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(1);
-		expect(pageRequest()).toEqual(jasmine.objectContaining({ page: 1, pageSize: 25, sortBy: 'date', sortDirection: 'desc' }));
-		expect(accountsServiceSpy.refreshAccounts.calls.count()).toBe(1);
+		expect(component.historyLoadErrorSignal()).toBeTrue();
+
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.and.callFake((_paymentAccountId, query) =>
+			of(createPage(historyRows, query))
+		);
+		component.retryHistory();
+		await fixture.whenStable();
+		fixture.detectChanges();
+
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(2);
+		expect(pageRequest()).toEqual(
+			jasmine.objectContaining({ page: 1, pageSize: 25, sortBy: 'date', sortDirection: 'desc' })
+		);
+		expect(accountsServiceSpy.refreshAccounts.calls.count()).toBe(2);
 		expect(accountsServiceSpy.refreshAccounts.calls.mostRecent().args).toEqual([activePaymentAccountId]);
 		expect(component.historyLoadErrorSignal()).toBeFalse();
 	});
@@ -404,7 +434,10 @@ describe('payments history component', () => {
 		const latestRows = [historyRows[1]];
 		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.reset();
 		accountsServiceSpy.refreshAccounts.calls.reset();
-		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.and.returnValues(firstHistoryResponse, secondHistoryResponse);
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.and.returnValues(
+			firstHistoryResponse,
+			secondHistoryResponse
+		);
 		accountsServiceSpy.refreshAccounts.and.returnValues(of(undefined), of(undefined));
 
 		component.retryHistory();
@@ -434,8 +467,6 @@ describe('payments history component', () => {
 
 		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(1);
 	});
-
-
 	it('completes synchronization only after the submitted transfer is present in refreshed history', () => {
 		transferProjectionSynchronizationService.start([Guid.parse(activePaymentAccountId)], incomeRecordId);
 
@@ -674,14 +705,6 @@ describe('payments history component', () => {
 		return Array.from<HTMLElement>(getNativeElement().querySelectorAll('th')).map(header =>
 			(header.textContent ?? '').trim()
 		);
-	}
-
-	function matchingNotification(): AccountNotification {
-		return {
-			eventId: 'event-id',
-			accountId: activePaymentAccountId,
-			eventType: 'UpdatePaymentAccountBalanceCommand',
-		};
 	}
 
 	function createPage(
