@@ -2,8 +2,7 @@
 <section class="payments-dashboard">
 	<div class="payments-dashboard__hero">
 		<div>
-			<p class="payments-dashboard__eyebrow">Active account</p>
-			<h1 class="payments-dashboard__title">{{ activePaymentAccount.emitter }}</h1>
+			<h2 class="payments-dashboard__title">{{ activePaymentAccount.emitter }}</h2>
 			<p class="payments-dashboard__copy">
 				{{ activePaymentAccount.description }} · {{ activePaymentAccount.currency }}
 			</p>
@@ -56,9 +55,7 @@
 		class="payments-dashboard__summary"
 		aria-label="Cached account-operation summary"
 	>
-		<p class="payments-dashboard__summary-scope">
-			Cached account-operation snapshot. The paged timeline below can represent a different scope.
-		</p>
+		<p class="payments-dashboard__summary-scope">Totals reflect the account data currently available.</p>
 		<div class="payments-dashboard__summary-card">
 			<span class="payments-dashboard__summary-label">Cached operations</span>
 			<strong>{{ accountingSummarySignal().operationsCount }}</strong>
@@ -90,8 +87,7 @@
 		class="payments-dashboard__summary-unavailable"
 		role="status"
 	>
-		<p>Account-wide transaction totals are unavailable until a complete account snapshot is loaded.</p>
-		<p>The transaction timeline below remains the authoritative paged result set.</p>
+		<p>Account totals are currently unavailable. Transaction history is still available below.</p>
 	</div>
 	}
 	<payments-history></payments-history>
@@ -100,8 +96,7 @@
 <section class="payments-dashboard">
 	<div class="payments-dashboard__hero">
 		<div>
-			<p class="payments-dashboard__eyebrow">Active account</p>
-			<h1 class="payments-dashboard__title">Select a payment account</h1>
+			<h2 class="payments-dashboard__title">Select a payment account</h2>
 			<p class="payments-dashboard__copy">Operations are available after an account is selected.</p>
 			<div class="payments-dashboard__actions">
 				<button

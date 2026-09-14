@@ -6,7 +6,6 @@ import { NgxsModule } from '@ngxs/store';
 
 import { AccountingOperationsCrudComponent } from './components/accounting-operations-crud/accounting-operations-crud.component';
 import { PaymentAccountComponent } from './components/payment-account/payment-account.component';
-import { PaymentAccountCrudComponent } from './components/payment-account-crud/payment-account-crud.component';
 import { PaymentsDashboardComponent } from './components/payments-dashboard/payments-dashboard.component';
 import { paymentEditorCanDeactivateGuard } from './guards/payment-editor-can-deactivate.guard';
 import { AccountsService } from './services/accounts.service';
@@ -97,12 +96,6 @@ export const accountingRoutes: Routes = [
 				component: AccountingOperationsCrudComponent,
 				outlet: 'right_sidebar',
 				canDeactivate: [paymentEditorCanDeactivateGuard],
-			},
-			{
-				path: '',
-				component: PaymentAccountCrudComponent,
-				outlet: 'right_sidebar',
-				pathMatch: 'full',
 			},
 		],
 	},

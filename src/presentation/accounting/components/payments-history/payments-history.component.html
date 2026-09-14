@@ -1,23 +1,19 @@
 <section class="payments-history">
 	<div class="payments-history__header">
 		<div>
-			<p class="payments-history__eyebrow">Operations history</p>
-			<h3 class="payments-history__title">Transactions timeline</h3>
-			<p class="payments-history__copy">
-				Scan income, expense, balance progression, and future-dated operations in one place.
-			</p>
+			<h3 class="payments-history__title">Transactions</h3>
+			<p class="payments-history__copy">Review and filter this account’s payment history.</p>
 		</div>
 
 		<div class="payments-history__header-actions">
-			<div class="payments-history__stats">
-				<div class="payments-history__stat">
-					<strong>{{ totalCountSignal() }}</strong>
-					<span>matching results</span>
-				</div>
-				<div class="payments-history__stat">
-					<strong>{{ futureRecordsCount }}</strong>
-					<span>scheduled on this page</span>
-				</div>
+			<div
+				class="payments-history__stats"
+				aria-label="Transaction status"
+			>
+				<span class="payments-history__status-chip">{{ totalCountSignal() }} transactions</span>
+				@if (futureRecordsCount) {
+				<span class="payments-history__status-chip">{{ futureRecordsCount }} scheduled</span>
+				}
 			</div>
 			<button
 				type="button"
@@ -28,6 +24,7 @@
 				<mat-icon>refresh</mat-icon>
 				Refresh
 			</button>
+			@if (!isCreateEditorOpenSignal() && !isPersistentDesktopEditor()) {
 			<button
 				type="button"
 				mat-flat-button
@@ -37,6 +34,7 @@
 				<mat-icon>add</mat-icon>
 				Add payment
 			</button>
+			}
 		</div>
 	</div>
 	<form
@@ -48,19 +46,31 @@
 			<mat-label>From</mat-label>
 			<input
 				matInput
-				type="date"
-				[value]="draftPaymentHistoryQuerySignal().dateFrom ?? ''"
-				(change)="updateDraftFilterFromInput('dateFrom', $event)"
+				[matDatepicker]="fromDatePicker"
+				[value]="draftDateFrom"
+				(dateChange)="updateDraftCalendarDate('dateFrom', $event)"
 			/>
+			<mat-hint>MM/DD/YYYY</mat-hint>
+			<mat-datepicker-toggle
+				matIconSuffix
+				[for]="fromDatePicker"
+			/>
+			<mat-datepicker #fromDatePicker />
 		</mat-form-field>
 		<mat-form-field appearance="outline">
 			<mat-label>To</mat-label>
 			<input
 				matInput
-				type="date"
-				[value]="draftPaymentHistoryQuerySignal().dateTo ?? ''"
-				(change)="updateDraftFilterFromInput('dateTo', $event)"
+				[matDatepicker]="toDatePicker"
+				[value]="draftDateTo"
+				(dateChange)="updateDraftCalendarDate('dateTo', $event)"
 			/>
+			<mat-hint>MM/DD/YYYY</mat-hint>
+			<mat-datepicker-toggle
+				matIconSuffix
+				[for]="toDatePicker"
+			/>
+			<mat-datepicker #toDatePicker />
 		</mat-form-field>
 		<mat-form-field appearance="outline">
 			<mat-label>Type</mat-label>
@@ -207,6 +217,7 @@
 	} @else if (recordsCount === 0) {
 	<div class="payments-history__state">
 		<p>{{ hasAppliedFilters ? 'No transactions match these filters.' : 'No transactions yet.' }}</p>
+		@if (!isPersistentDesktopEditor()) {
 		<button
 			type="button"
 			mat-stroked-button
@@ -214,6 +225,7 @@
 		>
 			{{ hasAppliedFilters ? 'Clear filters' : 'Add payment' }}
 		</button>
+		}
 	</div>
 	} @else { @if (historyLoadErrorSignal()) {
 	<div
@@ -244,6 +256,7 @@
 				<th
 					mat-header-cell
 					*matHeaderCellDef
+					class="payments-history__column payments-history__column--date"
 				>
 					<button
 						type="button"
@@ -258,6 +271,7 @@
 				<td
 					mat-cell
 					*matCellDef="let element"
+					class="payments-history__column payments-history__column--date"
 				>
 					{{ element.operationDate | date }} @if (recentMutationFor(element); as recentMutation) {
 					<span
@@ -277,12 +291,14 @@
 				<th
 					mat-header-cell
 					*matHeaderCellDef
+					class="payments-history__column payments-history__column--contractor"
 				>
 					Contractor
 				</th>
 				<td
 					mat-cell
 					*matCellDef="let element"
+					class="payments-history__column payments-history__column--contractor"
 				>
 					{{ element.contractor }}
 				</td>
@@ -292,12 +308,14 @@
 				<th
 					mat-header-cell
 					*matHeaderCellDef
+					class="payments-history__column payments-history__column--category"
 				>
 					Category
 				</th>
 				<td
 					mat-cell
 					*matCellDef="let element"
+					class="payments-history__column payments-history__column--category"
 				>
 					{{ element.category }}
 				</td>
@@ -307,6 +325,7 @@
 				<th
 					mat-header-cell
 					*matHeaderCellDef
+					class="payments-history__column payments-history__column--income"
 				>
 					<button
 						type="button"
@@ -321,7 +340,7 @@
 				<td
 					mat-cell
 					*matCellDef="let element"
-					class="payments-history__amount payments-history__amount--income"
+					class="payments-history__column payments-history__column--income payments-history__amount payments-history__amount--income"
 				>
 					{{ element.income | accountingCurrencyFormat | currency:' ' }}
 				</td>
@@ -331,13 +350,14 @@
 				<th
 					mat-header-cell
 					*matHeaderCellDef
+					class="payments-history__column payments-history__column--expense"
 				>
 					Expense
 				</th>
 				<td
 					mat-cell
 					*matCellDef="let element"
-					class="payments-history__amount payments-history__amount--expense"
+					class="payments-history__column payments-history__column--expense payments-history__amount payments-history__amount--expense"
 				>
 					{{ element.expense | accountingCurrencyFormat | currency:' ' }}
 				</td>
@@ -347,13 +367,14 @@
 				<th
 					mat-header-cell
 					*matHeaderCellDef
+					class="payments-history__column payments-history__column--balance"
 				>
 					Balance
 				</th>
 				<td
 					mat-cell
 					*matCellDef="let element"
-					class="payments-history__amount payments-history__amount--balance"
+					class="payments-history__column payments-history__column--balance payments-history__amount payments-history__amount--balance"
 				>
 					{{ element.balance | accountingCurrencyFormat | currency:' ' }}
 				</td>
@@ -363,12 +384,14 @@
 				<th
 					mat-header-cell
 					*matHeaderCellDef
+					class="payments-history__column payments-history__column--comment"
 				>
 					Comment
 				</th>
 				<td
 					mat-cell
 					*matCellDef="let element"
+					class="payments-history__column payments-history__column--comment"
 				>
 					@if (element.relatedPaymentAccountId) {
 					<div class="payments-history__transfer-comment">
@@ -399,13 +422,14 @@
 				<th
 					mat-header-cell
 					*matHeaderCellDef
+					class="payments-history__column payments-history__column--actions"
 				>
 					Actions
 				</th>
 				<td
 					mat-cell
 					*matCellDef="let element"
-					class="payments-history__actions"
+					class="payments-history__column payments-history__column--actions payments-history__actions"
 				>
 					<button
 						type="button"

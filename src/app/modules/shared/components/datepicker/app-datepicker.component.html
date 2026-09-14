@@ -6,7 +6,6 @@
 			matInput
 			[matDatepicker]="picker"
 			(dateChange)="updateValue($event)"
-			readonly
 			[value]="data$ | async"
 		/>
 		<mat-hint>{{ dateFormat }}</mat-hint>

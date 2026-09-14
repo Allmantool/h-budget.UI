@@ -55,7 +55,6 @@ import { SseService } from '../../infrastructure/sse-service';
 import { accountingRoutes } from '../../presentation/accounting/accounting.routes';
 import { AccountingOperationsCrudComponent } from '../../presentation/accounting/components/accounting-operations-crud/accounting-operations-crud.component';
 import { PaymentAccountComponent } from '../../presentation/accounting/components/payment-account/payment-account.component';
-import { PaymentAccountCrudComponent } from '../../presentation/accounting/components/payment-account-crud/payment-account-crud.component';
 import { PaymentsDashboardComponent } from '../../presentation/accounting/components/payments-dashboard/payments-dashboard.component';
 import { IPaymentRepresentationModel } from '../../presentation/accounting/models/operation-record';
 import { AccountsService } from '../../presentation/accounting/services/accounts.service';
@@ -125,12 +124,6 @@ describe('accounting route providers', () => {
 				path: 'operations',
 				component: AccountingOperationsCrudComponent,
 				outlet: 'right_sidebar',
-			}),
-			jasmine.objectContaining({
-				path: '',
-				component: PaymentAccountCrudComponent,
-				outlet: 'right_sidebar',
-				pathMatch: 'full',
 			}),
 		]);
 		expect(childRoutes.every(route => route.providers === undefined)).toBeTrue();
@@ -367,12 +360,6 @@ describe('accounting lazy route and named-outlet activation', () => {
 						path: 'operations',
 						outlet: 'right_sidebar',
 						component: AccountingOperationsCrudComponent,
-					}),
-					jasmine.objectContaining({
-						path: '',
-						outlet: 'right_sidebar',
-						component: PaymentAccountCrudComponent,
-						pathMatch: 'full',
 					}),
 				],
 			})

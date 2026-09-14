@@ -18,6 +18,7 @@ export class PaymentEditorSessionService implements OnDestroy {
 	private recentMutationTimeout?: ReturnType<typeof setTimeout>;
 
 	public readonly editorModeSignal = signal<PaymentEditorMode>('create');
+	public readonly isEditorOpenSignal = signal(false);
 	public readonly recentMutationSignal = signal<RecentPaymentMutation | undefined>(undefined);
 
 	public beginCreate(): void {
@@ -26,6 +27,14 @@ export class PaymentEditorSessionService implements OnDestroy {
 
 	public beginEdit(): void {
 		this.editorModeSignal.set('edit');
+	}
+
+	public open(): void {
+		this.isEditorOpenSignal.set(true);
+	}
+
+	public close(): void {
+		this.isEditorOpenSignal.set(false);
 	}
 
 	public reset(): void {

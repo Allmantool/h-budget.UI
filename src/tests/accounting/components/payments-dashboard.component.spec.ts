@@ -212,11 +212,34 @@ describe('payments dashboard component', () => {
 	it('should create the standalone dashboard and render the standalone history child', () => {
 		expect(component).toBeTruthy();
 		expect(getNativeElement().querySelector('payments-history')).not.toBeNull();
-		expect(getNativeText()).toContain('Transactions timeline');
+		expect(getNativeText()).toContain('Transactions');
 	});
 
 	it('starts pending payment command recovery when the payment dashboard is recreated', () => {
 		expect(paymentCommandExecutorSpy.recoverPendingCommands.calls.count()).toBe(1);
+	});
+
+	it('opens the persistent new-payment rail for an active account on a wide desktop workspace', () => {
+		const originalMatchMedia = Object.getOwnPropertyDescriptor(globalThis, 'matchMedia');
+		Object.defineProperty(globalThis, 'matchMedia', {
+			configurable: true,
+			value: jasmine.createSpy('matchMedia').and.returnValue({ matches: true }),
+		});
+		const navigateSpy = spyOn(router, 'navigate').and.resolveTo(true);
+
+		try {
+			component.ngOnInit();
+
+			expect(navigateSpy).toHaveBeenCalledWith([{ outlets: { right_sidebar: ['operations'] } }], {
+				relativeTo: accountingWorkspaceRouteStub,
+			});
+		} finally {
+			if (originalMatchMedia) {
+				Object.defineProperty(globalThis, 'matchMedia', originalMatchMedia);
+			} else {
+				Reflect.deleteProperty(globalThis, 'matchMedia');
+			}
+		}
 	});
 
 	it('should render dashboard actions in the existing order', () => {
@@ -243,7 +266,7 @@ describe('payments dashboard component', () => {
 		store.dispatch(new SetInitialPaymentOperations([]));
 		fixture.detectChanges();
 
-		expect(getNativeText()).toContain('Account-wide transaction totals are unavailable');
+		expect(getNativeText()).toContain('Account totals are currently unavailable');
 		expect(getNativeText()).not.toContain('Net flow');
 	});
 

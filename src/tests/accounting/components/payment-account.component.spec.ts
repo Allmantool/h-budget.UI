@@ -17,6 +17,7 @@ import { DefaultPaymentAccountsProvider } from '../../../data/providers/accounti
 import { AccountTypes } from '../../../domain/models/accounting/account-types';
 import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
 import { PaymentAccountComponent } from '../../../presentation/accounting/components/payment-account/payment-account.component';
+import { PaymentAccountDialogService } from '../../../presentation/accounting/services/payment-account-dialog.service';
 
 describe('payment account component', () => {
 	let fixture: ComponentFixture<PaymentAccountComponent>;
@@ -24,6 +25,7 @@ describe('payment account component', () => {
 	let store: Store;
 
 	let paymentAccountsProviderSpy: jasmine.SpyObj<DefaultPaymentAccountsProvider>;
+	let paymentAccountDialogServiceSpy: jasmine.SpyObj<PaymentAccountDialogService>;
 	let routerSpy: jasmine.SpyObj<Router>;
 
 	const accountingWorkspaceRouteStub = {} as ActivatedRoute;
@@ -43,6 +45,10 @@ describe('payment account component', () => {
 		paymentAccountsProviderSpy = jasmine.createSpyObj<DefaultPaymentAccountsProvider>('paymentAccountsProvider', {
 			getPaymentAccounts: of(paymentAccounts),
 		});
+		paymentAccountDialogServiceSpy = jasmine.createSpyObj<PaymentAccountDialogService>(
+			'paymentAccountDialogService',
+			['openForSave', 'openForUpdate']
+		);
 		routerSpy = jasmine.createSpyObj<Router>('router', {
 			navigate: Promise.resolve(true),
 		});
@@ -65,6 +71,10 @@ describe('payment account component', () => {
 				{
 					provide: DefaultPaymentAccountsProvider,
 					useValue: paymentAccountsProviderSpy,
+				},
+				{
+					provide: PaymentAccountDialogService,
+					useValue: paymentAccountDialogServiceSpy,
 				},
 			],
 		}).compileComponents();
@@ -100,23 +110,22 @@ describe('payment account component', () => {
 		expect(component.totalAccountsCount).toBe(4);
 	});
 
-	it('should compile the real template and render account groups with balances', () => {
+	it('should compile the real template and render compact account groups with balances', () => {
 		const pageText = getNativeText();
 
-		expect(pageText).toContain('Accounts hub');
-		expect(pageText).toContain('Total accounts4');
-		expect(pageText).toContain('Wallet balance125.34');
-		expect(pageText).toContain('Virtual balance200.12');
-		expect(pageText).toContain('Loans and credit-350.25');
+		expect(pageText).toContain('Accounts');
+		expect(getButtonByText('Add account')).not.toBeNull();
+		expect(pageText).toContain('4accounts available');
 		expect(pageText).toContain('Wallet money');
 		expect(pageText).toContain('Virtual accounts');
-		expect(pageText).toContain('Loans');
-		expect(pageText).toContain('Cash box | Pocket cash | Balance: 125.34 [USD]');
-		expect(pageText).toContain('Bank card | Everyday account | Balance: 200.12 [BYN]');
-		expect(pageText).toContain('Auto loan | Loan balance | Balance: -50 [EUR]');
-		expect(pageText).toContain('Credit card | Card debt | Balance: -300.25 [USD]');
+		expect(pageText).toContain('Loans and credit');
+		expect(pageText).toContain('Cash boxPocket cash · USDBalance125.34 USD Open');
+		expect(pageText).toContain('Bank cardEveryday account · BYNBalance200.12 BYN Open');
+		expect(pageText).toContain('Auto loanLoan balance · EURBalance-50 EUR Open');
+		expect(pageText).toContain('Credit cardCard debt · USDBalance-300.25 USD Open');
 		expect(getNativeElement().querySelector('.fi-us')).not.toBeNull();
 		expect(getNativeElement().querySelector('.fi-by')).not.toBeNull();
+		expect(getNativeElement().querySelectorAll('mat-list-option')).toHaveSize(0);
 	});
 
 	it('should render the existing empty account state as zero counts and no options', async () => {
@@ -128,33 +137,51 @@ describe('payment account component', () => {
 		const pageText = getNativeText();
 
 		expect(component.totalAccountsCount).toBe(0);
-		expect(pageText).toContain('Total accounts0');
-		expect(pageText).toContain('Wallet balance0');
-		expect(pageText).toContain('Virtual balance0');
-		expect(pageText).toContain('Loans and credit0');
-		expect(getAccountOptions()).toEqual([]);
+		expect(pageText).toContain('0accounts available');
+		expect(pageText).toContain('No accounts in this group.');
+		expect(getAccountRows()).toEqual([]);
 	});
 
-	it('should select an account, update active-account state, and enable operations navigation', async () => {
-		await clickAccountOption('Bank card');
+	it('should open an account from its row and update the active-account state', async () => {
+		await clickOpenAccount('Bank card');
 
 		expect(store.selectSnapshot(getActivePaymentAccountId)).toBe(virtualAccountId);
-		expect(component.isNavigateToOperationsDisabled).toBe(false);
-		expect(getNavigateButtons().every(button => button.disabled)).toBeFalse();
-		expect(findAccountOption('Bank card')?.getAttribute('aria-selected')).toBe('true');
+		expect(routerSpy.navigate.calls.mostRecent().args).toEqual([
+			[
+				{
+					outlets: {
+						primary: ['operations'],
+					},
+				},
+			],
+			{
+				relativeTo: accountingWorkspaceRouteStub,
+				queryParams: { paymentAccountId: virtualAccountId },
+			},
+		]);
 	});
 
-	it('should preserve repeated account selection behavior', async () => {
-		await clickAccountOption('Bank card');
-		await clickAccountOption('Bank card');
+	it('should open account dialogs from explicit workspace actions only', () => {
+		getButtonByText('Add account')?.click();
+
+		expect(paymentAccountDialogServiceSpy.openForSave.calls.count()).toBe(1);
+
+		getEditButton('Bank card')?.click();
+
+		expect(paymentAccountDialogServiceSpy.openForUpdate.calls.count()).toBe(1);
+		expect(paymentAccountDialogServiceSpy.openForUpdate.calls.mostRecent().args).toEqual([virtualAccountId]);
+	});
+
+	it('should keep the selected account visually identifiable after its edit action', () => {
+		getEditButton('Bank card')?.click();
+		fixture.detectChanges();
 
 		expect(store.selectSnapshot(getActivePaymentAccountId)).toBe(virtualAccountId);
-		expect(component.isNavigateToOperationsDisabled).toBe(false);
-		expect(findAccountOption('Bank card')?.getAttribute('aria-selected')).toBe('true');
+		expect(findAccountRow('Bank card')?.classList).toContain('accounts-workspace__account-row--selected');
 	});
 
-	it('should navigate to the existing primary and right-sidebar operations outlets', async () => {
-		await clickAccountOption('Bank card');
+	it('should navigate to the operations workspace without opening the editor', async () => {
+		component.selectPaymentAccount(paymentAccounts[1]);
 
 		await component.navigateToOperations();
 
@@ -163,7 +190,6 @@ describe('payment account component', () => {
 				{
 					outlets: {
 						primary: ['operations'],
-						right_sidebar: ['operations'],
 					},
 				},
 			],
@@ -208,30 +234,42 @@ describe('payment account component', () => {
 		];
 	}
 
-	async function clickAccountOption(accountEmitter: string): Promise<void> {
-		const accountOption = findAccountOption(accountEmitter);
+	async function clickOpenAccount(accountEmitter: string): Promise<void> {
+		const accountRow = findAccountRow(accountEmitter);
 
-		if (accountOption === undefined) {
-			throw new Error(`Expected account option '${accountEmitter}' to be rendered.`);
+		if (accountRow === undefined) {
+			throw new Error(`Expected account row '${accountEmitter}' to be rendered.`);
 		}
 
-		accountOption.click();
+		const openButton = Array.from(accountRow.querySelectorAll<HTMLButtonElement>('button')).find(button =>
+			normalizeText(button.textContent ?? '').endsWith('Open')
+		);
+		openButton?.click();
 
 		await fixture.whenStable();
 		fixture.detectChanges();
 	}
 
-	function findAccountOption(accountEmitter: string): HTMLElement | undefined {
-		return getAccountOptions().find(option => normalizeText(option.textContent ?? '').includes(accountEmitter));
+	function findAccountRow(accountEmitter: string): HTMLElement | undefined {
+		return getAccountRows().find(row => normalizeText(row.textContent ?? '').includes(accountEmitter));
 	}
 
-	function getAccountOptions(): HTMLElement[] {
-		return Array.from<HTMLElement>(getNativeElement().querySelectorAll('mat-list-option'));
+	function getAccountRows(): HTMLElement[] {
+		return Array.from<HTMLElement>(getNativeElement().querySelectorAll('.accounts-workspace__account-row'));
 	}
 
-	function getNavigateButtons(): HTMLButtonElement[] {
-		return Array.from<HTMLButtonElement>(getNativeElement().querySelectorAll('button')).filter(
-			button => normalizeText(button.textContent ?? '') === 'Navigate'
+	function getEditButton(accountEmitter: string): HTMLButtonElement | undefined {
+		return (
+			getNativeElement().querySelector<HTMLButtonElement>(`button[aria-label="Edit ${accountEmitter}"]`) ??
+			undefined
+		);
+	}
+
+	function getButtonByText(text: string): HTMLButtonElement | null {
+		return (
+			Array.from<HTMLButtonElement>(getNativeElement().querySelectorAll('button')).find(button =>
+				normalizeText(button.textContent ?? '').endsWith(text)
+			) ?? null
 		);
 	}
 

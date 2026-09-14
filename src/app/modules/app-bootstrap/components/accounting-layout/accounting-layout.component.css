@@ -1,12 +1,15 @@
 .accounting-shell {
 	position: relative;
 	display: grid;
-	grid-template-columns: minmax(240px, 0.95fr) minmax(0, 3.7fr) minmax(280px, 1fr);
+	grid-template-columns: minmax(0, 1fr);
 	gap: 1rem;
 	min-height: 100%;
 }
 
-.accounting-sidebar,
+.accounting-shell--detail-open {
+	grid-template-columns: minmax(0, 1fr);
+}
+
 .accounting-main,
 .accounting-detail {
 	display: grid;
@@ -15,59 +18,32 @@
 	min-width: 0;
 }
 
-.accounting-card,
-.accounting-header,
-.accounting-main__content {
+.accounting-detail {
+	display: none;
+}
+
+.accounting-detail--active {
+	display: block;
+	width: 100%;
+	padding: 0;
+	overflow-y: auto;
+}
+
+.accounting-header {
 	border-radius: 24px;
 	border: 1px solid rgba(15, 23, 42, 0.08);
 	background: rgba(255, 255, 255, 0.82);
 }
 
-.accounting-card,
 .accounting-header {
 	padding: 1rem;
-	overflow: hidden;
 }
 
-.accounting-eyebrow {
-	margin: 0 0 0.35rem;
-	font-size: 0.78rem;
-	font-weight: 700;
-	letter-spacing: 0.1em;
-	text-transform: uppercase;
-	color: #0e7490;
-}
-
-.accounting-nav-item {
-	display: flex;
-	gap: 0.75rem;
-	align-items: start;
-	margin-top: 0.65rem;
-	padding: 0.85rem 1rem;
-	border-radius: 18px;
-	background: #fff;
-	text-decoration: none;
-	color: inherit;
-	border: 1px solid transparent;
-}
-
-.accounting-nav-item--active {
-	background: rgba(14, 116, 144, 0.08);
-	border-color: rgba(14, 116, 144, 0.2);
-}
-
-.accounting-nav-item-tab {
-	display: flex;
-	flex-direction: column;
-}
-
-.accounting-title,
 .accounting-header__title {
 	margin: 0;
 }
 
-.accounting-copy,
-.accounting-nav-item small {
+.accounting-copy {
 	color: #617089;
 	line-height: 1.5;
 }
@@ -77,27 +53,13 @@
 	gap: 1rem;
 }
 
-.accounting-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: end;
-	gap: 1rem;
-}
-
 .accounting-header__title {
 	font-family: Georgia, 'Times New Roman', serif;
 	font-size: clamp(1.6rem, 2vw, 2.25rem);
 	line-height: 1.08;
 }
 
-.accounting-header__actions {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 0.75rem;
-}
-
 .accounting-main__content {
-	padding: 0.25rem;
 	min-width: 0;
 }
 
@@ -115,13 +77,16 @@
 	justify-items: center;
 }
 
-@media (max-width: 1200px) {
-	.accounting-shell {
-		grid-template-columns: minmax(220px, 0.95fr) minmax(0, 1fr);
+@media (min-width: 1700px) {
+	.accounting-shell--detail-open {
+		grid-template-columns: minmax(0, 1fr) minmax(26rem, 34rem);
 	}
 
-	.accounting-detail {
-		grid-column: 1 / -1;
+	.accounting-detail--active {
+		padding: 1rem;
+		border-radius: 24px;
+		border: 1px solid rgba(15, 23, 42, 0.08);
+		background: rgba(255, 255, 255, 0.82);
 	}
 }
 
@@ -130,8 +95,7 @@
 		grid-template-columns: 1fr;
 	}
 
-	.accounting-header {
-		flex-direction: column;
-		align-items: start;
+	.accounting-detail--active {
+		padding: 0;
 	}
 }

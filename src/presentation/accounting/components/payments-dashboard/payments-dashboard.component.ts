@@ -12,7 +12,7 @@ import _ from 'lodash';
 
 import { Select, Store } from '@ngxs/store';
 import { isFuture, isPast } from 'date-fns';
-import { Observable, take } from 'rxjs';
+import { filter, Observable, take } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
 import { SetActiveAccountingOperation } from '../../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
@@ -125,6 +125,12 @@ export class PaymentsDashboardComponent implements OnInit {
 
 	public ngOnInit(): void {
 		void this.paymentCommandExecutor?.recoverPendingCommands();
+		this.activePaymentAccount$
+			.pipe(
+				filter((paymentAccount): paymentAccount is IPaymentAccountModel => !_.isNil(paymentAccount)),
+				take(1)
+			)
+			.subscribe(() => void this.openPersistentDesktopEditor());
 		if (_.isNil(this.store.selectSnapshot(getActivePaymentAccount))) {
 			this.restoreActivePaymentAccountFromRoute();
 		}
@@ -181,5 +187,20 @@ export class PaymentsDashboardComponent implements OnInit {
 
 	public moneyTransfer(): void {
 		this.accountsTransferService.openForTransfer();
+	}
+
+	private async openPersistentDesktopEditor(): Promise<void> {
+		if (!globalThis.matchMedia?.('(min-width: 1700px)').matches) {
+			return;
+		}
+
+		const accountingWorkspaceRoute = this.route.parent?.parent;
+		if (_.isNil(accountingWorkspaceRoute)) {
+			return;
+		}
+
+		await this.router.navigate([{ outlets: { right_sidebar: ['operations'] } }], {
+			relativeTo: accountingWorkspaceRoute,
+		});
 	}
 }

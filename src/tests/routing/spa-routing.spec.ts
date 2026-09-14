@@ -7,7 +7,6 @@ import { NationalBankCurrenciesProvider } from '../../data/providers/rates/natio
 import { accountingRoutes } from '../../presentation/accounting/accounting.routes';
 import { AccountingOperationsCrudComponent } from '../../presentation/accounting/components/accounting-operations-crud/accounting-operations-crud.component';
 import { PaymentAccountComponent } from '../../presentation/accounting/components/payment-account/payment-account.component';
-import { PaymentAccountCrudComponent } from '../../presentation/accounting/components/payment-account-crud/payment-account-crud.component';
 import { PaymentsDashboardComponent } from '../../presentation/accounting/components/payments-dashboard/payments-dashboard.component';
 import { CurrencyRatesDashboardComponent } from '../../presentation/currency-rates/components/currency-rates-dashboard/currency-rates-dashboard.component';
 import { currencyRatesRoutes } from '../../presentation/currency-rates/currency-rates.routes';
@@ -65,7 +64,7 @@ describe('SPA routing', () => {
 		expect(currencyRatesDefaultRoute?.providers).toContain(LoaderService);
 	});
 
-	it('routes accounting primary and right-sidebar flows together', () => {
+	it('keeps account browsing separate from the explicit payment editor outlet', () => {
 		const providerParent = accountingRoutes[0];
 		const childRoutes = providerParent.children ?? [];
 
@@ -73,9 +72,9 @@ describe('SPA routing', () => {
 		expect(providerParent.path).toBe('');
 		expect(providerParent.providers).toBeDefined();
 		expect(childRoutes).toContain(jasmine.objectContaining({ path: '', component: PaymentAccountComponent }));
-		expect(childRoutes).toContain(
-			jasmine.objectContaining({ path: '', outlet: 'right_sidebar', component: PaymentAccountCrudComponent })
-		);
+		expect(childRoutes.some(route => route.path === '' && route.outlet === 'right_sidebar'))
+			.withContext('account browsing must not activate a secondary editor or action surface')
+			.toBeFalse();
 		expect(childRoutes).toContain(
 			jasmine.objectContaining({ path: 'operations', component: PaymentsDashboardComponent })
 		);

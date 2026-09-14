@@ -93,6 +93,9 @@ export class PaymentsHistoryService implements IPaymentsHistoryService {
 		query: IPaymentHistoryQueryModel
 	): Observable<Omit<IPaymentHistoryPageModel, 'items'> & { items: IPaymentRepresentationModel[] }> {
 		return this.paymensHistoryProvider.getPagedOperationsHistoryForPaymentAccount(paymentAccountId, query).pipe(
+			tap(history =>
+				this.store.dispatch(new SetInitialPaymentOperations(history.items.map(item => item.record)))
+			),
 			map(history => ({
 				...history,
 				items: this.mapper.map(

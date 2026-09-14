@@ -16,6 +16,8 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerInputEvent, MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
@@ -23,6 +25,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SseService } from 'infrastructure/sse-service';
 
 import { Select, Store } from '@ngxs/store';
@@ -94,9 +97,11 @@ interface ProjectionRefreshRequest {
 		DatePipe,
 		DecimalPipe,
 		MatButtonModule,
+		MatDatepickerModule,
 		MatFormFieldModule,
 		MatIconModule,
 		MatInputModule,
+		MatNativeDateModule,
 		MatPaginatorModule,
 		MatProgressBarModule,
 		MatSelectModule,
@@ -115,6 +120,7 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	private isProjectionRefreshActive = false;
 	private hasQueuedProjectionRefresh = false;
 	private activeProjectionRefreshId = 0;
+	private selectionRequestId = 0;
 	private isDestroyed = false;
 
 	@Select(getCategories)
@@ -162,6 +168,8 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	public readonly hasPreviousPageSignal = signal(false);
 	public readonly hasNextPageSignal = signal(false);
 	public readonly recentMutation = () => this.paymentEditorSession.recentMutationSignal();
+	public draftDateFrom: Date | null = null;
+	public draftDateTo: Date | null = null;
 
 	constructor(
 		private readonly handbooksService: HandbooksService,
@@ -173,7 +181,9 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		public readonly relatedTransferNavigationService: RelatedTransferNavigationService,
 		private readonly changeDetectorRef: ChangeDetectorRef,
 		private readonly paymentEditorLeaveService: PaymentEditorLeaveService,
-		private readonly paymentEditorSession: PaymentEditorSessionService
+		private readonly paymentEditorSession: PaymentEditorSessionService,
+		private readonly route: ActivatedRoute,
+		private readonly router: Router
 	) {
 		this.handbooksReady$ = this.handbooksService
 			.setupHandbooksStore()
@@ -253,16 +263,27 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	}
 
 	public async selectRow(record: IPaymentRepresentationModel): Promise<void> {
-		if (!(await this.paymentEditorLeaveService.canLeave())) {
+		const requestId = ++this.selectionRequestId;
+		if (!(await this.paymentEditorLeaveService.canLeave()) || requestId !== this.selectionRequestId) {
 			return;
 		}
 
 		this.paymentEditorSession.beginEdit();
 		this.store.dispatch(new SetActiveAccountingOperation(record.key));
+		if (!(await this.openPaymentEditor()) || requestId !== this.selectionRequestId) {
+			return;
+		}
 	}
 
 	public async addPayment(): Promise<void> {
+		this.selectionRequestId++;
+		if (this.isCreateEditorOpenSignal()) {
+			return;
+		}
 		if (!(await this.paymentEditorLeaveService.canLeave())) {
+			return;
+		}
+		if (!(await this.openPaymentEditor())) {
 			return;
 		}
 
@@ -308,6 +329,9 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 			...this.draftPaymentHistoryQuerySignal(),
 			[field]: parsedValue,
 		});
+		if (field === 'dateFrom' || field === 'dateTo') {
+			this.setDraftCalendarDate(field, typeof parsedValue === 'string' ? parsedValue : undefined);
+		}
 	}
 
 	public updateDraftFilterFromInput(field: PaymentHistoryFilterField, event: Event): void {
@@ -315,6 +339,24 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		if (target instanceof HTMLInputElement) {
 			this.updateDraftFilter(field, target.value);
 		}
+	}
+
+	private calendarDate(date: string | undefined): Date | null {
+		if (!date) {
+			return null;
+		}
+
+		const dateParts = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+		if (!dateParts) {
+			return null;
+		}
+
+		const [, year, month, day] = dateParts;
+		return new Date(Number(year), Number(month) - 1, Number(day));
+	}
+
+	public updateDraftCalendarDate(field: 'dateFrom' | 'dateTo', event: MatDatepickerInputEvent<Date>): void {
+		this.updateDraftFilter(field, event.value ? this.formatCalendarDate(event.value) : '');
 	}
 
 	public applyFilters(): void {
@@ -343,6 +385,8 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		const { pageSize, sortBy, sortDirection } = this.paymentHistoryQuerySignal();
 		const clearedQuery = { page: 1, pageSize, sortBy, sortDirection };
 		this.draftPaymentHistoryQuerySignal.set(clearedQuery);
+		this.draftDateFrom = null;
+		this.draftDateTo = null;
 		this.updateQuery(clearedQuery);
 	}
 
@@ -400,6 +444,13 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		return this.isSelected(record) || this.historySummarySignal()[0]?.key.equals(record.key) === true;
 	}
 
+	public isPersistentDesktopEditor(): boolean {
+		return (
+			this.paymentEditorSession.isEditorOpenSignal() &&
+			(globalThis.matchMedia?.('(min-width: 1700px)').matches ?? false)
+		);
+	}
+
 	public recentMutationFor(record: IPaymentRepresentationModel): RecentPaymentMutation | undefined {
 		const recentMutation = this.paymentEditorSession.recentMutationSignal();
 		return recentMutation?.operationId.equals(record.key) ? recentMutation : undefined;
@@ -419,6 +470,10 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	});
 	public readonly isHistoryRefreshingSignal = computed(
 		() => this.historyLoadingSignal() && this.historySummarySignal().length > 0
+	);
+	public readonly isCreateEditorOpenSignal = computed(
+		() =>
+			this.paymentEditorSession.isEditorOpenSignal() && this.paymentEditorSession.editorModeSignal() === 'create'
 	);
 
 	public get recordsCount(): number {
@@ -451,6 +506,8 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		};
 		this.paymentHistoryQuerySignal.set(query);
 		this.draftPaymentHistoryQuerySignal.set(query);
+		this.draftDateFrom = null;
+		this.draftDateTo = null;
 		this.hasQueuedProjectionRefresh = false;
 		this.dataSource$.next([]);
 		this.totalCountSignal.set(0);
@@ -686,5 +743,36 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 			globalThis.clearTimeout(this.relatedOperationHighlightTimeout);
 			this.relatedOperationHighlightTimeout = undefined;
 		}
+	}
+
+	private formatCalendarDate(date: Date): string {
+		const year = date.getFullYear();
+		const month = String(date.getMonth() + 1).padStart(2, '0');
+		const day = String(date.getDate()).padStart(2, '0');
+		return `${year}-${month}-${day}`;
+	}
+
+	private setDraftCalendarDate(field: 'dateFrom' | 'dateTo', value: string | undefined): void {
+		if (field === 'dateFrom') {
+			this.draftDateFrom = this.calendarDate(value);
+			return;
+		}
+
+		this.draftDateTo = this.calendarDate(value);
+	}
+
+	private async openPaymentEditor(): Promise<boolean> {
+		if (this.paymentEditorSession.isEditorOpenSignal()) {
+			return true;
+		}
+
+		const accountingWorkspaceRoute = this.route.parent?.parent;
+		if (!accountingWorkspaceRoute) {
+			return false;
+		}
+
+		return this.router.navigate([{ outlets: { right_sidebar: ['operations'] } }], {
+			relativeTo: accountingWorkspaceRoute,
+		});
 	}
 }

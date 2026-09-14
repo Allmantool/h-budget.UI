@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import {
+	AfterViewInit,
+	ChangeDetectionStrategy,
+	Component,
+	computed,
+	DestroyRef,
+	ElementRef,
+	inject,
+	OnInit,
+	signal,
+	ViewChild,
+} from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,6 +20,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { Select, Store } from '@ngxs/store';
 import { combineLatest, firstValueFrom, Observable } from 'rxjs';
@@ -40,7 +52,7 @@ import { PaymentEditorSessionService } from '../../services/payment-editor-sessi
 import { PaymentDeleteDialogComponent } from '../payment-delete-dialog/payment-delete-dialog.component';
 
 interface PaymentEditorValue {
-	amount: number;
+	amount: number | null;
 	categoryId: string;
 	comment: string;
 	contractorId: string;
@@ -83,7 +95,7 @@ interface PaymentDeleteDialogData {
 		MatSelectModule,
 	],
 })
-export class AccountingOperationsCrudComponent implements OnInit {
+export class AccountingOperationsCrudComponent implements AfterViewInit, OnInit {
 	private readonly destroyRef = inject(DestroyRef);
 	private readonly formBuilder = inject(FormBuilder);
 	private readonly baselineSignal = signal<NormalizedPaymentEditorValue>(
@@ -93,7 +105,13 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	private activeAccountId?: string;
 	private executionToken = 0;
 	private isDestroyed = false;
+	private loadedOperationReferenceSignature?: string;
 	private pendingIntent?: PaymentCommandIntent;
+	private continueAfterCreate = false;
+	private repeatedEntryContext?: Pick<PaymentEditorValue, 'direction' | 'operationDate'>;
+	private readonly route = inject(ActivatedRoute, { optional: true });
+	private readonly router = inject(Router, { optional: true });
+	@ViewChild('amountInput') private amountInput?: ElementRef<HTMLInputElement>;
 
 	@Select(getActivePaymentAccountId)
 	private activePaymentAccountId$!: Observable<Guid | undefined>;
@@ -114,13 +132,10 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	private contractors$!: Observable<IContractorModel[]>;
 
 	public readonly paymentForm = this.formBuilder.nonNullable.group({
-		amount: [
-			0,
-			[
-				(control: AbstractControl) => Validators.required(control),
-				(control: AbstractControl) => Validators.min(0.01)(control),
-			],
-		],
+		amount: this.formBuilder.control<number | null>(null, [
+			(control: AbstractControl) => Validators.required(control),
+			(control: AbstractControl) => Validators.min(0.01)(control),
+		]),
 		categoryId: ['', (control: AbstractControl) => Validators.required(control)],
 		comment: [''],
 		contractorId: [''],
@@ -138,6 +153,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		initialValue: this.paymentForm.getRawValue(),
 	});
 	public readonly submissionStateSignal = signal<PaymentSubmissionState>({ status: 'idle' });
+	public readonly isEditorLoadingSignal = signal(false);
 	public readonly editorModeSignal = this.paymentEditorSession.editorModeSignal;
 	public readonly selectedOperationSignal = computed(() => {
 		const selectedId = this.selectedRecordGuidSignal();
@@ -156,6 +172,10 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		() => !this.areEquivalent(this.normalizeEditableValue(this.formValueSignal()), this.baselineSignal())
 	);
 
+	public get isSaveDisabled(): boolean {
+		return this.isSubmittingSignal() || !this.activeAccountIdSignal();
+	}
+
 	constructor(
 		private readonly paymentCommandExecutor: PaymentCommandExecutorService,
 		private readonly categoriesDialogService: CategoriesDialogService,
@@ -167,13 +187,15 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	) {}
 
 	public ngOnInit(): void {
+		this.paymentEditorSession.open();
 		const unregisterLeaveEditor = this.paymentEditorLeaveService.register(() => this.canLeaveEditor());
-		combineLatest([this.selectedRecordGuid$, this.paymentOperations$])
+		combineLatest([this.selectedRecordGuid$, this.paymentOperations$, this.categories$, this.contractors$])
 			.pipe(takeUntilDestroyed(this.destroyRef))
 			.subscribe(() => this.loadSelectedOperation());
 
 		this.destroyRef.onDestroy(() => {
 			unregisterLeaveEditor();
+			this.paymentEditorSession.close();
 			this.isDestroyed = true;
 			this.executionToken++;
 		});
@@ -188,12 +210,25 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			this.executionToken++;
 		});
 
-		this.paymentForm.controls.direction.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
-			const categoryId = this.paymentForm.controls.categoryId.value;
-			if (!this.filteredCategoriesSignal().some(category => category.key.toString() === categoryId)) {
-				this.paymentForm.controls.categoryId.setValue('');
-			}
-		});
+		this.paymentForm.controls.direction.valueChanges
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe(direction => {
+				const categoryId = this.paymentForm.controls.categoryId.value;
+				if (
+					this.categoriesSignal().length > 0 &&
+					!this.categoriesSignal().some(
+						category => category.operationType === direction && category.key.toString() === categoryId
+					)
+				) {
+					this.paymentForm.controls.categoryId.setValue('');
+				}
+			});
+	}
+
+	public ngAfterViewInit(): void {
+		if (this.editorModeSignal() === 'create') {
+			this.focusAmountInput();
+		}
 	}
 
 	public async canLeaveEditor(): Promise<boolean> {
@@ -212,7 +247,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		return contractor.nameNodes.join(': ');
 	}
 
-	public async submitAsync(): Promise<void> {
+	public async submitAsync(continueAfterSave = false): Promise<void> {
 		if (this.isSubmittingSignal()) {
 			return;
 		}
@@ -228,6 +263,9 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		}
 
 		const operation = this.operationKind();
+		const shouldContinueAfterCreate = operation === 'create' && continueAfterSave;
+		this.continueAfterCreate = shouldContinueAfterCreate;
+		this.repeatedEntryContext = shouldContinueAfterCreate ? this.captureRepeatedEntryContext() : undefined;
 		if (operation === 'update' && !this.selectedOperationSignal()) {
 			this.reconcileStaleSelection();
 			this.submissionStateSignal.set({
@@ -256,8 +294,18 @@ export class AccountingOperationsCrudComponent implements OnInit {
 						commandId => this.markAsProcessing(operation, executionToken, commandId)
 					);
 		if (this.isCurrentExecution(executionToken)) {
-			this.applyExecutionResult(operation, result, expectedOperation.key.toString());
+			this.applyExecutionResult(
+				operation,
+				result,
+				expectedOperation.key.toString(),
+				shouldContinueAfterCreate,
+				this.repeatedEntryContext
+			);
 		}
+	}
+
+	public async submitAndAddAnotherAsync(): Promise<void> {
+		await this.submitAsync(true);
 	}
 
 	public async deleteAsync(): Promise<void> {
@@ -304,13 +352,28 @@ export class AccountingOperationsCrudComponent implements OnInit {
 
 	public cancel(): void {
 		this.executionToken++;
+		this.continueAfterCreate = false;
+		this.repeatedEntryContext = undefined;
 		this.submissionStateSignal.set({ status: 'idle' });
 		if (this.editorModeSignal() === 'edit') {
+			if (this.isPersistentDesktopEditor()) {
+				void this.closePaymentEditor();
+				return;
+			}
+
 			this.paymentForm.reset(this.baselineValue());
 			return;
 		}
 
 		this.initializeForm(this.defaultValue());
+	}
+
+	public async closeEditorAsync(): Promise<void> {
+		if (!(await this.canLeaveEditor())) {
+			return;
+		}
+
+		await this.closePaymentEditor();
 	}
 
 	public async addCategory(): Promise<void> {
@@ -331,7 +394,9 @@ export class AccountingOperationsCrudComponent implements OnInit {
 	private applyExecutionResult(
 		operation: 'create' | 'update' | 'delete',
 		result: PaymentCommandExecutionResult,
-		operationId: string
+		operationId: string,
+		shouldContinueAfterCreate = false,
+		repeatedEntryContext?: Pick<PaymentEditorValue, 'direction' | 'operationDate'>
 	): void {
 		if (this.isDestroyed) {
 			return;
@@ -369,40 +434,55 @@ export class AccountingOperationsCrudComponent implements OnInit {
 				Guid.parse(result.paymentOperationId ?? operationId),
 				'created'
 			);
-			this.paymentEditorSession.beginCreate();
-			this.resetNewPaymentForm();
 			this.store.dispatch(new SetActiveAccountingOperation(undefined));
+			if (shouldContinueAfterCreate) {
+				this.paymentEditorSession.beginCreate();
+				this.resetNewPaymentForm(repeatedEntryContext);
+				this.continueAfterCreate = false;
+				this.repeatedEntryContext = undefined;
+				return;
+			}
+
+			void this.closePaymentEditor();
 		}
 		if (operation === 'update') {
 			this.paymentEditorSession.queueRecentMutation(
 				Guid.parse(result.paymentOperationId ?? operationId),
 				'updated'
 			);
-			this.loadedOperationId = undefined;
-			this.loadSelectedOperation();
+			void this.closePaymentEditor();
 		}
 		if (operation === 'delete') {
-			this.paymentEditorSession.beginCreate();
-			this.resetNewPaymentForm();
 			this.store.dispatch(new SetActiveAccountingOperation(undefined));
+			void this.closePaymentEditor();
 		}
 	}
 
 	private loadSelectedOperation(): void {
 		const operation = this.selectedOperationSignal();
 		const selectedOperationId = this.selectedRecordGuidSignal();
-		if (selectedOperationId && !operation) {
+		const activeAccountId = this.activeAccountIdSignal()?.toString();
+		if (selectedOperationId && (!operation || operation.paymentAccountId.toString() !== activeAccountId)) {
 			this.reconcileStaleSelection();
 			return;
 		}
 
 		const operationId = operation?.key.toString();
-		if (operationId === this.loadedOperationId) {
+		if (operation && !this.hasRequiredReferenceData(operation)) {
+			this.paymentEditorSession.beginEdit();
+			this.isEditorLoadingSignal.set(true);
+			return;
+		}
+
+		const referenceSignature = operation ? this.referenceSignature(operation) : undefined;
+		if (operationId === this.loadedOperationId && referenceSignature === this.loadedOperationReferenceSignature) {
 			return;
 		}
 
 		this.loadedOperationId = operationId;
+		this.loadedOperationReferenceSignature = referenceSignature;
 		this.pendingIntent = undefined;
+		this.isEditorLoadingSignal.set(false);
 		if (operation) {
 			this.paymentEditorSession.beginEdit();
 		} else {
@@ -419,7 +499,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 			key: existingOperation?.key ?? Guid.EMPTY,
 			paymentAccountId: Guid.parse(this.activeAccountIdSignal()!.toString()),
 			operationDate: this.businessDate(value.operationDate),
-			amount: value.amount,
+			amount: value.amount ?? 0,
 			categoryId: Guid.parse(value.categoryId),
 			contractorId: value.contractorId ? Guid.parse(value.contractorId) : Guid.EMPTY,
 			comment: value.comment.trim(),
@@ -441,7 +521,7 @@ export class AccountingOperationsCrudComponent implements OnInit {
 
 	private defaultValue(): PaymentEditorValue {
 		return {
-			amount: 0,
+			amount: null,
 			categoryId: '',
 			comment: '',
 			contractorId: '',
@@ -472,15 +552,45 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		this.store.dispatch(new SetActiveAccountingOperation(undefined));
 	}
 
-	private resetNewPaymentForm(): void {
+	private resetNewPaymentForm(repeatedEntryContext?: Pick<PaymentEditorValue, 'direction' | 'operationDate'>): void {
 		this.loadedOperationId = undefined;
-		this.initializeForm(this.defaultValue());
+		this.loadedOperationReferenceSignature = undefined;
+		this.isEditorLoadingSignal.set(false);
+		this.initializeForm({
+			...this.defaultValue(),
+			...repeatedEntryContext,
+		});
 		this.submissionStateSignal.set({ status: 'idle' });
+		this.focusAmountInput();
+	}
+
+	private captureRepeatedEntryContext(): Pick<PaymentEditorValue, 'direction' | 'operationDate'> {
+		const value = this.paymentForm.getRawValue();
+		return {
+			direction: value.direction,
+			operationDate: this.businessDate(value.operationDate),
+		};
+	}
+
+	private focusAmountInput(): void {
+		queueMicrotask(() => this.amountInput?.nativeElement.focus());
 	}
 
 	private initializeForm(value: PaymentEditorValue): void {
 		this.paymentForm.reset(value);
 		this.captureBaseline();
+	}
+
+	private hasRequiredReferenceData(operation: IPaymentOperationModel): boolean {
+		const hasCategory = this.categoriesSignal().some(category => category.key.equals(operation.categoryId));
+		const hasContractor =
+			operation.contractorId.equals(Guid.EMPTY) ||
+			this.contractorsSignal().some(contractor => contractor.key.equals(operation.contractorId));
+		return hasCategory && hasContractor;
+	}
+
+	private referenceSignature(operation: IPaymentOperationModel): string {
+		return `${operation.categoryId.toString()}:${operation.contractorId.toString()}`;
 	}
 
 	private captureBaseline(): void {
@@ -491,15 +601,20 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		const baseline = this.baselineSignal();
 		return {
 			...baseline,
-			amount: typeof baseline.amount === 'number' ? baseline.amount : Number(baseline.amount),
+			amount:
+				typeof baseline.amount === 'number'
+					? baseline.amount
+					: baseline.amount === ''
+						? null
+						: Number(baseline.amount),
 			operationDate: this.dateFromBusinessDay(baseline.operationDate),
 		};
 	}
 
 	private normalizeEditableValue(value: Partial<PaymentEditorValue>): NormalizedPaymentEditorValue {
-		const amount = Number(value.amount);
+		const amount = value.amount;
 		return {
-			amount: Number.isFinite(amount) ? amount : String(value.amount ?? ''),
+			amount: amount === null || amount === undefined ? '' : Number.isFinite(amount) ? amount : String(amount),
 			categoryId: this.stableId(value.categoryId),
 			comment: value.comment?.trim() ?? '',
 			contractorId: this.stableId(value.contractorId),
@@ -585,5 +700,27 @@ export class AccountingOperationsCrudComponent implements OnInit {
 		const month = `${date.getMonth() + 1}`.padStart(2, '0');
 		const day = `${date.getDate()}`.padStart(2, '0');
 		return `${year}-${month}-${day}`;
+	}
+
+	private async closePaymentEditor(): Promise<void> {
+		if (this.isPersistentDesktopEditor()) {
+			this.paymentEditorSession.beginCreate();
+			this.store.dispatch(new SetActiveAccountingOperation(undefined));
+			this.resetNewPaymentForm();
+			return;
+		}
+
+		const accountingWorkspaceRoute = this.route?.parent?.parent;
+		if (!this.router || !accountingWorkspaceRoute) {
+			return;
+		}
+
+		await this.router.navigate([{ outlets: { right_sidebar: null } }], {
+			relativeTo: accountingWorkspaceRoute,
+		});
+	}
+
+	private isPersistentDesktopEditor(): boolean {
+		return globalThis.matchMedia?.('(min-width: 1700px)').matches ?? false;
 	}
 }

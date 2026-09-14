@@ -27,42 +27,32 @@
 	justify-content: flex-end;
 }
 
-.payments-history__eyebrow {
-	margin: 0 0 0.25rem;
-	color: var(--mat-sys-primary, #3f51b5);
-	font-size: 0.75rem;
-	font-weight: 600;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-}
-
 .payments-history__title {
 	margin: 0;
-	font-size: 1.5rem;
+	font-size: 1.25rem;
 	line-height: 1.2;
 }
 
 .payments-history__copy {
-	max-width: 46rem;
-	margin: 0.5rem 0 0;
+	margin: 0.25rem 0 0;
 	color: rgba(0, 0, 0, 0.65);
 	line-height: 1.5;
 }
 
-.payments-history__stat {
-	display: grid;
-	gap: 0.125rem;
-	min-width: 7rem;
-	padding: 0.5rem 0.75rem;
-	border-left: 3px solid var(--mat-sys-primary, #3f51b5);
-	background: rgba(0, 0, 0, 0.03);
-}
-
-.payments-history__stat span,
+.payments-history__status-chip,
 .payments-history__conversion,
 .payments-history__mobile-contractor {
 	color: rgba(0, 0, 0, 0.65);
 	font-size: 0.875rem;
+}
+
+.payments-history__status-chip {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.35rem 0.6rem;
+	border-radius: 999px;
+	background: rgba(14, 116, 144, 0.08);
+	white-space: nowrap;
 }
 
 .payments-history__filters {
@@ -126,13 +116,53 @@
 }
 
 .payments-history__table {
+	inline-size: 100%;
+	box-sizing: border-box;
 	overflow-x: auto;
 	border: 1px solid rgba(0, 0, 0, 0.12);
 	border-radius: 0.5rem;
 }
 
 .payments-history__table mat-table {
-	min-width: 58rem;
+	display: table;
+	inline-size: 100%;
+	min-inline-size: 58rem;
+	table-layout: fixed;
+}
+
+.payments-history__table tr[mat-header-row],
+.payments-history__table tr[mat-row] {
+	inline-size: 100%;
+	box-sizing: border-box;
+}
+
+.payments-history__column--date {
+	inline-size: 11%;
+}
+
+.payments-history__column--contractor,
+.payments-history__column--category {
+	inline-size: 14%;
+}
+
+.payments-history__column--category {
+	inline-size: 15%;
+}
+
+.payments-history__column--income,
+.payments-history__column--expense,
+.payments-history__column--balance {
+	inline-size: 10%;
+	white-space: nowrap;
+}
+
+.payments-history__column--comment {
+	inline-size: 23%;
+	overflow-wrap: anywhere;
+}
+
+.payments-history__column--actions {
+	inline-size: 7%;
 }
 
 .payments-history__mobile-list {
@@ -156,7 +186,6 @@
 }
 
 .payments-history__actions {
-	inline-size: 3.5rem;
 	text-align: center;
 }
 
@@ -174,6 +203,10 @@
 
 .payments-history__row {
 	cursor: pointer;
+}
+
+.payments-history__row:hover {
+	background: rgba(14, 116, 144, 0.06);
 }
 
 .payments-history__row--selected,
@@ -270,6 +303,12 @@
 @media (max-width: 1100px) {
 	.payments-history__filters {
 		grid-template-columns: repeat(2, minmax(10rem, 1fr));
+	}
+}
+
+@media (min-width: 1500px) {
+	.payments-history__filters {
+		grid-template-columns: repeat(8, minmax(7.5rem, 1fr));
 	}
 }
 

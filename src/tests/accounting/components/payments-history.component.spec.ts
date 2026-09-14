@@ -1,5 +1,7 @@
 import { signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDatepickerInputEvent } from '@angular/material/datepicker';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { MapperModule } from '@dynamic-mapper/angular';
 import { NgxsModule, Store } from '@ngxs/store';
@@ -52,6 +54,7 @@ describe('payments history component', () => {
 	let sseServiceSpy: jasmine.SpyObj<SseService>;
 	let notificationsSubject: Subject<AccountNotification>;
 	let transferProjectionSynchronizationService: TransferProjectionSynchronizationService;
+	let routerSpy: jasmine.SpyObj<Router>;
 	let canLeaveEditor = true;
 
 	let store: Store;
@@ -87,6 +90,8 @@ describe('payments history component', () => {
 
 	beforeEach(async () => {
 		canLeaveEditor = true;
+		routerSpy = jasmine.createSpyObj<Router>('router', ['navigate']);
+		routerSpy.navigate.and.resolveTo(true);
 		contractorsProviderSpy = jasmine.createSpyObj<DefaultContractorsProvider>('contractorsProvider', {
 			getContractors: of([
 				{
@@ -156,6 +161,8 @@ describe('payments history component', () => {
 				MapperModule.withProfiles([PaymentHistoryMappingProfile, DataContractorProfile, DataCategoryProfile]),
 			],
 			providers: [
+				{ provide: ActivatedRoute, useValue: { parent: { parent: {} } } },
+				{ provide: Router, useValue: routerSpy },
 				HandbooksService,
 				TransferProjectionSynchronizationService,
 				{
@@ -254,6 +261,34 @@ describe('payments history component', () => {
 		expect(nativeElement.textContent).toContain('Showing 2 of 2 results');
 	});
 
+	it('uses the full available table width with flexible content columns', () => {
+		const table = getNativeElement().querySelector('mat-table') as HTMLElement;
+
+		expect(table).not.toBeNull();
+		expect(getComputedStyle(table).inlineSize).toBe('100%');
+		expect(getComputedStyle(table).tableLayout).toBe('fixed');
+	});
+
+	it('provides independent Material calendar pickers for the optional From and To filters', () => {
+		const nativeElement = getNativeElement();
+		const dateInputs = nativeElement.querySelectorAll<HTMLInputElement>('input[matInput]');
+
+		expect(nativeElement.querySelectorAll('mat-datepicker-toggle').length).toBe(2);
+		expect(nativeElement.querySelectorAll('mat-datepicker').length).toBe(2);
+		expect(Array.from(dateInputs).filter(input => input.type === 'date')).toHaveSize(0);
+	});
+
+	it('keeps calendar selections local until filters are explicitly applied', () => {
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.reset();
+
+		component.updateDraftCalendarDate('dateFrom', {
+			value: new Date(2024, 0, 15),
+		} as MatDatepickerInputEvent<Date>);
+
+		expect(component.draftPaymentHistoryQuerySignal().dateFrom).toBe('2024-01-15');
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(0);
+	});
+
 	it('provides a labelled row edit action in addition to row selection', async () => {
 		const editButton = getNativeElement().querySelector<HTMLButtonElement>('button[aria-label="Edit payment"]');
 
@@ -264,6 +299,45 @@ describe('payments history component', () => {
 		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid.toString()).toBe(
 			incomeRecordId.toString()
 		);
+	});
+
+	it('selects a row when the persistent editor outlet is already active', async () => {
+		const editorSession = TestBed.inject(PaymentEditorSessionService);
+		editorSession.open();
+		editorSession.beginCreate();
+		routerSpy.navigate.and.resolveTo(false);
+
+		await component.selectRow(historyRows[1]);
+
+		expect(routerSpy.navigate.calls.count()).toBe(0);
+		expect(editorSession.editorModeSignal()).toBe('edit');
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid?.toString()).toBe(
+			expenseRecordId.toString()
+		);
+	});
+
+	it('opens the editor outlet only after an explicit Add payment action', async () => {
+		await component.addPayment();
+
+		expect(routerSpy.navigate.calls.mostRecent().args).toEqual([
+			[{ outlets: { right_sidebar: ['operations'] } }],
+			jasmine.objectContaining({ relativeTo: jasmine.anything() }),
+		]);
+	});
+
+	it('hides and ignores Add payment while a create editor is already open', async () => {
+		const editorSession = TestBed.inject(PaymentEditorSessionService);
+		editorSession.open();
+		editorSession.beginCreate();
+		fixture.detectChanges();
+		routerSpy.navigate.calls.reset();
+
+		expect(getHeaderAddPaymentButton()).toBeUndefined();
+
+		await component.addPayment();
+
+		expect(routerSpy.navigate.calls.count()).toBe(0);
+		expect(editorSession.editorModeSignal()).toBe('create');
 	});
 
 	it('does not load until valid draft filters are applied', () => {
@@ -406,6 +480,36 @@ describe('payments history component', () => {
 		expect(getRenderedRows()[1].getAttribute('aria-selected')).toBe('true');
 	});
 
+	it('opens the selected row once from the explicit edit button without bubbling to a second row activation', async () => {
+		routerSpy.navigate.calls.reset();
+		const editButton = getNativeElement().querySelector<HTMLButtonElement>('button[aria-label="Edit payment"]');
+
+		editButton?.click();
+		await fixture.whenStable();
+
+		expect(routerSpy.navigate.calls.count()).toBe(1);
+		expect(TestBed.inject(PaymentEditorSessionService).editorModeSignal()).toBe('edit');
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid.toString()).toBe(
+			incomeRecordId.toString()
+		);
+	});
+
+	it('opens a focused row with Enter and Space keyboard activation', async () => {
+		const row = getRenderedRows()[1];
+
+		row.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+		await fixture.whenStable();
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid.toString()).toBe(
+			expenseRecordId.toString()
+		);
+
+		row.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+		await fixture.whenStable();
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid.toString()).toBe(
+			expenseRecordId.toString()
+		);
+	});
+
 	it('should preserve repeated row selection behavior', async () => {
 		const row = getRenderedRows()[1];
 
@@ -421,6 +525,18 @@ describe('payments history component', () => {
 		expect(Array.from(component.clickedRowGuids).map(recordGuid => recordGuid.toString())).toEqual([
 			expenseRecordId.toString(),
 		]);
+	});
+
+	it('keeps the latest transaction selection when row activation is requested rapidly', async () => {
+		routerSpy.navigate.calls.reset();
+
+		await Promise.all([component.selectRow(historyRows[0]), component.selectRow(historyRows[1])]);
+
+		expect(routerSpy.navigate.calls.count()).toBe(1);
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid.toString()).toBe(
+			expenseRecordId.toString()
+		);
+		expect(TestBed.inject(PaymentEditorSessionService).editorModeSignal()).toBe('edit');
 	});
 
 	it('returns the editor to create mode and clears selection when Add payment is used from an edit', async () => {
@@ -822,6 +938,12 @@ describe('payments history component', () => {
 
 	function getTableText(): string {
 		return getNativeElement().querySelector('mat-table, table')?.textContent ?? '';
+	}
+
+	function getHeaderAddPaymentButton(): HTMLButtonElement | undefined {
+		return Array.from(
+			getNativeElement().querySelectorAll<HTMLButtonElement>('.payments-history__header-actions button')
+		).find(button => button.textContent?.includes('Add payment'));
 	}
 
 	function getRenderedRows(): HTMLElement[] {

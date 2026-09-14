@@ -1,205 +1,89 @@
 <section class="accounts-workspace">
-	<div class="accounts-workspace__hero">
+	<header class="accounts-workspace__toolbar">
 		<div>
-			<p class="accounts-workspace__eyebrow">Accounts hub</p>
-			<h1 class="accounts-workspace__title">Pick the account space you want to work with.</h1>
-			<p class="accounts-workspace__copy">
-				Group accounts by type, scan balances quickly, and open operations only after selecting the account that
-				will drive the workspace.
-			</p>
+			<h2 class="accounts-workspace__toolbar-title">Accounts</h2>
+			<p class="accounts-workspace__toolbar-copy">Choose an account to review its transactions.</p>
 		</div>
+		<div class="accounts-workspace__toolbar-actions">
+			<button
+				mat-flat-button
+				color="primary"
+				type="button"
+				(click)="createNewPaymentAccount()"
+			>
+				<mat-icon>add</mat-icon>
+				Add account
+			</button>
+		</div>
+	</header>
 
-		<div class="accounts-workspace__stats">
-			<div class="accounts-workspace__stat-card">
-				<span class="accounts-workspace__stat-label">Total accounts</span>
-				<strong>{{ totalAccountsCount }}</strong>
-			</div>
-			<div class="accounts-workspace__stat-card">
-				<span class="accounts-workspace__stat-label">Wallet balance</span>
-				<strong>{{ getAccountsTotalBalance(cashAccountsSignal()) }}</strong>
-			</div>
-			<div class="accounts-workspace__stat-card">
-				<span class="accounts-workspace__stat-label">Virtual balance</span>
-				<strong>{{ getAccountsTotalBalance(debitVirtualAccountsSignal()) }}</strong>
-			</div>
-			<div class="accounts-workspace__stat-card">
-				<span class="accounts-workspace__stat-label">Loans and credit</span>
-				<strong>{{ getAccountsTotalBalance(creditVirtualAccountsSignal()) }}</strong>
-			</div>
-		</div>
+	<div
+		class="accounts-workspace__summary"
+		aria-label="Account summary"
+	>
+		<strong>{{ totalAccountsCount }}</strong>
+		<span>accounts available</span>
+		<span class="accounts-workspace__summary-note">Balances remain in their account currencies.</span>
 	</div>
 
-	<mat-accordion class="headers-align accounts-workspace__accordion">
-		<mat-expansion-panel
-			[expanded]="step === 0"
-			(opened)="setStep(0)"
-			hideToggle
-		>
-			<mat-expansion-panel-header>
-				<mat-panel-title>Wallet money</mat-panel-title>
-				<mat-panel-description>
-					{{ cashAccountsSignal().length }} accounts · {{ getAccountsTotalBalance(cashAccountsSignal()) }}
-					total
-					<mat-icon>account_balance_wallet</mat-icon>
-				</mat-panel-description>
-			</mat-expansion-panel-header>
-
-			<mat-selection-list
-				#cash
-				[multiple]="false"
-				(selectionChange)="chooseAccount($event)"
+	@for (accountGroup of [ { name: 'Wallet money', accounts: cashAccountsSignal() }, { name: 'Virtual accounts',
+	accounts: debitVirtualAccountsSignal() }, { name: 'Loans and credit', accounts: creditVirtualAccountsSignal() } ];
+	track accountGroup.name) {
+	<section class="accounts-workspace__group">
+		<header class="accounts-workspace__group-header">
+			<h3>{{ accountGroup.name }}</h3>
+			<span>
+				{{ accountGroup.accounts.length }} {{ accountGroup.accounts.length === 1 ? 'account' : 'accounts' }}
+			</span>
+		</header>
+		@if (accountGroup.accounts.length) {
+		<div class="accounts-workspace__account-list">
+			@for (paymentAccount of accountGroup.accounts; track paymentAccount.key) {
+			<article
+				class="accounts-workspace__account-row"
+				[class.accounts-workspace__account-row--selected]="isSelectedPaymentAccount(paymentAccount)"
 			>
-				@for (paymentAccount of cashAccountsSignal(); track paymentAccount) {
-				<mat-list-option
-					[value]="paymentAccount.key"
-					class="accounts-workspace__account-row"
-				>
+				<div class="accounts-workspace__account-identity">
 					<span
 						class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
 					></span>
-					{{paymentAccount.emitter }} | {{paymentAccount.description}} | Balance:
-					<span [class]="paymentAccount.balance > 0 ? 'positive-balance' : 'negative-balance'">
-						{{ paymentAccount.balance }}
-					</span>
-					[{{paymentAccount.currency}}]
-				</mat-list-option>
-				}
-			</mat-selection-list>
-
-			<mat-action-row>
-				<button
-					mat-button
-					color="primary"
-					[disabled]="isNavigateToOperationsDisabled"
-					(click)="navigateToOperations()"
+					<div>
+						<h4>{{ paymentAccount.emitter }}</h4>
+						<p>{{ paymentAccount.description }} · {{ paymentAccount.currency }}</p>
+					</div>
+				</div>
+				<div
+					class="accounts-workspace__balance"
+					[class.positive-balance]="paymentAccount.balance > 0"
+					[class.negative-balance]="paymentAccount.balance < 0"
 				>
-					Navigate
-				</button>
-			</mat-action-row>
-		</mat-expansion-panel>
-
-		<mat-expansion-panel
-			[expanded]="step === 1"
-			(opened)="setStep(1)"
-			hideToggle
-		>
-			<mat-expansion-panel-header>
-				<mat-panel-title>Virtual accounts</mat-panel-title>
-				<mat-panel-description>
-					{{ debitVirtualAccountsSignal().length }} accounts · {{
-					getAccountsTotalBalance(debitVirtualAccountsSignal()) }} total
-					<mat-icon>payments</mat-icon>
-				</mat-panel-description>
-			</mat-expansion-panel-header>
-
-			<mat-selection-list
-				#virtual
-				[multiple]="false"
-				(selectionChange)="chooseAccount($event)"
-			>
-				@for (paymentAccount of debitVirtualAccountsSignal(); track paymentAccount) {
-				<mat-list-option
-					[value]="paymentAccount.key"
-					class="accounts-workspace__account-row"
-				>
-					<span
-						class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
-					></span>
-					{{paymentAccount.emitter }} | {{paymentAccount.description}} | Balance:
-					<span [class]="paymentAccount.balance > 0 ? 'positive-balance' : 'negative-balance'">
-						{{ paymentAccount.balance }}
-					</span>
-					[{{paymentAccount.currency}}]
-				</mat-list-option>
-				}
-			</mat-selection-list>
-
-			<mat-action-row>
-				<button
-					mat-button
-					color="warn"
-					(click)="prevStep()"
-				>
-					Previous
-				</button>
-				<button
-					mat-button
-					color="primary"
-					(click)="nextStep()"
-				>
-					Next
-				</button>
-				<button
-					mat-button
-					color="primary"
-					[disabled]="isNavigateToOperationsDisabled"
-					(click)="navigateToOperations()"
-				>
-					Navigate
-				</button>
-			</mat-action-row>
-		</mat-expansion-panel>
-
-		<mat-expansion-panel
-			[expanded]="step === 2"
-			(opened)="setStep(2)"
-			hideToggle
-		>
-			<mat-expansion-panel-header>
-				<mat-panel-title>Loans</mat-panel-title>
-				<mat-panel-description>
-					{{ creditVirtualAccountsSignal().length }} accounts · {{
-					getAccountsTotalBalance(creditVirtualAccountsSignal()) }} total
-					<mat-icon>credit_score</mat-icon>
-				</mat-panel-description>
-			</mat-expansion-panel-header>
-
-			<mat-selection-list
-				#loan
-				[multiple]="false"
-				(selectionChange)="chooseAccount($event)"
-			>
-				@for (paymentAccount of creditVirtualAccountsSignal(); track paymentAccount) {
-				<mat-list-option
-					[value]="paymentAccount.key"
-					class="accounts-workspace__account-row"
-				>
-					<span
-						class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
-					></span>
-					{{paymentAccount.emitter }} | {{paymentAccount.description}} | Balance:
-					<span [class]="paymentAccount.balance > 0 ? 'positive-balance' : 'negative-balance'">
-						{{ paymentAccount.balance }}
-					</span>
-					[{{paymentAccount.currency}}]
-				</mat-list-option>
-				}
-			</mat-selection-list>
-
-			<mat-action-row>
-				<button
-					mat-button
-					color="warn"
-					(click)="prevStep()"
-				>
-					Previous
-				</button>
-				<button
-					mat-button
-					color="primary"
-					(click)="nextStep()"
-				>
-					End
-				</button>
-				<button
-					mat-button
-					color="primary"
-					[disabled]="isNavigateToOperationsDisabled"
-					(click)="navigateToOperations()"
-				>
-					Navigate
-				</button>
-			</mat-action-row>
-		</mat-expansion-panel>
-	</mat-accordion>
+					<span>Balance</span>
+					<strong>{{ paymentAccount.balance }} {{ paymentAccount.currency }}</strong>
+				</div>
+				<div class="accounts-workspace__account-actions">
+					<button
+						mat-button
+						color="primary"
+						type="button"
+						(click)="openPaymentAccount(paymentAccount)"
+					>
+						Open
+					</button>
+					<button
+						mat-icon-button
+						type="button"
+						aria-label="Edit {{ paymentAccount.emitter }}"
+						(click)="selectPaymentAccount(paymentAccount); updateSelectedPaymentAccount()"
+					>
+						<mat-icon>edit</mat-icon>
+					</button>
+				</div>
+			</article>
+			}
+		</div>
+		} @else {
+		<p class="accounts-workspace__empty-group">No accounts in this group.</p>
+		}
+	</section>
+	}
 </section>
