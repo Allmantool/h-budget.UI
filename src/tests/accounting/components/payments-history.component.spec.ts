@@ -233,7 +233,6 @@ describe('payments history component', () => {
 			'expense',
 			'balance',
 			'comment',
-			'actions',
 		]);
 		expect(getHeaderTexts()).toEqual([
 			'Date  ↓',
@@ -243,7 +242,6 @@ describe('payments history component', () => {
 			'Expense',
 			'Balance',
 			'Comment',
-			'Actions',
 		]);
 	});
 
@@ -289,11 +287,11 @@ describe('payments history component', () => {
 		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(0);
 	});
 
-	it('provides a labelled row edit action in addition to row selection', async () => {
-		const editButton = getNativeElement().querySelector<HTMLButtonElement>('button[aria-label="Edit payment"]');
+	it('provides a labelled selectable row action', async () => {
+		const row = getRenderedRows()[0];
 
-		expect(editButton).not.toBeNull();
-		editButton?.click();
+		expect(row.getAttribute('aria-label')).toContain('Edit payment');
+		row.click();
 		await fixture.whenStable();
 
 		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid.toString()).toBe(
@@ -466,6 +464,11 @@ describe('payments history component', () => {
 		expect(Array.from(component.clickedRowGuids).some(recordGuid => recordGuid.equals(incomeRecordId))).toBe(true);
 	});
 
+	it('uses the selectable row surface instead of a redundant desktop Actions column', () => {
+		expect(getHeaderTexts()).toEqual(['Date  ↓', 'Contractor', 'Category', 'Income', 'Expense', 'Balance', 'Comment']);
+		expect(getNativeElement().querySelector('button[aria-label="Edit payment"]')).toBeNull();
+	});
+
 	it('should dispatch selected history operation when a row is clicked', async () => {
 		getRenderedRows()[1].click();
 
@@ -480,11 +483,11 @@ describe('payments history component', () => {
 		expect(getRenderedRows()[1].getAttribute('aria-selected')).toBe('true');
 	});
 
-	it('opens the selected row once from the explicit edit button without bubbling to a second row activation', async () => {
+	it('opens the selected row once from the row surface', async () => {
 		routerSpy.navigate.calls.reset();
-		const editButton = getNativeElement().querySelector<HTMLButtonElement>('button[aria-label="Edit payment"]');
+		const row = getRenderedRows()[0];
 
-		editButton?.click();
+		row.click();
 		await fixture.whenStable();
 
 		expect(routerSpy.navigate.calls.count()).toBe(1);

@@ -1,0 +1,59 @@
+<section class="transfer-details">
+	<header class="transfer-details__header">
+		<p class="transfer-details__eyebrow">Transfer</p>
+		<h2 class="transfer-details__title">Transfer details</h2>
+		<p class="transfer-details__summary">
+			{{ isIncoming ? 'Received into this account' : 'Sent from this account' }}
+		</p>
+	</header>
+
+	<dl class="transfer-details__list">
+		<div class="transfer-details__item">
+			<dt class="transfer-details__label">From account</dt>
+			<dd class="transfer-details__value">{{ sourceAccountLabel }}</dd>
+		</div>
+		<div class="transfer-details__item">
+			<dt class="transfer-details__label">To account</dt>
+			<dd class="transfer-details__value">{{ destinationAccountLabel }}</dd>
+		</div>
+		<div class="transfer-details__item">
+			<dt class="transfer-details__label">Sent</dt>
+			<dd class="transfer-details__value">{{ sourceAmount | number: '1.2-2' }} {{ sourceCurrency }}</dd>
+		</div>
+		<div class="transfer-details__item">
+			<dt class="transfer-details__label">Received</dt>
+			<dd class="transfer-details__value">{{ destinationAmount | number: '1.2-2' }} {{ destinationCurrency }}</dd>
+		</div>
+		<div class="transfer-details__item">
+			<dt class="transfer-details__label">Date</dt>
+			<dd class="transfer-details__value">{{ operation?.operationDate | date: 'd MMM y' }}</dd>
+		</div>
+		<div class="transfer-details__item">
+			<dt class="transfer-details__label">Direction</dt>
+			<dd class="transfer-details__value">{{ isIncoming ? 'Incoming transfer' : 'Outgoing transfer' }}</dd>
+		</div>
+		<div class="transfer-details__item">
+			<dt class="transfer-details__label">Related account</dt>
+			<dd class="transfer-details__value">{{ relatedAccountId }}</dd>
+		</div>
+		@if (operation?.comment) {
+		<div class="transfer-details__item transfer-details__item--comment">
+			<dt class="transfer-details__label">Comment</dt>
+			<dd class="transfer-details__value">{{ operation?.comment }}</dd>
+		</div>
+		}
+	</dl>
+
+	@if (deleteErrorSignal()) {
+	<p class="transfer-details__status transfer-details__status--error" role="alert">
+		{{ deleteErrorSignal() }}
+	</p>
+	}
+
+	<footer class="transfer-details__actions">
+		<button mat-button type="button" color="warn" (click)="deleteTransfer()" [disabled]="isDeletingSignal()">
+			{{ isDeletingSignal() ? 'Deleting transfer…' : 'Delete transfer' }}
+		</button>
+		<button mat-button type="button" (click)="requestClose()" [disabled]="isDeletingSignal()">Close</button>
+	</footer>
+</section>

@@ -50,6 +50,7 @@ import { PaymentCommandExecutorService } from '../../services/payment-command-ex
 import { PaymentEditorLeaveService } from '../../services/payment-editor-leave.service';
 import { PaymentEditorSessionService } from '../../services/payment-editor-session.service';
 import { PaymentDeleteDialogComponent } from '../payment-delete-dialog/payment-delete-dialog.component';
+import { TransferDetailsComponent } from '../transfer-details/transfer-details.component';
 
 interface PaymentEditorValue {
 	amount: number | null;
@@ -93,6 +94,7 @@ interface PaymentDeleteDialogData {
 		MatInputModule,
 		MatNativeDateModule,
 		MatSelectModule,
+		TransferDetailsComponent,
 	],
 })
 export class AccountingOperationsCrudComponent implements AfterViewInit, OnInit {
@@ -161,6 +163,9 @@ export class AccountingOperationsCrudComponent implements AfterViewInit, OnInit 
 			? this.paymentOperationsSignal().find(operation => operation.key.equals(selectedId))
 			: undefined;
 	});
+	public readonly isTransferSelectionSignal = computed(
+		() => this.selectedOperationSignal()?.operationType === OperationTypes.Transfer
+	);
 	public readonly filteredCategoriesSignal = computed(() =>
 		this.categoriesSignal().filter(category => category.operationType === this.formValueSignal().direction)
 	);
@@ -368,6 +373,13 @@ export class AccountingOperationsCrudComponent implements AfterViewInit, OnInit 
 		this.initializeForm(this.defaultValue());
 	}
 
+	public closeTransferDetails(): void {
+		this.paymentEditorSession.beginCreate();
+		this.store.dispatch(new SetActiveAccountingOperation(undefined));
+		this.resetNewPaymentForm();
+		void this.closePaymentEditor();
+	}
+
 	public async closeEditorAsync(): Promise<void> {
 		if (!(await this.canLeaveEditor())) {
 			return;
@@ -464,6 +476,15 @@ export class AccountingOperationsCrudComponent implements AfterViewInit, OnInit 
 		const activeAccountId = this.activeAccountIdSignal()?.toString();
 		if (selectedOperationId && (!operation || operation.paymentAccountId.toString() !== activeAccountId)) {
 			this.reconcileStaleSelection();
+			return;
+		}
+		if (operation?.operationType === OperationTypes.Transfer) {
+			this.loadedOperationId = operation.key.toString();
+			this.loadedOperationReferenceSignature = undefined;
+			this.pendingIntent = undefined;
+			this.isEditorLoadingSignal.set(false);
+			this.paymentEditorSession.beginEdit();
+			this.submissionStateSignal.set({ status: 'idle' });
 			return;
 		}
 

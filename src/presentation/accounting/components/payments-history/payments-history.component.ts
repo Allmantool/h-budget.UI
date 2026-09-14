@@ -62,6 +62,7 @@ import { getContractors } from '../../../../app/modules/shared/store/states/hand
 import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
 import { IContractorModel } from '../../../../domain/models/accounting/contractor.model.';
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
+import { OperationTypes } from '../../../../domain/types/operation.types';
 import {
 	defaultPaymentHistoryQuery,
 	IPaymentHistoryQueryModel,
@@ -150,7 +151,6 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 		'expense',
 		'balance',
 		'comment',
-		'actions',
 	];
 
 	public dataSource$: BehaviorSubject<IPaymentRepresentationModel[]> = new BehaviorSubject<
@@ -435,6 +435,12 @@ export class PaymentsHistoryComponent implements OnInit, OnDestroy, AfterViewIni
 	}
 
 	public isFuturePayment = (record: IPaymentRepresentationModel): boolean => isFuture(record.operationDate);
+
+	public transactionRowLabel(record: IPaymentRepresentationModel): string {
+		const action = record.operationType === OperationTypes.Transfer ? 'Open transfer details' : 'Edit payment';
+		const selected = this.isSelected(record) ? 'Selected. ' : '';
+		return `${selected}${action} on ${record.operationDate.toLocaleDateString()}`;
+	}
 
 	public isSelected(record: IPaymentRepresentationModel): boolean {
 		return this.clickedRowGuids.has(record.key);

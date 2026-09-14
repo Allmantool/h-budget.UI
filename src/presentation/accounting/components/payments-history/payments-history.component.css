@@ -137,32 +137,28 @@
 }
 
 .payments-history__column--date {
-	inline-size: 11%;
+	inline-size: 10%;
 }
 
 .payments-history__column--contractor,
 .payments-history__column--category {
-	inline-size: 14%;
+	inline-size: 15%;
 }
 
 .payments-history__column--category {
-	inline-size: 15%;
+	inline-size: 16%;
 }
 
 .payments-history__column--income,
 .payments-history__column--expense,
 .payments-history__column--balance {
-	inline-size: 10%;
+	inline-size: 9%;
 	white-space: nowrap;
 }
 
 .payments-history__column--comment {
-	inline-size: 23%;
+	inline-size: 32%;
 	overflow-wrap: anywhere;
-}
-
-.payments-history__column--actions {
-	inline-size: 7%;
 }
 
 .payments-history__mobile-list {
@@ -183,10 +179,6 @@
 	align-self: center;
 	color: rgba(0, 0, 0, 0.72);
 	font-size: 0.875rem;
-}
-
-.payments-history__actions {
-	text-align: center;
 }
 
 .payments-history__sort-button {

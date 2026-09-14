@@ -2,6 +2,14 @@
 	class="payment-editor"
 	[class.payment-editor--submitting]="isSubmittingSignal()"
 >
+	@if (isTransferSelectionSignal()) {
+	<transfer-details
+		[activeAccount]="activeAccountSignal()"
+		[operation]="selectedOperationSignal()"
+		(closeRequested)="closeTransferDetails()"
+		(deleted)="closeTransferDetails()"
+	></transfer-details>
+	} @else {
 	<header class="payment-editor__header">
 		<div>
 			<p class="payment-editor__eyebrow">{{ editorModeSignal() === 'create' ? 'New record' : 'Edit payment' }}</p>
@@ -224,5 +232,6 @@
 			}
 		</footer>
 	</form>
+	}
 	}
 </section>

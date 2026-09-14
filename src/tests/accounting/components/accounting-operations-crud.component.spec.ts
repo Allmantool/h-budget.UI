@@ -1,15 +1,21 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDatepicker } from '@angular/material/datepicker';
+import { MatDialog } from '@angular/material/dialog';
 import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { NgxsModule, Store } from '@ngxs/store';
+import { of } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
+import { Result } from '../../../core/result';
 import { ngxsConfig } from '../../../app/modules/shared/store/ngxs.config';
 import { AccountingOperationsTableState } from '../../../app/modules/shared/store/states/accounting/accounting-operations-table.state';
 import { SetActiveAccountingOperation } from '../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
-import { SetActivePaymentAccount } from '../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
+import {
+	SetActivePaymentAccount,
+	SetInitialPaymentAccounts,
+} from '../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
 import { SetInitialPaymentOperations } from '../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
 import { PaymentAccountState } from '../../../app/modules/shared/store/states/accounting/payment-account.state';
 import { AccountingOperationsState } from '../../../app/modules/shared/store/states/accounting/payment-operations.state';
@@ -19,9 +25,13 @@ import { SetInitialContractors } from '../../../app/modules/shared/store/states/
 import { CategoriesState } from '../../../app/modules/shared/store/states/handbooks/categories.state';
 import { ContractorsState } from '../../../app/modules/shared/store/states/handbooks/contractors.state';
 import { PaymentOperationTypes } from '../../../domain/models/accounting/operation-types';
+import { AccountTypes } from '../../../domain/models/accounting/account-types';
+import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
 import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 import { OperationTypes } from '../../../domain/types/operation.types';
+import { CrossAccountsTransferProvider } from '../../../data/providers/accounting/cross-accounts-transfer.provider';
 import { AccountingOperationsCrudComponent } from '../../../presentation/accounting/components/accounting-operations-crud/accounting-operations-crud.component';
+import { TransferDetailsComponent } from '../../../presentation/accounting/components/transfer-details/transfer-details.component';
 import { CategoriesDialogService } from '../../../presentation/accounting/services/categories-dialog.service';
 import { ContractorsDialogService } from '../../../presentation/accounting/services/contractors-dialog.service';
 import { PaymentCommandExecutorService } from '../../../presentation/accounting/services/payment-command-executor.service';
@@ -117,6 +127,7 @@ describe('accounting operations CRUD component', () => {
 			],
 		}).compileComponents();
 		const store = TestBed.inject(Store);
+		store.dispatch(new SetInitialPaymentAccounts([activeAccount()]));
 		store.dispatch(new SetActivePaymentAccount('1c12ec59-8875-45c1-9fb0-e4edcf34a074'));
 		const fixture = TestBed.createComponent(AccountingOperationsCrudComponent);
 		fixture.detectChanges();
@@ -147,7 +158,7 @@ describe('accounting operations CRUD component', () => {
 				Promise.resolve({ status: 'projected', paymentOperationId: createdOperationId }),
 				Promise.resolve({ status: 'projected', paymentOperationId: secondCreatedOperationId })
 			);
-		await TestBed.configureTestingModule({
+		TestBed.configureTestingModule({
 			imports: [
 				AccountingOperationsCrudComponent,
 				NoopAnimationsModule,
@@ -332,6 +343,77 @@ describe('accounting operations CRUD component', () => {
 				Reflect.deleteProperty(globalThis, 'matchMedia');
 			}
 		}
+	});
+
+	it('shows transfer details instead of waiting for payment reference data for an incoming transfer', async () => {
+		const transfer = {
+			...paymentOperation('7cfceda7-d9b7-4c05-b054-7480dc357cf4', 45, 'Transfer from Priorank'),
+			categoryId: Guid.EMPTY,
+			contractorId: Guid.EMPTY,
+			relatedPaymentAccountId: Guid.parse('2fa2f03e-a74f-40c0-8ae9-0d4699f2f194'),
+			operationType: OperationTypes.Transfer,
+		};
+		const { fixture } = await createSelectedEditor(jasmine.createSpy('confirmDiscard').and.resolveTo(true), transfer, false);
+		const nativeElement = fixture.nativeElement as HTMLElement;
+
+		expect(nativeElement.textContent).toContain('Transfer details');
+		expect(nativeElement.textContent).not.toContain('Loading payment…');
+		expect(nativeElement.textContent).not.toContain('Save changes');
+	});
+
+	it('keeps a transfer selected when a previously selected payment changes late', async () => {
+		const transfer = {
+			...paymentOperation('7cfceda7-d9b7-4c05-b054-7480dc357cf4', -45, 'Transfer to Priorank'),
+			categoryId: Guid.EMPTY,
+			contractorId: Guid.EMPTY,
+			relatedPaymentAccountId: Guid.parse('2fa2f03e-a74f-40c0-8ae9-0d4699f2f194'),
+			operationType: OperationTypes.Transfer,
+		};
+		const { fixture, store } = await createSelectedEditor();
+
+		store.dispatch(new SetInitialPaymentOperations([operationA(), transfer]));
+		store.dispatch(new SetActiveAccountingOperation(transfer.key));
+		fixture.detectChanges();
+		await fixture.whenStable();
+		fixture.detectChanges();
+
+		expect((fixture.nativeElement as HTMLElement).textContent).toContain('Transfer details');
+		expect((fixture.nativeElement as HTMLElement).textContent).not.toContain('Loading payment…');
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid?.toString()).toBe(transfer.key.toString());
+	});
+
+	it('deletes a transfer only through the paired transfer endpoint after confirmation', async () => {
+		const transfer = {
+			...paymentOperation('7cfceda7-d9b7-4c05-b054-7480dc357cf4', -45, 'Transfer to Priorank'),
+			categoryId: Guid.EMPTY,
+			contractorId: Guid.EMPTY,
+			relatedPaymentAccountId: Guid.parse('2fa2f03e-a74f-40c0-8ae9-0d4699f2f194'),
+			operationType: OperationTypes.Transfer,
+		};
+		const { dialog, fixture, transferProvider } = await createSelectedEditor(
+			jasmine.createSpy('confirmDiscard').and.resolveTo(true),
+			transfer,
+			false
+		);
+		dialog.open.and.returnValue({ afterClosed: () => of(true) } as never);
+		transferProvider.deleteById.and.returnValue(
+			of(new Result<Guid>({ isSucceeded: true, message: '', payload: Guid.create() }))
+		);
+
+		const nativeElement: unknown = fixture.nativeElement;
+		if (!(nativeElement instanceof HTMLElement)) {
+			throw new Error('Expected the fixture to render an HTMLElement.');
+		}
+		Array.from(nativeElement.querySelectorAll('button')).find(button =>
+			button.textContent?.includes('Delete transfer')
+		)?.click();
+
+		expect(transferProvider.deleteById).toHaveBeenCalledTimes(1);
+		const [accountId, operationId] = transferProvider.deleteById.calls.mostRecent().args;
+		expect(accountId.toString()).toBe('1c12ec59-8875-45c1-9fb0-e4edcf34a074');
+		expect(operationId.toString()).toBe(transfer.key.toString());
+		expect(fixture.componentInstance.editorModeSignal()).toBe('create');
+		expect(storeSelection(fixture)).toBeUndefined();
 	});
 
 	it('uses a normalized baseline so browsing unchanged records does not request a discard', async () => {
@@ -607,6 +689,9 @@ describe('accounting operations CRUD component', () => {
 		selectedOperation = operationA(),
 		withReferenceData = true
 	) {
+		const transferProvider = jasmine.createSpyObj<CrossAccountsTransferProvider>('transferProvider', ['deleteById']);
+		const dialog = jasmine.createSpyObj<MatDialog>('dialog', ['open']);
+		dialog.open.and.returnValue({ afterClosed: () => Promise.resolve(false) } as never);
 		const commandExecutor = {
 			executeCreate: jasmine.createSpy('executeCreate'),
 			executeUpdate: jasmine.createSpy('executeUpdate'),
@@ -628,6 +713,8 @@ describe('accounting operations CRUD component', () => {
 				),
 			],
 			providers: [
+				{ provide: CrossAccountsTransferProvider, useValue: transferProvider },
+				{ provide: MatDialog, useValue: dialog },
 				{
 					provide: PaymentCommandExecutorService,
 					useValue: commandExecutor,
@@ -644,8 +731,13 @@ describe('accounting operations CRUD component', () => {
 				},
 				PaymentEditorSessionService,
 			],
-		}).compileComponents();
+		});
+		TestBed.overrideComponent(TransferDetailsComponent, {
+			add: { providers: [{ provide: MatDialog, useValue: dialog }] },
+		});
+		await TestBed.compileComponents();
 		const store = TestBed.inject(Store);
+		store.dispatch(new SetInitialPaymentAccounts([activeAccount()]));
 		store.dispatch(new SetActivePaymentAccount('1c12ec59-8875-45c1-9fb0-e4edcf34a074'));
 		if (withReferenceData) {
 			store.dispatch([
@@ -664,7 +756,7 @@ describe('accounting operations CRUD component', () => {
 		fixture.detectChanges();
 		await fixture.whenStable();
 		fixture.detectChanges();
-		return { fixture, store, commandExecutor };
+		return { fixture, store, commandExecutor, dialog, transferProvider };
 	}
 
 	function operationA(): IPaymentOperationModel {
@@ -699,5 +791,20 @@ describe('accounting operations CRUD component', () => {
 			confirmDiscard: () => Promise.resolve(true),
 			register: () => () => undefined,
 		};
+	}
+
+	function activeAccount(): IPaymentAccountModel {
+		return {
+			key: Guid.parse('1c12ec59-8875-45c1-9fb0-e4edcf34a074'),
+			type: AccountTypes.Virtual,
+			currency: 'USD',
+			balance: 0,
+			emitter: 'Current account',
+			description: 'Checking',
+		};
+	}
+
+	function storeSelection(fixture: ComponentFixture<AccountingOperationsCrudComponent>) {
+		return TestBed.inject(Store).selectSnapshot(getAccountingTableOptions).selectedRecordGuid;
 	}
 });
