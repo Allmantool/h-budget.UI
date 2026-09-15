@@ -2,6 +2,7 @@ import * as _ from 'lodash';
 
 import { MappingPair, Profile } from '@dynamic-mapper/mapper';
 
+import { CurrencyFlagMetadata } from '../../../app/modules/shared/constants/currency-flag-metadata';
 import { CurrencyTrend } from '../../../app/modules/shared/store/models/currency-rates/currency-trend';
 import { CurrencyRateValueModel } from '../../../domain/models/rates/currency-rate-value.model';
 import { CurrencyRateGroupModel } from '../../../domain/models/rates/currency-rates-group.model';
@@ -24,6 +25,9 @@ export class PresentationRatesMappingProfile extends Profile {
 			abbreviation: opt => {
 				opt.preCondition(src => !_.isNil(src.abbreviation));
 				opt.mapFrom(src => src.abbreviation);
+			},
+			country: opt => {
+				opt.mapFrom(src => CurrencyFlagMetadata.getByCurrencyAbbreviation(src.abbreviation));
 			},
 			scale: opt => {
 				opt.preCondition(src => !_.isNil(src.scale));

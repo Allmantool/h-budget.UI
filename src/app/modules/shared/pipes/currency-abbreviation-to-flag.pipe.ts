@@ -1,13 +1,13 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-import * as _ from 'lodash';
+import { CurrencyFlagMetadata } from '../constants/currency-flag-metadata';
 
 @Pipe({
 	name: 'currencyAbbreviationToFlagFormat',
 	standalone: true,
 })
 export class CurrencyAbbreviationToFlagFormatPipe implements PipeTransform {
-	public transform(currencyAbbreviation: string): string {
-		return _.isNil(currencyAbbreviation) ? '' : _.lowerCase(currencyAbbreviation.slice(0, 2));
+	public transform(currencyAbbreviation: string | null | undefined): string {
+		return CurrencyFlagMetadata.getByCurrencyAbbreviation(currencyAbbreviation)?.countryCode ?? '';
 	}
 }

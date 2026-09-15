@@ -136,6 +136,36 @@ describe('currency rates grid component', () => {
 		expect(tableText).toContain('Euro [EUR]');
 		expect(tableText).toContain('3.25');
 		expect(tableText).toContain('3.55');
+		expect(getNativeElement().querySelector('.fi-us')?.getAttribute('aria-label')).toBe('United States');
+		expect(getNativeElement().querySelector('.fi-eu')?.getAttribute('aria-label')).toBe('European Union');
+	});
+
+	it('should render an accessible unknown-country fallback without throwing', async () => {
+		currencyRateProviderSpy.getTodayCurrencies.and.returnValue(
+			of([
+				new CurrencyRateGroupModel({
+					currencyId: 999,
+					name: 'Unknown currency',
+					abbreviation: undefined,
+					scale: 1,
+					rateValues: [
+						new CurrencyRateValueModel({
+							officialRate: 1,
+							ratePerUnit: 1,
+							updateDate: new Date(2024, 0, 15),
+						}),
+					],
+				}),
+			])
+		);
+
+		await component.getTodayCurrencyRatesAsync();
+		fixture.detectChanges();
+
+		const fallback = getNativeElement().querySelector('.currency-rates-grid__unknown-country');
+
+		expect(fallback?.getAttribute('aria-label')).toBe('Unknown country');
+		expect(fallback?.textContent?.trim()).toBe('public');
 	});
 
 	it('should initialize selection from the selected currency state', async () => {
