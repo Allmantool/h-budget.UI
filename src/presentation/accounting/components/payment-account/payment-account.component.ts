@@ -8,16 +8,13 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
-import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
-import { MatListModule, MatSelectionListChange } from '@angular/material/list';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import * as _ from 'lodash';
 
 import { Store } from '@ngxs/store';
 import { Observable, take } from 'rxjs';
-import { Guid } from 'typescript-guid';
 
 import { CurrencyAbbreviationToFlagFormatPipe } from '../../../../app/modules/shared/pipes/currency-abbreviation-to-flag.pipe';
 import { LoaderService } from '../../../../app/modules/shared/services/loader-service';
@@ -29,6 +26,7 @@ import { getPaymentAccounts } from '../../../../app/modules/shared/store/states/
 import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
 import { AccountTypes } from '../../../../domain/models/accounting/account-types';
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
+import { PaymentAccountDialogService } from '../../services/payment-account-dialog.service';
 
 @Component({
 	selector: 'payment-accounts',
@@ -36,10 +34,9 @@ import { IPaymentAccountModel } from '../../../../domain/models/accounting/payme
 	styleUrls: ['./payment-account.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [MatButtonModule, MatExpansionModule, MatIconModule, MatListModule, CurrencyAbbreviationToFlagFormatPipe],
+	imports: [MatButtonModule, MatIconModule, CurrencyAbbreviationToFlagFormatPipe],
 })
 export class PaymentAccountComponent implements OnInit {
-	public isNavigateToOperationsDisabled: boolean = true;
 	private selectedPaymentAccountId?: string;
 	public cashAccountsSignal = signal<IPaymentAccountModel[]>([]);
 	public debitVirtualAccountsSignal = signal<IPaymentAccountModel[]>([]);
@@ -49,6 +46,7 @@ export class PaymentAccountComponent implements OnInit {
 	constructor(
 		private injector: EnvironmentInjector,
 		private readonly paymentAccountsProvider: DefaultPaymentAccountsProvider,
+		private readonly paymentAccountDialogService: PaymentAccountDialogService,
 		private readonly route: ActivatedRoute,
 		private readonly router: Router,
 		private readonly store: Store,
@@ -81,8 +79,6 @@ export class PaymentAccountComponent implements OnInit {
 		});
 	}
 
-	public step: number = 0;
-
 	public get totalAccountsCount(): number {
 		return (
 			this.cashAccountsSignal().length +
@@ -91,30 +87,48 @@ export class PaymentAccountComponent implements OnInit {
 		);
 	}
 
-	public setStep(index: number) {
-		this.step = index;
+	public selectPaymentAccount(paymentAccount: IPaymentAccountModel): void {
+		const paymentAccountId = paymentAccount.key?.toString();
+
+		if (!paymentAccountId) {
+			return;
+		}
+
+		this.store.dispatch(new SetActivePaymentAccount(paymentAccountId));
+		this.selectedPaymentAccountId = paymentAccountId;
 	}
 
-	public nextStep() {
-		this.step++;
+	public createNewPaymentAccount(): void {
+		this.paymentAccountDialogService.openForSave();
 	}
 
-	public prevStep() {
-		this.step--;
+	public updateSelectedPaymentAccount(): void {
+		if (_.isNil(this.selectedPaymentAccountId)) {
+			return;
+		}
+
+		this.paymentAccountDialogService.openForUpdate(this.selectedPaymentAccountId);
 	}
 
-	public chooseAccount(event: MatSelectionListChange): void {
-		const options = event.options;
+	public get selectedPaymentAccount(): IPaymentAccountModel | undefined {
+		return this.store
+			.selectSnapshot(getPaymentAccounts)
+			.find(paymentAccount => paymentAccount.key?.toString() === this.selectedPaymentAccountId);
+	}
 
-		const guid = _.first(options)?.value as Guid;
+	public isSelectedPaymentAccount(paymentAccount: IPaymentAccountModel): boolean {
+		return paymentAccount.key?.toString() === this.selectedPaymentAccountId;
+	}
 
-		this.store.dispatch(new SetActivePaymentAccount(guid.toString()));
-		this.selectedPaymentAccountId = guid.toString();
-
-		this.isNavigateToOperationsDisabled = false;
+	public async openPaymentAccount(paymentAccount: IPaymentAccountModel): Promise<void> {
+		this.selectPaymentAccount(paymentAccount);
+		await this.navigateToOperations();
 	}
 
 	public async navigateToOperations(): Promise<void> {
+		if (_.isNil(this.selectedPaymentAccountId)) {
+			return;
+		}
 		const accountingWorkspaceRoute = this.route.parent?.parent;
 
 		if (_.isNil(accountingWorkspaceRoute)) {
@@ -126,7 +140,6 @@ export class PaymentAccountComponent implements OnInit {
 				{
 					outlets: {
 						primary: ['operations'],
-						right_sidebar: ['operations'],
 					},
 				},
 			],

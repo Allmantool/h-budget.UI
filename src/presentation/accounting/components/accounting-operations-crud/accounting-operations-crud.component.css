@@ -1,11 +1,9 @@
 :host {
 	display: block;
-	height: 100%;
 }
 .payment-editor {
 	display: grid;
 	gap: 1rem;
-	min-height: 100%;
 	padding: 1.25rem;
 	border: 1px solid rgba(15, 23, 42, 0.08);
 	border-radius: 1.25rem;
@@ -15,6 +13,22 @@
 .payment-editor__form {
 	display: grid;
 	gap: 0.85rem;
+}
+.payment-editor__header {
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: start;
+}
+.payment-editor__form {
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.payment-editor__form-field,
+.payment-editor__field-action,
+.payment-editor__actions {
+	min-width: 0;
+}
+.payment-editor__form-field--comment,
+.payment-editor__actions {
+	grid-column: 1 / -1;
 }
 .payment-editor__eyebrow,
 .payment-editor__account {
@@ -62,7 +76,23 @@
 	gap: 0.5rem;
 	padding-top: 0.5rem;
 }
+
+.payment-editor__actions button {
+	min-inline-size: 8.5rem;
+}
+
+.payment-editor__actions .payment-editor__action--cancel,
+.payment-editor__actions .payment-editor__action--delete {
+	min-inline-size: auto;
+}
 @media (max-width: 720px) {
+	.payment-editor__form {
+		grid-template-columns: 1fr;
+	}
+	.payment-editor__form-field--comment,
+	.payment-editor__actions {
+		grid-column: auto;
+	}
 	.payment-editor {
 		border-radius: 0;
 		border-inline: 0;

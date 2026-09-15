@@ -1,8 +1,7 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, Signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { MatButtonModule } from '@angular/material/button';
-import { ActivatedRoute, NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 
 import * as _ from 'lodash';
 
@@ -26,7 +25,7 @@ interface WorkspaceNavigationItem {
 	styleUrls: ['./dashboard-layout.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [AsyncPipe, MatButtonModule, RouterLink, RouterOutlet, ProgressSpinnerComponent],
+	imports: [AsyncPipe, RouterOutlet, ProgressSpinnerComponent],
 })
 export class DashboardLayoutComponent implements OnInit {
 	private readonly destroyRef = inject(DestroyRef);
@@ -55,7 +54,6 @@ export class DashboardLayoutComponent implements OnInit {
 	requestsUnderProcessing$!: Observable<string[]>;
 
 	public isDataLoading$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-	public readonly currentUrlSignal: Signal<string>;
 	public readonly currentSectionSignal: Signal<WorkspaceNavigationItem | undefined>;
 
 	public ngOnInit(): void {
@@ -69,44 +67,18 @@ export class DashboardLayoutComponent implements OnInit {
 		});
 	}
 
-	constructor(
-		private readonly route: ActivatedRoute,
-		private readonly router: Router
-	) {
+	constructor(private readonly router: Router) {
 		const currentUrl$ = this.router.events.pipe(
 			filter(event => event instanceof NavigationEnd),
 			startWith(null),
 			map(() => this.router.url)
 		);
 
-		this.currentUrlSignal = toSignal(currentUrl$, { initialValue: this.router.url });
 		this.currentSectionSignal = toSignal(
 			currentUrl$.pipe(
 				map(url => _.findLast(this.navigationItems, navigationItem => url.startsWith(navigationItem.route)))
 			),
 			{ initialValue: this.navigationItems[0] }
 		);
-	}
-
-	public async navigateToDashboardAsync(): Promise<void> {
-		await this.router.navigate([''], { relativeTo: this.route });
-	}
-
-	public async navigateToRatesAsync(): Promise<void> {
-		await this.router.navigate(['/dashboard/currency-rates'], { relativeTo: this.route });
-	}
-
-	public async navigateToAccountingAsync(): Promise<void> {
-		await this.router.navigate(['/dashboard/accounting'], { relativeTo: this.route });
-	}
-
-	public isRouteActive(route: string): boolean {
-		const currentUrl = this.currentUrlSignal();
-
-		if (route === '/dashboard') {
-			return currentUrl === route;
-		}
-
-		return currentUrl.startsWith(route);
 	}
 }

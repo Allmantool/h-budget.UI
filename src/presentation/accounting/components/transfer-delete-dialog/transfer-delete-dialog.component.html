@@ -1,0 +1,21 @@
+<h2 mat-dialog-title>Delete transfer?</h2>
+<mat-dialog-content>
+	<p><strong>{{ data.amount | number: '1.2-2' }} {{ data.currency }}</strong></p>
+	<p>{{ data.fromAccount }} → {{ data.toAccount }}</p>
+	<p>This removes both linked transfer entries from the affected account histories.</p>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+	<button
+		mat-button
+		mat-dialog-close
+	>
+		Cancel
+	</button>
+	<button
+		mat-flat-button
+		color="warn"
+		(click)="confirm()"
+	>
+		Delete transfer
+	</button>
+</mat-dialog-actions>

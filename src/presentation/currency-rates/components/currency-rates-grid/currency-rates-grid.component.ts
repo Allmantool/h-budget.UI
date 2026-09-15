@@ -20,7 +20,6 @@ import { combineLatest, Observable } from 'rxjs';
 
 import { RatesDialogService } from './../../services/rates-dialog.service';
 import { ProgressSpinnerComponent } from '../../../../app/modules/shared/components/progress-spinner/progress-spinner.component';
-import { CurrencyAbbreviationToFlagFormatPipe } from '../../../../app/modules/shared/pipes/currency-abbreviation-to-flag.pipe';
 import { LoaderService } from '../../../../app/modules/shared/services/loader-service';
 import { ICurrencyTableOptions } from '../../../../app/modules/shared/store/models/currency-rates/currency-table-options';
 import { IPreviousDayCurrencyRate } from '../../../../app/modules/shared/store/models/currency-rates/previous-day-currency-rate';
@@ -50,7 +49,6 @@ import { CurrencyRatesGridService } from '../../services/currency-rates-grid.ser
 		MatButtonToggleModule,
 		MatCheckboxModule,
 		MatTableModule,
-		CurrencyAbbreviationToFlagFormatPipe,
 		ProgressSpinnerComponent,
 	],
 })

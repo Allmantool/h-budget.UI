@@ -79,4 +79,10 @@ For non-trivial work, report the result, specification path, requirements/accept
 - [Instruction hierarchy](docs/codex/01-instruction-hierarchy.md)
 - [Governance audit](docs/codex/00-codex-governance-audit.md)
 
+For Angular/browser verification, use the
+[local HTTPS browser verification skill](.codex/skills/local-https-browser-verification/SKILL.md)
+before declaring browser access blocked or starting an HTTP fallback. Never
+expose private keys, bypass certificate validation, or modify hosts or trust
+stores without explicit user authorization.
+
 Detailed legacy documents are retained as redirects only: [coding standards](docs/angular-coding-standards.md) and [review checklist](docs/angular-code-review-checklist.md). The `.codex` package is authoritative for future Codex work.

@@ -1,9 +1,11 @@
 import { signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDatepickerInputEvent } from '@angular/material/datepicker';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { MapperModule } from '@dynamic-mapper/angular';
 import { NgxsModule, Store } from '@ngxs/store';
-import { of, Subject } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
 import { ngxsConfig } from '../../../app/modules/shared/store/ngxs.config';
@@ -26,6 +28,8 @@ import { DataContractorProfile } from '../../../data/providers/accounting/mapper
 import { PaymentHistoryMappingProfile } from '../../../data/providers/accounting/mappers/payment-history.mapping.profile';
 import { ICategoryModel } from '../../../domain/models/accounting/category.model';
 import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
+import { IPaymentHistoryQueryModel } from '../../../domain/models/accounting/payment-history-query.model';
+import { OperationTypes } from '../../../domain/types/operation.types';
 import { AccountNotification } from '../../../infrastructure/account-notification';
 import { SseService } from '../../../infrastructure/sse-service';
 import { PaymentsHistoryComponent } from '../../../presentation/accounting/components/payments-history/payments-history.component';
@@ -51,6 +55,7 @@ describe('payments history component', () => {
 	let sseServiceSpy: jasmine.SpyObj<SseService>;
 	let notificationsSubject: Subject<AccountNotification>;
 	let transferProjectionSynchronizationService: TransferProjectionSynchronizationService;
+	let routerSpy: jasmine.SpyObj<Router>;
 	let canLeaveEditor = true;
 
 	let store: Store;
@@ -69,7 +74,7 @@ describe('payments history component', () => {
 			expense: 0,
 			comment: 'income-comment',
 			balance: 11,
-			operationType: 0,
+			operationType: OperationTypes.Payment,
 		},
 		{
 			key: expenseRecordId,
@@ -80,12 +85,14 @@ describe('payments history component', () => {
 			expense: 4.25,
 			comment: 'expense-comment',
 			balance: 6.75,
-			operationType: 0,
+			operationType: OperationTypes.Payment,
 		},
 	];
 
 	beforeEach(async () => {
 		canLeaveEditor = true;
+		routerSpy = jasmine.createSpyObj<Router>('router', ['navigate']);
+		routerSpy.navigate.and.resolveTo(true);
 		contractorsProviderSpy = jasmine.createSpyObj<DefaultContractorsProvider>('contractorsProvider', {
 			getContractors: of([
 				{
@@ -104,9 +111,13 @@ describe('payments history component', () => {
 			]),
 		});
 
-		paymentsHistoryServiceSpy = jasmine.createSpyObj<PaymentsHistoryService>('paymentsHistoryService', {
-			refreshPaymentsHistory: of(historyRows),
-		});
+		paymentsHistoryServiceSpy = jasmine.createSpyObj<PaymentsHistoryService>('paymentsHistoryService', [
+			'refreshPaymentsHistory',
+			'refreshPagedPaymentsHistory',
+		]);
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.and.callFake((_paymentAccountId, query) =>
+			of(createPage(historyRows, query))
+		);
 
 		accountsServiceSpy = jasmine.createSpyObj<AccountsService>('accountsService', {
 			refreshAccounts: of(undefined),
@@ -151,6 +162,8 @@ describe('payments history component', () => {
 				MapperModule.withProfiles([PaymentHistoryMappingProfile, DataContractorProfile, DataCategoryProfile]),
 			],
 			providers: [
+				{ provide: ActivatedRoute, useValue: { parent: { parent: {} } } },
+				{ provide: Router, useValue: routerSpy },
 				HandbooksService,
 				TransferProjectionSynchronizationService,
 				{
@@ -222,11 +235,140 @@ describe('payments history component', () => {
 			'balance',
 			'comment',
 		]);
-		expect(getHeaderTexts()).toEqual(['Date', 'Contractor', 'Category', 'Income', 'Expense', 'Balance', 'Comment']);
+		expect(getHeaderTexts()).toEqual([
+			'Date  ↓',
+			'Contractor',
+			'Category',
+			'Income',
+			'Expense',
+			'Balance',
+			'Comment',
+		]);
 	});
 
 	it('renders an always-available Add payment action above the history table', () => {
 		expect(getNativeElement().textContent).toContain('Add payment');
+	});
+
+	it('uses Material filter and pagination controls while keeping query application explicit', () => {
+		const nativeElement = getNativeElement();
+
+		expect(nativeElement.querySelectorAll('mat-form-field').length).toBeGreaterThan(0);
+		expect(nativeElement.querySelectorAll('mat-select').length).toBeGreaterThan(0);
+		expect(nativeElement.querySelector('mat-paginator')).not.toBeNull();
+		expect(nativeElement.textContent).toContain('Apply filters');
+		expect(nativeElement.textContent).toContain('Showing 2 of 2 results');
+	});
+
+	it('uses the full available table width with flexible content columns', () => {
+		const table = getNativeElement().querySelector('mat-table') as HTMLElement;
+
+		expect(table).not.toBeNull();
+		expect(getComputedStyle(table).inlineSize).toBe('100%');
+		expect(getComputedStyle(table).tableLayout).toBe('fixed');
+	});
+
+	it('provides independent Material calendar pickers for the optional From and To filters', () => {
+		const nativeElement = getNativeElement();
+		const dateInputs = nativeElement.querySelectorAll<HTMLInputElement>('input[matInput]');
+
+		expect(nativeElement.querySelectorAll('mat-datepicker-toggle').length).toBe(2);
+		expect(nativeElement.querySelectorAll('mat-datepicker').length).toBe(2);
+		expect(Array.from(dateInputs).filter(input => input.type === 'date')).toHaveSize(0);
+	});
+
+	it('keeps calendar selections local until filters are explicitly applied', () => {
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.reset();
+
+		component.updateDraftCalendarDate('dateFrom', {
+			value: new Date(2024, 0, 15),
+		} as MatDatepickerInputEvent<Date>);
+
+		expect(component.draftPaymentHistoryQuerySignal().dateFrom).toBe('2024-01-15');
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(0);
+	});
+
+	it('provides a labelled selectable row action', async () => {
+		const row = getRenderedRows()[0];
+
+		expect(row.getAttribute('aria-label')).toContain('Edit payment');
+		row.click();
+		await fixture.whenStable();
+
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid.toString()).toBe(
+			incomeRecordId.toString()
+		);
+	});
+
+	it('selects a row when the persistent editor outlet is already active', async () => {
+		const editorSession = TestBed.inject(PaymentEditorSessionService);
+		editorSession.open();
+		editorSession.beginCreate();
+		routerSpy.navigate.and.resolveTo(false);
+
+		await component.selectRow(historyRows[1]);
+
+		expect(routerSpy.navigate.calls.count()).toBe(0);
+		expect(editorSession.editorModeSignal()).toBe('edit');
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid?.toString()).toBe(
+			expenseRecordId.toString()
+		);
+	});
+
+	it('opens the editor outlet only after an explicit Add payment action', async () => {
+		await component.addPayment();
+
+		expect(routerSpy.navigate.calls.mostRecent().args).toEqual([
+			[{ outlets: { right_sidebar: ['operations'] } }],
+			jasmine.objectContaining({ relativeTo: jasmine.anything() }),
+		]);
+	});
+
+	it('hides and ignores Add payment while a create editor is already open', async () => {
+		const editorSession = TestBed.inject(PaymentEditorSessionService);
+		editorSession.open();
+		editorSession.beginCreate();
+		fixture.detectChanges();
+		routerSpy.navigate.calls.reset();
+
+		expect(getHeaderAddPaymentButton()).toBeUndefined();
+
+		await component.addPayment();
+
+		expect(routerSpy.navigate.calls.count()).toBe(0);
+		expect(editorSession.editorModeSignal()).toBe('create');
+	});
+
+	it('does not load until valid draft filters are applied', () => {
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.reset();
+
+		component.updateDraftFilter('type', 'expense');
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(0);
+
+		component.applyFilters();
+
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(1);
+		expect(pageRequest()).toEqual(jasmine.objectContaining({ page: 1, type: 'expense' }));
+	});
+
+	it('keeps an invalid amount range local instead of issuing an invalid history request', () => {
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.reset();
+		component.updateDraftFilter('amountMin', '20');
+		component.updateDraftFilter('amountMax', '10');
+
+		component.applyFilters();
+		fixture.detectChanges();
+
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(0);
+		expect(getNativeElement().textContent).toContain('minimum amount must not exceed the maximum amount');
+	});
+
+	it('loads the initial page once for the selected account without a notification', () => {
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(1);
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.mostRecent().args).toEqual([
+			activePaymentAccountId,
+			jasmine.objectContaining({ page: 1, pageSize: 25, sortBy: 'date', sortDirection: 'desc' }),
+		]);
 	});
 
 	it('should render representative history rows and summary counts', () => {
@@ -262,12 +404,12 @@ describe('payments history component', () => {
 		component.historyLoadingSignal.set(true);
 		component.historyLoadErrorSignal.set(false);
 		fixture.detectChanges();
-		expect(getNativeElement().textContent).toContain('Loading payments…');
-		expect(getNativeElement().textContent).not.toContain('No payments yet.');
+		expect(getNativeElement().textContent).toContain('Loading transactions…');
+		expect(getNativeElement().textContent).not.toContain('No transactions yet.');
 
 		component.historyLoadingSignal.set(false);
 		fixture.detectChanges();
-		expect(getNativeElement().textContent).toContain('No payments yet.');
+		expect(getNativeElement().textContent).toContain('No transactions yet.');
 		expect(getNativeElement().textContent).toContain('Add payment');
 
 		component.historyLoadErrorSignal.set(true);
@@ -276,18 +418,42 @@ describe('payments history component', () => {
 		expect(getNativeElement().textContent).toContain('Retry');
 	});
 
-	it('retries a failed history read through the existing projection refresh action', () => {
-		paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.reset();
-		accountsServiceSpy.refreshAccounts.calls.reset();
+	it('keeps loaded transactions visible and offers Retry after a refresh error', () => {
 		component.historyLoadErrorSignal.set(true);
+		component.historyLoadingSignal.set(false);
+		fixture.detectChanges();
+
+		expect(getRenderedRows().length).toBe(2);
+		expect(getNativeElement().textContent).toContain('Showing the most recently loaded history.');
+		expect(getNativeElement().textContent).toContain('Retry');
+	});
+
+	it('retries a failed history read through the existing projection refresh action', async () => {
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.reset();
+		accountsServiceSpy.refreshAccounts.calls.reset();
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.and.returnValue(
+			throwError(() => new Error('History read failed.'))
+		);
 
 		component.retryHistory();
+		await fixture.whenStable();
+		fixture.detectChanges();
 
-		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(1);
-		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.mostRecent().args).toEqual([
-			activePaymentAccountId,
-		]);
-		expect(accountsServiceSpy.refreshAccounts.calls.count()).toBe(1);
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(1);
+		expect(component.historyLoadErrorSignal()).toBeTrue();
+
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.and.callFake((_paymentAccountId, query) =>
+			of(createPage(historyRows, query))
+		);
+		component.retryHistory();
+		await fixture.whenStable();
+		fixture.detectChanges();
+
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(2);
+		expect(pageRequest()).toEqual(
+			jasmine.objectContaining({ page: 1, pageSize: 25, sortBy: 'date', sortDirection: 'desc' })
+		);
+		expect(accountsServiceSpy.refreshAccounts.calls.count()).toBe(2);
 		expect(accountsServiceSpy.refreshAccounts.calls.mostRecent().args).toEqual([activePaymentAccountId]);
 		expect(component.historyLoadErrorSignal()).toBeFalse();
 	});
@@ -297,6 +463,19 @@ describe('payments history component', () => {
 		fixture.detectChanges();
 
 		expect(Array.from(component.clickedRowGuids).some(recordGuid => recordGuid.equals(incomeRecordId))).toBe(true);
+	});
+
+	it('uses the selectable row surface instead of a redundant desktop Actions column', () => {
+		expect(getHeaderTexts()).toEqual([
+			'Date  ↓',
+			'Contractor',
+			'Category',
+			'Income',
+			'Expense',
+			'Balance',
+			'Comment',
+		]);
+		expect(getNativeElement().querySelector('button[aria-label="Edit payment"]')).toBeNull();
 	});
 
 	it('should dispatch selected history operation when a row is clicked', async () => {
@@ -311,6 +490,36 @@ describe('payments history component', () => {
 		expect(Array.from(component.clickedRowGuids).some(recordGuid => recordGuid.equals(expenseRecordId))).toBe(true);
 		expect(getRenderedRows()[1].classList).toContain('payments-history__row--selected');
 		expect(getRenderedRows()[1].getAttribute('aria-selected')).toBe('true');
+	});
+
+	it('opens the selected row once from the row surface', async () => {
+		routerSpy.navigate.calls.reset();
+		const row = getRenderedRows()[0];
+
+		row.click();
+		await fixture.whenStable();
+
+		expect(routerSpy.navigate.calls.count()).toBe(1);
+		expect(TestBed.inject(PaymentEditorSessionService).editorModeSignal()).toBe('edit');
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid.toString()).toBe(
+			incomeRecordId.toString()
+		);
+	});
+
+	it('opens a focused row with Enter and Space keyboard activation', async () => {
+		const row = getRenderedRows()[1];
+
+		row.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+		await fixture.whenStable();
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid.toString()).toBe(
+			expenseRecordId.toString()
+		);
+
+		row.dispatchEvent(new KeyboardEvent('keydown', { key: ' ' }));
+		await fixture.whenStable();
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid.toString()).toBe(
+			expenseRecordId.toString()
+		);
 	});
 
 	it('should preserve repeated row selection behavior', async () => {
@@ -328,6 +537,18 @@ describe('payments history component', () => {
 		expect(Array.from(component.clickedRowGuids).map(recordGuid => recordGuid.toString())).toEqual([
 			expenseRecordId.toString(),
 		]);
+	});
+
+	it('keeps the latest transaction selection when row activation is requested rapidly', async () => {
+		routerSpy.navigate.calls.reset();
+
+		await Promise.all([component.selectRow(historyRows[0]), component.selectRow(historyRows[1])]);
+
+		expect(routerSpy.navigate.calls.count()).toBe(1);
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid.toString()).toBe(
+			expenseRecordId.toString()
+		);
+		expect(TestBed.inject(PaymentEditorSessionService).editorModeSignal()).toBe('edit');
 	});
 
 	it('returns the editor to create mode and clears selection when Add payment is used from an edit', async () => {
@@ -381,70 +602,87 @@ describe('payments history component', () => {
 		expect(rows[1].getAttribute('tabindex')).toBe('-1');
 	});
 
-	it('should refresh history and accounts after a matching SSE notification', () => {
-		paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.reset();
+	it('refreshes the current paged query and account summary', () => {
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.reset();
 		accountsServiceSpy.refreshAccounts.calls.reset();
 
-		notificationsSubject.next({
-			eventId: 'event-id',
-			accountId: activePaymentAccountId,
-			eventType: 'UpdatePaymentAccountBalanceCommand',
-		});
+		component.retryHistory();
 
-		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.mostRecent().args).toEqual([
-			activePaymentAccountId,
-		]);
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(1);
+		expect(pageRequest()).toEqual(jasmine.objectContaining({ page: 1, pageSize: 25 }));
 		expect(accountsServiceSpy.refreshAccounts.calls.mostRecent().args).toEqual([activePaymentAccountId]);
 		expect(component.recordsCount).toBe(2);
 	});
 
-	it('runs one trailing projection refresh when notifications arrive during an active refresh', () => {
-		const firstHistoryResponse = new Subject<IPaymentRepresentationModel[]>();
-		const secondHistoryResponse = new Subject<IPaymentRepresentationModel[]>();
+	it('uses the current query for every explicit refresh without locally mutating rows', () => {
+		const firstHistoryResponse = new Subject<ReturnType<typeof createPage>>();
+		const secondHistoryResponse = new Subject<ReturnType<typeof createPage>>();
 		const latestRows = [historyRows[1]];
-		paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.reset();
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.reset();
 		accountsServiceSpy.refreshAccounts.calls.reset();
-		paymentsHistoryServiceSpy.refreshPaymentsHistory.and.returnValues(firstHistoryResponse, secondHistoryResponse);
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.and.returnValues(
+			firstHistoryResponse,
+			secondHistoryResponse
+		);
 		accountsServiceSpy.refreshAccounts.and.returnValues(of(undefined), of(undefined));
 
-		notificationsSubject.next(matchingNotification());
-		notificationsSubject.next(matchingNotification());
-		notificationsSubject.next(matchingNotification());
+		component.retryHistory();
 
-		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(1);
-		firstHistoryResponse.next(historyRows);
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(1);
+		firstHistoryResponse.next(createPage(historyRows, component.paymentHistoryQuerySignal()));
 		firstHistoryResponse.complete();
 
-		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(2);
-		secondHistoryResponse.next(latestRows);
+		component.retryHistory();
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(2);
+		secondHistoryResponse.next(createPage(latestRows, component.paymentHistoryQuerySignal()));
 		secondHistoryResponse.complete();
 
 		expect(component.historySummarySignal()).toEqual(latestRows);
 	});
 
-	it('does not run a queued projection refresh after the component is destroyed', () => {
-		const firstHistoryResponse = new Subject<IPaymentRepresentationModel[]>();
-		paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.reset();
-		paymentsHistoryServiceSpy.refreshPaymentsHistory.and.returnValue(firstHistoryResponse);
+	it('queues one final account refresh when a notification arrives during an active refresh', () => {
+		const firstHistoryResponse = new Subject<ReturnType<typeof createPage>>();
+		const secondHistoryResponse = new Subject<ReturnType<typeof createPage>>();
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.reset();
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.and.returnValues(
+			firstHistoryResponse,
+			secondHistoryResponse
+		);
+		accountsServiceSpy.refreshAccounts.and.returnValues(of(undefined), of(undefined));
 
-		notificationsSubject.next(matchingNotification());
-		notificationsSubject.next(matchingNotification());
-		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(1);
-
-		fixture.destroy();
-		firstHistoryResponse.complete();
-
-		expect(paymentsHistoryServiceSpy.refreshPaymentsHistory.calls.count()).toBe(1);
-	});
-
-	it('completes synchronization only after the submitted transfer is present in refreshed history', () => {
-		transferProjectionSynchronizationService.start([Guid.parse(activePaymentAccountId)], incomeRecordId);
-
+		component.retryHistory();
 		notificationsSubject.next({
-			eventId: 'event-id',
+			eventId: Guid.create().toString(),
 			accountId: activePaymentAccountId,
 			eventType: 'UpdatePaymentAccountBalanceCommand',
 		});
+
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(1);
+		firstHistoryResponse.next(createPage(historyRows, component.paymentHistoryQuerySignal()));
+		firstHistoryResponse.complete();
+
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(2);
+		secondHistoryResponse.next(createPage(historyRows, component.paymentHistoryQuerySignal()));
+		secondHistoryResponse.complete();
+	});
+
+	it('does not issue a refresh after the component is destroyed', () => {
+		const firstHistoryResponse = new Subject<ReturnType<typeof createPage>>();
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.reset();
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.and.returnValue(firstHistoryResponse);
+
+		component.retryHistory();
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(1);
+
+		fixture.destroy();
+		component.retryHistory();
+
+		expect(paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.count()).toBe(1);
+	});
+	it('completes synchronization only after the submitted transfer is present in refreshed history', () => {
+		transferProjectionSynchronizationService.start([Guid.parse(activePaymentAccountId)], incomeRecordId);
+
+		component.retryHistory();
 
 		expect(transferProjectionSynchronizationService.isSynchronizing(activePaymentAccountId)).toBeFalse();
 	});
@@ -452,11 +690,7 @@ describe('payments history component', () => {
 	it('does not complete synchronization when a refresh excludes the submitted transfer', () => {
 		transferProjectionSynchronizationService.start([Guid.parse(activePaymentAccountId)], Guid.create());
 
-		notificationsSubject.next({
-			eventId: 'event-id',
-			accountId: activePaymentAccountId,
-			eventType: 'UpdatePaymentAccountBalanceCommand',
-		});
+		component.retryHistory();
 
 		expect(transferProjectionSynchronizationService.isSynchronizing(activePaymentAccountId)).toBeTrue();
 	});
@@ -536,7 +770,7 @@ describe('payments history component', () => {
 			expense: 13,
 			comment: 'Transfer to BelarusBank',
 			balance: -2,
-			operationType: 2,
+			operationType: OperationTypes.Transfer,
 			relatedPaymentAccountId,
 			relatedPaymentAccountName: 'BelarusBank',
 		};
@@ -576,7 +810,7 @@ describe('payments history component', () => {
 			expense: 13,
 			comment: 'Transfer to BelarusBank',
 			balance: -2,
-			operationType: 2,
+			operationType: OperationTypes.Transfer,
 			relatedPaymentAccountId,
 			conversionMultiplier: 3.1,
 		};
@@ -595,12 +829,10 @@ describe('payments history component', () => {
 				} as IPaymentAccountModel,
 			])
 		);
-		paymentsHistoryServiceSpy.refreshPaymentsHistory.and.returnValue(of([transferRecord]));
-		notificationsSubject.next({
-			eventId: 'event-id',
-			accountId: activePaymentAccountId,
-			eventType: 'UpdatePaymentAccountBalanceCommand',
-		});
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.and.callFake((_accountId, query) =>
+			of(createPage([transferRecord], query))
+		);
+		component.retryHistory();
 		fixture.detectChanges();
 
 		await fixture.whenStable();
@@ -621,7 +853,7 @@ describe('payments history component', () => {
 			expense: 0,
 			comment: 'Transfer from source account',
 			balance: 13,
-			operationType: 2,
+			operationType: OperationTypes.Transfer,
 			relatedPaymentAccountId: sourcePaymentAccountId,
 			conversionMultiplier: 3.1,
 		};
@@ -640,7 +872,9 @@ describe('payments history component', () => {
 				} as IPaymentAccountModel,
 			])
 		);
-		paymentsHistoryServiceSpy.refreshPaymentsHistory.and.returnValue(of([transferRecord]));
+		paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.and.callFake((_accountId, query) =>
+			of(createPage([transferRecord], query))
+		);
 		notificationsSubject.next({
 			eventId: 'event-id',
 			accountId: activePaymentAccountId,
@@ -664,7 +898,7 @@ describe('payments history component', () => {
 			expense: 13,
 			comment: 'Transfer to BelarusBank',
 			balance: -2,
-			operationType: 2,
+			operationType: OperationTypes.Transfer,
 			relatedPaymentAccountId: Guid.parse('8f9f90a8-048f-44a9-b634-b02226724438'),
 			relatedPaymentAccountName: 'BelarusBank',
 			conversionMultiplier: 1,
@@ -685,16 +919,43 @@ describe('payments history component', () => {
 		);
 	}
 
-	function matchingNotification(): AccountNotification {
+	function createPage(
+		items: IPaymentRepresentationModel[],
+		query: IPaymentHistoryQueryModel,
+		override: Partial<{
+			page: number;
+			pageSize: number;
+			totalCount: number;
+			totalPages: number;
+			hasPreviousPage: boolean;
+			hasNextPage: boolean;
+		}> = {}
+	) {
+		const totalCount = override.totalCount ?? items.length;
+		const totalPages = override.totalPages ?? (totalCount === 0 ? 0 : Math.ceil(totalCount / query.pageSize));
 		return {
-			eventId: 'event-id',
-			accountId: activePaymentAccountId,
-			eventType: 'UpdatePaymentAccountBalanceCommand',
+			items,
+			page: override.page ?? query.page,
+			pageSize: override.pageSize ?? query.pageSize,
+			totalCount,
+			totalPages,
+			hasPreviousPage: override.hasPreviousPage ?? query.page > 1,
+			hasNextPage: override.hasNextPage ?? query.page < totalPages,
 		};
+	}
+
+	function pageRequest(): IPaymentHistoryQueryModel {
+		return paymentsHistoryServiceSpy.refreshPagedPaymentsHistory.calls.mostRecent().args[1];
 	}
 
 	function getTableText(): string {
 		return getNativeElement().querySelector('mat-table, table')?.textContent ?? '';
+	}
+
+	function getHeaderAddPaymentButton(): HTMLButtonElement | undefined {
+		return Array.from(
+			getNativeElement().querySelectorAll<HTMLButtonElement>('.payments-history__header-actions button')
+		).find(button => button.textContent?.includes('Add payment'));
 	}
 
 	function getRenderedRows(): HTMLElement[] {

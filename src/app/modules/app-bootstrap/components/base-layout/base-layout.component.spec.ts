@@ -77,7 +77,7 @@ describe('BaseLayoutComponent', () => {
 		const links = fixture.debugElement.queryAll(By.directive(RouterLink));
 		const linkElements = links.map(link => link.nativeElement as HTMLElement);
 		const hrefs = linkElements.map(link => link.getAttribute('href'));
-		const labels = linkElements.map(link => link.querySelector('strong')?.textContent?.trim());
+		const labels = linkElements.map(link => link.querySelectorAll('span')[1]?.textContent?.trim());
 
 		expect(labels).toEqual(['Overview', 'Rates', 'Accounting']);
 		expect(hrefs).toEqual(['/dashboard', '/dashboard/currency-rates', '/dashboard/accounting']);
@@ -94,7 +94,7 @@ describe('BaseLayoutComponent', () => {
 		expect(activeLink?.textContent).toContain('Rates');
 	});
 
-	it('keeps the primary navigation and active tile heights stable across workspace routes', async () => {
+	it('keeps a single compact primary navigation across workspace routes', async () => {
 		const router = TestBed.inject(Router);
 		const shell = (fixture.nativeElement as HTMLElement).querySelector('.app-shell') as HTMLElement;
 		const routes = ['/dashboard', '/dashboard/currency-rates', '/dashboard/accounting'];
@@ -115,15 +115,12 @@ describe('BaseLayoutComponent', () => {
 				const nativeElement = fixture.nativeElement as HTMLElement;
 				const navigation = nativeElement.querySelector('.app-shell__nav') as HTMLElement;
 				const activeTile = nativeElement.querySelector('.app-shell__nav-item--active') as HTMLElement;
-				const subtitles = nativeElement.querySelectorAll<HTMLElement>('.app-shell__nav-copy small');
+				const duplicateNavigation = nativeElement.querySelector('.workspace-sidebar, .accounting-sidebar');
 
 				expect(activeTile).withContext(`Expected an active tile for ${route}`).not.toBeNull();
-				expect(subtitles.length).withContext(`Expected all subtitles for ${route}`).toBe(3);
-				subtitles.forEach(subtitle => {
-					expect(subtitle.scrollWidth)
-						.withContext(`Expected the subtitle to fit within its tile for ${route} at ${viewportWidth}px`)
-						.toBeLessThanOrEqual(subtitle.clientWidth);
-				});
+				expect(duplicateNavigation)
+					.withContext(`Expected no nested navigation at ${viewportWidth}px`)
+					.toBeNull();
 
 				dimensions.push({
 					navigation: navigation.getBoundingClientRect().height,

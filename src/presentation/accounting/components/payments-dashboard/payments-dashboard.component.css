@@ -8,13 +8,12 @@
 	display: grid;
 	grid-template-columns: minmax(0, 1.5fr) minmax(260px, 0.8fr);
 	gap: 1rem;
-	padding: 1.35rem;
-	border-radius: 24px;
+	padding: 1rem;
+	border-radius: 16px;
 	background: linear-gradient(135deg, #f8fafc, #eff6ff 50%, #f0fdf4);
 	border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
-.payments-dashboard__eyebrow,
 .payments-dashboard__summary-label,
 .payments-dashboard__balance-label {
 	margin: 0 0 0.3rem;
@@ -27,9 +26,8 @@
 
 .payments-dashboard__title {
 	margin: 0;
-	font-family: Georgia, 'Times New Roman', serif;
-	font-size: clamp(1.8rem, 3vw, 3rem);
-	line-height: 1.05;
+	font-size: clamp(1.35rem, 2vw, 1.8rem);
+	line-height: 1.15;
 }
 
 .payments-dashboard__copy {
@@ -50,14 +48,14 @@
 	display: grid;
 	gap: 0.25rem;
 	padding: 1rem;
-	border-radius: 18px;
+	border-radius: 12px;
 	background: rgba(255, 255, 255, 0.82);
 	border: 1px solid rgba(15, 23, 42, 0.08);
 }
 
 .payments-dashboard__balance-card strong,
 .payments-dashboard__summary-card strong {
-	font-size: 1.7rem;
+	font-size: 1.4rem;
 }
 
 .payments-dashboard__balance-card span:last-child,
@@ -90,6 +88,24 @@
 	display: grid;
 	grid-template-columns: repeat(5, minmax(0, 1fr));
 	gap: 0.85rem;
+}
+
+.payments-dashboard__summary-scope {
+	grid-column: 1 / -1;
+	margin: 0;
+	color: #617089;
+	font-size: 0.875rem;
+}
+
+.payments-dashboard__summary-unavailable {
+	padding: 0.75rem 1rem;
+	border: 1px solid rgba(15, 23, 42, 0.08);
+	border-radius: 18px;
+	background: rgba(255, 255, 255, 0.82);
+}
+
+.payments-dashboard__summary-unavailable p {
+	margin: 0;
 }
 
 .payments-dashboard__summary-card--net {

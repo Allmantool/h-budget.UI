@@ -2,12 +2,24 @@
 	class="payment-editor"
 	[class.payment-editor--submitting]="isSubmittingSignal()"
 >
+	@if (isTransferSelectionSignal()) {
+	<transfer-details
+		[activeAccount]="activeAccountSignal()"
+		[operation]="selectedOperationSignal()"
+		(closeRequested)="closeTransferDetails()"
+		(deleted)="closeTransferDetails()"
+	></transfer-details>
+	} @else {
 	<header class="payment-editor__header">
-		<p class="payment-editor__eyebrow">{{ editorModeSignal() === 'create' ? 'New record' : 'Selected record' }}</p>
-		<h2 class="payment-editor__title">{{ editorModeSignal() === 'create' ? 'New payment' : 'Edit payment' }}</h2>
-		<p class="payment-editor__account">
-			{{ activeAccountSignal()?.emitter }} · {{ activeAccountSignal()?.currency }}
-		</p>
+		<div>
+			<p class="payment-editor__eyebrow">{{ editorModeSignal() === 'create' ? 'New record' : 'Edit payment' }}</p>
+			<h2 class="payment-editor__title">
+				{{ editorModeSignal() === 'create' ? 'New payment' : 'Edit payment' }}
+			</h2>
+			<p class="payment-editor__account">
+				{{ activeAccountSignal()?.emitter }} · {{ activeAccountSignal()?.currency }}
+			</p>
+		</div>
 	</header>
 	@if (submissionStateSignal(); as submission) { @if (submission.status === 'failed') {
 	<p
@@ -48,36 +60,56 @@
 	>
 		Payment history is up to date.
 	</p>
-	} }
+	} } @if (isEditorLoadingSignal()) {
+	<p
+		class="payment-editor__status"
+		role="status"
+		aria-live="polite"
+		aria-busy="true"
+	>
+		Loading payment…
+	</p>
+	} @else {
 	<form
 		class="payment-editor__form"
 		[formGroup]="paymentForm"
 		(ngSubmit)="submitAsync()"
 		novalidate
 	>
-		<mat-form-field appearance="outline">
+		<mat-form-field
+			class="payment-editor__form-field"
+			appearance="outline"
+		>
 			<mat-label>Amount</mat-label>
 			<input
 				matInput
 				type="number"
 				inputmode="decimal"
 				min="0.01"
+				placeholder="0.00"
 				step="0.01"
 				formControlName="amount"
+				#amountInput
 			/>
 			<span matTextSuffix>{{ activeAccountSignal()?.currency }}</span>
 			@if (paymentForm.controls.amount.touched && paymentForm.controls.amount.invalid) {
 			<mat-error>Amount must be greater than zero.</mat-error>
 			}
 		</mat-form-field>
-		<mat-form-field appearance="outline">
+		<mat-form-field
+			class="payment-editor__form-field"
+			appearance="outline"
+		>
 			<mat-label>Type</mat-label>
 			<mat-select formControlName="direction">
 				<mat-option [value]="0">Income</mat-option>
 				<mat-option [value]="1">Expense</mat-option>
 			</mat-select>
 		</mat-form-field>
-		<mat-form-field appearance="outline">
+		<mat-form-field
+			class="payment-editor__form-field"
+			appearance="outline"
+		>
 			<mat-label>Date</mat-label>
 			<input
 				matInput
@@ -89,6 +121,7 @@
 				[for]="operationDatePicker"
 			></mat-datepicker-toggle>
 			<mat-datepicker #operationDatePicker></mat-datepicker>
+			<mat-hint>MM/DD/YYYY</mat-hint>
 			@if (paymentForm.controls.operationDate.touched && paymentForm.controls.operationDate.invalid) {
 			<mat-error>Enter a valid operation date.</mat-error>
 			}
@@ -135,7 +168,10 @@
 				<mat-icon>add</mat-icon>
 			</button>
 		</div>
-		<mat-form-field appearance="outline">
+		<mat-form-field
+			class="payment-editor__form-field payment-editor__form-field--comment"
+			appearance="outline"
+		>
 			<mat-label>Comment (optional)</mat-label>
 			<textarea
 				matInput
@@ -149,6 +185,7 @@
 				type="button"
 				mat-button
 				color="warn"
+				class="payment-editor__action--delete"
 				(click)="deleteAsync()"
 				[disabled]="isSubmittingSignal()"
 			>
@@ -158,21 +195,42 @@
 			<button
 				type="button"
 				mat-button
-				(click)="cancel()"
+				class="payment-editor__action--cancel"
+				(click)="closeEditorAsync()"
 				[disabled]="isSubmittingSignal()"
 			>
-				{{ submissionStateSignal().status === 'uncertain' ? 'Keep processing in background' : editorModeSignal()
-				=== 'edit' ? 'Revert changes' : 'Reset form' }}
+				{{ submissionStateSignal().status === 'uncertain' ? 'Keep processing in background' : 'Cancel' }}
 			</button>
+			@if (editorModeSignal() === 'create') {
+			<button
+				type="submit"
+				mat-stroked-button
+				[disabled]="isSaveDisabled"
+			>
+				{{ isSubmittingSignal() ? 'Saving…' : submissionStateSignal().status === 'uncertain' ? 'Retry saving' :
+				'Save payment' }}
+			</button>
+			<button
+				type="button"
+				mat-flat-button
+				color="primary"
+				(click)="submitAndAddAnotherAsync()"
+				[disabled]="isSaveDisabled"
+			>
+				Save &amp; add another
+			</button>
+			} @else {
 			<button
 				type="submit"
 				mat-flat-button
 				color="primary"
-				[disabled]="isSubmittingSignal() || !activeAccountIdSignal()"
+				[disabled]="isSaveDisabled"
 			>
 				{{ isSubmittingSignal() ? 'Saving…' : submissionStateSignal().status === 'uncertain' ? 'Retry saving' :
-				editorModeSignal() === 'create' ? 'Create payment' : 'Save changes' }}
+				'Save changes' }}
 			</button>
+			}
 		</footer>
 	</form>
+	} }
 </section>

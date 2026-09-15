@@ -64,10 +64,10 @@ function verifyIndexStylesheet() {
 function verifyBuiltArtifacts() {
 	const requiredFiles = [
 		'dist/h-budget/browser/assets/vendor/flag-icons/css/flag-icons.min.css',
-		'dist/h-budget/browser/assets/vendor/flag-icons/flags/4x3/us.svg',
-		'dist/h-budget/browser/assets/vendor/flag-icons/flags/4x3/by.svg',
-		'dist/h-budget/browser/assets/vendor/flag-icons/flags/1x1/us.svg',
-		'dist/h-budget/browser/assets/vendor/flag-icons/flags/1x1/by.svg',
+		...['by', 'cn', 'eu', 'pl', 'ru', 'th', 'tr', 'ua', 'us'].flatMap(countryCode => [
+			`dist/h-budget/browser/assets/vendor/flag-icons/flags/4x3/${countryCode}.svg`,
+			`dist/h-budget/browser/assets/vendor/flag-icons/flags/1x1/${countryCode}.svg`,
+		]),
 	];
 
 	for (const filePath of requiredFiles) {

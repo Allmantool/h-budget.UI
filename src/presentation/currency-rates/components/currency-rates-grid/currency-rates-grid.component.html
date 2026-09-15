@@ -95,11 +95,25 @@
 				<td
 					mat-cell
 					*matCellDef="let element"
-					class="country-column"
+					class="currency-rates-grid__country-cell"
 				>
+					@if (element.country; as country) {
 					<span
-						class="abbreviation-flag fi fi-{{ element.abbreviation | currencyAbbreviationToFlagFormat }}"
+						class="currency-rates-grid__flag fi fi-{{ country.countryCode }}"
+						role="img"
+						[attr.aria-label]="country.countryName"
+						[attr.title]="country.countryName"
 					></span>
+					} @else {
+					<span
+						class="currency-rates-grid__unknown-country material-icons"
+						role="img"
+						aria-label="Unknown country"
+						title="Unknown country"
+					>
+						public
+					</span>
+					}
 				</td>
 			</ng-container>
 			<ng-container [matColumnDef]="ratesGridColumnOptions.NAME">

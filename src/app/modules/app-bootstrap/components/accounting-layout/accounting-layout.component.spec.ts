@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 
 import { NgxsModule, Store } from '@ngxs/store';
@@ -76,18 +76,15 @@ describe('AccountingLayoutComponent', () => {
 		expect(outletNames).toEqual(['primary', 'right_sidebar']);
 	});
 
-	it('keeps accounting navigation links in the expected order', () => {
+	it('keeps financial workflow copy out of the shell navigation layer', () => {
 		fixture.detectChanges();
 
-		const links = fixture.debugElement
-			.queryAll(By.directive(RouterLink))
-			.filter(link => (link.nativeElement as HTMLElement).classList.contains('accounting-nav-item'));
-		const linkElements = links.map(link => link.nativeElement as HTMLElement);
-		const hrefs = linkElements.map(link => link.getAttribute('href'));
-		const labels = linkElements.map(link => link.querySelector('strong')?.textContent?.trim());
+		const nativeElement = fixture.nativeElement as HTMLElement;
+		const shellText = nativeElement.textContent ?? '';
 
-		expect(labels).toEqual(['Overview', 'Rates', 'Accounting']);
-		expect(hrefs).toEqual(['/dashboard', '/dashboard/currency-rates', '/dashboard/accounting']);
+		expect(shellText).toContain('Accounts and payments');
+		expect(shellText).not.toContain('Keep accounts, operations, and details visible together.');
+		expect(nativeElement.querySelector('.accounting-sidebar')).toBeNull();
 	});
 
 	it('keeps the primary and right sidebar outlets in their layout regions', () => {
@@ -101,6 +98,16 @@ describe('AccountingLayoutComponent', () => {
 
 		expect(primaryOutlet).not.toBeNull();
 		expect(rightSidebarOutlet).not.toBeNull();
+	});
+
+	it('does not reserve a permanent detail rail until its outlet is activated', () => {
+		fixture.detectChanges();
+
+		const shell = (fixture.nativeElement as HTMLElement).querySelector('.accounting-shell');
+		const detail = (fixture.nativeElement as HTMLElement).querySelector('.accounting-detail');
+
+		expect(shell?.classList.contains('accounting-shell--detail-open')).toBeFalse();
+		expect(detail?.classList.contains('accounting-detail--active')).toBeFalse();
 	});
 
 	it('renders the loading overlay from the async-bound processing state', () => {

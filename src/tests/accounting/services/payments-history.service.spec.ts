@@ -11,8 +11,10 @@ import { ngxsConfig } from '../../../app/modules/shared/store/ngxs.config';
 import { AccountingOperationsTableState } from '../../../app/modules/shared/store/states/accounting/accounting-operations-table.state';
 import { SetInitialPaymentOperations } from '../../../app/modules/shared/store/states/accounting/actions/payment-operation.actions';
 import { AccountingOperationsState } from '../../../app/modules/shared/store/states/accounting/payment-operations.state';
+import { getAccountPayments } from '../../../app/modules/shared/store/states/accounting/selectors/accounting.selectors';
 import { PaymentRepresentationsMappingProfile } from '../../../data/providers/accounting/mappers/payment-representations.mapping.profile';
 import { PaymentsHistoryProvider } from '../../../data/providers/accounting/payments-history.provider';
+import { defaultPaymentHistoryQuery } from '../../../domain/models/accounting/payment-history-query.model';
 import { IPaymentHistoryModel } from '../../../domain/models/accounting/payment-history.model';
 import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
@@ -43,6 +45,15 @@ describe('payments history service', () => {
 	beforeEach(() => {
 		paymensHistoryProviderSpy = jasmine.createSpyObj('paymensHistoryProvider', {
 			getOperationsHistoryForPaymentAccount: of<IPaymentHistoryModel[]>(payload),
+			getPagedOperationsHistoryForPaymentAccount: of({
+				items: payload,
+				page: 1,
+				pageSize: 25,
+				totalCount: 1,
+				totalPages: 1,
+				hasPreviousPage: false,
+				hasNextPage: false,
+			}),
 		});
 
 		TestBed.configureTestingModule({
@@ -101,5 +112,18 @@ describe('payments history service', () => {
 
 		expect(paymensHistoryProviderSpy.getOperationsHistoryForPaymentAccount.calls.mostRecent().args).toEqual(['']);
 		done();
+	});
+
+	it('stores paged row records so the selected payment can be edited', (done: DoneFn) => {
+		store.dispatch(new SetInitialPaymentOperations([]));
+
+		sut.refreshPagedPaymentsHistory('', defaultPaymentHistoryQuery).subscribe(result => {
+			expect(result.items).toHaveSize(1);
+			expect(store.selectSnapshot(getAccountPayments)).toEqual([payload[0].record]);
+			expect(
+				paymensHistoryProviderSpy.getPagedOperationsHistoryForPaymentAccount.calls.mostRecent().args
+			).toEqual(['', defaultPaymentHistoryQuery]);
+			done();
+		});
 	});
 });

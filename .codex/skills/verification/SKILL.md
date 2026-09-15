@@ -5,7 +5,7 @@ description: Independently prove task completion against acceptance criteria and
 
 # Verification Gate
 
-Implementation complete is not task complete. Use this gate before reporting a task as complete. For this SPA, use the actual command guidance and self-review requirements in [Angular review and validation](../angular-spa/review-and-validation.md); CI currently runs dependency guards plus `npm run lint`, `npm run test:ci`, and `npm run build:prod`.
+Implementation complete is not task complete. Use this gate before reporting a task as complete. For this SPA, follow the authoritative mandatory final-quality-gate policy in [the repository guide](../../../../AGENTS.md#mandatory-final-spa-quality-gates): after the final repository modification, run `npm run quality:gate` from `UI/`. It chains the canonical `npm run lint` check and non-watch `npm run test:ci` suite and must be remediated and rerun when either fails. Use the actual command guidance and self-review requirements in [Angular review and validation](../angular-spa/review-and-validation.md); CI currently runs dependency guards plus `npm run lint`, `npm run test:ci`, and `npm run build:prod`.
 
 1. Inspect the current specification and evaluate each applicable acceptance criterion separately. Record concrete test, command, inspection, or environment evidence as `PASS`, `FAIL`, `NOT RUN`, or `BLOCKED`.
 2. Run focused checks during implementation, then risk-appropriate surrounding regression checks. Choose real repository scripts; typical task checks are `npm run typecheck`, `npm run lint`, `npm run format:check`, `npm run test:ci`, and `npm run build:prod`. Documentation/governance changes need Markdown/link/scope/diff validation, not an application build.
