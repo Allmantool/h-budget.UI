@@ -29,6 +29,7 @@ import { PaymentHistoryMappingProfile } from '../../../data/providers/accounting
 import { ICategoryModel } from '../../../domain/models/accounting/category.model';
 import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
 import { IPaymentHistoryQueryModel } from '../../../domain/models/accounting/payment-history-query.model';
+import { OperationTypes } from '../../../domain/types/operation.types';
 import { AccountNotification } from '../../../infrastructure/account-notification';
 import { SseService } from '../../../infrastructure/sse-service';
 import { PaymentsHistoryComponent } from '../../../presentation/accounting/components/payments-history/payments-history.component';
@@ -73,7 +74,7 @@ describe('payments history component', () => {
 			expense: 0,
 			comment: 'income-comment',
 			balance: 11,
-			operationType: 0,
+			operationType: OperationTypes.Payment,
 		},
 		{
 			key: expenseRecordId,
@@ -84,7 +85,7 @@ describe('payments history component', () => {
 			expense: 4.25,
 			comment: 'expense-comment',
 			balance: 6.75,
-			operationType: 0,
+			operationType: OperationTypes.Payment,
 		},
 	];
 
@@ -465,7 +466,15 @@ describe('payments history component', () => {
 	});
 
 	it('uses the selectable row surface instead of a redundant desktop Actions column', () => {
-		expect(getHeaderTexts()).toEqual(['Date  ↓', 'Contractor', 'Category', 'Income', 'Expense', 'Balance', 'Comment']);
+		expect(getHeaderTexts()).toEqual([
+			'Date  ↓',
+			'Contractor',
+			'Category',
+			'Income',
+			'Expense',
+			'Balance',
+			'Comment',
+		]);
 		expect(getNativeElement().querySelector('button[aria-label="Edit payment"]')).toBeNull();
 	});
 
@@ -761,7 +770,7 @@ describe('payments history component', () => {
 			expense: 13,
 			comment: 'Transfer to BelarusBank',
 			balance: -2,
-			operationType: 2,
+			operationType: OperationTypes.Transfer,
 			relatedPaymentAccountId,
 			relatedPaymentAccountName: 'BelarusBank',
 		};
@@ -801,7 +810,7 @@ describe('payments history component', () => {
 			expense: 13,
 			comment: 'Transfer to BelarusBank',
 			balance: -2,
-			operationType: 2,
+			operationType: OperationTypes.Transfer,
 			relatedPaymentAccountId,
 			conversionMultiplier: 3.1,
 		};
@@ -844,7 +853,7 @@ describe('payments history component', () => {
 			expense: 0,
 			comment: 'Transfer from source account',
 			balance: 13,
-			operationType: 2,
+			operationType: OperationTypes.Transfer,
 			relatedPaymentAccountId: sourcePaymentAccountId,
 			conversionMultiplier: 3.1,
 		};
@@ -889,7 +898,7 @@ describe('payments history component', () => {
 			expense: 13,
 			comment: 'Transfer to BelarusBank',
 			balance: -2,
-			operationType: 2,
+			operationType: OperationTypes.Transfer,
 			relatedPaymentAccountId: Guid.parse('8f9f90a8-048f-44a9-b634-b02226724438'),
 			relatedPaymentAccountName: 'BelarusBank',
 			conversionMultiplier: 1,

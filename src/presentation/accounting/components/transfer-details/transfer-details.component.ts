@@ -8,9 +8,9 @@ import { Store } from '@ngxs/store';
 import { finalize, take } from 'rxjs';
 
 import { getPaymentAccounts } from '../../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
+import { CrossAccountsTransferProvider } from '../../../../data/providers/accounting/cross-accounts-transfer.provider';
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
 import { IPaymentOperationModel } from '../../../../domain/models/accounting/payment-operation.model';
-import { CrossAccountsTransferProvider } from '../../../../data/providers/accounting/cross-accounts-transfer.provider';
 import { TransferDeleteDialogComponent } from '../transfer-delete-dialog/transfer-delete-dialog.component';
 
 @Component({
@@ -47,9 +47,7 @@ export class TransferDetailsComponent {
 
 	public get relatedAccountLabel(): string {
 		const relatedAccount = this.relatedAccount;
-		return relatedAccount
-			? `${relatedAccount.emitter} | ${relatedAccount.description}`
-			: this.relatedAccountId;
+		return relatedAccount ? `${relatedAccount.emitter} | ${relatedAccount.description}` : this.relatedAccountId;
 	}
 
 	public get transferAmount(): number {
@@ -75,11 +73,11 @@ export class TransferDetailsComponent {
 	}
 
 	public get sourceCurrency(): string {
-		return this.isIncoming ? this.relatedAccountCurrency : this.activeAccount?.currency ?? '';
+		return this.isIncoming ? this.relatedAccountCurrency : (this.activeAccount?.currency ?? '');
 	}
 
 	public get destinationCurrency(): string {
-		return this.isIncoming ? this.activeAccount?.currency ?? '' : this.relatedAccountCurrency;
+		return this.isIncoming ? (this.activeAccount?.currency ?? '') : this.relatedAccountCurrency;
 	}
 
 	public requestClose(): void {
@@ -134,7 +132,9 @@ export class TransferDetailsComponent {
 	}
 
 	private get activeAccountLabel(): string {
-		return this.activeAccount ? `${this.activeAccount.emitter} | ${this.activeAccount.description}` : 'Current account';
+		return this.activeAccount
+			? `${this.activeAccount.emitter} | ${this.activeAccount.description}`
+			: 'Current account';
 	}
 
 	private get relatedAccountCurrency(): string {

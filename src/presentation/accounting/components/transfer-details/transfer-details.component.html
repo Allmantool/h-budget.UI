@@ -45,15 +45,31 @@
 	</dl>
 
 	@if (deleteErrorSignal()) {
-	<p class="transfer-details__status transfer-details__status--error" role="alert">
+	<p
+		class="transfer-details__status transfer-details__status--error"
+		role="alert"
+	>
 		{{ deleteErrorSignal() }}
 	</p>
 	}
 
 	<footer class="transfer-details__actions">
-		<button mat-button type="button" color="warn" (click)="deleteTransfer()" [disabled]="isDeletingSignal()">
+		<button
+			mat-button
+			type="button"
+			color="warn"
+			(click)="deleteTransfer()"
+			[disabled]="isDeletingSignal()"
+		>
 			{{ isDeletingSignal() ? 'Deleting transfer…' : 'Delete transfer' }}
 		</button>
-		<button mat-button type="button" (click)="requestClose()" [disabled]="isDeletingSignal()">Close</button>
+		<button
+			mat-button
+			type="button"
+			(click)="requestClose()"
+			[disabled]="isDeletingSignal()"
+		>
+			Close
+		</button>
 	</footer>
 </section>

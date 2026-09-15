@@ -8,7 +8,6 @@ import { NgxsModule, Store } from '@ngxs/store';
 import { of } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
-import { Result } from '../../../core/result';
 import { ngxsConfig } from '../../../app/modules/shared/store/ngxs.config';
 import { AccountingOperationsTableState } from '../../../app/modules/shared/store/states/accounting/accounting-operations-table.state';
 import { SetActiveAccountingOperation } from '../../../app/modules/shared/store/states/accounting/actions/accounting-table-options.actions';
@@ -24,12 +23,13 @@ import { SetInitialCategories } from '../../../app/modules/shared/store/states/h
 import { SetInitialContractors } from '../../../app/modules/shared/store/states/handbooks/actions/contractor.actions';
 import { CategoriesState } from '../../../app/modules/shared/store/states/handbooks/categories.state';
 import { ContractorsState } from '../../../app/modules/shared/store/states/handbooks/contractors.state';
-import { PaymentOperationTypes } from '../../../domain/models/accounting/operation-types';
+import { Result } from '../../../core/result';
+import { CrossAccountsTransferProvider } from '../../../data/providers/accounting/cross-accounts-transfer.provider';
 import { AccountTypes } from '../../../domain/models/accounting/account-types';
+import { PaymentOperationTypes } from '../../../domain/models/accounting/operation-types';
 import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
 import { IPaymentOperationModel } from '../../../domain/models/accounting/payment-operation.model';
 import { OperationTypes } from '../../../domain/types/operation.types';
-import { CrossAccountsTransferProvider } from '../../../data/providers/accounting/cross-accounts-transfer.provider';
 import { AccountingOperationsCrudComponent } from '../../../presentation/accounting/components/accounting-operations-crud/accounting-operations-crud.component';
 import { TransferDetailsComponent } from '../../../presentation/accounting/components/transfer-details/transfer-details.component';
 import { CategoriesDialogService } from '../../../presentation/accounting/services/categories-dialog.service';
@@ -158,7 +158,7 @@ describe('accounting operations CRUD component', () => {
 				Promise.resolve({ status: 'projected', paymentOperationId: createdOperationId }),
 				Promise.resolve({ status: 'projected', paymentOperationId: secondCreatedOperationId })
 			);
-		TestBed.configureTestingModule({
+		await TestBed.configureTestingModule({
 			imports: [
 				AccountingOperationsCrudComponent,
 				NoopAnimationsModule,
@@ -353,7 +353,11 @@ describe('accounting operations CRUD component', () => {
 			relatedPaymentAccountId: Guid.parse('2fa2f03e-a74f-40c0-8ae9-0d4699f2f194'),
 			operationType: OperationTypes.Transfer,
 		};
-		const { fixture } = await createSelectedEditor(jasmine.createSpy('confirmDiscard').and.resolveTo(true), transfer, false);
+		const { fixture } = await createSelectedEditor(
+			jasmine.createSpy('confirmDiscard').and.resolveTo(true),
+			transfer,
+			false
+		);
 		const nativeElement = fixture.nativeElement as HTMLElement;
 
 		expect(nativeElement.textContent).toContain('Transfer details');
@@ -379,7 +383,9 @@ describe('accounting operations CRUD component', () => {
 
 		expect((fixture.nativeElement as HTMLElement).textContent).toContain('Transfer details');
 		expect((fixture.nativeElement as HTMLElement).textContent).not.toContain('Loading payment…');
-		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid?.toString()).toBe(transfer.key.toString());
+		expect(store.selectSnapshot(getAccountingTableOptions).selectedRecordGuid?.toString()).toBe(
+			transfer.key.toString()
+		);
 	});
 
 	it('deletes a transfer only through the paired transfer endpoint after confirmation', async () => {
@@ -390,28 +396,31 @@ describe('accounting operations CRUD component', () => {
 			relatedPaymentAccountId: Guid.parse('2fa2f03e-a74f-40c0-8ae9-0d4699f2f194'),
 			operationType: OperationTypes.Transfer,
 		};
-		const { dialog, fixture, transferProvider } = await createSelectedEditor(
+		const { deleteTransferSpy, dialog, fixture } = await createSelectedEditor(
 			jasmine.createSpy('confirmDiscard').and.resolveTo(true),
 			transfer,
 			false
 		);
+		let deletedAccountId: Guid | undefined;
+		let deletedOperationId: Guid | undefined;
 		dialog.open.and.returnValue({ afterClosed: () => of(true) } as never);
-		transferProvider.deleteById.and.returnValue(
-			of(new Result<Guid>({ isSucceeded: true, message: '', payload: Guid.create() }))
-		);
+		deleteTransferSpy.and.callFake((accountId: Guid, operationId: Guid) => {
+			deletedAccountId = accountId;
+			deletedOperationId = operationId;
+			return of(new Result<Guid>({ isSucceeded: true, message: '', payload: Guid.create() }));
+		});
 
 		const nativeElement: unknown = fixture.nativeElement;
 		if (!(nativeElement instanceof HTMLElement)) {
 			throw new Error('Expected the fixture to render an HTMLElement.');
 		}
-		Array.from(nativeElement.querySelectorAll('button')).find(button =>
-			button.textContent?.includes('Delete transfer')
-		)?.click();
+		Array.from(nativeElement.querySelectorAll('button'))
+			.find(button => button.textContent?.includes('Delete transfer'))
+			?.click();
 
-		expect(transferProvider.deleteById).toHaveBeenCalledTimes(1);
-		const [accountId, operationId] = transferProvider.deleteById.calls.mostRecent().args;
-		expect(accountId.toString()).toBe('1c12ec59-8875-45c1-9fb0-e4edcf34a074');
-		expect(operationId.toString()).toBe(transfer.key.toString());
+		expect(deleteTransferSpy).toHaveBeenCalledTimes(1);
+		expect(deletedAccountId?.toString()).toBe('1c12ec59-8875-45c1-9fb0-e4edcf34a074');
+		expect(deletedOperationId?.toString()).toBe(transfer.key.toString());
 		expect(fixture.componentInstance.editorModeSignal()).toBe('create');
 		expect(storeSelection(fixture)).toBeUndefined();
 	});
@@ -689,7 +698,8 @@ describe('accounting operations CRUD component', () => {
 		selectedOperation = operationA(),
 		withReferenceData = true
 	) {
-		const transferProvider = jasmine.createSpyObj<CrossAccountsTransferProvider>('transferProvider', ['deleteById']);
+		const deleteTransferSpy = jasmine.createSpy('deleteById');
+		const transferProvider = { deleteById: deleteTransferSpy };
 		const dialog = jasmine.createSpyObj<MatDialog>('dialog', ['open']);
 		dialog.open.and.returnValue({ afterClosed: () => Promise.resolve(false) } as never);
 		const commandExecutor = {
@@ -697,7 +707,7 @@ describe('accounting operations CRUD component', () => {
 			executeUpdate: jasmine.createSpy('executeUpdate'),
 			executeDelete: jasmine.createSpy('executeDelete'),
 		};
-		await TestBed.configureTestingModule({
+		TestBed.configureTestingModule({
 			imports: [
 				AccountingOperationsCrudComponent,
 				NoopAnimationsModule,
@@ -756,7 +766,7 @@ describe('accounting operations CRUD component', () => {
 		fixture.detectChanges();
 		await fixture.whenStable();
 		fixture.detectChanges();
-		return { fixture, store, commandExecutor, dialog, transferProvider };
+		return { fixture, store, commandExecutor, deleteTransferSpy, dialog };
 	}
 
 	function operationA(): IPaymentOperationModel {

@@ -62,11 +62,11 @@ import { getContractors } from '../../../../app/modules/shared/store/states/hand
 import { ICategoryModel } from '../../../../domain/models/accounting/category.model';
 import { IContractorModel } from '../../../../domain/models/accounting/contractor.model.';
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
-import { OperationTypes } from '../../../../domain/types/operation.types';
 import {
 	defaultPaymentHistoryQuery,
 	IPaymentHistoryQueryModel,
 } from '../../../../domain/models/accounting/payment-history-query.model';
+import { OperationTypes } from '../../../../domain/types/operation.types';
 import { IPaymentRepresentationModel } from '../../models/operation-record';
 import { AccountsService } from '../../services/accounts.service';
 import { HandbooksService } from '../../services/handbooks.service';

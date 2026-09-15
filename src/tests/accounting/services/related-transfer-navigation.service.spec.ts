@@ -10,6 +10,7 @@ import { PaymentAccountState } from '../../../app/modules/shared/store/states/ac
 import { AccountingOperationsState } from '../../../app/modules/shared/store/states/accounting/payment-operations.state';
 import { getActivePaymentAccountId } from '../../../app/modules/shared/store/states/accounting/selectors/payment-account.selector';
 import { getSelectedRecordGuid } from '../../../app/modules/shared/store/states/accounting/selectors/table-options.selectors';
+import { OperationTypes } from '../../../domain/types/operation.types';
 import { IPaymentRepresentationModel } from '../../../presentation/accounting/models/operation-record';
 import { AccountsService } from '../../../presentation/accounting/services/accounts.service';
 import { PaymentsHistoryService } from '../../../presentation/accounting/services/payments-history.service';
@@ -122,7 +123,7 @@ describe('related transfer navigation service', () => {
 			expense: 13,
 			comment: 'Transfer',
 			balance: 0,
-			operationType: 2,
+			operationType: OperationTypes.Transfer,
 			relatedPaymentAccountId: relatedAccountId,
 		};
 	}
