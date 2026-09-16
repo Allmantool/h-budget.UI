@@ -42,6 +42,7 @@ export class PaymentAccountState {
 		const state = getState();
 
 		patchState({
+			activeAccountGuid: state.activeAccountGuid === paymentAccountId ? '' : state.activeAccountGuid,
 			accounts: [
 				..._.filter(state?.accounts, function (p) {
 					return p.key?.toString() !== paymentAccountId;

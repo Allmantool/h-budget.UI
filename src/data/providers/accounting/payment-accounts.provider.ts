@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 
 import { Mapper } from '@dynamic-mapper/angular';
-import { filter, map, Observable, retry, take, tap } from 'rxjs';
+import { map, Observable, retry, take } from 'rxjs';
 import { Guid } from 'typescript-guid';
 
 import { IPaymentAccountEntity } from './entities/payment-account.entity';
@@ -26,15 +26,10 @@ export class DefaultPaymentAccountsProvider implements IPaymentAccountsProvider 
 		this.accountingHostUrl = this.appConfigurationService.settings?.gatewayHost;
 	}
 
-	public removePaymentAccount(accountGuid: string): Observable<Result<boolean>> {
+	public removePaymentAccount(accountGuid: string): Observable<Result<string>> {
 		return this.httpClient
-			.delete<Result<boolean>>(`${this.accountingHostUrl}/${this.paymentAccountApi}/${accountGuid}`)
-			.pipe(
-				filter(responseResult => responseResult.isSucceeded),
-				tap(() => console.log(`The account with guid '${accountGuid}' has been deleted`)),
-				retry(ApiRequestOptions.RETRY_AMOUNT),
-				take(1)
-			);
+			.delete<Result<string>>(`${this.accountingHostUrl}/${this.paymentAccountApi}/${accountGuid}`)
+			.pipe(take(1));
 	}
 
 	public savePaymentAccount(newPaymentAccount: IPaymentAccountModel): Observable<Result<string>> {

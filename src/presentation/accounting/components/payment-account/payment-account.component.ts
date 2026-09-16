@@ -1,14 +1,8 @@
-import {
-	ChangeDetectionStrategy,
-	Component,
-	EnvironmentInjector,
-	OnInit,
-	runInInjectionContext,
-	signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import * as _ from 'lodash';
@@ -19,6 +13,7 @@ import { Observable, take } from 'rxjs';
 import { CurrencyAbbreviationToFlagFormatPipe } from '../../../../app/modules/shared/pipes/currency-abbreviation-to-flag.pipe';
 import { LoaderService } from '../../../../app/modules/shared/services/loader-service';
 import {
+	RemovePaymentAccount,
 	SetActivePaymentAccount,
 	SetInitialPaymentAccounts,
 } from '../../../../app/modules/shared/store/states/accounting/actions/payment-account.actions';
@@ -26,6 +21,7 @@ import { getPaymentAccounts } from '../../../../app/modules/shared/store/states/
 import { DefaultPaymentAccountsProvider } from '../../../../data/providers/accounting/payment-accounts.provider';
 import { AccountTypes } from '../../../../domain/models/accounting/account-types';
 import { IPaymentAccountModel } from '../../../../domain/models/accounting/payment-account.model';
+import { PaymentAccountDeletionService } from '../../services/payment-account-deletion.service';
 import { PaymentAccountDialogService } from '../../services/payment-account-dialog.service';
 
 @Component({
@@ -34,48 +30,45 @@ import { PaymentAccountDialogService } from '../../services/payment-account-dial
 	styleUrls: ['./payment-account.component.css'],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [MatButtonModule, MatIconModule, CurrencyAbbreviationToFlagFormatPipe],
+	imports: [MatButtonModule, MatIconModule, MatMenuModule, CurrencyAbbreviationToFlagFormatPipe],
 })
 export class PaymentAccountComponent implements OnInit {
+	private readonly destroyRef = inject(DestroyRef);
+	private readonly paymentAccountsProvider = inject(DefaultPaymentAccountsProvider);
+	private readonly paymentAccountDialogService = inject(PaymentAccountDialogService);
+	private readonly paymentAccountDeletionService = inject(PaymentAccountDeletionService);
+	private readonly route = inject(ActivatedRoute);
+	private readonly router = inject(Router);
+	private readonly store = inject(Store);
 	private selectedPaymentAccountId?: string;
+	public readonly loaderService = inject(LoaderService);
+	public readonly deletionStatusSignal = signal('');
 	public cashAccountsSignal = signal<IPaymentAccountModel[]>([]);
 	public debitVirtualAccountsSignal = signal<IPaymentAccountModel[]>([]);
 	public creditVirtualAccountsSignal = signal<IPaymentAccountModel[]>([]);
 	public paymentAccounts$: Observable<IPaymentAccountModel[]> = this.store.select(getPaymentAccounts);
-
-	constructor(
-		private injector: EnvironmentInjector,
-		private readonly paymentAccountsProvider: DefaultPaymentAccountsProvider,
-		private readonly paymentAccountDialogService: PaymentAccountDialogService,
-		private readonly route: ActivatedRoute,
-		private readonly router: Router,
-		private readonly store: Store,
-		public readonly loaderService: LoaderService
-	) {}
 
 	public ngOnInit(): void {
 		this.loaderService
 			.withLoader(this.paymentAccountsProvider.getPaymentAccounts())
 			.subscribe(accounts => this.store.dispatch(new SetInitialPaymentAccounts(accounts)).pipe(take(1)));
 
-		runInInjectionContext(this.injector, () => {
-			this.paymentAccounts$.pipe(takeUntilDestroyed()).subscribe(accounts => {
-				this.cashAccountsSignal.set(
-					_.filter(accounts, (account: IPaymentAccountModel) => account.type === AccountTypes.WalletCache)
-				);
+		this.paymentAccounts$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(accounts => {
+			this.cashAccountsSignal.set(
+				_.filter(accounts, (account: IPaymentAccountModel) => account.type === AccountTypes.WalletCache)
+			);
 
-				this.debitVirtualAccountsSignal.set(
-					_.filter(accounts, (account: IPaymentAccountModel) => account.type === AccountTypes.Virtual)
-				);
+			this.debitVirtualAccountsSignal.set(
+				_.filter(accounts, (account: IPaymentAccountModel) => account.type === AccountTypes.Virtual)
+			);
 
-				this.creditVirtualAccountsSignal.set(
-					_.filter(
-						accounts,
-						(account: IPaymentAccountModel) =>
-							account.type === AccountTypes.Loan || account.type === AccountTypes.Credit
-					)
-				);
-			});
+			this.creditVirtualAccountsSignal.set(
+				_.filter(
+					accounts,
+					(account: IPaymentAccountModel) =>
+						account.type === AccountTypes.Loan || account.type === AccountTypes.Credit
+				)
+			);
 		});
 	}
 
@@ -108,6 +101,25 @@ export class PaymentAccountComponent implements OnInit {
 		}
 
 		this.paymentAccountDialogService.openForUpdate(this.selectedPaymentAccountId);
+	}
+
+	public deletePaymentAccount(paymentAccount: IPaymentAccountModel): void {
+		this.deletionStatusSignal.set('');
+		this.paymentAccountDeletionService
+			.open(paymentAccount)
+			.pipe(takeUntilDestroyed(this.destroyRef))
+			.subscribe(deletedAccount => {
+				const deletedAccountId = deletedAccount?.key?.toString();
+				if (!deletedAccount || !deletedAccountId) {
+					return;
+				}
+
+				this.store.dispatch(new RemovePaymentAccount(deletedAccountId));
+				if (this.selectedPaymentAccountId === deletedAccountId) {
+					this.selectedPaymentAccountId = undefined;
+				}
+				this.deletionStatusSignal.set(`${deletedAccount.emitter} was deleted.`);
+			});
 	}
 
 	public get selectedPaymentAccount(): IPaymentAccountModel | undefined {

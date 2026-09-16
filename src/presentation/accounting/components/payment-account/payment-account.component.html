@@ -25,8 +25,15 @@
 		<span>accounts available</span>
 		<span class="accounts-workspace__summary-note">Balances remain in their account currencies.</span>
 	</div>
-
-	@for (accountGroup of [ { name: 'Wallet money', accounts: cashAccountsSignal() }, { name: 'Virtual accounts',
+	@if (deletionStatusSignal()) {
+	<p
+		class="accounts-workspace__status accounts-workspace__status--success"
+		role="status"
+		aria-live="polite"
+	>
+		{{ deletionStatusSignal() }}
+	</p>
+	} @for (accountGroup of [ { name: 'Wallet money', accounts: cashAccountsSignal() }, { name: 'Virtual accounts',
 	accounts: debitVirtualAccountsSignal() }, { name: 'Loans and credit', accounts: creditVirtualAccountsSignal() } ];
 	track accountGroup.name) {
 	<section class="accounts-workspace__group">
@@ -47,7 +54,7 @@
 					<span
 						class="abbreviation-flag fi fi-{{ paymentAccount.currency | currencyAbbreviationToFlagFormat }}"
 					></span>
-					<div>
+					<div class="accounts-workspace__account-details">
 						<h4>{{ paymentAccount.emitter }}</h4>
 						<p>{{ paymentAccount.description }} · {{ paymentAccount.currency }}</p>
 					</div>
@@ -72,11 +79,30 @@
 					<button
 						mat-icon-button
 						type="button"
-						aria-label="Edit {{ paymentAccount.emitter }}"
-						(click)="selectPaymentAccount(paymentAccount); updateSelectedPaymentAccount()"
+						aria-label="Actions for {{ paymentAccount.emitter }}"
+						[matMenuTriggerFor]="accountActionsMenu"
 					>
-						<mat-icon>edit</mat-icon>
+						<mat-icon>more_vert</mat-icon>
 					</button>
+					<mat-menu #accountActionsMenu="matMenu">
+						<button
+							mat-menu-item
+							type="button"
+							(click)="selectPaymentAccount(paymentAccount); updateSelectedPaymentAccount()"
+						>
+							<mat-icon>edit</mat-icon>
+							<span>Edit</span>
+						</button>
+						<button
+							mat-menu-item
+							type="button"
+							class="accounts-workspace__menu-item--danger"
+							(click)="deletePaymentAccount(paymentAccount)"
+						>
+							<mat-icon>delete</mat-icon>
+							<span>Delete account</span>
+						</button>
+					</mat-menu>
 				</div>
 			</article>
 			}
