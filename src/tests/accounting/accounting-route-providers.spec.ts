@@ -62,6 +62,7 @@ import { CategoriesDialogService } from '../../presentation/accounting/services/
 import { ContractorsDialogService } from '../../presentation/accounting/services/contractors-dialog.service';
 import { CrossAccountsTransferService } from '../../presentation/accounting/services/cross-accounts-transfer.dialog.service';
 import { HandbooksService } from '../../presentation/accounting/services/handbooks.service';
+import { PaymentAccountDeletionService } from '../../presentation/accounting/services/payment-account-deletion.service';
 import { PaymentAccountDialogService } from '../../presentation/accounting/services/payment-account-dialog.service';
 import { PaymentCommandExecutorService } from '../../presentation/accounting/services/payment-command-executor.service';
 import { PaymentEditorSessionService } from '../../presentation/accounting/services/payment-editor-session.service';
@@ -190,6 +191,7 @@ describe('accounting route providers', () => {
 		expect(createFeatureInjector().get(DialogProvider)).toEqual(jasmine.any(DialogProvider));
 		expect(featureInjector.get(CategoriesDialogService)).toEqual(jasmine.any(CategoriesDialogService));
 		expect(featureInjector.get(ContractorsDialogService)).toEqual(jasmine.any(ContractorsDialogService));
+		expect(featureInjector.get(PaymentAccountDeletionService)).toEqual(jasmine.any(PaymentAccountDeletionService));
 		expect(featureInjector.get(PaymentAccountDialogService)).toEqual(jasmine.any(PaymentAccountDialogService));
 		expect(featureInjector.get(CrossAccountsTransferService)).toEqual(jasmine.any(CrossAccountsTransferService));
 
@@ -503,7 +505,9 @@ function createPaymentAccountsProviderSpy(): jasmine.SpyObj<DefaultPaymentAccoun
 
 	providerSpy.getPaymentAccounts.and.returnValue(of([sampleAccount]));
 	providerSpy.getById.and.returnValue(of(sampleAccount));
-	providerSpy.removePaymentAccount.and.returnValue(of(new Result<boolean>({ isSucceeded: true, payload: true })));
+	providerSpy.removePaymentAccount.and.returnValue(
+		of(new Result<string>({ isSucceeded: true, payload: sampleAccountId }))
+	);
 	providerSpy.savePaymentAccount.and.returnValue(of(new Result({ isSucceeded: true, payload: sampleAccountId })));
 	providerSpy.updatePaymentAccount.and.returnValue(of(new Result({ isSucceeded: true, payload: sampleAccountId })));
 
@@ -566,6 +570,7 @@ const accountingFeatureProviders: Array<Type<unknown>> = [
 	DefaultCategoriesProvider,
 	CategoriesDialogService,
 	ContractorsDialogService,
+	PaymentAccountDeletionService,
 	PaymentAccountDialogService,
 	CrossAccountsTransferService,
 	RelatedTransferNavigationService,

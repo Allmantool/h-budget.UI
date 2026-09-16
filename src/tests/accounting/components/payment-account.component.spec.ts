@@ -17,6 +17,7 @@ import { DefaultPaymentAccountsProvider } from '../../../data/providers/accounti
 import { AccountTypes } from '../../../domain/models/accounting/account-types';
 import { IPaymentAccountModel } from '../../../domain/models/accounting/payment-account.model';
 import { PaymentAccountComponent } from '../../../presentation/accounting/components/payment-account/payment-account.component';
+import { PaymentAccountDeletionService } from '../../../presentation/accounting/services/payment-account-deletion.service';
 import { PaymentAccountDialogService } from '../../../presentation/accounting/services/payment-account-dialog.service';
 
 describe('payment account component', () => {
@@ -26,6 +27,7 @@ describe('payment account component', () => {
 
 	let paymentAccountsProviderSpy: jasmine.SpyObj<DefaultPaymentAccountsProvider>;
 	let paymentAccountDialogServiceSpy: jasmine.SpyObj<PaymentAccountDialogService>;
+	let paymentAccountDeletionServiceSpy: jasmine.SpyObj<PaymentAccountDeletionService>;
 	let routerSpy: jasmine.SpyObj<Router>;
 
 	const accountingWorkspaceRouteStub = {} as ActivatedRoute;
@@ -48,6 +50,12 @@ describe('payment account component', () => {
 		paymentAccountDialogServiceSpy = jasmine.createSpyObj<PaymentAccountDialogService>(
 			'paymentAccountDialogService',
 			['openForSave', 'openForUpdate']
+		);
+		paymentAccountDeletionServiceSpy = jasmine.createSpyObj<PaymentAccountDeletionService>(
+			'paymentAccountDeletionService',
+			{
+				open: of(undefined),
+			}
 		);
 		routerSpy = jasmine.createSpyObj<Router>('router', {
 			navigate: Promise.resolve(true),
@@ -75,6 +83,10 @@ describe('payment account component', () => {
 				{
 					provide: PaymentAccountDialogService,
 					useValue: paymentAccountDialogServiceSpy,
+				},
+				{
+					provide: PaymentAccountDeletionService,
+					useValue: paymentAccountDeletionServiceSpy,
 				},
 			],
 		}).compileComponents();
@@ -126,6 +138,12 @@ describe('payment account component', () => {
 		expect(getNativeElement().querySelector('.fi-us')).not.toBeNull();
 		expect(getNativeElement().querySelector('.fi-by')).not.toBeNull();
 		expect(getNativeElement().querySelectorAll('mat-list-option')).toHaveSize(0);
+		expect(getActionsTriggers().map(button => button.getAttribute('aria-label'))).toEqual([
+			'Actions for Cash box',
+			'Actions for Bank card',
+			'Actions for Auto loan',
+			'Actions for Credit card',
+		]);
 	});
 
 	it('should render the existing empty account state as zero counts and no options', async () => {
@@ -161,23 +179,66 @@ describe('payment account component', () => {
 		]);
 	});
 
-	it('should open account dialogs from explicit workspace actions only', () => {
+	it('should open account dialogs from explicit workspace actions only', async () => {
 		getButtonByText('Add account')?.click();
 
 		expect(paymentAccountDialogServiceSpy.openForSave.calls.count()).toBe(1);
 
-		getEditButton('Bank card')?.click();
+		await openActionsMenu('Bank card');
+		getOverlayButtonByText('Edit')?.click();
 
 		expect(paymentAccountDialogServiceSpy.openForUpdate.calls.count()).toBe(1);
 		expect(paymentAccountDialogServiceSpy.openForUpdate.calls.mostRecent().args).toEqual([virtualAccountId]);
 	});
 
-	it('should keep the selected account visually identifiable after its edit action', () => {
-		getEditButton('Bank card')?.click();
+	it('should keep the selected account visually identifiable after its edit action', async () => {
+		await openActionsMenu('Bank card');
+		getOverlayButtonByText('Edit')?.click();
 		fixture.detectChanges();
 
 		expect(store.selectSnapshot(getActivePaymentAccountId)).toBe(virtualAccountId);
 		expect(findAccountRow('Bank card')?.classList).toContain('accounts-workspace__account-row--selected');
+	});
+
+	it('should expose labeled Edit and Delete account menu items without navigating', async () => {
+		await openActionsMenu('Bank card');
+
+		expect(getOverlayButtonByText('Edit')).not.toBeNull();
+		expect(getOverlayButtonByText('Delete account')).not.toBeNull();
+		expect(routerSpy.navigate.calls.count()).toBe(0);
+	});
+
+	it('should delete only the chosen account after confirmed service success and announce it', async () => {
+		paymentAccountDeletionServiceSpy.open.and.returnValue(of(paymentAccounts[1]));
+		component.selectPaymentAccount(paymentAccounts[1]);
+
+		await openActionsMenu('Bank card');
+		getOverlayButtonByText('Delete account')?.click();
+		await fixture.whenStable();
+		fixture.detectChanges();
+
+		expect(paymentAccountDeletionServiceSpy.open.calls.count()).toBe(1);
+		expect(paymentAccountDeletionServiceSpy.open.calls.mostRecent().args).toEqual([paymentAccounts[1]]);
+		expect(store.selectSnapshot(getPaymentAccounts).map(account => account.key?.toString())).toEqual([
+			walletAccountId,
+			loanAccountId,
+			creditAccountId,
+		]);
+		expect(store.selectSnapshot(getActivePaymentAccountId)).toBe('');
+		expect(component.totalAccountsCount).toBe(3);
+		expect(getNativeText()).toContain('Bank card was deleted.');
+		expect(getNativeText()).toContain('Virtual accounts 0 accounts');
+	});
+
+	it('should retain the account when deletion is cancelled or fails before success', async () => {
+		paymentAccountDeletionServiceSpy.open.and.returnValue(of(undefined));
+
+		await openActionsMenu('Bank card');
+		getOverlayButtonByText('Delete account')?.click();
+		await fixture.whenStable();
+
+		expect(store.selectSnapshot(getPaymentAccounts)).toEqual(paymentAccounts);
+		expect(component.totalAccountsCount).toBe(4);
 	});
 
 	it('should navigate to the operations workspace without opening the editor', async () => {
@@ -258,10 +319,29 @@ describe('payment account component', () => {
 		return Array.from<HTMLElement>(getNativeElement().querySelectorAll('.accounts-workspace__account-row'));
 	}
 
-	function getEditButton(accountEmitter: string): HTMLButtonElement | undefined {
+	async function openActionsMenu(accountEmitter: string): Promise<void> {
+		const trigger = getNativeElement().querySelector<HTMLButtonElement>(
+			`button[aria-label="Actions for ${accountEmitter}"]`
+		);
+
+		if (!trigger) {
+			throw new Error(`Expected actions trigger for '${accountEmitter}'.`);
+		}
+
+		trigger.click();
+		fixture.detectChanges();
+		await fixture.whenStable();
+	}
+
+	function getActionsTriggers(): HTMLButtonElement[] {
+		return Array.from(getNativeElement().querySelectorAll<HTMLButtonElement>('button[aria-label^="Actions for "]'));
+	}
+
+	function getOverlayButtonByText(text: string): HTMLButtonElement | null {
 		return (
-			getNativeElement().querySelector<HTMLButtonElement>(`button[aria-label="Edit ${accountEmitter}"]`) ??
-			undefined
+			Array.from(document.body.querySelectorAll<HTMLButtonElement>('.mat-mdc-menu-panel button')).find(button =>
+				normalizeText(button.textContent ?? '').endsWith(text)
+			) ?? null
 		);
 	}
 

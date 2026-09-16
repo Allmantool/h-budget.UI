@@ -1,0 +1,47 @@
+<section
+	class="payment-account-delete-dialog"
+	[aria-busy]="isDeletingSignal()"
+>
+	<h2 mat-dialog-title>Delete payment account?</h2>
+	<mat-dialog-content class="payment-account-delete-dialog__content">
+		<p class="payment-account-delete-dialog__account-name">{{ data.account.emitter }}</p>
+		<dl class="payment-account-delete-dialog__details">
+			<div class="payment-account-delete-dialog__detail">
+				<dt>Currency</dt>
+				<dd>{{ data.account.currency }}</dd>
+			</div>
+			<div class="payment-account-delete-dialog__detail">
+				<dt>Current balance</dt>
+				<dd>{{ data.account.balance | number: '1.0-2' }} {{ data.account.currency }}</dd>
+			</div>
+		</dl>
+		<p>This account will be removed from Home Ledger.</p>
+		@if (errorMessageSignal()) {
+		<p
+			class="payment-account-delete-dialog__error"
+			role="alert"
+		>
+			{{ errorMessageSignal() }}
+		</p>
+		}
+	</mat-dialog-content>
+	<mat-dialog-actions align="end">
+		<button
+			mat-button
+			mat-dialog-close
+			type="button"
+			[disabled]="isDeletingSignal()"
+		>
+			Cancel
+		</button>
+		<button
+			mat-flat-button
+			color="warn"
+			type="button"
+			[disabled]="isDeletingSignal()"
+			(click)="confirm()"
+		>
+			{{ isDeletingSignal() ? 'Deleting…' : 'Delete account' }}
+		</button>
+	</mat-dialog-actions>
+</section>

@@ -39,6 +39,18 @@
 	border-block: 1px solid rgba(15, 23, 42, 0.08);
 }
 
+.accounts-workspace__status {
+	margin: 0;
+	padding: 0.75rem 1rem;
+	border-inline-start: 3px solid currentColor;
+	border-radius: 4px;
+}
+
+.accounts-workspace__status--success {
+	background: rgba(46, 125, 50, 0.08);
+	color: #256029;
+}
+
 .accounts-workspace__summary strong {
 	font-size: 1.25rem;
 }
@@ -116,6 +128,16 @@
 	min-width: 0;
 }
 
+.accounts-workspace__account-details {
+	min-width: 0;
+}
+
+.accounts-workspace__account-identity h4 {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
 .accounts-workspace__account-identity p {
 	margin-top: 0.2rem;
 	overflow: hidden;
@@ -149,6 +171,10 @@
 
 .abbreviation-flag {
 	flex: 0 0 auto;
+}
+
+.accounts-workspace__menu-item--danger {
+	color: #b3261e;
 }
 
 @media (max-width: 900px) {

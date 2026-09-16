@@ -1,0 +1,60 @@
+:host {
+	display: block;
+}
+
+.payment-account-delete-dialog__content {
+	display: grid;
+	gap: 1rem;
+}
+
+.payment-account-delete-dialog__content p,
+.payment-account-delete-dialog__details,
+.payment-account-delete-dialog__detail dd {
+	margin: 0;
+}
+
+.payment-account-delete-dialog__account-name {
+	overflow-wrap: anywhere;
+	font-size: 1.125rem;
+	font-weight: 600;
+}
+
+.payment-account-delete-dialog__details {
+	display: grid;
+	gap: 0.5rem;
+}
+
+.payment-account-delete-dialog__detail {
+	display: grid;
+	grid-template-columns: minmax(8rem, 1fr) auto;
+	gap: 1rem;
+}
+
+.payment-account-delete-dialog__detail dt {
+	color: #617089;
+}
+
+.payment-account-delete-dialog__detail dd {
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	text-align: end;
+}
+
+.payment-account-delete-dialog__error {
+	padding: 0.75rem;
+	border-inline-start: 3px solid #b3261e;
+	border-radius: 4px;
+	background: rgba(179, 38, 30, 0.08);
+	color: #8c1d18;
+}
+
+@media (max-width: 480px) {
+	.payment-account-delete-dialog__detail {
+		grid-template-columns: 1fr;
+		gap: 0.15rem;
+	}
+
+	.payment-account-delete-dialog__detail dd {
+		text-align: start;
+	}
+}

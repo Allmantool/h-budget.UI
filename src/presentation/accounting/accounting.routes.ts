@@ -13,6 +13,7 @@ import { CategoriesDialogService } from './services/categories-dialog.service';
 import { ContractorsDialogService } from './services/contractors-dialog.service';
 import { CrossAccountsTransferService } from './services/cross-accounts-transfer.dialog.service';
 import { HandbooksService } from './services/handbooks.service';
+import { PaymentAccountDeletionService } from './services/payment-account-deletion.service';
 import { PaymentAccountDialogService } from './services/payment-account-dialog.service';
 import { PaymentCommandExecutorService } from './services/payment-command-executor.service';
 import { PaymentEditorLeaveService } from './services/payment-editor-leave.service';
@@ -58,6 +59,7 @@ export const accountingRoutes: Routes = [
 			CategoriesDialogService,
 			ContractorsDialogService,
 			PaymentAccountDialogService,
+			PaymentAccountDeletionService,
 			PaymentEditorLeaveService,
 			PaymentEditorSessionService,
 			CrossAccountsTransferService,
