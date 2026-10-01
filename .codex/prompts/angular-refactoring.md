@@ -11,4 +11,4 @@ Self-review: Inspect the complete diff, confirm behavior and boundaries are pres
 Final response: Result; behavior preserved; changed files and rationale; PASS/FAIL/NOT RUN validation; self-review corrections; preserved unrelated changes; risks/exceptions; next safe action.
 ```
 
-Authority: [root instructions](../../AGENTS.md) and [Angular/Nx skill](../skills/angular-spa/SKILL.md).
+Authority: [root instructions](../../AGENTS.md) and [Angular/Nx skill](../../.agents/skills/angular-spa/SKILL.md).

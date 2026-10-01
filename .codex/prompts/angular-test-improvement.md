@@ -10,4 +10,4 @@ Self-review: Inspect the complete diff, confirm RED evidence where practical and
 Final response: Covered behavior/gaps; changed files; test design rationale; PASS/FAIL/NOT RUN validation; self-review corrections; preserved unrelated changes; risks; next action.
 ```
 
-Authority: [root instructions](../../AGENTS.md) and [Angular/Nx skill](../skills/angular-spa/SKILL.md).
+Authority: [root instructions](../../AGENTS.md) and [Angular/Nx skill](../../.agents/skills/angular-spa/SKILL.md).

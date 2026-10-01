@@ -1,6 +1,6 @@
 # Angular/Nx Standards Summary
 
-The authoritative rules are in [the Angular/Nx skill](../../.codex/skills/angular-spa/SKILL.md); this is a concise map, not a second authority.
+The authoritative rules are in [the Angular/Nx skill](../../.agents/skills/angular-spa/SKILL.md); this is a concise map, not a second authority.
 
 - Preserve the current Angular/Nx/NgModule/NGXS architecture until explicitly authorized to migrate.
 - Use explicit feature, UI, data-access, utility, and composition-root ownership. Future Nx libraries follow directional dependencies only when authorized.

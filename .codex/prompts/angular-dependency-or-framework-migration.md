@@ -10,4 +10,4 @@ Self-review: Inspect the complete diff for compatibility, lockfile integrity, AP
 Final response: Migration result; compatibility decisions; files changed; PASS/FAIL/NOT RUN validation; self-review corrections; preserved unrelated changes; rollout/rollback risks; next action.
 ```
 
-Authority: [root instructions](../../AGENTS.md), [Angular/Nx skill](../skills/angular-spa/SKILL.md), and repository dependency guidance.
+Authority: [root instructions](../../AGENTS.md), [Angular/Nx skill](../../.agents/skills/angular-spa/SKILL.md), and repository dependency guidance.

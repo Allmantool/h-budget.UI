@@ -10,4 +10,4 @@ Self-review: Recheck findings against complete inspected evidence, severity, sco
 Final response: Findings by severity with paths/evidence; standards affected; safe remediation plan; PASS/FAIL/NOT RUN checks; limitations; next action.
 ```
 
-Authority: [root instructions](../../AGENTS.md) and [Angular/Nx skill](../skills/angular-spa/SKILL.md).
+Authority: [root instructions](../../AGENTS.md) and [Angular/Nx skill](../../.agents/skills/angular-spa/SKILL.md).

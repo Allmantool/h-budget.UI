@@ -11,4 +11,4 @@ Self-review: Inspect the complete diff, fix standards findings, and rerun affect
 Final response: Result; specification and acceptance-criteria outcomes; TDD evidence/exception; behavior and files changed; PASS/FAIL/NOT RUN validation; self-review corrections; preserved unrelated changes; risks/exceptions; next safe action.
 ```
 
-Authority: [root instructions](../../AGENTS.md) and [Angular/Nx skill](../skills/angular-spa/SKILL.md).
+Authority: [root instructions](../../AGENTS.md) and [Angular/Nx skill](../../.agents/skills/angular-spa/SKILL.md).

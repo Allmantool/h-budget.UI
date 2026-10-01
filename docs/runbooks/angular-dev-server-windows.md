@@ -85,7 +85,7 @@ Use the resolver's facts in this order:
    isolated from the workstation network namespace.
 
 The resolver cannot prove browser locality by itself. Follow the
-[`local-https-browser-verification` skill](../../.codex/skills/local-https-browser-verification/SKILL.md)
+[`local-https-browser-verification` skill](../../.agents/skills/local-https-browser-verification/SKILL.md)
 for the verified command-line probe and browser decision tree. A temporary HTTP
 server, if explicitly authorized for non-secure layout evidence, must be
 labelled **REAL BROWSER + TEST HTTP FALLBACK** and cannot prove HTTPS,
