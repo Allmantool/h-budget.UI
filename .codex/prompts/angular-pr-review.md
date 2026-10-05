@@ -10,4 +10,4 @@ Self-review: Recheck every finding for severity, concrete impact, location, and 
 Final response: Findings ordered by severity with precise evidence; questions/assumptions; positive coverage only where verified; validation gaps; summary.
 ```
 
-Authority: [root instructions](../../AGENTS.md) and [Angular/Nx skill](../skills/angular-spa/SKILL.md).
+Authority: [root instructions](../../AGENTS.md) and [Angular/Nx skill](../../.agents/skills/angular-spa/SKILL.md).

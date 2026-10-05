@@ -94,7 +94,7 @@ Git diff checks.
 
 | Requirement | Acceptance Criteria | Implementation                                                         | Test / Evidence                                                                                                       | Status |
 | ----------- | ------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------ |
-| REQ-001     | AC-001              | `.codex/skills/local-https-browser-verification/SKILL.md`, `AGENTS.md` | Skill reviewed; Markdown links resolve; HTTP fallback and system-mutation policy are explicit.                        | PASS   |
+| REQ-001     | AC-001              | `.agents/skills/local-https-browser-verification/SKILL.md`, `AGENTS.md` | Skill reviewed; Markdown links resolve; HTTP fallback and system-mutation policy are explicit.                        | PASS   |
 | REQ-002     | AC-002              | `tools/dev/resolve-angular-https.ps1`                                  | Parser passed; live resolver found configured files, SANs, trust, DNS, and port listener without reading key content. | PASS   |
 | REQ-003     | AC-003              | `docs/runbooks/angular-dev-server-windows.md`                          | Runbook and skill separate Vite, listener, routing, hostname, trust, expiry, and browser transport.                   | PASS   |
 
@@ -116,7 +116,7 @@ Git diff checks.
 ### Decisions and Requirement Changes
 
 - `tools/dev/` is used to match the existing one-shot Windows diagnostic
-  helper. The skill has its own focused directory under `.codex/skills/` so it
+  helper. The skill has its own focused directory under `.agents/skills/` so it
   remains discoverable without extending the generic Angular skill.
 - The already-running port-4200 listener predated this task and was not stopped
   or replaced. Its presence proves resolver listener reporting but is not

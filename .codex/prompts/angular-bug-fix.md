@@ -11,4 +11,4 @@ Self-review: Inspect the complete diff, verify the root cause is addressed witho
 Final response: Result; specification and acceptance-criteria outcomes; root cause; RED/GREEN regression evidence; changed files; PASS/FAIL/NOT RUN validation; self-review corrections; preserved unrelated changes; risks/exceptions; next safe action.
 ```
 
-Authority: [root instructions](../../AGENTS.md) and [Angular/Nx skill](../skills/angular-spa/SKILL.md).
+Authority: [root instructions](../../AGENTS.md) and [Angular/Nx skill](../../.agents/skills/angular-spa/SKILL.md).

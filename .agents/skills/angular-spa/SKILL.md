@@ -55,4 +55,4 @@ description: Govern implementation, refactoring, bug-fix, audit, review, testing
 | PR review          | Inspect the complete diff against the correct base; report severity and evidence; do not edit unless asked.            |
 | Standards-only     | Modify only governance files; validate links and scope; do not change runtime behavior.                                |
 
-Use the [pre-change checklist](../../checklists/angular-pre-change-checklist.md) and [self-review checklist](../../checklists/angular-self-review-checklist.md). Use [prompt templates](../../prompts/) as task starters, never as authority over this skill.
+Use the [pre-change checklist](../../../.codex/checklists/angular-pre-change-checklist.md) and [self-review checklist](../../../.codex/checklists/angular-self-review-checklist.md). Use [prompt templates](../../../.codex/prompts/) as task starters, never as authority over this skill.
